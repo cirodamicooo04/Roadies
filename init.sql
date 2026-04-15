@@ -1,0 +1,5 @@
+CREATE DATABASE user_db;
+CREATE DATABASE travel_db;
+CREATE DATABASE booking_db;
+CREATE DATABASE review_db;
+CREATE DATABASE chat_db;
