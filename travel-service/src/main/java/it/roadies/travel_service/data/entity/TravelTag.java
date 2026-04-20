@@ -1,6 +1,6 @@
-package it.roadies.travel_service.entity;
+package it.roadies.travel_service.data.entity;
 
-import it.roadies.travel_service.entity.embeddables.TravelTagId;
+import it.roadies.travel_service.data.entity.embeddables.TravelTagId;
 import jakarta.persistence.*;
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package it.roadies.travel_service.entity;
+package it.roadies.travel_service.data.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

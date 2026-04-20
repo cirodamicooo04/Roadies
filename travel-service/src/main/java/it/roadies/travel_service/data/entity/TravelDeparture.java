@@ -1,6 +1,6 @@
-package it.roadies.travel_service.entity;
+package it.roadies.travel_service.data.entity;
 
-import it.roadies.travel_service.entity.enumerations.Status;
+import it.roadies.travel_service.data.entity.enumerations.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -35,4 +35,7 @@ public class TravelDeparture {
 
     @Column(name = "max_slots", nullable = false)
     private Integer maxSlots;
+
+    @Version
+    private Long version;
 }

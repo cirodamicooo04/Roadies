@@ -1,6 +1,6 @@
-package it.roadies.travel_service.entity;
+package it.roadies.travel_service.data.entity;
 
-import it.roadies.travel_service.entity.enumerations.Visibility;
+import it.roadies.travel_service.data.entity.enumerations.Visibility;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;

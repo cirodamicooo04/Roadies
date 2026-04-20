@@ -1,4 +1,4 @@
-package it.roadies.travel_service.entity;
+package it.roadies.travel_service.data.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -45,7 +45,7 @@ public class Activity {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "activity")
-    private Set<ActivitySession> sessions;
+    private Set<ActivityDeparture> sessions;
 
 
 }

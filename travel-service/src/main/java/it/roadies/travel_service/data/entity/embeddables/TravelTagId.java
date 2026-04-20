@@ -1,4 +1,4 @@
-package it.roadies.travel_service.entity.embeddables;
+package it.roadies.travel_service.data.entity.embeddables;
 
 import jakarta.persistence.Embeddable;
 import lombok.Data;

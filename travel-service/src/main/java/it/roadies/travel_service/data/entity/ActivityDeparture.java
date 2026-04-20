@@ -1,6 +1,6 @@
-package it.roadies.travel_service.entity;
+package it.roadies.travel_service.data.entity;
 
-import it.roadies.travel_service.entity.enumerations.Status;
+import it.roadies.travel_service.data.entity.enumerations.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "ACTIVITY_SESSIONS")
-public class ActivitySession {
+public class ActivityDeparture {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -28,6 +28,9 @@ public class ActivitySession {
 
     @Column(name = "max_slots", nullable = false)
     private Integer maxSlots;
+
+    @Version
+    private Long version;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;

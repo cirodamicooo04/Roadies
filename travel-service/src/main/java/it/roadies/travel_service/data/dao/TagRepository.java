@@ -1,6 +1,6 @@
-package it.roadies.travel_service.dao;
+package it.roadies.travel_service.data.dao;
 
-import it.roadies.travel_service.entity.Tag;
+import it.roadies.travel_service.data.entity.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
