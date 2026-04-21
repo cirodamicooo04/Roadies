@@ -21,7 +21,7 @@ public class SecurityConfiguration {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/api/v1/travels/public/**", "/fallback/**").permitAll()
+                        .pathMatchers("/api/v1/travels/public/**", "/api/v1/bookings/public/**", "/fallback/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth

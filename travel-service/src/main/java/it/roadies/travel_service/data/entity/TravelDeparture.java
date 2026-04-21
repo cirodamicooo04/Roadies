@@ -36,6 +36,9 @@ public class TravelDeparture {
     @Column(name = "max_slots", nullable = false)
     private Integer maxSlots;
 
+    @Column(name = "available_slots", nullable = false)
+    private Integer availableSlots;
+
     @Version
     private Long version;
 }

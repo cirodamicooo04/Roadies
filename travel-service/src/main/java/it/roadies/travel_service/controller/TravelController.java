@@ -2,6 +2,7 @@ package it.roadies.travel_service.controller;
 
 import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
 import it.roadies.travel_service.data.dto.response.TravelResponse;
+import it.roadies.travel_service.services.TravelDepartureService;
 import it.roadies.travel_service.services.TravelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class TravelController {
 
     private final TravelService travelService;
+    private final TravelDepartureService travelDepartureService;
 
     @PreAuthorize("hasRole('ORGANIZER')")
     @PostMapping
@@ -30,5 +32,17 @@ public class TravelController {
     public ResponseEntity<TravelResponse> getTravelById(@PathVariable UUID id){
         TravelResponse response = travelService.getTravelById(id);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{travelId}/reserve")
+    public ResponseEntity<Void> reserveSpots(@PathVariable UUID travelId, @RequestParam int spots) {
+        travelDepartureService.reserveSpots(travelId, spots);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{travelId}/release")
+    public ResponseEntity<Void> releaseSpots(@PathVariable UUID travelId, @RequestParam int spots) {
+        travelDepartureService.releaseSpots(travelId, spots);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,6 +1,6 @@
-package it.roadies.booking_service.entities;
+package it.roadies.booking_service.data.entities;
 
-import it.roadies.booking_service.entities.enumeration.BookingStatus;
+import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,8 +21,11 @@ public class Booking {
     @Column(name = "user_id" , nullable = false)
     private String userId;
 
-    @Column(name = "travel_id", nullable = false)
+    @Column(name = "travel_departures_id")
     private UUID travelId;
+
+    @Column(name = "activity_id")
+    private UUID activityId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "booking_status", nullable = false)
@@ -52,6 +55,7 @@ public class Booking {
     @PrePersist
     public void setCreatedAtAndStatus() {
         this.createdAt = LocalDateTime.now();
+        this.expiresAt = LocalDateTime.now().plusMinutes(20);
         if (this.status == null) {
             this.status = BookingStatus.PENDING;
         }

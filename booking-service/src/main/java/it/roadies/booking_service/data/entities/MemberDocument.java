@@ -1,7 +1,7 @@
-package it.roadies.booking_service.entities;
+package it.roadies.booking_service.data.entities;
 
-import it.roadies.booking_service.entities.enumeration.DocumentStatus;
-import it.roadies.booking_service.entities.enumeration.DocumentType;
+import it.roadies.booking_service.data.entities.enumeration.DocumentStatus;
+import it.roadies.booking_service.data.entities.enumeration.DocumentType;
 import jakarta.persistence.*;
 import lombok.Data;
 
