@@ -1,4 +1,4 @@
-package it.roadies.user_service.entities;
+package it.roadies.user_service.data.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -47,7 +47,7 @@ public class User {
     @OneToMany(mappedBy = "receiver_id")
     private List<Friendship> receiver_friendships; //Amicizie in uscita
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Gamification gamification;
 
 }

@@ -1,11 +1,10 @@
-package it.roadies.user_service.entities;
+package it.roadies.user_service.data.entities;
 
-import it.roadies.user_service.entities.enumeration.Status;
+import it.roadies.user_service.data.entities.enumeration.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
