@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ public class Activity {
     private Travel travel;
 
     @Column(name = "owner_id", nullable = false)
-    private UUID ownerId;
+    private String ownerId;
 
     @Column(length = 100, name = "name", nullable = false)
     private String name;
@@ -44,8 +45,8 @@ public class Activity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "activity")
-    private Set<ActivityDeparture> sessions;
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ActivityDeparture> departures;
 
 
 }

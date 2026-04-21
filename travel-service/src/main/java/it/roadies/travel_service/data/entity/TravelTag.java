@@ -9,7 +9,7 @@ import lombok.Data;
 @Table(name = "TRAVEL_TAG")
 public class TravelTag {
     @EmbeddedId
-    private TravelTagId travelTagId;
+    private TravelTagId travelTagId = new TravelTagId();
 
     @ManyToOne
     @MapsId("travelId")
