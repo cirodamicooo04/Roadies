@@ -34,7 +34,7 @@ public class Activity {
     @Column(length = 200, name = "location", nullable = false)
     private String location;
 
-    @Column(name = "day_number", nullable = false)
+    @Column(name = "day_number")
     private Integer dayNumber;
 
     @CreationTimestamp

@@ -1,6 +1,7 @@
 package it.roadies.travel_service.data.mapper;
 
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
+import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDeparturesResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.data.entity.Activity;
@@ -20,6 +21,11 @@ public interface ActivityMapper {
 
     @Mapping(target = "activityId", source = "activity.id")
     ActivityDeparturesResponse toDeparturesResponse(ActivityDeparture activity);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "travel", ignore = true)
+    @Mapping(target = "ownerId", ignore = true)
+    void updateActivityFromDto(ActivityUpdateRequest request, @MappingTarget Activity activity);
 
     @AfterMapping
     default void linkRelations(@MappingTarget Activity activity) {

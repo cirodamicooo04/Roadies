@@ -19,4 +19,6 @@ public interface TravelDepartureRepository extends JpaRepository<TravelDeparture
     TravelDeparture findByIdWithLock(@Param("id") UUID id);
 
     boolean findByTravel(Travel travel);
+
+    boolean existsByTravel(Travel travel);
 }

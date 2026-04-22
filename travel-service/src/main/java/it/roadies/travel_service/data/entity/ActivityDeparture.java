@@ -20,10 +20,10 @@ public class ActivityDeparture {
     @JoinColumn(name = "activity_id")
     private Activity activity;
 
-    @Column(name = "start_timestamp", nullable = false)
+    @Column(name = "start_timestamp")
     private LocalDateTime startTimestamp;
 
-    @Column(name = "end_timestamp", nullable = false)
+    @Column(name = "end_timestamp")
     private LocalDateTime endTimestamp;
 
     @Column(name = "max_slots", nullable = false)
@@ -38,5 +38,12 @@ public class ActivityDeparture {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status = Status.PLANNED;
+
+    @PrePersist
+    public void prePersist() {
+        if (price == null) {
+            price = BigDecimal.ZERO;
+        }
+    }
 
 }

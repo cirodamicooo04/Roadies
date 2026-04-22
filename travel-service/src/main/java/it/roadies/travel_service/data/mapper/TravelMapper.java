@@ -1,6 +1,7 @@
 package it.roadies.travel_service.data.mapper;
 
 import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
+import it.roadies.travel_service.data.dto.request.TravelUpdateRequest;
 import it.roadies.travel_service.data.dto.response.TravelDepartureResponse;
 import it.roadies.travel_service.data.dto.response.TravelResponse;
 import it.roadies.travel_service.data.entity.Travel;
@@ -10,7 +11,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring", uses = {ActivityMapper.class, TagMapper.class})
+@Mapper(componentModel = "spring", uses = {ActivityMapper.class, TagMapper.class}, nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
 public interface TravelMapper {
     @Mapping(target = "ownerId", source = "ownerId") //mappo il campo ownerId che prendo dal jwt
     @Mapping(target = "tagScores", ignore = true)
@@ -18,6 +19,11 @@ public interface TravelMapper {
     Travel toEntity(TravelCreateRequest request, String ownerId);
 
     TravelResponse toResponse(Travel travel);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "ownerId", ignore = true)
+    @Mapping(target = "tagScores", ignore = true)
+    void updateTravelFromDto(TravelUpdateRequest request, @MappingTarget Travel travel);
 
     @Mapping(target = "travelId", source = "travel.id")
     TravelDepartureResponse toDepartureResponse(TravelDeparture departure);
