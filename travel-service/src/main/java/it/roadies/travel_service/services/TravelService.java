@@ -3,19 +3,24 @@ package it.roadies.travel_service.services;
 import it.roadies.travel_service.data.dao.TagRepository;
 import it.roadies.travel_service.data.dao.TravelDepartureRepository;
 import it.roadies.travel_service.data.dao.TravelRepository;
+import it.roadies.travel_service.data.dao.specification.TravelSpecification;
 import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
 import it.roadies.travel_service.data.dto.request.TravelTagRequest;
 import it.roadies.travel_service.data.dto.request.TravelUpdateRequest;
 import it.roadies.travel_service.data.dto.response.TravelResponse;
+import it.roadies.travel_service.data.dto.response.TravelSummaryResponse;
 import it.roadies.travel_service.data.entity.*;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import it.roadies.travel_service.data.mapper.TravelMapper;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -118,5 +123,26 @@ public class TravelService {
 
         Travel updatedTravel = travelRepository.save(travel);
         return travelMapper.toResponse(updatedTravel);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TravelSummaryResponse> searchTravels(String destination, BigDecimal minPrice, BigDecimal maxPrice, Integer minDurationDays, Integer maxDurationDays){
+        Specification<Travel> travelSpecification = Specification.where(TravelSpecification.hasDestination(destination))
+                .and(TravelSpecification.hasPriceRange(minPrice, maxPrice))
+                .and(TravelSpecification.hasDurationRange(minDurationDays, maxDurationDays));
+
+        List<Travel> travels = travelRepository.findAll(travelSpecification);
+        return travels.stream().map(t -> {
+            TravelSummaryResponse response = travelMapper.toSummaryResponse(t);
+
+            BigDecimal startingFrom = t.getDepartures().stream()
+                    .map(TravelDeparture::getPrice)
+                    .min(Comparator.naturalOrder())
+                    .orElse(BigDecimal.ZERO);
+
+            response.setStartingFromPrice(startingFrom);
+
+            return response;
+        }).toList();
     }
 }

@@ -4,12 +4,17 @@ import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
 import it.roadies.travel_service.data.dto.request.TravelUpdateRequest;
 import it.roadies.travel_service.data.dto.response.TravelDepartureResponse;
 import it.roadies.travel_service.data.dto.response.TravelResponse;
+import it.roadies.travel_service.data.dto.response.TravelSummaryResponse;
 import it.roadies.travel_service.data.entity.Travel;
 import it.roadies.travel_service.data.entity.TravelDeparture;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
+import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.Objects;
 
 @Mapper(componentModel = "spring", uses = {ActivityMapper.class, TagMapper.class}, nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
 public interface TravelMapper {
@@ -25,6 +30,9 @@ public interface TravelMapper {
     @Mapping(target = "tagScores", ignore = true)
     void updateTravelFromDto(TravelUpdateRequest request, @MappingTarget Travel travel);
 
+    @Mapping(target = "startingFromPrice" , ignore = true)
+    TravelSummaryResponse toSummaryResponse(Travel travel);
+
     @Mapping(target = "travelId", source = "travel.id")
     TravelDepartureResponse toDepartureResponse(TravelDeparture departure);
 
@@ -32,6 +40,7 @@ public interface TravelMapper {
     default void linkRelations(@MappingTarget Travel travel) {
         if (travel.getDepartures() != null) {
             travel.getDepartures().forEach(d -> d.setTravel(travel));
+
         }
         if (travel.getActivities() != null) {
             travel.getActivities().forEach(a -> {

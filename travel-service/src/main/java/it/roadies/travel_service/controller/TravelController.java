@@ -3,6 +3,7 @@ package it.roadies.travel_service.controller;
 import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
 import it.roadies.travel_service.data.dto.request.TravelUpdateRequest;
 import it.roadies.travel_service.data.dto.response.TravelResponse;
+import it.roadies.travel_service.data.dto.response.TravelSummaryResponse;
 import it.roadies.travel_service.services.TravelDepartureService;
 import it.roadies.travel_service.services.TravelService;
 import jakarta.validation.Valid;
@@ -13,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,6 +39,7 @@ public class TravelController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ORGANIZER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTravel(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
         travelService.deleteTravelById(id, jwt.getClaim("sub"));
@@ -43,11 +47,18 @@ public class TravelController {
     }
 
     //DA VEDERE PROBLEMA MAPPER AGGIORNAMENTO
+    //@PreAuthorize("hasRole('ORGANIZER')")
 //    @PutMapping("/{id}")
 //    public ResponseEntity<TravelResponse> updateTravel(@PathVariable UUID id, @RequestBody @Valid TravelUpdateRequest request, @AuthenticationPrincipal Jwt jwt) {
 //        TravelResponse response = travelService.updateTravel(request, jwt.getClaim("sub"), id);
 //        return ResponseEntity.ok(response);
 //    }
+
+    @GetMapping("/public/search")
+    public ResponseEntity<List<TravelSummaryResponse>> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays ){
+        List<TravelSummaryResponse> travels = travelService.searchTravels(destination, minPrice, maxPrice, minDurationDays, maxDurationDays);
+        return ResponseEntity.ok(travels);
+    }
 
     @PostMapping("/{travelId}/reserve")
     public ResponseEntity<Void> reserveSpots(@PathVariable UUID travelId, @RequestParam int spots) {
