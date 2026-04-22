@@ -1,12 +1,13 @@
 package it.roadies.booking_service.mapper;
 
-import it.roadies.booking_service.data.dto.request.BookingMemberRequestDTO;
-import it.roadies.booking_service.data.dto.response.BookingMemberResponseDTO;
+import it.roadies.booking_service.data.dto.request.BookingMemberRequest;
+import it.roadies.booking_service.data.dto.response.BookingMemberResponse;
 import it.roadies.booking_service.data.entities.BookingMember;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BookingMemberMapper {
-    BookingMember toEntity(BookingMemberRequestDTO requestDto);
-    BookingMemberResponseDTO toDto(BookingMember entity);
+    BookingMember toEntity(BookingMemberRequest requestDto);
+    BookingMemberResponse toDto(BookingMember entity);
 }

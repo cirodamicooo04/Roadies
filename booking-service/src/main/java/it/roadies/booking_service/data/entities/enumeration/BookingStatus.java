@@ -1,5 +1,5 @@
 package it.roadies.booking_service.data.entities.enumeration;
 
 public enum BookingStatus {
-    PENDING, CONFIRMED, CANCELLED, EXPIRED
+    DRAFT, PENDING, CONFIRMED, REJECTED, CANCELLED, EXPIRED
 }

@@ -1,7 +1,7 @@
 package it.roadies.booking_service.controller;
 
-import it.roadies.booking_service.data.dto.request.BookingRequestDTO;
-import it.roadies.booking_service.data.dto.response.BookingResponseDTO;
+import it.roadies.booking_service.data.dto.request.BookingRequest;
+import it.roadies.booking_service.data.dto.response.BookingResponse;
 import it.roadies.booking_service.services.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,8 +18,8 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping("/public/create/booking")
-    public ResponseEntity<BookingResponseDTO> createBooking(@RequestBody BookingRequestDTO requestDto) {
-        BookingResponseDTO response = bookingService.createBooking(requestDto);
+    public ResponseEntity<BookingResponse> createBooking(@RequestBody BookingRequest requestDto) {
+        BookingResponse response = bookingService.createBooking(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

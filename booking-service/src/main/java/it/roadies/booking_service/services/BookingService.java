@@ -1,9 +1,9 @@
 package it.roadies.booking_service.services;
 
-import it.roadies.booking_service.data.dto.request.BookingRequestDTO;
-import it.roadies.booking_service.data.dto.response.BookingResponseDTO;
+import it.roadies.booking_service.data.dto.request.BookingRequest;
+import it.roadies.booking_service.data.dto.response.BookingResponse;
 
 
 public interface BookingService {
-    public BookingResponseDTO createBooking(BookingRequestDTO b);
+    public BookingResponse createBooking(BookingRequest b);
 }
