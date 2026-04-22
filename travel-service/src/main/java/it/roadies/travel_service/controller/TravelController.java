@@ -45,4 +45,10 @@ public class TravelController {
         travelDepartureService.releaseSpots(travelId, spots);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTravel(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+        travelService.deleteTravelById(id, jwt.getClaim("sub"));
+        return ResponseEntity.ok().build();
+    }
 }

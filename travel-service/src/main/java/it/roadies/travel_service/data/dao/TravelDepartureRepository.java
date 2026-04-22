@@ -1,5 +1,6 @@
 package it.roadies.travel_service.data.dao;
 
+import it.roadies.travel_service.data.entity.Travel;
 import it.roadies.travel_service.data.entity.TravelDeparture;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +17,6 @@ public interface TravelDepartureRepository extends JpaRepository<TravelDeparture
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT t FROM TravelDeparture t WHERE t.id = :id")
     TravelDeparture findByIdWithLock(@Param("id") UUID id);
+
+    boolean findByTravel(Travel travel);
 }
