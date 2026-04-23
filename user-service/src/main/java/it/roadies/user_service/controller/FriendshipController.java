@@ -1,5 +1,6 @@
 package it.roadies.user_service.controller;
 
+import it.roadies.user_service.data.dto.response.FriendshipResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.entities.enumeration.Status;
 import it.roadies.user_service.services.FriendshipService;
@@ -31,9 +32,33 @@ public class FriendshipController {
         return ResponseEntity.ok().build();
     }
 
+    //Lista di amicizia rapida
     @GetMapping("/list/{myId}")
     public ResponseEntity<List<UserProfileResponseDTO>> getFriends(@PathVariable String myId) {
         List<UserProfileResponseDTO> friends = friendshipService.getFriendsList(myId);
         return ResponseEntity.ok(friends);
     }
+
+
+    // Lista amici DETTAGLIATA (come dicevamo all'interno della repository avrà l'account completo dell'amico, l'id dell'amicizia
+    // e anche la data dell'inizio dell'amicizia
+    @GetMapping("/detailed-list/{myId}")
+    public ResponseEntity<List<FriendshipResponseDTO>> getDetailedFriends(@PathVariable String myId) {
+        return ResponseEntity.ok(friendshipService.getDetailedFriendsList(myId));
+    }
+
+    @GetMapping("/requests/pending/{myId}")
+    public ResponseEntity<List<FriendshipResponseDTO>> getPendingRequests(@PathVariable String myId) {
+        return ResponseEntity.ok(friendshipService.getPendingRequests(myId));
+    }
+
+    @DeleteMapping("/{friendshipId}")
+    public ResponseEntity<Void> removeFriend(
+            @PathVariable UUID friendshipId,
+            @RequestParam String myId) {
+        friendshipService.removeFriend(friendshipId, myId);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
