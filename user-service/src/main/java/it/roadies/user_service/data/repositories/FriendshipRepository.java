@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,7 +36,13 @@ public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
     List<Friendship> findAllAcceptedFriendshipsByUser(String userId);
 
 
-
-    List<Friendship> findByReceiver_idAndStatus(User receiver, Status status);
+    //Tenere a mente che quando abbiamo delle query su dei parametri con _ come receiver_id in questo modo crasha
+    //List<Friendship> findByReceiver_idAndStatus(User receiver, Status status);
+    //Meglio scrivere la query a mano
+    @Query("SELECT f FROM Friendship f WHERE f.receiver_id = :receiver AND f.status = :status")
+    List<Friendship> findByReceiver_idAndStatus(
+            @Param("receiver") User receiver,
+            @Param("status") Status status
+    );
 
 }
