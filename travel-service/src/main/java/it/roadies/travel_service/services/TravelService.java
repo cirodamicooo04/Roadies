@@ -1,16 +1,15 @@
 package it.roadies.travel_service.services;
 
+import it.roadies.travel_service.data.dao.ActivityRepository;
 import it.roadies.travel_service.data.dao.TagRepository;
 import it.roadies.travel_service.data.dao.TravelDepartureRepository;
 import it.roadies.travel_service.data.dao.TravelRepository;
 import it.roadies.travel_service.data.dao.specification.TravelSpecification;
-import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
-import it.roadies.travel_service.data.dto.request.TravelTagRequest;
-import it.roadies.travel_service.data.dto.request.TravelUpdateRequest;
-import it.roadies.travel_service.data.dto.response.TravelResponse;
-import it.roadies.travel_service.data.dto.response.TravelSummaryResponse;
+import it.roadies.travel_service.data.dto.request.*;
+import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.data.entity.*;
 import it.roadies.travel_service.data.entity.enumerations.Status;
+import it.roadies.travel_service.data.mapper.ActivityMapper;
 import it.roadies.travel_service.data.mapper.TravelMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,6 +30,8 @@ public class TravelService {
     private final TagRepository tagRepository;
     private final TravelRepository travelRepository;
     private final TravelDepartureRepository travelDepartureRepository;
+    private final ActivityRepository activityRepository;
+    private final ActivityMapper activityMapper;
 
     private void validateTravelLogic(Travel travel){
         for (TravelDeparture departure : travel.getDepartures()){
@@ -132,17 +133,76 @@ public class TravelService {
                 .and(TravelSpecification.hasDurationRange(minDurationDays, maxDurationDays));
 
         List<Travel> travels = travelRepository.findAll(travelSpecification);
-        return travels.stream().map(t -> {
-            TravelSummaryResponse response = travelMapper.toSummaryResponse(t);
+        return travels.stream().map(travelMapper::toSummaryResponse).toList();
+    }
 
-            BigDecimal startingFrom = t.getDepartures().stream()
-                    .map(TravelDeparture::getPrice)
-                    .min(Comparator.naturalOrder())
-                    .orElse(BigDecimal.ZERO);
+    @Transactional(readOnly = true)
+    public OrganizerTravelsActivityResponse getOrganizerTravelsActivity(String ownerId){
+        List<Travel> travels = travelRepository.findAllByOwnerId(ownerId);
+        List<TravelSummaryResponse> travelsSummary = travels.stream().map(travelMapper::toSummaryResponse).toList();
 
-            response.setStartingFromPrice(startingFrom);
+        List<Activity> activities = activityRepository.findAllByOwnerId(ownerId);
+        List<ActivitySummaryResponse> activitiesSummary = activities.stream().map(activityMapper::toSummaryResponse).toList();
 
-            return response;
-        }).toList();
+        OrganizerTravelsActivityResponse response = new OrganizerTravelsActivityResponse();
+        response.setTravels(travelsSummary);
+        response.setActivities(activitiesSummary);
+        return response;
+    }
+
+    @Transactional
+    public TravelDepartureResponse addDeparture(UUID travelId, TravelDepartureCreateRequest departureCreateRequest, String ownerId){
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new RuntimeException("Travel not found"));
+        if (!travel.getOwnerId().equals(ownerId)) {throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to add a departure to this travel");}
+        TravelDeparture departure = travelMapper.toDepartureEntity(departureCreateRequest);
+        departure.setTravel(travel);
+
+        travel.getDepartures().add(departure);
+        validateTravelLogic(travel);
+
+        TravelDeparture savedDeparture = travelDepartureRepository.save(departure);
+        return travelMapper.toDepartureResponse(savedDeparture);
+    }
+
+    @Transactional
+    public void deleteDeparture(UUID travelId, UUID departureId, String ownerId){
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new RuntimeException("Travel not found"));
+        if (!travel.getOwnerId().equals(ownerId)) {throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this departure");}
+        TravelDeparture departure = travelDepartureRepository.findById(departureId).orElseThrow(() -> new RuntimeException("Departure not found"));
+        if (departure.getStatus() == Status.CONFIRMED){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't delete a confirmed departure");}
+        travel.getDepartures().remove(departure);
+        travelDepartureRepository.delete(departure);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TravelDepartureResponse> getTravelDepartures(UUID travelId){
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new RuntimeException("Travel not found"));
+        List<TravelDeparture> departures = travelDepartureRepository.findAllByTravel(travel);
+        return departures.stream().map(travelMapper::toDepartureResponse).toList();
+    }
+
+    @Transactional
+    public TravelDepartureResponse updateDeparture(UUID travelId, UUID departureId, TravelDepartureUpdateRequest request, String ownerId){
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new RuntimeException("Travel not found"));
+        if (!travel.getOwnerId().equals(ownerId)){throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to update this departure");}
+        TravelDeparture departure = travelDepartureRepository.findById(departureId).orElseThrow(() -> new RuntimeException("Departure not found"));
+        if (departure.getStatus().equals(Status.CONFIRMED)){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update a confirmed departure");}
+
+        travelMapper.updateDepartureEntity(request, departure);
+        validateTravelLogic(travel);
+
+        travelDepartureRepository.save(departure);
+        return travelMapper.toDepartureResponse(departure);
+    }
+
+    @Transactional
+    public TravelDepartureResponse confirmDeparture(UUID travelId, UUID departureId, String ownerId){
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new RuntimeException("Travel not found"));
+        if (!travel.getOwnerId().equals(ownerId)){throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to confirm this departure");}
+        TravelDeparture departure = travelDepartureRepository.findById(departureId).orElseThrow(() -> new RuntimeException("Departure not found"));
+        if (departure.getStatus() == Status.CONFIRMED){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This departure is already confirmed");}
+        departure.setStatus(Status.CONFIRMED);
+        travelDepartureRepository.save(departure);
+        return travelMapper.toDepartureResponse(departure);
     }
 }
