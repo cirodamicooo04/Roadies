@@ -27,7 +27,7 @@ public class UserService {
     @Transactional
     public UserSyncResult syncUser(UserSyncRequestDTO requestDto) {
 
-        Optional<User> existingUserOpt = userRepository.findById(requestDto.getKeycloak_id());
+        Optional<User> existingUserOpt = userRepository.findById(requestDto.getKeycloakId());
 
         // Se l'utente esiste già restituisco un dto e dico che non è un nuovo utente e aggiorno anche il suo ultimo accesso
         if (existingUserOpt.isPresent()) {

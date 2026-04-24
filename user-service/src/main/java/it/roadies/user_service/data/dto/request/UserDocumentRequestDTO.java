@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class UserDocumentRequestDTO {
-    private DocumentType document_type;
+    private DocumentType documentType;
     private String documentNumber;
     private String fileUrl;
 }
