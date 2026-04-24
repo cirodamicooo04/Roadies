@@ -40,7 +40,7 @@ public class Booking {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "expires_at", nullable = false)
+    @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
     @Column(name = "people_count", nullable = false)
@@ -49,15 +49,14 @@ public class Booking {
     @Version
     private Long version;
 
-    @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<BookingMember> members;
 
     @PrePersist
     public void setCreatedAtAndStatus() {
         this.createdAt = LocalDateTime.now();
-        this.expiresAt = LocalDateTime.now().plusMinutes(20);
         if (this.status == null) {
-            this.status = BookingStatus.PENDING;
+            this.status = BookingStatus.DRAFT;
         }
     }
 

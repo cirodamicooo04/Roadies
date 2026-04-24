@@ -41,7 +41,7 @@ public class MemberDocument {
     private BookingMember member;
 
     @PrePersist
-    public void setStatusandCreateAt() {
+    public void setStatusAndCreateAt() {
         if (this.status == null) {
             this.status = DocumentStatus.PENDING;
         }
