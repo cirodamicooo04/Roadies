@@ -30,7 +30,7 @@ public class UserDocument {
     @Column(nullable = false)
     private DocumentStatus status;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "rejectionReason")
