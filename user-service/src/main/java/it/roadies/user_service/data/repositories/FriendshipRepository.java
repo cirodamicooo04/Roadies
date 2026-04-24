@@ -18,12 +18,12 @@ import java.util.UUID;
 public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
 
     @Query("SELECT f FROM Friendship f WHERE " +
-            "(f.requester_id.keycloak_id = :id1 AND f.receiver_id.keycloak_id = :id2) OR " +
-            "(f.requester_id.keycloak_id = :id2 AND f.receiver_id.keycloak_id = :id1)")
+            "(f.requesterId.keycloakId = :id1 AND f.receiverId.keycloakId = :id2) OR " +
+            "(f.requesterId.keycloakId = :id2 AND f.receiverId.keycloakId = :id1)")
     Optional<Friendship> findExistingFriendship(String id1, String id2);
 
-    @Query("SELECT CASE WHEN f.requester_id.keycloak_id = :userId THEN f.receiver_id ELSE f.requester_id END " +
-            "FROM Friendship f WHERE (f.requester_id.keycloak_id = :userId OR f.receiver_id.keycloak_id = :userId) " +
+    @Query("SELECT CASE WHEN f.requesterId.keycloakId = :userId THEN f.receiverId ELSE f.requesterId END " +
+            "FROM Friendship f WHERE (f.requesterId.keycloakId = :userId OR f.receiverId.keycloakId = :userId) " +
             "AND f.status = it.roadies.user_service.data.entities.enumeration.Status.ACCEPTED")
     List<User> findAcceptedFriendsByUser(String userId);
 
@@ -31,7 +31,7 @@ public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
     // l'id per poter abilitare la funzione di rimozione dell'amicizia e anche la data di creazione
     // dell'amicizia se vogliamo visualizzare ad esempio amici dal gg/mm/aaaa
     @Query("SELECT f FROM Friendship f WHERE " +
-            "(f.requester_id.keycloak_id = :userId OR f.receiver_id.keycloak_id = :userId) " +
+            "(f.requesterId.keycloakId = :userId OR f.receiverId.keycloakId = :userId) " +
             "AND f.status = it.roadies.user_service.data.entities.enumeration.Status.ACCEPTED")
     List<Friendship> findAllAcceptedFriendshipsByUser(String userId);
 
@@ -39,8 +39,8 @@ public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
     //Tenere a mente che quando abbiamo delle query su dei parametri con _ come receiver_id in questo modo crasha
     //List<Friendship> findByReceiver_idAndStatus(User receiver, Status status);
     //Meglio scrivere la query a mano
-    @Query("SELECT f FROM Friendship f WHERE f.receiver_id = :receiver AND f.status = :status")
-    List<Friendship> findByReceiver_idAndStatus(
+    @Query("SELECT f FROM Friendship f WHERE f.receiverId = :receiver AND f.status = :status")
+    List<Friendship> findByReceiverIdAndStatus(
             @Param("receiver") User receiver,
             @Param("status") Status status
     );

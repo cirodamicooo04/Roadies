@@ -22,7 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final GamificationRepository gamificationRepository;
-    private final UserMapper userMapper; // Iniettiamo il mapper di MapStruct
+    private final UserMapper userMapper;
 
     @Transactional
     public UserSyncResult syncUser(UserSyncRequestDTO requestDto) {
@@ -32,7 +32,7 @@ public class UserService {
         // Se l'utente esiste già restituisco un dto e dico che non è un nuovo utente e aggiorno anche il suo ultimo accesso
         if (existingUserOpt.isPresent()) {
             User user = existingUserOpt.get();
-            user.setLast_login(LocalDateTime.now());
+            user.setLastLogin(LocalDateTime.now());
             userRepository.save(user);
 
             return new UserSyncResult(userMapper.toDto(user), false);
@@ -41,9 +41,9 @@ public class UserService {
         // Nel caso in cui ci troviamo davanti ad un nuovo utente lo mappiamo e restitiamo che è un nuovo utente
         User newUser = userMapper.toEntity(requestDto);
 
-        newUser.setCreated_at(LocalDateTime.now());
-        newUser.setLast_login(LocalDateTime.now());
-        newUser.setAvatar_url("default_avatar.png");
+        newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setLastLogin(LocalDateTime.now());
+        newUser.setAvatarUrl("default_avatar.png");
 
         User savedUser = userRepository.save(newUser);
 

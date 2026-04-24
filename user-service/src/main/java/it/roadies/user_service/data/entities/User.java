@@ -15,7 +15,7 @@ import java.util.List;
 public class User {
 
     @Id
-    private String keycloak_id;
+    private String keycloakId;
 
     @Column(length = 255,unique = true,nullable = false)
     private String email;
@@ -24,30 +24,33 @@ public class User {
     private String username;
 
     @Column(length = 255,nullable = false)
-    private String first_name;
+    private String firstName;
 
     @Column(length = 255,nullable = false)
-    private String last_name;
+    private String lastName;
 
     @Column(length = 255)
-    private String avatar_url;
+    private String avatarUrl;
 
     @Column(nullable = false)
-    private LocalDate birth_date;
+    private LocalDate birthDate;
 
     @Column(nullable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime last_login;
+    private LocalDateTime lastLogin;
 
-    @OneToMany(mappedBy = "requester_id")
-    private List<Friendship> requester_friendships; //Amicizie in arrivo
+    @OneToMany(mappedBy = "requesterId")
+    private List<Friendship> requesterFriendships; //Amicizie in arrivo
 
-    @OneToMany(mappedBy = "receiver_id")
-    private List<Friendship> receiver_friendships; //Amicizie in uscita
+    @OneToMany(mappedBy = "receiverId")
+    private List<Friendship> receiverFriendships; //Amicizie in uscita
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Gamification gamification;
+
+    @OneToMany(mappedBy = "user_id", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserDocument> documents;
 
 }

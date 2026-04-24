@@ -11,11 +11,11 @@ import lombok.Data;
 
 public class Gamification {
     @Id
-    private String user_id;
+    private String userId;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name="user_id", referencedColumnName = "keycloak_id")
+    @JoinColumn(name="userId", referencedColumnName = "keycloakId")
     private User user;
 
     @Column

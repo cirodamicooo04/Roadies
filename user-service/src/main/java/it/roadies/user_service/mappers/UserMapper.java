@@ -15,9 +15,9 @@ public interface UserMapper {
     @Mapping(source = "gamification.badge", target = "badge")
     UserProfileResponseDTO toDto(User user);
 
-    @Mapping(target = "keycloak_id", ignore = true)
-    @Mapping(target = "email", ignore = true) // Solitamente l'email non si cambia da qui
-    @Mapping(target = "created_at", ignore = true)
+    @Mapping(target = "keycloakId", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "gamification", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(UserSyncRequestDTO dto, @MappingTarget User entity);

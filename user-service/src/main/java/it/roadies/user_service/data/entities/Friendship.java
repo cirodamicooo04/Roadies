@@ -18,16 +18,16 @@ public class Friendship {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name="requester_id", referencedColumnName = "keycloak_id")
-    private User requester_id;
+    @JoinColumn(name="requesterId", referencedColumnName = "keycloakId")
+    private User requesterId;
 
     @ManyToOne
-    @JoinColumn(name="receiver_id", referencedColumnName = "keycloak_id")
-    private User receiver_id;
+    @JoinColumn(name="receiverId", referencedColumnName = "keycloakId")
+    private User receiverId;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
     @Column(nullable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 }

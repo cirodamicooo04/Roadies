@@ -31,17 +31,17 @@ public class FriendshipService {
         User receiver = userRepository.findByUsername(receiverUsername)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
-        if (senderId.equals(receiver.getKeycloak_id()))
+        if (senderId.equals(receiver.getKeycloakId()))
             throw new RuntimeException("Non puoi essere amico di te stesso!");
 
-        friendshipRepository.findExistingFriendship(senderId, receiver.getKeycloak_id())
+        friendshipRepository.findExistingFriendship(senderId, receiver.getKeycloakId())
                 .ifPresent(f -> { throw new RuntimeException("Richiesta già esistente o siete già amici"); });
 
         Friendship friendship = new Friendship();
-        friendship.setRequester_id(userRepository.getReferenceById(senderId));
-        friendship.setReceiver_id(receiver);
+        friendship.setRequesterId(userRepository.getReferenceById(senderId));
+        friendship.setReceiverId(receiver);
         friendship.setStatus(Status.PENDING);
-        friendship.setCreated_at(LocalDateTime.now());
+        friendship.setCreatedAt(LocalDateTime.now());
 
         friendshipRepository.save(friendship);
     }
@@ -51,7 +51,7 @@ public class FriendshipService {
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> new RuntimeException("Richiesta non trovata"));
 
-        if (!friendship.getReceiver_id().getKeycloak_id().equals(currentUserId)) {
+        if (!friendship.getReceiverId().getKeycloakId().equals(currentUserId)) {
             throw new RuntimeException("Non autorizzato");
         }
 
@@ -74,9 +74,9 @@ public class FriendshipService {
         return friendships.stream().map(f -> {
             FriendshipResponseDTO dto = friendshipMapper.toDto(f);
 
-            User friend = f.getRequester_id().getKeycloak_id().equals(userId)
-                    ? f.getReceiver_id()
-                    : f.getRequester_id();
+            User friend = f.getRequesterId().getKeycloakId().equals(userId)
+                    ? f.getReceiverId()
+                    : f.getRequesterId();
 
             dto.setFriendProfile(userMapper.toDto(friend));
             return dto;
@@ -85,11 +85,11 @@ public class FriendshipService {
 
     public List<FriendshipResponseDTO> getPendingRequests(String userId) {
         User receiver = userRepository.getReferenceById(userId);
-        List<Friendship> pending = friendshipRepository.findByReceiver_idAndStatus(receiver, Status.PENDING);
+        List<Friendship> pending = friendshipRepository.findByReceiverIdAndStatus(receiver, Status.PENDING);
 
         return pending.stream().map(f -> {
             FriendshipResponseDTO dto = friendshipMapper.toDto(f);
-            dto.setFriendProfile(userMapper.toDto(f.getRequester_id()));
+            dto.setFriendProfile(userMapper.toDto(f.getRequesterId()));
             return dto;
         }).collect(Collectors.toList());
     }
@@ -100,8 +100,8 @@ public class FriendshipService {
                 .orElseThrow(() -> new RuntimeException("Relazione di amicizia non trovata"));
 
 
-        boolean isParticipant = friendship.getRequester_id().getKeycloak_id().equals(currentUserId) ||
-                friendship.getReceiver_id().getKeycloak_id().equals(currentUserId);
+        boolean isParticipant = friendship.getRequesterId().getKeycloakId().equals(currentUserId) ||
+                friendship.getReceiverId().getKeycloakId().equals(currentUserId);
 
         if (!isParticipant) {
             throw new RuntimeException("Non sei autorizzato a rimuovere questa amicizia");
