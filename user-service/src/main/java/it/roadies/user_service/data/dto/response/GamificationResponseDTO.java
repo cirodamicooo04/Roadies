@@ -6,5 +6,5 @@ public class GamificationResponseDTO {
     private String username;
     private Long points;
     private Badge badge;
-    private String avatar_url;
+    private String avatarUrl;
 }

@@ -10,11 +10,11 @@ import java.util.UUID;
 @Data
 public class UserDocumentResponseDTO {
     private UUID id;
-    private DocumentType document_type;
-    private String document_number;
-    private String file_url;
+    private DocumentType documentType;
+    private String documentNumber;
+    private String fileUrl;
     private DocumentStatus status;
-    private String rejection_reason;
-    private LocalDateTime created_at;
+    private String rejectionReason;
+    private LocalDateTime createdAt;
     private String userId;
 }

@@ -5,10 +5,10 @@ import java.time.LocalDate;
 
 @Data
 public class UserSyncRequestDTO {
-    private String keycloak_id;
+    private String keycloakId;
     private String email;
     private String username;
-    private String first_name;
-    private String last_name;
-    private LocalDate birth_date;
+    private String firstName;
+    private String lastName;
+    private LocalDate birthDate;
 }

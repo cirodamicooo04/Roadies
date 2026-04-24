@@ -8,6 +8,6 @@ import java.util.UUID;
 public class FriendshipResponseDTO {
     private UUID id;
     private String status;
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
     private UserProfileResponseDTO friendProfile;
 }
