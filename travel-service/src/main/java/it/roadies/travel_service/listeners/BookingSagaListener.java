@@ -3,7 +3,7 @@ package it.roadies.travel_service.listeners;
 import it.roadies.travel_service.data.dto.event.BookingCreatedEvent;
 import it.roadies.travel_service.data.dto.event.SpotsFailedEvent;
 import it.roadies.travel_service.data.dto.event.SpotsReservedEvent;
-import it.roadies.travel_service.services.TravelDepartureService;
+import it.roadies.travel_service.services.impl.TravelDepartureServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class BookingSagaListener {
 
-    private final TravelDepartureService travelDepartureService;
+    private final TravelDepartureServiceImpl travelDepartureService;
     private final RabbitTemplate rabbitTemplate;
 
     @RabbitListener(queuesToDeclare = @Queue("booking.created.queue"))

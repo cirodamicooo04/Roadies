@@ -20,6 +20,8 @@ import java.util.Objects;
 @Mapper(componentModel = "spring")
 public interface ActivityMapper {
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "travel", ignore = true)
+    @Mapping(target = "ownerId", ignore = true)
     Activity toEntity(ActivityCreateRequest activityCreateRequest);
 
     @Mapping(target = "travelId", source = "travel.id")

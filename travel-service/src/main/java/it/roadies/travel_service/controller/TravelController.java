@@ -3,7 +3,6 @@ package it.roadies.travel_service.controller;
 import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
 import it.roadies.travel_service.data.dto.request.TravelDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.TravelDepartureUpdateRequest;
-import it.roadies.travel_service.data.dto.request.TravelUpdateRequest;
 import it.roadies.travel_service.data.dto.response.OrganizerTravelsActivityResponse;
 import it.roadies.travel_service.data.dto.response.TravelDepartureResponse;
 import it.roadies.travel_service.data.dto.response.TravelResponse;

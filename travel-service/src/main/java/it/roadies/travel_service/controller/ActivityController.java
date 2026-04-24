@@ -1,7 +1,6 @@
 package it.roadies.travel_service.controller;
 
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
-import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.services.ActivityService;
 import jakarta.validation.Valid;
