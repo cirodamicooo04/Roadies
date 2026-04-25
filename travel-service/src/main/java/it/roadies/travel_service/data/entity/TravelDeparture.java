@@ -41,4 +41,11 @@ public class TravelDeparture {
 
     @Version
     private Long version;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.availableSlots == null) {
+            this.availableSlots = maxSlots;
+        }
+    }
 }
