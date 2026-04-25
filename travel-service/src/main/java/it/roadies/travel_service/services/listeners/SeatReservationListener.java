@@ -4,7 +4,7 @@ import it.roadies.travel_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.travel_service.data.dto.event.SeatReservationFailedEvent;
 import it.roadies.travel_service.data.dto.event.SeatReservedEvent;
 import it.roadies.travel_service.exceptions.SeatsNotAvailableException;
-import it.roadies.travel_service.services.ActivityDepartureService;
+import it.roadies.travel_service.services.impl.ActivityDepartureServiceImpl;
 import it.roadies.travel_service.services.TravelDepartureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SeatReservationListener {
     private final TravelDepartureService travelDepartureService;
-    private final ActivityDepartureService activityDepartureService;
+    private final ActivityDepartureServiceImpl activityDepartureService;
     private final RabbitTemplate rabbitTemplate;
 
     @RabbitListener(queues = "travel.reserve.queue")

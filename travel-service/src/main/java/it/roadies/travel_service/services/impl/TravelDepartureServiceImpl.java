@@ -14,11 +14,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TravelDepartureServiceImpl implements TravelDepartureService {
 
-    private final TravelDepartureMapper travelDepartureMapper;
     private final TravelDepartureRepository travelDepartureRepository;
 
     @Transactional
-    public void reserveSpots(UUID travelDepartureId, int spots){
+    @Override
+    public void reserveSeats(UUID travelDepartureId, Integer spots){
         TravelDeparture travel = travelDepartureRepository.findByIdWithLock(travelDepartureId);
 
         int newSlotsNumber = travel.getAvailableSlots() - spots;
@@ -32,7 +32,8 @@ public class TravelDepartureServiceImpl implements TravelDepartureService {
     }
 
     @Transactional
-    public void releaseSpots(UUID travelDepartureId, int spots) {
+    @Override
+    public void releaseSeats(UUID travelDepartureId, Integer spots) {
         TravelDeparture travel = travelDepartureRepository.findByIdWithLock(travelDepartureId);
 
         travel.setAvailableSlots(travel.getAvailableSlots() + spots);
