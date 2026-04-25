@@ -19,4 +19,5 @@ public interface TravelService {
     List<TravelDepartureResponse> getTravelDepartures(UUID travelId);
     TravelDepartureResponse updateDeparture(UUID travelId, UUID departureId, TravelDepartureUpdateRequest request, String ownerId);
     TravelDepartureResponse confirmDeparture(UUID travelId, UUID departureId, String ownerId);
+    List<String> getUniqueDestinations();
 }

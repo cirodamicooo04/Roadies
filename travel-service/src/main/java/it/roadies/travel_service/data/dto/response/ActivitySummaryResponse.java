@@ -10,6 +10,6 @@ public class ActivitySummaryResponse {
     private UUID id;
     private String ownerId;
     private String name;
-    private String location;
+    private String destination;
     private BigDecimal startingFromPrice;
 }

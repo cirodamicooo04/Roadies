@@ -7,7 +7,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -31,8 +30,8 @@ public class Activity {
     @Column(length = 1000, name = "description", nullable = false)
     private String description;
 
-    @Column(length = 200, name = "location", nullable = false)
-    private String location;
+    @Column(length = 200, name = "destination", nullable = false)
+    private String destination;
 
     @Column(name = "day_number")
     private Integer dayNumber;

@@ -3,10 +3,8 @@ package it.roadies.travel_service.controller;
 import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
 import it.roadies.travel_service.data.dto.request.TravelDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.TravelDepartureUpdateRequest;
-import it.roadies.travel_service.data.dto.response.OrganizerTravelsActivityResponse;
-import it.roadies.travel_service.data.dto.response.TravelDepartureResponse;
-import it.roadies.travel_service.data.dto.response.TravelResponse;
-import it.roadies.travel_service.data.dto.response.TravelSummaryResponse;
+import it.roadies.travel_service.data.dto.response.*;
+import it.roadies.travel_service.services.ActivityService;
 import it.roadies.travel_service.services.TravelDepartureService;
 import it.roadies.travel_service.services.TravelService;
 import jakarta.validation.Valid;
@@ -28,6 +26,7 @@ public class TravelController {
 
     private final TravelService travelService;
     private final TravelDepartureService travelDepartureService;
+    private final ActivityService activityService;
 
     //ORGANIZER AREA
 
@@ -69,9 +68,13 @@ public class TravelController {
     }
 
     @GetMapping("/public/search")
-    public ResponseEntity<List<TravelSummaryResponse>> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays ){
-        List<TravelSummaryResponse> travels = travelService.searchTravels(destination, minPrice, maxPrice, minDurationDays, maxDurationDays);
-        return ResponseEntity.ok(travels);
+    public ResponseEntity<?> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays , @RequestParam(required = false, defaultValue = "TRAVEL") String type){
+        if(!type.equalsIgnoreCase("ACTIVITY")){
+            List<TravelSummaryResponse> travels = travelService.searchTravels(destination, minPrice, maxPrice, minDurationDays, maxDurationDays);
+            return ResponseEntity.ok(travels);
+        }
+        List<ActivitySummaryResponse> activities = activityService.searchActivities(destination, minPrice, maxPrice);
+        return ResponseEntity.ok(activities);
     }
 
     //TRAVEL DEPARTURES AREA
@@ -104,7 +107,7 @@ public class TravelController {
     }
 
     @PreAuthorize("hasRole('ORGANIZER')")
-    @PutMapping("/{travelId}/departures/{departureId}/confirm")
+    @PatchMapping("/{travelId}/departures/{departureId}/confirm")
     public ResponseEntity<TravelDepartureResponse> confirmDeparture(@PathVariable UUID travelId, @PathVariable UUID departureId, @AuthenticationPrincipal Jwt jwt){
         TravelDepartureResponse response = travelService.confirmDeparture(travelId, departureId, jwt.getClaim("sub"));
         return ResponseEntity.ok(response);

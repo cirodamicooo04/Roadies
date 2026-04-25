@@ -172,6 +172,7 @@ public class TravelServiceImpl implements TravelService {
         Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new RuntimeException("Travel not found"));
         if (!travel.getOwnerId().equals(ownerId)) {throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this departure");}
         TravelDeparture departure = travelDepartureRepository.findById(departureId).orElseThrow(() -> new RuntimeException("Departure not found"));
+        if (!departure.getTravel().getId().equals(travelId)){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure not found in this travel");}
         if (departure.getStatus() == Status.CONFIRMED){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't delete a confirmed departure");}
         travel.getDepartures().remove(departure);
         travelDepartureRepository.delete(departure);
@@ -189,6 +190,7 @@ public class TravelServiceImpl implements TravelService {
         Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new RuntimeException("Travel not found"));
         if (!travel.getOwnerId().equals(ownerId)){throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to update this departure");}
         TravelDeparture departure = travelDepartureRepository.findById(departureId).orElseThrow(() -> new RuntimeException("Departure not found"));
+        if (!departure.getTravel().getId().equals(travelId)){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure not found in this travel");}
         if (departure.getStatus().equals(Status.CONFIRMED)){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update a confirmed departure");}
 
         travelMapper.updateDepartureEntity(request, departure);
@@ -202,10 +204,17 @@ public class TravelServiceImpl implements TravelService {
     public TravelDepartureResponse confirmDeparture(UUID travelId, UUID departureId, String ownerId){
         Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new RuntimeException("Travel not found"));
         if (!travel.getOwnerId().equals(ownerId)){throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to confirm this departure");}
+
         TravelDeparture departure = travelDepartureRepository.findById(departureId).orElseThrow(() -> new RuntimeException("Departure not found"));
+        if (!departure.getTravel().getId().equals(travelId)){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure not found in this travel");}
         if (departure.getStatus() == Status.CONFIRMED){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This departure is already confirmed");}
         departure.setStatus(Status.CONFIRMED);
         travelDepartureRepository.save(departure);
         return travelMapper.toDepartureResponse(departure);
+    }
+
+    @Override
+    public List<String> getUniqueDestinations() {
+        return travelRepository.findUniqueDestinations();
     }
 }

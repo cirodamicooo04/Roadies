@@ -16,5 +16,5 @@ public class ActivityResponse {
     private Integer dayNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<ActivityDeparturesResponse> departures;
+    private List<ActivityDepartureResponse> departures;
 }

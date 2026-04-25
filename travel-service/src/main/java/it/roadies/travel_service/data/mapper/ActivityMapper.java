@@ -1,13 +1,14 @@
 package it.roadies.travel_service.data.mapper;
 
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
+import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
+import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
-import it.roadies.travel_service.data.dto.response.ActivityDeparturesResponse;
+import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.data.dto.response.ActivitySummaryResponse;
 import it.roadies.travel_service.data.entity.Activity;
 import it.roadies.travel_service.data.entity.ActivityDeparture;
-import it.roadies.travel_service.data.entity.TravelDeparture;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -28,7 +29,16 @@ public interface ActivityMapper {
     ActivityResponse toResponse (Activity activity);
 
     @Mapping(target = "activityId", source = "activity.id")
-    ActivityDeparturesResponse toDeparturesResponse(ActivityDeparture activity);
+    ActivityDepartureResponse toDeparturesResponse(ActivityDeparture activity);
+
+    @Mapping(target = "activity", ignore = true)
+    ActivityDeparture toDepartureEntity(ActivityDepartureCreateRequest request);
+
+    @Mapping(target = "activity", ignore = true)
+    @Mapping(target = "maxSlots", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    //@Mapping(target = "availableSlots", ignore = true)
+    ActivityDeparture updateDepartureEntity(ActivityDepartureUpdateRequest request, @MappingTarget ActivityDeparture departure);
 
     @Mapping(target = "startingFromPrice", ignore = true)
     ActivitySummaryResponse toSummaryResponse(Activity activity);
