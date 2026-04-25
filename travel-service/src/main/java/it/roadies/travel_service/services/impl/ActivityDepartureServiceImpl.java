@@ -1,6 +1,6 @@
 package it.roadies.travel_service.services.impl;
 
-import it.roadies.travel_service.data.dao.ActivitySessionRepository;
+import it.roadies.travel_service.data.dao.ActivityDepartureRepository;
 import it.roadies.travel_service.data.entity.ActivityDeparture;
 import it.roadies.travel_service.exceptions.NotEnoughSeatsException;
 import it.roadies.travel_service.services.ActivityDepartureService;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ActivityDepartureServiceImpl implements ActivityDepartureService {
-    private final ActivitySessionRepository activitySessionRepository;
+    private final ActivityDepartureRepository activitySessionRepository;
 
     @Transactional
     public void reserveSeats(UUID id, Integer peopleCount){

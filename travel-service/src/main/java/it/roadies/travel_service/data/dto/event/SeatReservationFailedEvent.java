@@ -3,7 +3,6 @@ package it.roadies.travel_service.data.dto.event;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-package it.roadies.travel_service.data.dto.event;
 
 import java.util.UUID;
 
