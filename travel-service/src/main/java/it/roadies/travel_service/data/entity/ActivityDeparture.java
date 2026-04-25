@@ -47,6 +47,11 @@ public class ActivityDeparture {
         if (price == null) {
             price = BigDecimal.ZERO;
         }
+
+        if (this.availableSlots == null) {
+            this.availableSlots = maxSlots;
+        }
+
     }
 
 }

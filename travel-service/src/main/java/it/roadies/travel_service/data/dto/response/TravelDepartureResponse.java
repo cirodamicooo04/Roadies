@@ -15,4 +15,5 @@ public class TravelDepartureResponse {
     private BigDecimal price;
     private Status status;
     private Integer maxSlots;
+    private Integer availableSlots;
 }

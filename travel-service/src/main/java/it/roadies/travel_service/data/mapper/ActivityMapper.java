@@ -28,16 +28,17 @@ public interface ActivityMapper {
     @Mapping(target = "travelId", source = "travel.id")
     ActivityResponse toResponse (Activity activity);
 
-    @Mapping(target = "activityId", source = "activity.id")
-    ActivityDepartureResponse toDeparturesResponse(ActivityDeparture activity);
+    @Mapping(target = "activityId", source = "departure.activity.id")
+    ActivityDepartureResponse toDeparturesResponse(ActivityDeparture departure);
 
     @Mapping(target = "activity", ignore = true)
+    @Mapping(target = "availableSlots", ignore = true)
     ActivityDeparture toDepartureEntity(ActivityDepartureCreateRequest request);
 
     @Mapping(target = "activity", ignore = true)
     @Mapping(target = "maxSlots", ignore = true)
     @Mapping(target = "status", ignore = true)
-    //@Mapping(target = "availableSlots", ignore = true)
+    @Mapping(target = "availableSlots", ignore = true)
     ActivityDeparture updateDepartureEntity(ActivityDepartureUpdateRequest request, @MappingTarget ActivityDeparture departure);
 
     @Mapping(target = "startingFromPrice", ignore = true)

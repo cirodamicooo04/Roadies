@@ -39,6 +39,7 @@ public interface TravelMapper {
     TravelDepartureResponse toDepartureResponse(TravelDeparture departure);
 
     @Mapping(target = "travel", ignore = true)
+    @Mapping(target = "availableSlots", ignore = true)
     TravelDeparture toDepartureEntity(TravelDepartureCreateRequest request);
 
     @Mapping(target = "travel", ignore = true)
