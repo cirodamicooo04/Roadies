@@ -5,6 +5,7 @@ import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
 import it.roadies.booking_service.data.dto.request.BookingMemberRequest;
 import it.roadies.booking_service.data.dto.response.BookingDraftResponse;
 import it.roadies.booking_service.data.dto.response.BookingStatusResponse;
+import jakarta.transaction.Transactional;
 
 import java.util.UUID;
 
@@ -14,4 +15,6 @@ public interface BookingService {
     public void createBookingStep1(BookingCreateRequest b);
     public void createBookingStep2(BookingMemberRequest b);
     BookingStatusResponse getBookingStatus(UUID bookingId);
+    public void confirmBooking(UUID bookingId);
+    void deleteBooking(UUID bookingId);
 }

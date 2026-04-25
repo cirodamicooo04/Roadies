@@ -110,7 +110,7 @@ public class TravelController {
         return ResponseEntity.ok(response);
     }
 
-    
+
     //BOOKING AREA
 
     @PostMapping("/{travelId}/reserve")

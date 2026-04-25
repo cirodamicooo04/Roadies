@@ -1,19 +1,34 @@
 package it.roadies.booking_service.services.implementations;
 
-import it.roadies.booking_service.data.dao.BookingRepository;
-import it.roadies.booking_service.data.mapper.BookingMapper;
+import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentIntent;
+import com.stripe.param.PaymentIntentCreateParams;
+import it.roadies.booking_service.data.dto.request.PaymentRequest;
+import it.roadies.booking_service.data.dto.response.PaymentResponse;
 import it.roadies.booking_service.services.PaymentService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
-@RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
-    private final BookingRepository bookingRepository;
-    private final BookingMapper bookingMapper;
 
-    @Override
-    public void createPayment() {
+    public PaymentResponse createPaymentIntent(PaymentRequest request) throws StripeException {
+        PaymentIntentCreateParams params =
+                PaymentIntentCreateParams.builder()
+                        .setAmount(request.getAmount().multiply(new BigDecimal("100")).longValue())
+                        .setCurrency(request.getCurrency())
+                        .putMetadata("bookingId", request.getBookingId().toString())
+                        .setAutomaticPaymentMethods(
+                                PaymentIntentCreateParams.AutomaticPaymentMethods
+                                        .builder()
+                                        .setEnabled(true)
+                                        .build()
+                        )
+                        .build();
 
+        PaymentIntent paymentIntent = PaymentIntent.create(params);
+        return new PaymentResponse(paymentIntent.getId(), paymentIntent.getClientSecret(), paymentIntent.getStatus());
     }
+
 }
