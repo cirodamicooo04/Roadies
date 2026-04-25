@@ -43,4 +43,16 @@ public class BookingController {
     public ResponseEntity<BookingStatusResponse> getStatus(@PathVariable UUID bookingId) {
         return ResponseEntity.ok(bookingService.getBookingStatus(bookingId));
     }
+
+    @PostMapping("/{bookingId}/confirm")
+    public ResponseEntity<Void> confirmBooking(@PathVariable UUID bookingId) {
+        bookingService.confirmBooking(bookingId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{bookingId}/confirm")
+    public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId) {
+        bookingService.deleteBooking(bookingId);
+        return ResponseEntity.noContent().build();
+    }
 }

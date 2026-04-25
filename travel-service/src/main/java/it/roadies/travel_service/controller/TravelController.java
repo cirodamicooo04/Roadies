@@ -113,18 +113,18 @@ public class TravelController {
         return ResponseEntity.ok(response);
     }
 
-    
+
     //BOOKING AREA
 
     @PostMapping("/{travelId}/reserve")
-    public ResponseEntity<Void> reserveSpots(@PathVariable UUID travelId, @RequestParam int spots) {
-        travelDepartureService.reserveSpots(travelId, spots);
+    public ResponseEntity<Void> reserveSpots(@PathVariable UUID travelId, @RequestParam Integer spots) {
+        travelDepartureService.reserveSeats(travelId, spots);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{travelId}/release")
     public ResponseEntity<Void> releaseSpots(@PathVariable UUID travelId, @RequestParam int spots) {
-        travelDepartureService.releaseSpots(travelId, spots);
+        travelDepartureService.releaseSeats(travelId, spots);
         return ResponseEntity.ok().build();
     }
 
