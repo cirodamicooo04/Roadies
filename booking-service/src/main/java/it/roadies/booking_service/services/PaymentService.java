@@ -1,5 +1,10 @@
 package it.roadies.booking_service.services;
 
+import com.stripe.exception.StripeException;
+import it.roadies.booking_service.data.dto.request.PaymentRequest;
+import it.roadies.booking_service.data.dto.response.PaymentResponse;
+
+
 public interface PaymentService {
-    public void createPayment();
+    public PaymentResponse createPaymentIntent(PaymentRequest request) throws StripeException;
 }

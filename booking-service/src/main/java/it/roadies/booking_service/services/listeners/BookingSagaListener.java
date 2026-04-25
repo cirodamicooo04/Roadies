@@ -18,10 +18,15 @@ public class BookingSagaListener {
     @RabbitListener(queues = "booking.reserved.queue")
     public void handleSeatReserved(SeatReservedEvent event) {
         bookingRepository.findById(event.getBookingId()).ifPresent(booking -> {
-            booking.setStatus(BookingStatus.RESERVE_CONFIRMED);
-            booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));
-            bookingRepository.save(booking);
+            if (booking.getStatus() != BookingStatus.CANCELLED) {
+                booking.setStatus(BookingStatus.RESERVE_CONFIRMED);
+                if (booking.getExpiresAt() != null) {
+                    booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));
+                }
+                bookingRepository.save(booking);
+            }
         });
+
     }
 
     @RabbitListener(queues = "booking.failed.queue")

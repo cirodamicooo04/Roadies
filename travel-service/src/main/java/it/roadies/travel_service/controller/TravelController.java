@@ -33,16 +33,4 @@ public class TravelController {
         TravelResponse response = travelService.getTravelById(id);
         return ResponseEntity.ok(response);
     }
-
-    @PostMapping("/{travelId}/reserve")
-    public ResponseEntity<Void> reserveSpots(@PathVariable UUID travelId, @RequestParam int spots) {
-        travelDepartureService.reserveSpots(travelId, spots);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/{travelId}/release")
-    public ResponseEntity<Void> releaseSpots(@PathVariable UUID travelId, @RequestParam int spots) {
-        travelDepartureService.releaseSpots(travelId, spots);
-        return ResponseEntity.ok().build();
-    }
 }
