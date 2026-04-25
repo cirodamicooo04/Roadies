@@ -1,4 +1,4 @@
-package it.roadies.booking_service.data.dto.event;
+package it.roadies.travel_service.data.dto.event;
 
 import java.util.UUID;
 
