@@ -25,6 +25,7 @@ public interface TravelMapper {
     @Mapping(target = "id", ignore = true) //evito manipolazioni
     Travel toEntity(TravelCreateRequest request, String ownerId);
 
+    @Mapping(target = "type", constant = "TRAVEL")
     TravelResponse toResponse(Travel travel);
 
     @Mapping(target = "id", ignore = true)
@@ -33,6 +34,7 @@ public interface TravelMapper {
     void updateTravelFromDto(TravelUpdateRequest request, @MappingTarget Travel travel);
 
     @Mapping(target = "startingFromPrice" , ignore = true)
+    @Mapping(target = "type", constant = "TRAVEL")
     TravelSummaryResponse toSummaryResponse(Travel travel);
 
     @Mapping(target = "travelId", source = "travel.id")
@@ -58,6 +60,9 @@ public interface TravelMapper {
             travel.getActivities().forEach(a -> {
                 a.setTravel(travel);
                 a.setOwnerId(travel.getOwnerId());
+                if (a.getDestination() == null || a.getDestination().isBlank()) {
+                    a.setDestination(travel.getDestination());
+                }
             });
         }
         if (travel.getTagScores() != null) {

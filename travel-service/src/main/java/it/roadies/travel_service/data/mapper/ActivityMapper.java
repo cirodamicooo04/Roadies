@@ -26,6 +26,7 @@ public interface ActivityMapper {
     Activity toEntity(ActivityCreateRequest activityCreateRequest);
 
     @Mapping(target = "travelId", source = "travel.id")
+    @Mapping(target = "type", expression = "java(activity.getTravel() == null ? \"STANDALONE\" : \"STEP\")")
     ActivityResponse toResponse (Activity activity);
 
     @Mapping(target = "activityId", source = "departure.activity.id")
@@ -42,6 +43,7 @@ public interface ActivityMapper {
     ActivityDeparture updateDepartureEntity(ActivityDepartureUpdateRequest request, @MappingTarget ActivityDeparture departure);
 
     @Mapping(target = "startingFromPrice", ignore = true)
+    @Mapping(target = "type", expression = "java(activity.getTravel() == null ? \"STANDALONE\" : \"STEP\")")
     ActivitySummaryResponse toSummaryResponse(Activity activity);
 
     @Mapping(target = "id", ignore = true)
@@ -63,7 +65,6 @@ public interface ActivityMapper {
             return;
         }
 
-        // La logica che avevi nel Service ora è qui
         BigDecimal startingFrom = activity.getDepartures().stream()
                 .map(ActivityDeparture::getPrice)
                 .filter(Objects::nonNull)
