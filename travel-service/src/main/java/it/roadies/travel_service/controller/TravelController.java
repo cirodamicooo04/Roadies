@@ -1,8 +1,6 @@
 package it.roadies.travel_service.controller;
 
-import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
-import it.roadies.travel_service.data.dto.request.TravelDepartureCreateRequest;
-import it.roadies.travel_service.data.dto.request.TravelDepartureUpdateRequest;
+import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.services.ActivityService;
 import it.roadies.travel_service.services.TravelDepartureService;
@@ -44,13 +42,12 @@ public class TravelController {
         return ResponseEntity.ok().build();
     }
 
-    //DA VEDERE PROBLEMA MAPPER AGGIORNAMENTO
-    //@PreAuthorize("hasRole('ORGANIZER')")
-//    @PutMapping("/{id}")
-//    public ResponseEntity<TravelResponse> updateTravel(@PathVariable UUID id, @RequestBody @Valid TravelUpdateRequest request, @AuthenticationPrincipal Jwt jwt) {
-//        TravelResponse response = travelService.updateTravel(request, jwt.getClaim("sub"), id);
-//        return ResponseEntity.ok(response);
-//  }
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<TravelResponse> updateTravel(@PathVariable UUID id, @RequestBody @Valid TravelUpdateRequest request, @AuthenticationPrincipal Jwt jwt) {
+        TravelResponse response = travelService.updateTravel(request, jwt.getClaim("sub"), id);
+        return ResponseEntity.ok(response);
+  }
 
     @PreAuthorize("hasRole('ORGANIZER')")
     @GetMapping("/my-travels")
@@ -110,6 +107,28 @@ public class TravelController {
     @PatchMapping("/{travelId}/departures/{departureId}/confirm")
     public ResponseEntity<TravelDepartureResponse> confirmDeparture(@PathVariable UUID travelId, @PathVariable UUID departureId, @AuthenticationPrincipal Jwt jwt){
         TravelDepartureResponse response = travelService.confirmDeparture(travelId, departureId, jwt.getClaim("sub"));
+        return ResponseEntity.ok(response);
+    }
+
+    //TRAVEL ACTIVITIES AREA
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PostMapping("/{travelId}/activities")
+    public ResponseEntity<TravelResponse> addActivity(@PathVariable UUID travelId, @RequestBody @Valid ActivityCreateRequest request, @AuthenticationPrincipal Jwt jwt){
+        TravelResponse response = travelService.addActivity(travelId,request,jwt.getClaim("sub"));
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @DeleteMapping("/{travelId}/activities/{activityId}")
+    public ResponseEntity<?> deleteActivity(@PathVariable UUID travelId, @PathVariable UUID activityId, @AuthenticationPrincipal Jwt jwt){
+        travelService.deleteTravelActivity(travelId,activityId,jwt.getClaim("sub"));
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PutMapping("/{travelId}/activities/{activityId}")
+    public ResponseEntity<TravelResponse> updateActivity(@PathVariable UUID travelId, @PathVariable UUID activityId, @RequestBody @Valid ActivityUpdateRequest request, @AuthenticationPrincipal Jwt jwt){
+        TravelResponse response = travelService.updateTravelActivity(travelId,activityId,request,jwt.getClaim("sub"));
         return ResponseEntity.ok(response);
     }
 

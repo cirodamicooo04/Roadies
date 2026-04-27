@@ -49,6 +49,7 @@ public interface ActivityMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "travel", ignore = true)
     @Mapping(target = "ownerId", ignore = true)
+    @Mapping(target = "departures", ignore = true)
     void updateActivityFromDto(ActivityUpdateRequest request, @MappingTarget Activity activity);
 
     @AfterMapping

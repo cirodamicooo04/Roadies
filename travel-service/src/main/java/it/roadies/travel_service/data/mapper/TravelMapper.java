@@ -31,6 +31,8 @@ public interface TravelMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "ownerId", ignore = true)
     @Mapping(target = "tagScores", ignore = true)
+    @Mapping(target = "departures", ignore = true)
+    @Mapping(target = "activities", ignore = true)
     void updateTravelFromDto(TravelUpdateRequest request, @MappingTarget Travel travel);
 
     @Mapping(target = "startingFromPrice" , ignore = true)
@@ -48,7 +50,7 @@ public interface TravelMapper {
     @Mapping(target = "maxSlots", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "availableSlots", ignore = true)
-    TravelDeparture updateDepartureEntity(TravelDepartureUpdateRequest request, @MappingTarget TravelDeparture departure);
+    void updateDepartureEntity(TravelDepartureUpdateRequest request, @MappingTarget TravelDeparture departure);
 
     @AfterMapping
     default void linkRelations(@MappingTarget Travel travel) {

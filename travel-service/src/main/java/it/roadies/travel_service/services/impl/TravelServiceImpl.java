@@ -44,7 +44,10 @@ public class TravelServiceImpl implements TravelService {
 
         if (travel.getActivities() != null) {
             for (Activity activity : travel.getActivities()) {
-                if (activity.getDayNumber() != null && activity.getDayNumber() > travel.getDurationDays()) {
+                if (activity.getDayNumber() == null) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Il dayNumber è obbligatorio per le tappe di un viaggio.");
+                }
+                if (activity.getDayNumber() > travel.getDurationDays()) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                             "L'attività " + activity.getName() + " è assegnata al giorno " + activity.getDayNumber() + " ma il viaggio dura solo " + travel.getDurationDays() + " giorni");
                 }
@@ -57,9 +60,16 @@ public class TravelServiceImpl implements TravelService {
         Travel travel = travelMapper.toEntity(travelCreateRequest, ownerId);
         validateTravelLogic(travel);
 
+        if (travelCreateRequest.getActivities() != null ) {
+            boolean activityWithDepartures = travelCreateRequest.getActivities().stream().anyMatch(a -> a.getDepartures() != null);
+            if (activityWithDepartures) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't add an activity with departures to a travel");
+            }
+        }
+
         if(travelCreateRequest.getTagScores() != null){
             List<TravelTagRequest> tagScores = travelCreateRequest.getTagScores();
-            for (TravelTagRequest ts : tagScores) {
+            for (TravelTagRequest ts : tagScores.stream().distinct().toList()) {
                 Tag tag = tagRepository.findById(ts.getTagId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
                 TravelTag travelTag = new TravelTag();
                 travelTag.setTravel(travel);
@@ -100,22 +110,14 @@ public class TravelServiceImpl implements TravelService {
 
         //check se ci sono partenze confermate
         boolean hasConfirmedDepartures = travel.getDepartures().stream().anyMatch(d -> d.getStatus() == Status.CONFIRMED);
-
-        if (hasConfirmedDepartures && travelUpdateRequest.getActivities() != null){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update the activities of this travel because it has confirmed departures");
-        }
-
-        //se ci sono partenze confermate non si può modificare
-        if (travelUpdateRequest.getDestination() != null && !travelUpdateRequest.getDestination().equals(travel.getDestination()) && hasConfirmedDepartures) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update the destination of this travel because it has confirmed departures");
-        }
+        if (hasConfirmedDepartures) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update a travel with confirmed departures");}
 
         travelMapper.updateTravelFromDto(travelUpdateRequest, travel);
         validateTravelLogic(travel);
 
         if (travelUpdateRequest.getTagScores() != null){
             travel.getTagScores().clear();
-            for (TravelTagRequest ts : travelUpdateRequest.getTagScores()) {
+            for (TravelTagRequest ts : travelUpdateRequest.getTagScores().stream().distinct().toList()) {
                 Tag tag =  tagRepository.findById(ts.getTagId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
                 TravelTag travelTag = new TravelTag();
                 travelTag.setTravel(travel);
@@ -216,6 +218,60 @@ public class TravelServiceImpl implements TravelService {
     @Override
     public List<String> getUniqueDestinations() {
         return travelRepository.findUniqueDestinations();
+    }
+
+    @Transactional
+    public TravelResponse addActivity(UUID travelId, ActivityCreateRequest request, String ownerId) {
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Travel not found"));
+        if (!travel.getOwnerId().equals(ownerId)) {throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to add an activity to this travel");}
+
+        boolean hasConfirmedDepartures = travel.getDepartures().stream().anyMatch(d -> d.getStatus() == Status.CONFIRMED);
+        if (hasConfirmedDepartures) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't add an activity to a travel with confirmed departures");}
+
+        if (request.getDepartures() != null && !request.getDepartures().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't add an activity non standalone to a travel");
+        }
+        Activity activity = activityMapper.toEntity(request);
+        activity.setTravel(travel);
+        activity.setOwnerId(ownerId);
+
+        travel.getActivities().add(activity);
+        validateTravelLogic(travel);
+        activityRepository.save(activity);
+        return travelMapper.toResponse(travel);
+    }
+
+    @Transactional
+    public void deleteTravelActivity(UUID travelId, UUID activityId, String ownerId) {
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Travel not found"));
+        if (!travel.getOwnerId().equals(ownerId)) {throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this activity");}
+
+        boolean hasConfirmedDepartures = travel.getDepartures().stream().anyMatch(d -> d.getStatus() == Status.CONFIRMED);
+        if (hasConfirmedDepartures) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't add an activity to a travel with confirmed departures");}
+
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
+        if (!activity.getTravel().getId().equals(travelId)){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Activity not found in this travel");}
+
+        travel.getActivities().remove(activity);
+        activityRepository.delete(activity);
+    }
+
+    @Transactional
+    public TravelResponse updateTravelActivity(UUID travelId, UUID activityId, ActivityUpdateRequest request, String ownerId) {
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Travel not found"));
+        if (!travel.getOwnerId().equals(ownerId)) {throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to update this activity");}
+
+        boolean hasConfirmedDepartures = travel.getDepartures().stream().anyMatch(d -> d.getStatus() == Status.CONFIRMED);
+        if (hasConfirmedDepartures) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update an activity of a travel with confirmed departures");}
+
+        Activity activity = activityRepository.findById(activityId).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
+        if (!activity.getTravel().getId().equals(travelId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Activity not found in this travel");
+
+        activityMapper.updateActivityFromDto(request, activity);
+        validateTravelLogic(travel);
+
+        activityRepository.save(activity);
+        return travelMapper.toResponse(travel);
     }
 }
 

@@ -6,6 +6,7 @@ import it.roadies.travel_service.data.dao.specification.ActivitySpecification;
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest;
+import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.data.dto.response.ActivitySummaryResponse;
@@ -143,5 +144,20 @@ public class ActivityServiceImpl implements ActivityService {
 
     public List<String> getUniqueDestinations() {
         return activityRepository.findUniqueDestinations();
+    }
+
+    @Transactional
+    public ActivityResponse updateActivity(UUID id, ActivityUpdateRequest request, String ownerId) {
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
+        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to update this activity");
+
+        boolean hasConfirmedDepartures = activity.getDepartures().stream().anyMatch(d -> d.getStatus() == Status.CONFIRMED);
+        if (hasConfirmedDepartures) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update an activity with confirmed departures");
+
+        activityMapper.updateActivityFromDto(request, activity);
+        validateActivity(activity);
+
+        activityRepository.save(activity);
+        return activityMapper.toResponse(activity);
     }
 }

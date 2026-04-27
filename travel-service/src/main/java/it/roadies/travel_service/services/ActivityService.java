@@ -3,6 +3,7 @@ package it.roadies.travel_service.services;
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest;
+import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.data.dto.response.ActivitySummaryResponse;
@@ -27,4 +28,5 @@ public interface ActivityService {
     List<ActivityDepartureResponse> getDepartures(UUID activityId);
     ActivityDepartureResponse confirmDeparture(UUID activityId, UUID departureId, String ownerId);
     List<String> getUniqueDestinations();
+    ActivityResponse updateActivity(UUID id, ActivityUpdateRequest request, String ownerId);
 }

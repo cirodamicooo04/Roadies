@@ -2,6 +2,7 @@ package it.roadies.travel_service.services;
 
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
+import jakarta.validation.Valid;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,4 +21,7 @@ public interface TravelService {
     TravelDepartureResponse updateDeparture(UUID travelId, UUID departureId, TravelDepartureUpdateRequest request, String ownerId);
     TravelDepartureResponse confirmDeparture(UUID travelId, UUID departureId, String ownerId);
     List<String> getUniqueDestinations();
+    TravelResponse addActivity(UUID travelId, ActivityCreateRequest request, String ownerId);
+    void deleteTravelActivity(UUID travelId, UUID activityId, String ownerId);
+    TravelResponse updateTravelActivity(UUID travelId, UUID activityId, ActivityUpdateRequest request, String ownerId);
 }
