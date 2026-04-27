@@ -3,7 +3,7 @@ package it.roadies.user_service.controller;
 import it.roadies.user_service.data.dto.response.FriendshipResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.entities.enumeration.Status;
-import it.roadies.user_service.services.FriendshipService;
+import it.roadies.user_service.services.impl.FriendshipServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/friends")
 @RequiredArgsConstructor
 public class FriendshipController {
-    private final FriendshipService friendshipService;
+    private final FriendshipServiceImpl friendshipService;
 
     @PostMapping("/request/{receiverUsername}")
     public ResponseEntity<Void> send(@RequestParam String myId, @PathVariable String receiverUsername) {

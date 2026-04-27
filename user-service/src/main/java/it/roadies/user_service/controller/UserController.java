@@ -3,9 +3,7 @@ package it.roadies.user_service.controller;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.result.UserSyncResult;
-import it.roadies.user_service.data.entities.User;
-import it.roadies.user_service.services.UserService;
-import jakarta.transaction.Transactional;
+import it.roadies.user_service.services.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     @PostMapping("/sync")
     public ResponseEntity<UserProfileResponseDTO> syncUser(@RequestBody UserSyncRequestDTO requestDto) {

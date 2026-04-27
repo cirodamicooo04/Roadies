@@ -1,6 +1,6 @@
 package it.roadies.user_service.controller;
 
-import it.roadies.user_service.services.GamificationService;
+import it.roadies.user_service.services.impl.GamificationServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class GamificationController {
 
-    private final GamificationService gamificationService;
+    private final GamificationServiceImpl gamificationService;
 
     @PatchMapping("/purchase/{keycloakId}")
     public ResponseEntity<String> addPurchase(@PathVariable String keycloakId, @RequestParam double amount) {

@@ -3,9 +3,8 @@ package it.roadies.user_service.controller;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import it.roadies.user_service.data.dto.request.UserDocumentRequestDTO;
 import it.roadies.user_service.data.dto.response.UserDocumentResponseDTO;
-import it.roadies.user_service.services.UserDocumentService;
+import it.roadies.user_service.services.impl.UserDocumentServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
 public class UserDocumentController {
-    private final UserDocumentService userDocumentService;
+    private final UserDocumentServiceImpl userDocumentService;
 
     @PostMapping("/upload/{userId}")
     public ResponseEntity<UserDocumentResponseDTO> upload(
