@@ -12,6 +12,7 @@ import it.roadies.user_service.mappers.UserMapper;
 import it.roadies.user_service.services.FriendshipService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final UserMapper userMapper;
     private final FriendshipMapper friendshipMapper;
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @Override
     @Transactional
     public void sendRequest(String senderId, String receiverUsername) {
@@ -48,6 +50,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendshipRepository.save(friendship);
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @Override
     @Transactional
     public void respondToRequest(UUID friendshipId, Status newStatus, String currentUserId) {
@@ -62,6 +65,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendshipRepository.save(friendship);
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @Override
     public List<UserProfileResponseDTO> getFriendsList(String userId) {
 
@@ -72,6 +76,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @Override
     public List<FriendshipResponseDTO> getDetailedFriendsList(String userId) {
         List<Friendship> friendships = friendshipRepository.findAllAcceptedFriendshipsByUser(userId);
@@ -88,6 +93,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         }).collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @Override
     public List<FriendshipResponseDTO> getPendingRequests(String userId) {
         User receiver = userRepository.getReferenceById(userId);
@@ -100,6 +106,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         }).collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @Override
     @Transactional
     public void removeFriend(UUID friendshipId, String currentUserId) {

@@ -42,7 +42,6 @@ public class UserDocumentServiceImpl implements UserDocumentService {
 
         List<UserDocument> docs = documentRepository.findByUserId(userId);
         return userDocumentMapper.toDtoList(docs);
-
     }
 
     @Override

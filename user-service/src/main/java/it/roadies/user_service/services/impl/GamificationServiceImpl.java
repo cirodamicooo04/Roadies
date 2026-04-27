@@ -6,6 +6,7 @@ import it.roadies.user_service.data.repositories.GamificationRepository;
 import it.roadies.user_service.services.GamificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +18,7 @@ public class GamificationServiceImpl implements GamificationService {
     //Stabiliamo che ogni euro speso si ottengono 10 punti
     private static final int POINTS_PER_EURO = 10;
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @Override
     @Transactional
     public void addPointsBySpending(String userId, double amountSpent) {
@@ -31,6 +33,7 @@ public class GamificationServiceImpl implements GamificationService {
         gamificationRepository.save(gamification);
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     private Badge calculateBadge(Long points) {
         if (points >= 250000) return Badge.EMERALD;
         if (points >= 100000) return Badge.DIAMOND;
