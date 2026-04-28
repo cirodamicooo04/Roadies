@@ -147,7 +147,7 @@ public class TravelServiceImpl implements TravelService {
         List<TravelSummaryResponse> travelsSummary = travels.stream().map(travelMapper::toSummaryResponse).toList();
 
         List<Activity> activities = activityRepository.findAllByOwnerId(ownerId);
-        List<ActivitySummaryResponse> activitiesSummary = activities.stream().map(activityMapper::toSummaryResponse).toList();
+        List<ActivitySummaryResponse> activitiesSummary = activities.stream().filter(a -> a.getTravel() == null).map(activityMapper::toSummaryResponse).toList();
 
         OrganizerTravelsActivityResponse response = new OrganizerTravelsActivityResponse();
         response.setTravels(travelsSummary);
