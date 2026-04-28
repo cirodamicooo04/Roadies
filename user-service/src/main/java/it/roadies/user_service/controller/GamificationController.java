@@ -1,19 +1,30 @@
 package it.roadies.user_service.controller;
 
-import it.roadies.user_service.services.impl.GamificationServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import it.roadies.user_service.services.GamificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/gamification")
 @RequiredArgsConstructor
+@Tag(name = "Gamification Management", description = "API per la gestione dei punti e dei badge degli utenti")
 public class GamificationController {
 
-    private final GamificationServiceImpl gamificationService;
+    private final GamificationService gamificationService;
 
-    @PatchMapping("/purchase/{keycloakId}")
-    public ResponseEntity<String> addPurchase(@PathVariable String keycloakId, @RequestParam double amount) {
+    @PatchMapping("/purchase")
+    @Operation(summary = "Aggiungi punti per acquisto", description = "Aggiunge punti al profilo gamification dell'utente loggato in base alla spesa effettuata")
+    public ResponseEntity<String> addPurchase(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam double amount) {
+
+        String keycloakId = jwt.getSubject();
+
         gamificationService.addPointsBySpending(keycloakId, amount);
         return ResponseEntity.ok("Punti aggiunti con successo per la spesa effettuata di: " + amount + "€");
     }

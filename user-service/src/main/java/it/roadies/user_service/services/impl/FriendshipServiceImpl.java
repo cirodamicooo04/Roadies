@@ -28,7 +28,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final UserMapper userMapper;
     private final FriendshipMapper friendshipMapper;
 
-    @PreAuthorize("hasRole('TRAVELER')")
+    @PreAuthorize("hasRole('TRAVELER') and #senderId == authentication.name")
     @Override
     @Transactional
     public void sendRequest(String senderId, String receiverUsername) {
@@ -50,7 +50,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendshipRepository.save(friendship);
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
+    @PreAuthorize("hasRole('TRAVELER') and #currentUserId == authentication.name")
     @Override
     @Transactional
     public void respondToRequest(UUID friendshipId, Status newStatus, String currentUserId) {
@@ -65,10 +65,9 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendshipRepository.save(friendship);
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
+    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     public List<UserProfileResponseDTO> getFriendsList(String userId) {
-
         List<User> friends = friendshipRepository.findAcceptedFriendsByUser(userId);
 
         return friends.stream()
@@ -76,7 +75,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
+    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     public List<FriendshipResponseDTO> getDetailedFriendsList(String userId) {
         List<Friendship> friendships = friendshipRepository.findAllAcceptedFriendshipsByUser(userId);
@@ -93,7 +92,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         }).collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
+    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     public List<FriendshipResponseDTO> getPendingRequests(String userId) {
         User receiver = userRepository.getReferenceById(userId);
@@ -106,13 +105,12 @@ public class FriendshipServiceImpl implements FriendshipService {
         }).collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
+    @PreAuthorize("hasRole('TRAVELER') and #currentUserId == authentication.name")
     @Override
     @Transactional
     public void removeFriend(UUID friendshipId, String currentUserId) {
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> new RuntimeException("Relazione di amicizia non trovata"));
-
 
         boolean isParticipant = friendship.getRequesterId().getKeycloakId().equals(currentUserId) ||
                 friendship.getReceiverId().getKeycloakId().equals(currentUserId);

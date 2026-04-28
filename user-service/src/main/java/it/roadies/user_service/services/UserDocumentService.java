@@ -10,5 +10,5 @@ public interface UserDocumentService {
     UserDocumentResponseDTO uploadDocument(String userId, UserDocumentRequestDTO dto);
     List<UserDocumentResponseDTO> getUserDocuments(String userId);
     UserDocumentResponseDTO verifyDocument(UUID docId, boolean approved, String reason);
-    void deleteDocument(UUID docId);
+    void deleteDocument(UUID docId,String userId);
 }

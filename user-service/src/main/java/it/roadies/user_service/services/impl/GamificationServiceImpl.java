@@ -18,7 +18,7 @@ public class GamificationServiceImpl implements GamificationService {
     //Stabiliamo che ogni euro speso si ottengono 10 punti
     private static final int POINTS_PER_EURO = 10;
 
-    @PreAuthorize("hasRole('TRAVELER')")
+    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     @Transactional
     public void addPointsBySpending(String userId, double amountSpent) {
@@ -33,7 +33,6 @@ public class GamificationServiceImpl implements GamificationService {
         gamificationRepository.save(gamification);
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
     private Badge calculateBadge(Long points) {
         if (points >= 250000) return Badge.EMERALD;
         if (points >= 100000) return Badge.DIAMOND;

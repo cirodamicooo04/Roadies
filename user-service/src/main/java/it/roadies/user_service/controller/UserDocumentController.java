@@ -1,12 +1,14 @@
 package it.roadies.user_service.controller;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.roadies.user_service.data.dto.request.UserDocumentRequestDTO;
 import it.roadies.user_service.data.dto.response.UserDocumentResponseDTO;
-import it.roadies.user_service.services.impl.UserDocumentServiceImpl;
+import it.roadies.user_service.services.UserDocumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,35 +17,40 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
+@Tag(name = "Document Management", description = "API per l'upload e la verifica dei documenti degli utenti")
 public class UserDocumentController {
-    private final UserDocumentServiceImpl userDocumentService;
+    private final UserDocumentService userDocumentService;
 
     @PostMapping("/upload/{userId}")
+    @Operation(summary = "Carica documento", description = "Carica un documento. Solo l'utente stesso può farlo.")
     public ResponseEntity<UserDocumentResponseDTO> upload(
             @PathVariable String userId,
             @RequestBody UserDocumentRequestDTO dto){
-        return ResponseEntity.ok(userDocumentService.uploadDocument(userId,dto));
+        return ResponseEntity.ok(userDocumentService.uploadDocument(userId, dto));
     }
 
     @GetMapping("/user/{userId}")
+    @Operation(summary = "Lista documenti utente", description = "Recupera i documenti di un utente. Accessibile al proprietario, all'organizzatore o all'admin.")
     public ResponseEntity<List<UserDocumentResponseDTO>> getDocumentsByUser(
             @PathVariable String userId) {
         return ResponseEntity.ok(userDocumentService.getUserDocuments(userId));
     }
 
-    @PreAuthorize("hasRole('ORGANIZER')")
     @PatchMapping("/verify/{docId}")
+    @Operation(summary = "Verifica documento", description = "Approvazione o rifiuto. Solo per Organizzatori o Admin.")
     public ResponseEntity<UserDocumentResponseDTO> verifyDocument(
             @PathVariable UUID docId,
             @RequestParam boolean approved,
             @RequestParam (required = false) String reason){
-        return ResponseEntity.ok(userDocumentService.verifyDocument(docId,approved,reason));
+        return ResponseEntity.ok(userDocumentService.verifyDocument(docId, approved, reason));
     }
 
     @DeleteMapping("/{docId}")
+    @Operation(summary = "Elimina documento", description = "Elimina un documento. Solo il proprietario o l'admin possono farlo.")
     public ResponseEntity<Void> deleteDocument(
-            @PathVariable UUID docId){
-        userDocumentService.deleteDocument(docId);
+            @PathVariable UUID docId,
+            @AuthenticationPrincipal Jwt jwt){
+        userDocumentService.deleteDocument(docId, jwt.getSubject());
         return ResponseEntity.noContent().build();
     }
 }

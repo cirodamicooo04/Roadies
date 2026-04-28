@@ -11,6 +11,7 @@ import it.roadies.user_service.data.dto.result.UserSyncResult;
 import it.roadies.user_service.mappers.UserMapper;
 import it.roadies.user_service.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @PreAuthorize("isAuthenticated() and #requestDto.keycloakId == authentication.name")
     public UserSyncResult syncUser(UserSyncRequestDTO requestDto) {
 
         Optional<User> existingUserOpt = userRepository.findById(requestDto.getKeycloakId());
@@ -63,7 +65,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    // Recupera il profilo tramite Keycloak ID
+    @PreAuthorize("isAuthenticated() and #keycloakId == authentication.name")
     public UserProfileResponseDTO getProfile(String keycloakId) {
         User user = userRepository.findById(keycloakId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
@@ -71,7 +73,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    // Cerca utente per Username (per ricerca amici)
+    @PreAuthorize("isAuthenticated()")
     public UserProfileResponseDTO getProfileByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Username non trovato"));
@@ -79,8 +81,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    // Aggiorna il profilo
     @Transactional
+    @PreAuthorize("isAuthenticated() and #keycloakId == authentication.name")
     public UserProfileResponseDTO updateProfile(String keycloakId, UserSyncRequestDTO updateDto) {
         User user = userRepository.findById(keycloakId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
@@ -90,8 +92,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    // Elimina profilo
     @Transactional
+    @PreAuthorize("isAuthenticated() and #keycloakId == authentication.name")
     public void deleteProfile(String keycloakId) {
         if (!userRepository.existsById(keycloakId)) {
             throw new RuntimeException("Utente non trovato");

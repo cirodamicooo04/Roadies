@@ -11,6 +11,7 @@ import it.roadies.user_service.mappers.UserDocumentMapper;
 import it.roadies.user_service.services.UserDocumentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,25 +28,27 @@ public class UserDocumentServiceImpl implements UserDocumentService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     public UserDocumentResponseDTO uploadDocument(String userId, UserDocumentRequestDTO dto){
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Utente non trovato con ID: " + userId));
 
-    UserDocument doc= userDocumentMapper.toEntity(dto);
-    doc.setUserId(user);
+        UserDocument doc= userDocumentMapper.toEntity(dto);
+        doc.setUserId(user);
 
-    UserDocument saved = documentRepository.save(doc);
-    return userDocumentMapper.toDto(saved);
+        UserDocument saved = documentRepository.save(doc);
+        return userDocumentMapper.toDto(saved);
     }
 
     @Override
+    @PreAuthorize("(hasRole('TRAVELER') and #userId == authentication.name) or hasAnyRole('ORGANIZER', 'ADMIN')")
     public List<UserDocumentResponseDTO> getUserDocuments(String userId){
-
         List<UserDocument> docs = documentRepository.findByUserId(userId);
         return userDocumentMapper.toDtoList(docs);
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public UserDocumentResponseDTO verifyDocument(UUID docId, boolean approved, String reason){
         UserDocument doc = documentRepository.findById(docId)
                 .orElseThrow(() -> new RuntimeException("Documento non trovato"));
@@ -62,15 +65,19 @@ public class UserDocumentServiceImpl implements UserDocumentService {
         }
 
         return userDocumentMapper.toDto(documentRepository.save(doc));
-
     }
 
     @Override
     @Transactional
-    public void deleteDocument(UUID docId) {
-        if (!documentRepository.existsById(docId)) {
-            throw new RuntimeException("Impossibile eliminare: documento non trovato");
+    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
+    public void deleteDocument(UUID docId, String userId) {
+        UserDocument doc = documentRepository.findById(docId)
+                .orElseThrow(() -> new RuntimeException("Impossibile eliminare: documento non trovato"));
+
+        if (!doc.getUserId().getKeycloakId().equals(userId)) {
+            throw new RuntimeException("Non sei autorizzato a eliminare questo documento");
         }
+
         documentRepository.deleteById(docId);
     }
 }
