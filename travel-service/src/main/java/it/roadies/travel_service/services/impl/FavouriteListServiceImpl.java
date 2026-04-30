@@ -6,6 +6,7 @@ import it.roadies.travel_service.data.entity.enumerations.Visibility;
 import it.roadies.travel_service.services.FavouriteListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,6 +27,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public FavouriteList createList(String name, Visibility visibility, String ownerId) {
         FavouriteList newList = new FavouriteList();
         newList.setName(name);
@@ -36,12 +38,14 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public List<FavouriteList> getMyLists(String ownerId) {
         return listRepository.findAllByOwnerId(ownerId);
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void deleteList(UUID listId, String ownerId) {
         FavouriteList list = listRepository.findById(listId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lista non trovata"));
@@ -96,6 +100,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void addFriendToList(UUID listId, String friendId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
@@ -110,6 +115,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void removeFriendFromList(UUID listId, String friendId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
@@ -119,6 +125,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void addTravelToList(UUID listId, UUID travelId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
@@ -135,6 +142,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void addActivityToList(UUID listId, UUID activityId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
@@ -152,6 +160,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void removeTravelFromList(UUID listId, UUID travelId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId))
@@ -159,4 +168,17 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
         itemRepository.deleteByListIdAndTravelId(listId, travelId);
     }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
+    public void removeActivityFromList(UUID listId, UUID activityId, String ownerId) {
+        FavouriteList list = listRepository.findById(listId).orElseThrow();
+        if (!list.getOwnerId().equals(ownerId))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
+
+        itemRepository.deleteByListIdAndTravelId(listId, activityId);
+    }
+
+
 }

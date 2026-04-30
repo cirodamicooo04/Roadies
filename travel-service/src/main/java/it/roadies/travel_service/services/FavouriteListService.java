@@ -20,4 +20,5 @@ public interface FavouriteListService {
     void removeTravelFromList(UUID listId, UUID travelId, String ownerId);
 
     void addActivityToList(UUID listId, UUID activityId, String ownerId);
+    void removeActivityFromList(UUID listId, UUID activityId, String ownerId);
 }
