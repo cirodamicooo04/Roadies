@@ -14,6 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import it.roadies.user_service.data.dto.event.FriendshipEvent;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +29,8 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final FriendshipMapper friendshipMapper;
+
+    private final RabbitTemplate rabbitTemplate;
 
     @PreAuthorize("hasRole('TRAVELER') and #senderId == authentication.name")
     @Override
@@ -63,6 +67,15 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         friendship.setStatus(newStatus);
         friendshipRepository.save(friendship);
+
+        if (newStatus == Status.ACCEPTED) {
+            FriendshipEvent event = new FriendshipEvent();
+            event.setUserId1(friendship.getRequesterId().getKeycloakId());
+            event.setUserId2(friendship.getReceiverId().getKeycloakId());
+            event.setStatus("ACCEPTED");
+
+            rabbitTemplate.convertAndSend("travel-service.friendship.accepted.queue", event);
+        }
     }
 
     @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
@@ -120,5 +133,12 @@ public class FriendshipServiceImpl implements FriendshipService {
         }
 
         friendshipRepository.delete(friendship);
+
+        FriendshipEvent event = new FriendshipEvent();
+        event.setUserId1(friendship.getRequesterId().getKeycloakId());
+        event.setUserId2(friendship.getReceiverId().getKeycloakId());
+        event.setStatus("DELETED");
+
+        rabbitTemplate.convertAndSend("travel-service.friendship.deleted.queue", event);
     }
 }
