@@ -7,6 +7,8 @@ import it.roadies.travel_service.services.TravelDepartureService;
 import it.roadies.travel_service.services.TravelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -65,12 +67,12 @@ public class TravelController {
     }
 
     @GetMapping("/public/search")
-    public ResponseEntity<?> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays , @RequestParam(required = false, defaultValue = "TRAVEL") String type){
+    public ResponseEntity<?> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays , @RequestParam(required = false, defaultValue = "TRAVEL") String type, Pageable pageable){
         if(!type.equalsIgnoreCase("ACTIVITY")){
-            List<TravelSummaryResponse> travels = travelService.searchTravels(destination, minPrice, maxPrice, minDurationDays, maxDurationDays);
+            Page<TravelSummaryResponse> travels = travelService.searchTravels(destination, minPrice, maxPrice, minDurationDays, maxDurationDays, pageable);
             return ResponseEntity.ok(travels);
         }
-        List<ActivitySummaryResponse> activities = activityService.searchActivities(destination, minPrice, maxPrice);
+        Page<ActivitySummaryResponse> activities = activityService.searchActivities(destination, minPrice, maxPrice, pageable);
         return ResponseEntity.ok(activities);
     }
 
@@ -130,6 +132,14 @@ public class TravelController {
     public ResponseEntity<TravelResponse> updateActivity(@PathVariable UUID travelId, @PathVariable UUID activityId, @RequestBody @Valid ActivityUpdateRequest request, @AuthenticationPrincipal Jwt jwt){
         TravelResponse response = travelService.updateTravelActivity(travelId,activityId,request,jwt.getClaim("sub"));
         return ResponseEntity.ok(response);
+    }
+
+    //RECOMMENDATIONS
+    @PreAuthorize("hasRole('TRAVELER')")
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<TravelSummaryResponse>> getRecommendations(@AuthenticationPrincipal Jwt jwt){
+        List<TravelSummaryResponse> responses = travelService.getRecommendedTravels(jwt.getClaim("sub"));
+        return ResponseEntity.ok(responses);
     }
 
 

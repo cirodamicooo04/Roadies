@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -126,5 +127,11 @@ public class BookingServiceImpl implements BookingService {
         }
 
         //qui aggiungerò un qualche evento
+    }
+
+    @Override
+    public List<UUID> getUserBookings(String userId) {
+        List<Booking> bookings = bookingRepository.findAllByUserIdAndStatus(userId,BookingStatus.CONFIRMED, Pageable.ofSize(100));
+        return bookings.stream().map(Booking::getId).toList();
     }
 }

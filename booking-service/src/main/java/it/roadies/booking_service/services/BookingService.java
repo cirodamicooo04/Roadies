@@ -7,6 +7,7 @@ import it.roadies.booking_service.data.dto.response.BookingDraftResponse;
 import it.roadies.booking_service.data.dto.response.BookingStatusResponse;
 import jakarta.transaction.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -17,4 +18,5 @@ public interface BookingService {
     BookingStatusResponse getBookingStatus(UUID bookingId);
     public void confirmBooking(UUID bookingId);
     void deleteBooking(UUID bookingId);
+    List<UUID> getUserBookings(String userId);
 }

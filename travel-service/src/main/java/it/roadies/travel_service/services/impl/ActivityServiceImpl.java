@@ -18,6 +18,8 @@ import it.roadies.travel_service.data.mapper.ActivityMapper;
 import it.roadies.travel_service.services.ActivityService;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.PropertySource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -70,13 +72,13 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Transactional(readOnly = true)
-    public List<ActivitySummaryResponse> searchActivities(String destination, BigDecimal minPrice, BigDecimal maxPrice) {
+    public Page<ActivitySummaryResponse> searchActivities(String destination, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
         Specification<Activity> specification = Specification.where(ActivitySpecification.hasDestination(destination))
                 .and(ActivitySpecification.hasPriceRange(minPrice, maxPrice)
                         .and(ActivitySpecification.isStandalone()));
 
-        List<Activity> activities = activityRepository.findAll(specification);
-        return activities.stream().map(activityMapper::toSummaryResponse).toList();
+        Page<Activity> activities = activityRepository.findAll(specification, pageable);
+        return activities.map(activityMapper::toSummaryResponse);
     }
 
     @Transactional
