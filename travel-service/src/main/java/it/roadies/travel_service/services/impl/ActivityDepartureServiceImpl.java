@@ -16,7 +16,7 @@ public class ActivityDepartureServiceImpl implements ActivityDepartureService {
     private final ActivityDepartureRepository activitySessionRepository;
 
     @Transactional
-    public void reserveSeats(UUID id, Integer peopleCount){
+    public void reserveSeats(UUID id, Integer peopleCount) {
         ActivityDeparture activityDeparture = activitySessionRepository.findByIdWithLock(id);
 
         int newSlotsNumber = activityDeparture.getAvailableSlots() - peopleCount;

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -30,6 +31,7 @@ public class PaymentController {
     @Value("${stripe.webhook.secret}")
     private String endpointSecret;
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/private/create-payment-intent")
     public ResponseEntity<PaymentResponse> createPaymentIntent(@RequestBody PaymentRequest request) throws StripeException {
         PaymentResponse response = stripePaymentService.createPaymentIntent(request);
