@@ -3,6 +3,7 @@ package it.roadies.travel_service.controller;
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest;
+import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.services.ActivityService;
@@ -44,12 +45,12 @@ public class ActivityController {
         return ResponseEntity.ok().build();
     }
 
-    //DA VEDERE PROBLEMA MAPPER AGGIORNAMENTO
-//    @PreAuthorize("hasRole('ORGANIZER')")
-//    @PutMapping("/{id}")
-//    public ResponseEntity<ActivityResponse> updateActivity(@PathVariable UUID id, @RequestBody @Valid ActivityUpdateRequest request, @AuthenticationPrincipal Jwt jwt){
-//        return null;
-//    }
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ActivityResponse> updateActivity(@PathVariable UUID id, @RequestBody @Valid ActivityUpdateRequest request, @AuthenticationPrincipal Jwt jwt){
+        ActivityResponse response = activityService.updateActivity(id,request,jwt.getClaim("sub"));
+        return ResponseEntity.ok(response);
+    }
 
     @PreAuthorize("hasRole('ORGANIZER')")
     @PostMapping("/{activityId}/departures")

@@ -13,9 +13,12 @@ public class TravelResponse {
     private String title;
     private String description;
     private String destination;
+    private Double latitude;
+    private Double longitude;
     private int durationDays;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String type;
 
     private List<TravelDepartureResponse> departures;
     private List<ActivityResponse> activities;

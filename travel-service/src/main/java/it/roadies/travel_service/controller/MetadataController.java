@@ -4,11 +4,12 @@ import it.roadies.travel_service.data.dto.response.TagResponse;
 import it.roadies.travel_service.services.ActivityService;
 import it.roadies.travel_service.services.TagService;
 import it.roadies.travel_service.services.TravelService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -35,5 +36,12 @@ public class MetadataController {
         destinations.addAll(travelService.getUniqueDestinations());
         destinations.addAll(activityService.getUniqueDestinations());
         return ResponseEntity.ok(destinations);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/tags")
+    public ResponseEntity<TagResponse> addTag(@RequestBody @Size(min = 3, max = 25) String name){
+        TagResponse response = tagService.addTag(name);
+        return ResponseEntity.ok(response);
     }
 }

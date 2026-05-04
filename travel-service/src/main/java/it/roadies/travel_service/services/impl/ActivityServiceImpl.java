@@ -6,6 +6,7 @@ import it.roadies.travel_service.data.dao.specification.ActivitySpecification;
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest;
+import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.data.dto.response.ActivitySummaryResponse;
@@ -57,13 +58,13 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     public ActivityResponse getActivityById(UUID id){
-        Activity activity = activityRepository.findById(id).orElseThrow(() -> new RuntimeException("Activity not found"));
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
         return activityMapper.toResponse(activity);
     }
 
     @Transactional
     public void deleteActivityById(UUID id, String ownerId){
-        Activity activity = activityRepository.findById(id).orElseThrow(() -> new RuntimeException("Activity not found"));
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
         if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this activity");
         activityRepository.deleteById(id);
     }
@@ -80,7 +81,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Transactional
     public ActivityDepartureResponse addDeparture(UUID activityId, ActivityDepartureCreateRequest request,  String ownerId) {
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new RuntimeException("Activity not found"));
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
         if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to add a departure to this activity");
 
         ActivityDeparture departure = activityMapper.toDepartureEntity(request);
@@ -95,10 +96,10 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Transactional
     public void deleteDeparture(UUID activityId, UUID departureId, String ownerId){
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new RuntimeException("Activity not found"));
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
         if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this departure");
 
-        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new RuntimeException("Departure not found"));
+        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Departure not found"));
         if (!departure.getActivity().getId().equals(activityId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure not found in this activity");
 
         if (departure.getStatus() == Status.CONFIRMED) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't delete a confirmed departure");
@@ -108,10 +109,10 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Transactional
     public ActivityDepartureResponse updateDeparture(UUID activityId, UUID departureId, ActivityDepartureUpdateRequest request, String ownerId) {
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new RuntimeException("Activity not found"));
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
         if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to update this departure");
 
-        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new RuntimeException("Departure not found"));
+        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Departure not found"));
         if (!departure.getActivity().getId().equals(activityId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure not found in this activity");
         if (departure.getStatus() == Status.CONFIRMED) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update a confirmed departure");
 
@@ -124,16 +125,16 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Transactional(readOnly = true)
     public List<ActivityDepartureResponse> getDepartures(UUID activityId) {
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new RuntimeException("Activity not found"));
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
         return activity.getDepartures().stream().filter(d -> d.getStartTimestamp().isAfter(LocalDateTime.now())).sorted(Comparator.comparing(ActivityDeparture::getStartTimestamp)).map(activityMapper::toDeparturesResponse).toList();
     }
 
     @Transactional
     public ActivityDepartureResponse confirmDeparture(UUID activityId, UUID departureId, String ownerId) {
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new RuntimeException("Activity not found"));
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
         if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to confirm this departure");
 
-        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new RuntimeException("Departure not found"));
+        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Departure not found"));
         if (!departure.getActivity().getId().equals(activityId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure not found in this activity");
         if (departure.getStatus() == Status.CONFIRMED) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This departure is already confirmed");
         departure.setStatus(Status.CONFIRMED);
@@ -143,5 +144,20 @@ public class ActivityServiceImpl implements ActivityService {
 
     public List<String> getUniqueDestinations() {
         return activityRepository.findUniqueDestinations();
+    }
+
+    @Transactional
+    public ActivityResponse updateActivity(UUID id, ActivityUpdateRequest request, String ownerId) {
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
+        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to update this activity");
+
+        boolean hasConfirmedDepartures = activity.getDepartures().stream().anyMatch(d -> d.getStatus() == Status.CONFIRMED);
+        if (hasConfirmedDepartures) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update an activity with confirmed departures");
+
+        activityMapper.updateActivityFromDto(request, activity);
+        validateActivity(activity);
+
+        activityRepository.save(activity);
+        return activityMapper.toResponse(activity);
     }
 }

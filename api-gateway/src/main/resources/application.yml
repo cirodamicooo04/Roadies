@@ -8,16 +8,16 @@ spring:
     gateway:
       routes:
         - id: travel-service
-          uri: http://localhost:8082
+          uri: lb://TRAVEL-SERVICE
           predicates:
-            - Path=/api/v1/travels/**
+            - Path=/api/v1/travels/**, /api/v1/activities/**, /api/v1/metadata/**
           filters:
             - name: CircuitBreaker
               args:
                 name: travel-service-circuit-breaker
                 fallbackUri: forward:/fallback/travel
         - id: user-service
-          uri: http://localhost:8083
+          uri: lb://USER-SERVICE
           predicates:
             - Path=/api/v1/users/**
           filters:
@@ -26,7 +26,7 @@ spring:
                 name: user-service-circuit-breaker
                 fallbackUri: forward:/fallback/user
         - id: review-service
-          uri: http://localhost:8084
+          uri: lb://REVIEW-SERVICE
           predicates:
             - Path=/api/v1/reviews/**
           filters:
@@ -35,7 +35,7 @@ spring:
                 name: review-service-circuit-breaker
                 fallbackUri: forward:/fallback/review
         - id: chat-service
-          uri: http://localhost:8085
+          uri: lb://CHAT-SERVICE
           predicates:
             - Path=/api/v1/chats/**
           filters:
@@ -44,7 +44,7 @@ spring:
                 name: chat-service-circuit-breaker
                 fallbackUri: forward:/fallback/chat
         - id: booking-service
-          uri: http://localhost:8086
+          uri: lb://BOOKING-SERVICE
           predicates:
             - Path=/api/v1/bookings/**
           filters:
@@ -60,6 +60,11 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8081/realms/roadies-app
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
 
 resilience4j:
   circuitbreaker:
