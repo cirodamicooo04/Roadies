@@ -1,17 +1,48 @@
 package it.roadies.booking_service.services.implementations;
 
 import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import it.roadies.booking_service.data.dto.request.PaymentRequest;
 import it.roadies.booking_service.data.dto.response.PaymentResponse;
+import it.roadies.booking_service.services.BookingService;
 import it.roadies.booking_service.services.PaymentService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
+    private final BookingService bookingService;
+
+    @Override
+    public void processStripeEvent(Event event) {
+        if ("payment_intent.succeeded".equals(event.getType())) {
+            PaymentIntent paymentIntent = (PaymentIntent) event.getDataObjectDeserializer().getObject().orElse(null);
+
+            if (paymentIntent != null && paymentIntent.getMetadata().containsKey("bookingId")) {
+                String bookingIdStr = paymentIntent.getMetadata().get("bookingId");
+                try {
+                    UUID bookingId = UUID.fromString(bookingIdStr);
+                    bookingService.confirmBooking(bookingId);
+                    log.info("Pagamento Stripe riuscito. Prenotazione {} confermata.", bookingId);
+                } catch (IllegalArgumentException e) {
+                    log.error("Il bookingId ricevuto da Stripe non è un UUID valido: {}", bookingIdStr, e);
+                }
+            } else {
+                log.warn("Ricevuto webhook di successo da Stripe, ma nessun bookingId nei metadati. Evento ID: {}", event.getId());
+            }
+
+        } else if ("payment_intent.payment_failed".equals(event.getType())) {
+            log.warn("Pagamento Stripe fallito per l'evento: {}", event.getId());
+        }
+    }
 
     public PaymentResponse createPaymentIntent(PaymentRequest request) throws StripeException {
         PaymentIntentCreateParams params =

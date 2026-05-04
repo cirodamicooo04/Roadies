@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,10 +35,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     public BookingDraftResponse createDraft(BookingDraftRequest requestDto) {
+        log.info("Iniziata creazione draft per userId: {}", requestDto.getUserId());
         Booking booking = bookingMapper.toEntity(requestDto);
         booking.setTotalPrice(java.math.BigDecimal.ZERO);
         booking.setPeopleCount(0);
         Booking saved = bookingRepository.save(booking);
+        log.info("Draft creato con successo con Booking ID: {}", saved.getId());
         return bookingMapper.toDto(saved);
     }
 
@@ -65,6 +66,8 @@ public class BookingServiceImpl implements BookingService {
                 requestDto.getPeopleCount()
         );
 
+        log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), (newPeopleCount - oldPeopleCount));
+
         if (newPeopleCount - oldPeopleCount > 0) {
             if (requestDto.getTravelId() != null && requestDto.getActivityId() == null) {
                 rabbitTemplate.convertAndSend("travel.exchange", "travel.reserve", command);
@@ -87,7 +90,11 @@ public class BookingServiceImpl implements BookingService {
             entities.forEach(member -> member.setBooking(booking));
             booking.setMembers(entities);
             bookingRepository.save(booking);
-        } else throw new StatusException("Status non consentito");
+            log.info("Aggiunti {} membri al Booking ID: {}", requestDto.getMembers().size(), booking.getId());
+        } else {
+            log.warn("Tentativo di aggiungere membri fallito: il Booking ID {} è nello stato {}", booking.getId(), booking.getStatus());
+            throw new StatusException("Status non consentito");
+        }
     }
 
     @Override
