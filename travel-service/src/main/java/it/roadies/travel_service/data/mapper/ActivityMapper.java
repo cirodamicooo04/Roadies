@@ -26,26 +26,30 @@ public interface ActivityMapper {
     Activity toEntity(ActivityCreateRequest activityCreateRequest);
 
     @Mapping(target = "travelId", source = "travel.id")
+    @Mapping(target = "type", expression = "java(activity.getTravel() == null ? \"STANDALONE\" : \"STEP\")")
     ActivityResponse toResponse (Activity activity);
 
-    @Mapping(target = "activityId", source = "activity.id")
-    ActivityDepartureResponse toDeparturesResponse(ActivityDeparture activity);
+    @Mapping(target = "activityId", source = "departure.activity.id")
+    ActivityDepartureResponse toDeparturesResponse(ActivityDeparture departure);
 
     @Mapping(target = "activity", ignore = true)
+    @Mapping(target = "availableSlots", ignore = true)
     ActivityDeparture toDepartureEntity(ActivityDepartureCreateRequest request);
 
     @Mapping(target = "activity", ignore = true)
     @Mapping(target = "maxSlots", ignore = true)
     @Mapping(target = "status", ignore = true)
-    //@Mapping(target = "availableSlots", ignore = true)
+    @Mapping(target = "availableSlots", ignore = true)
     ActivityDeparture updateDepartureEntity(ActivityDepartureUpdateRequest request, @MappingTarget ActivityDeparture departure);
 
     @Mapping(target = "startingFromPrice", ignore = true)
+    @Mapping(target = "type", expression = "java(activity.getTravel() == null ? \"STANDALONE\" : \"STEP\")")
     ActivitySummaryResponse toSummaryResponse(Activity activity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "travel", ignore = true)
     @Mapping(target = "ownerId", ignore = true)
+    @Mapping(target = "departures", ignore = true)
     void updateActivityFromDto(ActivityUpdateRequest request, @MappingTarget Activity activity);
 
     @AfterMapping
@@ -62,7 +66,6 @@ public interface ActivityMapper {
             return;
         }
 
-        // La logica che avevi nel Service ora è qui
         BigDecimal startingFrom = activity.getDepartures().stream()
                 .map(ActivityDeparture::getPrice)
                 .filter(Objects::nonNull)

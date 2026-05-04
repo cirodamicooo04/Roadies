@@ -16,4 +16,5 @@ public class ActivityDepartureResponse {
     private Integer maxSlots;
     private BigDecimal price;
     private Status status;
+    private Integer availableSlots;
 }

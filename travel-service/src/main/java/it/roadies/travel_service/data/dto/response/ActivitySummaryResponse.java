@@ -12,4 +12,5 @@ public class ActivitySummaryResponse {
     private String name;
     private String destination;
     private BigDecimal startingFromPrice;
+    private String type;
 }

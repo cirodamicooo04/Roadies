@@ -3,6 +3,7 @@ package it.roadies.travel_service.data.entity;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SoftDelete;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "ACTIVITY_SESSIONS")
+@SoftDelete(columnName = "deleted")
 public class ActivityDeparture {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -47,6 +49,11 @@ public class ActivityDeparture {
         if (price == null) {
             price = BigDecimal.ZERO;
         }
+
+        if (this.availableSlots == null) {
+            this.availableSlots = maxSlots;
+        }
+
     }
 
 }

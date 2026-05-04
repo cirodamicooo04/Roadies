@@ -3,6 +3,7 @@ package it.roadies.travel_service.data.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "ACTIVITY")
+@SoftDelete(columnName = "deleted")
 public class Activity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,6 +34,15 @@ public class Activity {
 
     @Column(length = 200, name = "destination", nullable = false)
     private String destination;
+
+    @Column(length = 500, name = "address")
+    private String address;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
 
     @Column(name = "day_number")
     private Integer dayNumber;
