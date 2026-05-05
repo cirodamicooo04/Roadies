@@ -1,4 +1,4 @@
-package it.roadies.booking_service.conf;
+package it.roadies.booking_service.config;
 
 import com.stripe.Stripe;
 import jakarta.annotation.PostConstruct;

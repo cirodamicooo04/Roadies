@@ -1,4 +1,4 @@
-package it.roadies.booking_service.conf;
+package it.roadies.booking_service.config;
 
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;

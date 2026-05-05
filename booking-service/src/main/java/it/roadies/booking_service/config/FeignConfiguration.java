@@ -1,4 +1,4 @@
-package it.roadies.booking_service.conf;
+package it.roadies.booking_service.config;
 
 import feign.RequestInterceptor;
 import org.springframework.context.annotation.Bean;

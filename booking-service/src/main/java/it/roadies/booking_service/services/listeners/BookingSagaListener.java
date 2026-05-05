@@ -26,7 +26,6 @@ public class BookingSagaListener {
                 bookingRepository.save(booking);
             }
         });
-
     }
 
     @RabbitListener(queues = "booking.failed.queue")
