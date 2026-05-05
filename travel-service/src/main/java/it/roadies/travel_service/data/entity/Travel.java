@@ -59,6 +59,9 @@ public class Travel {
     @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelTag> tagScores = new ArrayList<>();
 
+    @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL)
+    private List<Image> images = new ArrayList<>();
+
 }
 
 
