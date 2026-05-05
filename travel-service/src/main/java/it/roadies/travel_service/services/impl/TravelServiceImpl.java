@@ -1,19 +1,19 @@
 package it.roadies.travel_service.services.impl;
 
 import it.roadies.travel_service.controller.client.BookingClient;
-import it.roadies.travel_service.data.dao.ActivityRepository;
-import it.roadies.travel_service.data.dao.TagRepository;
-import it.roadies.travel_service.data.dao.TravelDepartureRepository;
-import it.roadies.travel_service.data.dao.TravelRepository;
+import it.roadies.travel_service.data.dao.*;
 import it.roadies.travel_service.data.dao.specification.TravelSpecification;
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.data.entity.*;
+import it.roadies.travel_service.data.entity.enumerations.ImageStatus;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import it.roadies.travel_service.data.mapper.ActivityMapper;
 import it.roadies.travel_service.data.mapper.TravelMapper;
+import it.roadies.travel_service.services.ImageService;
 import it.roadies.travel_service.services.TravelService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TravelServiceImpl implements TravelService {
     private final TravelMapper travelMapper;
     private final TagRepository tagRepository;
@@ -38,6 +39,8 @@ public class TravelServiceImpl implements TravelService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
     private final BookingClient bookingClient;
+    private final ImageRepository imageRepository;
+    private final ImageService imageService;
 
     private void validateTravelLogic(Travel travel){
         for (TravelDeparture departure : travel.getDepartures()){
@@ -83,7 +86,25 @@ public class TravelServiceImpl implements TravelService {
             }
         }
 
-        travelRepository.save(travel);
+        Travel savedTravel = travelRepository.save(travel);
+        if (travelCreateRequest.getImageIds() != null && !travelCreateRequest.getImageIds().isEmpty()) {
+            List<Image> images = imageRepository.findAllById(travelCreateRequest.getImageIds());
+            images.forEach(i -> {
+                if (!i.getOwnerId().equals(ownerId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't add an image to a travel that is not yours");
+                }
+
+                if (i.getActivity() != null || (i.getTravel() != null && !i.getTravel().getId().equals(travel.getId()))) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This image is already associated with another travel");
+                }
+
+                i.setTravel(savedTravel);
+                i.setStatus(ImageStatus.PERMANENT);
+            });
+            imageRepository.saveAll(images);
+            savedTravel.setImages(images);
+        }
+
         return travelMapper.toResponse(travel);
     }
 
@@ -100,6 +121,12 @@ public class TravelServiceImpl implements TravelService {
         }
         if (travelDepartureRepository.existsByTravel(travel)){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't delete a travel with active departures");
+        }
+
+        if (travel.getImages() != null){
+            for (Image image : travel.getImages()) {
+                imageService.deleteImageFromMinio(image.getPath());
+            }
         }
         travelRepository.delete(travel);
     }
@@ -131,6 +158,35 @@ public class TravelServiceImpl implements TravelService {
             }
         }
 
+        if (travelUpdateRequest.getImageIds() != null) {
+            List<Image> requestedImages = imageRepository.findAllById(travelUpdateRequest.getImageIds());
+
+            List<Image> currentImages = travel.getImages();
+            for (Image currentImage : currentImages) {
+                if (!travelUpdateRequest.getImageIds().contains(currentImage.getId())) {
+                    imageService.deleteImageFromMinio(currentImage.getPath());
+                    imageRepository.delete(currentImage);
+                }
+            }
+
+            for (Image img : requestedImages) {
+                if (!img.getOwnerId().equals(ownerId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't add an image to a travel that is not yours");
+                }
+
+                if (img.getActivity() != null || (img.getTravel() != null && !img.getTravel().getId().equals(travel.getId()))) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This image is already associated with another travel");
+                }
+
+
+                if (img.getStatus() == ImageStatus.TEMPORARY) {
+                    img.setTravel(travel);
+                    img.setStatus(ImageStatus.PERMANENT);
+                }
+            }
+            travel.setImages(requestedImages);
+        }
+
         Travel updatedTravel = travelRepository.save(travel);
         return travelMapper.toResponse(updatedTravel);
     }
@@ -148,6 +204,7 @@ public class TravelServiceImpl implements TravelService {
     @Transactional
     public List<TravelSummaryResponse> getRecommendedTravels(String id) {
         List<UUID> pastTravelsIds = bookingClient.getUserBookings();
+        log.info("User past bookings: {}", pastTravelsIds);
         //Se non ha mai effettuato alcun viaggio, restituisco gli ultimi 10 viaggi creati
         if (pastTravelsIds.isEmpty()) return travelRepository.findTop10ByOrderByCreatedAtDesc().stream().map(travelMapper::toSummaryResponse).toList();
 

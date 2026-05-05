@@ -2,6 +2,7 @@ package it.roadies.travel_service.services.impl;
 
 import it.roadies.travel_service.data.dao.ActivityDepartureRepository;
 import it.roadies.travel_service.data.dao.ActivityRepository;
+import it.roadies.travel_service.data.dao.ImageRepository;
 import it.roadies.travel_service.data.dao.specification.ActivitySpecification;
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
@@ -12,10 +13,13 @@ import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.data.dto.response.ActivitySummaryResponse;
 import it.roadies.travel_service.data.entity.Activity;
 import it.roadies.travel_service.data.entity.ActivityDeparture;
+import it.roadies.travel_service.data.entity.Image;
 import it.roadies.travel_service.data.entity.TravelDeparture;
+import it.roadies.travel_service.data.entity.enumerations.ImageStatus;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import it.roadies.travel_service.data.mapper.ActivityMapper;
 import it.roadies.travel_service.services.ActivityService;
+import it.roadies.travel_service.services.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.PropertySource;
 import org.springframework.data.domain.Page;
@@ -38,6 +42,8 @@ public class ActivityServiceImpl implements ActivityService {
     private final ActivityMapper activityMapper;
     private final ActivityRepository activityRepository;
     private final ActivityDepartureRepository activityDepartureRepository;
+    private final ImageRepository imageRepository;
+    private final ImageService imageService;
 
     private void validateActivity(Activity activity){
         if (activity.getTravel() != null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Standalone activity can't have a travel");
@@ -55,9 +61,29 @@ public class ActivityServiceImpl implements ActivityService {
         validateActivity(activity);
         activity.setOwnerId(ownerId);
 
-        activityRepository.save(activity);
+        Activity savedActivity = activityRepository.save(activity);
+
+        if (request.getImageIds() != null && !request.getImageIds().isEmpty()) {
+            List<Image> images = imageRepository.findAllById(request.getImageIds());
+            images.forEach(i -> {
+                // Controllo sicurezza: L'immagine è tua?
+                if (!i.getOwnerId().equals(ownerId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi usare un'immagine non tua");
+                }
+                // Controllo sicurezza: L'immagine non deve essere già associata a qualcos'altro
+                if (i.getTravel() != null || (i.getActivity() != null && !i.getActivity().getId().equals(savedActivity.getId()))) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Immagine già associata a un'altra entità");
+                }
+
+                i.setActivity(savedActivity);
+                i.setStatus(ImageStatus.PERMANENT);
+            });
+            imageRepository.saveAll(images);
+            savedActivity.setImages(images);
+        }
         return activityMapper.toResponse(activity);
     }
+
 
     public ActivityResponse getActivityById(UUID id){
         Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
@@ -68,6 +94,13 @@ public class ActivityServiceImpl implements ActivityService {
     public void deleteActivityById(UUID id, String ownerId){
         Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
         if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this activity");
+
+        if (activity.getImages() != null) {
+            for (Image image : activity.getImages()) {
+                imageService.deleteImageFromMinio(image.getPath());
+            }
+        }
+
         activityRepository.deleteById(id);
     }
 
@@ -158,6 +191,35 @@ public class ActivityServiceImpl implements ActivityService {
 
         activityMapper.updateActivityFromDto(request, activity);
         validateActivity(activity);
+
+        if (request.getImageIds() != null) {
+            List<Image> requestedImages = imageRepository.findAllById(request.getImageIds());
+            List<Image> currentImages = activity.getImages();
+
+            for (Image currentImage : currentImages) {
+                if (!request.getImageIds().contains(currentImage.getId())) {
+                    imageService.deleteImageFromMinio(currentImage.getPath());
+                    imageRepository.delete(currentImage);
+                }
+            }
+
+            //associo le nuove immagini
+            for (Image img : requestedImages) {
+                if (!img.getOwnerId().equals(ownerId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't add an image to an activity that is not yours.");
+                }
+                if (img.getTravel() != null || (img.getActivity() != null && !img.getActivity().getId().equals(activity.getId()))) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image already associated with another activity.");
+                }
+
+                if (img.getStatus() == ImageStatus.TEMPORARY) {
+                    img.setActivity(activity);
+                    img.setStatus(ImageStatus.PERMANENT);
+                }
+            }
+            activity.setImages(requestedImages);
+        }
+
 
         activityRepository.save(activity);
         return activityMapper.toResponse(activity);

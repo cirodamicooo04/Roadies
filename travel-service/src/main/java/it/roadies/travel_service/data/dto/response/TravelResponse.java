@@ -23,4 +23,5 @@ public class TravelResponse {
     private List<TravelDepartureResponse> departures;
     private List<ActivityResponse> activities;
     private List<TravelTagResponse> tagScores;
+    private List<ImageResponse> images;
 }

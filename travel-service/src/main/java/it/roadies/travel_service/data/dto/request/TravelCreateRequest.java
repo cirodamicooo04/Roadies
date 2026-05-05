@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.Singular;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class TravelCreateRequest {
@@ -21,6 +22,8 @@ public class TravelCreateRequest {
     private Double longitude;
     @NotNull @Min(1)
     private int durationDays;
+
+    private List<UUID> imageIds;
 
     @Valid
     private List<TravelDepartureCreateRequest> departures;
