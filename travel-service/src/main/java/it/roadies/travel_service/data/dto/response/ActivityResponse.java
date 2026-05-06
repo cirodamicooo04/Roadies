@@ -21,5 +21,6 @@ public class ActivityResponse {
     private LocalDateTime updatedAt;
     private String type;
     private List<ActivityDepartureResponse> departures;
+    private List<ImageResponse> images;
 
 }

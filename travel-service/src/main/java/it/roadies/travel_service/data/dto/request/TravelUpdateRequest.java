@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class TravelUpdateRequest {
@@ -23,6 +24,8 @@ public class TravelUpdateRequest {
     private Double longitude;
     @Min(1)
     private Integer durationDays;
+
+    private List<UUID> imageIds;
 
     @Valid
     private List<TravelTagRequest> tagScores;

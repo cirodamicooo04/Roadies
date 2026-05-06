@@ -27,4 +27,6 @@ public class ActivityUpdateRequest {
     private Double longitude;
     @Min(1)
     private Integer dayNumber;
+
+    private List<UUID> imageIds;
 }

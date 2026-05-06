@@ -7,6 +7,7 @@ import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,6 +58,9 @@ public class Activity {
 
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ActivityDeparture> departures;
+
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL)
+    private List<Image> images = new ArrayList<>();
 
 
 }

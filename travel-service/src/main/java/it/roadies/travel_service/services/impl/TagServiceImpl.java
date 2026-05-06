@@ -7,6 +7,7 @@ import it.roadies.travel_service.data.mapper.TagMapper;
 import it.roadies.travel_service.services.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class TagServiceImpl implements TagService {
         return tags.stream().map(tagMapper::toResponse).toList();
     }
 
-    @Override
+    @Transactional
     public TagResponse addTag(String name) {
         String normalizedName = name.toUpperCase().trim();
 
@@ -32,7 +33,10 @@ public class TagServiceImpl implements TagService {
 
         Tag tag = new Tag();
         tag.setName(normalizedName);
-        tagRepository.save(tag);
+        Tag newTag = tagRepository.save(tag);
+
+        //Aggiungo il nuovo tag a tutti i viaggi esistenti con score di default
+        tagRepository.addDefaultTagToAllTravels(newTag.getId(), 2);
 
         return tagMapper.toResponse(tag);
     }

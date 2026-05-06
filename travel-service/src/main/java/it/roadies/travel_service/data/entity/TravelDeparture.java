@@ -3,6 +3,9 @@ package it.roadies.travel_service.data.entity;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SoftDelete;
 
 import java.math.BigDecimal;
@@ -10,7 +13,9 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "TRAVEL_DEPARTURE")
 @SoftDelete(columnName = "deleted")
 public class TravelDeparture {

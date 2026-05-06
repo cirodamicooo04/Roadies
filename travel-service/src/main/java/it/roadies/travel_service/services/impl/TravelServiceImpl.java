@@ -1,18 +1,22 @@
 package it.roadies.travel_service.services.impl;
 
-import it.roadies.travel_service.data.dao.ActivityRepository;
-import it.roadies.travel_service.data.dao.TagRepository;
-import it.roadies.travel_service.data.dao.TravelDepartureRepository;
-import it.roadies.travel_service.data.dao.TravelRepository;
+import it.roadies.travel_service.controller.client.BookingClient;
+import it.roadies.travel_service.data.dao.*;
 import it.roadies.travel_service.data.dao.specification.TravelSpecification;
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.data.entity.*;
+import it.roadies.travel_service.data.entity.enumerations.ImageStatus;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import it.roadies.travel_service.data.mapper.ActivityMapper;
 import it.roadies.travel_service.data.mapper.TravelMapper;
+import it.roadies.travel_service.services.ImageService;
 import it.roadies.travel_service.services.TravelService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,12 +25,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TravelServiceImpl implements TravelService {
     private final TravelMapper travelMapper;
     private final TagRepository tagRepository;
@@ -34,6 +38,9 @@ public class TravelServiceImpl implements TravelService {
     private final TravelDepartureRepository travelDepartureRepository;
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
+    private final BookingClient bookingClient;
+    private final ImageRepository imageRepository;
+    private final ImageService imageService;
 
     private void validateTravelLogic(Travel travel){
         for (TravelDeparture departure : travel.getDepartures()){
@@ -79,7 +86,25 @@ public class TravelServiceImpl implements TravelService {
             }
         }
 
-        travelRepository.save(travel);
+        Travel savedTravel = travelRepository.save(travel);
+        if (travelCreateRequest.getImageIds() != null && !travelCreateRequest.getImageIds().isEmpty()) {
+            List<Image> images = imageRepository.findAllById(travelCreateRequest.getImageIds());
+            images.forEach(i -> {
+                if (!i.getOwnerId().equals(ownerId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't add an image to a travel that is not yours");
+                }
+
+                if (i.getActivity() != null || (i.getTravel() != null && !i.getTravel().getId().equals(travel.getId()))) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This image is already associated with another travel");
+                }
+
+                i.setTravel(savedTravel);
+                i.setStatus(ImageStatus.PERMANENT);
+            });
+            imageRepository.saveAll(images);
+            savedTravel.setImages(images);
+        }
+
         return travelMapper.toResponse(travel);
     }
 
@@ -96,6 +121,12 @@ public class TravelServiceImpl implements TravelService {
         }
         if (travelDepartureRepository.existsByTravel(travel)){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't delete a travel with active departures");
+        }
+
+        if (travel.getImages() != null){
+            for (Image image : travel.getImages()) {
+                imageService.deleteImageFromMinio(image.getPath());
+            }
         }
         travelRepository.delete(travel);
     }
@@ -127,18 +158,88 @@ public class TravelServiceImpl implements TravelService {
             }
         }
 
+        if (travelUpdateRequest.getImageIds() != null) {
+            List<Image> requestedImages = imageRepository.findAllById(travelUpdateRequest.getImageIds());
+
+            List<Image> currentImages = travel.getImages();
+            for (Image currentImage : currentImages) {
+                if (!travelUpdateRequest.getImageIds().contains(currentImage.getId())) {
+                    imageService.deleteImageFromMinio(currentImage.getPath());
+                    imageRepository.delete(currentImage);
+                }
+            }
+
+            for (Image img : requestedImages) {
+                if (!img.getOwnerId().equals(ownerId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't add an image to a travel that is not yours");
+                }
+
+                if (img.getActivity() != null || (img.getTravel() != null && !img.getTravel().getId().equals(travel.getId()))) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This image is already associated with another travel");
+                }
+
+
+                if (img.getStatus() == ImageStatus.TEMPORARY) {
+                    img.setTravel(travel);
+                    img.setStatus(ImageStatus.PERMANENT);
+                }
+            }
+            travel.setImages(requestedImages);
+        }
+
         Travel updatedTravel = travelRepository.save(travel);
         return travelMapper.toResponse(updatedTravel);
     }
 
     @Transactional(readOnly = true)
-    public List<TravelSummaryResponse> searchTravels(String destination, BigDecimal minPrice, BigDecimal maxPrice, Integer minDurationDays, Integer maxDurationDays){
+    public Page<TravelSummaryResponse> searchTravels(String destination, BigDecimal minPrice, BigDecimal maxPrice, Integer minDurationDays, Integer maxDurationDays, Pageable pageable){
         Specification<Travel> travelSpecification = Specification.where(TravelSpecification.hasDestination(destination))
                 .and(TravelSpecification.hasPriceRange(minPrice, maxPrice))
                 .and(TravelSpecification.hasDurationRange(minDurationDays, maxDurationDays));
 
-        List<Travel> travels = travelRepository.findAll(travelSpecification);
-        return travels.stream().map(travelMapper::toSummaryResponse).toList();
+        Page<Travel> travels = travelRepository.findAll(travelSpecification, pageable);
+        return travels.map(travelMapper::toSummaryResponse);
+    }
+
+    @Transactional
+    public List<TravelSummaryResponse> getRecommendedTravels(String id) {
+        List<UUID> pastTravelsIds = bookingClient.getUserBookings();
+        log.info("User past bookings: {}", pastTravelsIds);
+        //Se non ha mai effettuato alcun viaggio, restituisco gli ultimi 10 viaggi creati
+        if (pastTravelsIds.isEmpty()) return travelRepository.findTop10ByOrderByCreatedAtDesc().stream().map(travelMapper::toSummaryResponse).toList();
+
+        List<Travel> userPastTravels = travelRepository.findAllById(pastTravelsIds);
+
+        Map<UUID, Double> userAverageScores = userPastTravels.stream().flatMap(t -> t.getTagScores().stream()).collect(Collectors.groupingBy(tt -> tt.getTag().getId(), Collectors.averagingInt(TravelTag::getScore)));
+
+        //Mi prendo massimo 500 viaggi per non sovraccaricare troppo
+        List<Travel> travels = travelRepository.findCandidateTravels(pastTravelsIds, PageRequest.of(0, 500));
+
+        //Calcolo lo scarto dei tag per ogni viaggio
+        return travels.stream()
+                .map(travel -> {
+                    double totalPenalty = 0.0;
+
+                    int totalTags = travel.getTagScores().size();
+
+                    for (TravelTag tripTag : travel.getTagScores()) {
+                        UUID tagId = tripTag.getTag().getId();
+                        double tripScore = tripTag.getScore();
+                        double userScore = userAverageScores.getOrDefault(tagId, 3.0);
+
+                        totalPenalty += Math.abs(tripScore - userScore);
+                    }
+
+                    double maxPossiblePenalty = totalTags * 4.0;
+                    double matchPercentage = (1.0 - (totalPenalty / maxPossiblePenalty)) * 100;
+
+                    return Map.entry(travel, matchPercentage);
+                })
+                .sorted(Map.Entry.<Travel, Double>comparingByValue().reversed())
+                .limit(10)
+                .map(Map.Entry::getKey)
+                .map(travelMapper::toSummaryResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)

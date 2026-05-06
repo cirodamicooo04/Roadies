@@ -11,8 +11,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.web.configurers.JeeConfigurer;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -22,44 +26,46 @@ import java.util.UUID;
 public class BookingController {
     private final BookingService bookingService;
 
-    @PreAuthorize("hasRole('TRAVELER')")
-    @PostMapping("/private/create-draft")
+    @PostMapping("/public/create_draft")
     public ResponseEntity<BookingDraftResponse> createDraftBooking(@Valid @RequestBody BookingDraftRequest request) {
         BookingDraftResponse response = bookingService.createDraft(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
-    @PostMapping("/private/create-pending")
+    @PostMapping("/public/create_pending")
     public ResponseEntity<Void> createBooking(@Valid @RequestBody BookingCreateRequest request) {
         bookingService.createBookingStep1(request);
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
-    @PostMapping("/private/create-members")
+    @PostMapping("/public/create_members")
     public ResponseEntity<Void> createMembers(@Valid @RequestBody BookingMemberRequest request) {
         bookingService.createBookingStep2(request);
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/{bookingId}/status")
     public ResponseEntity<BookingStatusResponse> getStatus(@PathVariable UUID bookingId) {
         return ResponseEntity.ok(bookingService.getBookingStatus(bookingId));
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/{bookingId}/confirm")
     public ResponseEntity<Void> confirmBooking(@PathVariable UUID bookingId) {
         bookingService.confirmBooking(bookingId);
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
-    @DeleteMapping("/{bookingId}/delete")
+    @DeleteMapping("/{bookingId}/confirm")
     public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId) {
         bookingService.deleteBooking(bookingId);
         return ResponseEntity.noContent().build();
+    }
+
+    //TRAVEL SERVICE RECOMMENDATION
+    @PreAuthorize("hasRole('TRAVELER')")
+    @GetMapping("/users/me")
+    public ResponseEntity<List<UUID>> getBookingsFromUser(@AuthenticationPrincipal Jwt jwt){
+        List<UUID> travelsIds = bookingService.getUserBookings(jwt.getClaim("sub"));
+        return ResponseEntity.ok(travelsIds);
     }
 }

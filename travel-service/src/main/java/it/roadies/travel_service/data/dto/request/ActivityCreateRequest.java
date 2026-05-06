@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class ActivityCreateRequest {
@@ -21,6 +22,9 @@ public class ActivityCreateRequest {
     private Double longitude;
     @Min(1)
     private Integer dayNumber;
+
+    private List<UUID> imageIds;
+
     @Valid
     private List<ActivityDepartureCreateRequest> departures;
 
