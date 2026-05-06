@@ -3,17 +3,20 @@ package it.roadies.travel_service.controller;
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.services.ActivityService;
+import it.roadies.travel_service.services.ImageService;
 import it.roadies.travel_service.services.TravelDepartureService;
 import it.roadies.travel_service.services.TravelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,6 +30,7 @@ public class TravelController {
     private final TravelService travelService;
     private final TravelDepartureService travelDepartureService;
     private final ActivityService activityService;
+    private final ImageService imageService;
 
     //ORGANIZER AREA
 
@@ -155,6 +159,14 @@ public class TravelController {
     public ResponseEntity<Void> releaseSpots(@PathVariable UUID travelId, @RequestParam int spots) {
         travelDepartureService.releaseSeats(travelId, spots);
         return ResponseEntity.ok().build();
+    }
+
+    //IMAGES AREA
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PostMapping(path = "/images",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImageResponse> uploadImage(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Jwt jwt){
+        ImageResponse response = imageService.uploadImage(file, jwt.getClaim("sub"));
+        return ResponseEntity.status(201).body(response);
     }
 
 
