@@ -8,6 +8,7 @@ import it.roadies.booking_service.data.dto.request.PaymentRequest;
 import it.roadies.booking_service.data.dto.response.PaymentResponse;
 import it.roadies.booking_service.services.BookingService;
 import it.roadies.booking_service.services.PaymentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +30,7 @@ public class PaymentController {
 
     @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/private/create-payment-intent")
-    public ResponseEntity<PaymentResponse> createPaymentIntent(@RequestBody PaymentRequest request) throws StripeException {
+    public ResponseEntity<PaymentResponse> createPaymentIntent(@Valid @RequestBody PaymentRequest request) throws StripeException {
         PaymentResponse response = stripePaymentService.createPaymentIntent(request);
         return ResponseEntity.ok(response);
     }
