@@ -1,21 +1,22 @@
 package it.roadies.travel_service.controller;
 
-import it.roadies.travel_service.data.dto.request.TravelCreateRequest;
-import it.roadies.travel_service.data.dto.request.TravelDepartureCreateRequest;
-import it.roadies.travel_service.data.dto.request.TravelDepartureUpdateRequest;
-import it.roadies.travel_service.data.dto.response.OrganizerTravelsActivityResponse;
-import it.roadies.travel_service.data.dto.response.TravelDepartureResponse;
-import it.roadies.travel_service.data.dto.response.TravelResponse;
-import it.roadies.travel_service.data.dto.response.TravelSummaryResponse;
+import it.roadies.travel_service.data.dto.request.*;
+import it.roadies.travel_service.data.dto.response.*;
+import it.roadies.travel_service.services.ActivityService;
+import it.roadies.travel_service.services.ImageService;
 import it.roadies.travel_service.services.TravelDepartureService;
 import it.roadies.travel_service.services.TravelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,6 +29,8 @@ public class TravelController {
 
     private final TravelService travelService;
     private final TravelDepartureService travelDepartureService;
+    private final ActivityService activityService;
+    private final ImageService imageService;
 
     //ORGANIZER AREA
 
@@ -45,13 +48,12 @@ public class TravelController {
         return ResponseEntity.ok().build();
     }
 
-    //DA VEDERE PROBLEMA MAPPER AGGIORNAMENTO
-    //@PreAuthorize("hasRole('ORGANIZER')")
-//    @PutMapping("/{id}")
-//    public ResponseEntity<TravelResponse> updateTravel(@PathVariable UUID id, @RequestBody @Valid TravelUpdateRequest request, @AuthenticationPrincipal Jwt jwt) {
-//        TravelResponse response = travelService.updateTravel(request, jwt.getClaim("sub"), id);
-//        return ResponseEntity.ok(response);
-//  }
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<TravelResponse> updateTravel(@PathVariable UUID id, @RequestBody @Valid TravelUpdateRequest request, @AuthenticationPrincipal Jwt jwt) {
+        TravelResponse response = travelService.updateTravel(request, jwt.getClaim("sub"), id);
+        return ResponseEntity.ok(response);
+  }
 
     @PreAuthorize("hasRole('ORGANIZER')")
     @GetMapping("/my-travels")
@@ -69,9 +71,13 @@ public class TravelController {
     }
 
     @GetMapping("/public/search")
-    public ResponseEntity<List<TravelSummaryResponse>> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays ){
-        List<TravelSummaryResponse> travels = travelService.searchTravels(destination, minPrice, maxPrice, minDurationDays, maxDurationDays);
-        return ResponseEntity.ok(travels);
+    public ResponseEntity<?> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays , @RequestParam(required = false, defaultValue = "TRAVEL") String type, Pageable pageable){
+        if(!type.equalsIgnoreCase("ACTIVITY")){
+            Page<TravelSummaryResponse> travels = travelService.searchTravels(destination, minPrice, maxPrice, minDurationDays, maxDurationDays, pageable);
+            return ResponseEntity.ok(travels);
+        }
+        Page<ActivitySummaryResponse> activities = activityService.searchActivities(destination, minPrice, maxPrice, pageable);
+        return ResponseEntity.ok(activities);
     }
 
     //TRAVEL DEPARTURES AREA
@@ -104,25 +110,63 @@ public class TravelController {
     }
 
     @PreAuthorize("hasRole('ORGANIZER')")
-    @PutMapping("/{travelId}/departures/{departureId}/confirm")
+    @PatchMapping("/{travelId}/departures/{departureId}/confirm")
     public ResponseEntity<TravelDepartureResponse> confirmDeparture(@PathVariable UUID travelId, @PathVariable UUID departureId, @AuthenticationPrincipal Jwt jwt){
         TravelDepartureResponse response = travelService.confirmDeparture(travelId, departureId, jwt.getClaim("sub"));
         return ResponseEntity.ok(response);
     }
 
-    
+    //TRAVEL ACTIVITIES AREA
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PostMapping("/{travelId}/activities")
+    public ResponseEntity<TravelResponse> addActivity(@PathVariable UUID travelId, @RequestBody @Valid ActivityCreateRequest request, @AuthenticationPrincipal Jwt jwt){
+        TravelResponse response = travelService.addActivity(travelId,request,jwt.getClaim("sub"));
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @DeleteMapping("/{travelId}/activities/{activityId}")
+    public ResponseEntity<?> deleteActivity(@PathVariable UUID travelId, @PathVariable UUID activityId, @AuthenticationPrincipal Jwt jwt){
+        travelService.deleteTravelActivity(travelId,activityId,jwt.getClaim("sub"));
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PutMapping("/{travelId}/activities/{activityId}")
+    public ResponseEntity<TravelResponse> updateActivity(@PathVariable UUID travelId, @PathVariable UUID activityId, @RequestBody @Valid ActivityUpdateRequest request, @AuthenticationPrincipal Jwt jwt){
+        TravelResponse response = travelService.updateTravelActivity(travelId,activityId,request,jwt.getClaim("sub"));
+        return ResponseEntity.ok(response);
+    }
+
+    //RECOMMENDATIONS
+    @PreAuthorize("hasRole('TRAVELER')")
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<TravelSummaryResponse>> getRecommendations(@AuthenticationPrincipal Jwt jwt){
+        List<TravelSummaryResponse> responses = travelService.getRecommendedTravels(jwt.getClaim("sub"));
+        return ResponseEntity.ok(responses);
+    }
+
+
     //BOOKING AREA
 
     @PostMapping("/{travelId}/reserve")
-    public ResponseEntity<Void> reserveSpots(@PathVariable UUID travelId, @RequestParam int spots) {
-        travelDepartureService.reserveSpots(travelId, spots);
+    public ResponseEntity<Void> reserveSpots(@PathVariable UUID travelId, @RequestParam Integer spots) {
+        travelDepartureService.reserveSeats(travelId, spots);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{travelId}/release")
     public ResponseEntity<Void> releaseSpots(@PathVariable UUID travelId, @RequestParam int spots) {
-        travelDepartureService.releaseSpots(travelId, spots);
+        travelDepartureService.releaseSeats(travelId, spots);
         return ResponseEntity.ok().build();
+    }
+
+    //IMAGES AREA
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PostMapping(path = "/images",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImageResponse> uploadImage(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Jwt jwt){
+        ImageResponse response = imageService.uploadImage(file, jwt.getClaim("sub"));
+        return ResponseEntity.status(201).body(response);
     }
 
 

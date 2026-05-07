@@ -23,7 +23,7 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/travels/public/**", "/api/v1/activities/public/**" , "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/v1/travels/public/**", "/api/v1/activities/public/**" , "/api/v1/metadata/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v1/seats/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

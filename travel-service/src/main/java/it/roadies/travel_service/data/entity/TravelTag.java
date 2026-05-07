@@ -3,9 +3,14 @@ package it.roadies.travel_service.data.entity;
 import it.roadies.travel_service.data.entity.embeddables.TravelTagId;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "TRAVEL_TAG")
 public class TravelTag {
     @EmbeddedId

@@ -34,7 +34,7 @@ public class BookingMember {
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<MemberDocument> documents;
 
 }

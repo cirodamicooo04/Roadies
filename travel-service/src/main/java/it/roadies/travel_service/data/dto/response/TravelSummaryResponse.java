@@ -15,4 +15,6 @@ public class TravelSummaryResponse {
     private String destination;
     private Integer durationDays;
     private BigDecimal startingFromPrice;
+    private String type;
+    private List<ImageResponse> images;
 }

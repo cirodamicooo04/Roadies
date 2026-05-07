@@ -12,9 +12,15 @@ public class ActivityResponse {
     private String ownerId;
     private String name;
     private String description;
-    private String location;
+    private String destination;
+    private String address;
+    private Double latitude;
+    private Double longitude;
     private Integer dayNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<ActivityDeparturesResponse> departures;
+    private String type;
+    private List<ActivityDepartureResponse> departures;
+    private List<ImageResponse> images;
+
 }

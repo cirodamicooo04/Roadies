@@ -10,8 +10,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.web.configurers.JeeConfigurer;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -42,5 +47,25 @@ public class BookingController {
     @GetMapping("/{bookingId}/status")
     public ResponseEntity<BookingStatusResponse> getStatus(@PathVariable UUID bookingId) {
         return ResponseEntity.ok(bookingService.getBookingStatus(bookingId));
+    }
+
+    @PostMapping("/{bookingId}/confirm")
+    public ResponseEntity<Void> confirmBooking(@PathVariable UUID bookingId) {
+        bookingService.confirmBooking(bookingId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{bookingId}/confirm")
+    public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId) {
+        bookingService.deleteBooking(bookingId);
+        return ResponseEntity.noContent().build();
+    }
+
+    //TRAVEL SERVICE RECOMMENDATION
+    @PreAuthorize("hasRole('TRAVELER')")
+    @GetMapping("/users/me")
+    public ResponseEntity<List<UUID>> getBookingsFromUser(@AuthenticationPrincipal Jwt jwt){
+        List<UUID> travelsIds = bookingService.getUserBookings(jwt.getClaim("sub"));
+        return ResponseEntity.ok(travelsIds);
     }
 }

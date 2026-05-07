@@ -1,4 +1,4 @@
-package it.roadies.booking_service.conf;
+package it.roadies.booking_service.config;
 
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.Components;

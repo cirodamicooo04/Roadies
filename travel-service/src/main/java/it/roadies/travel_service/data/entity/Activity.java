@@ -3,16 +3,18 @@ package it.roadies.travel_service.data.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Data
 @Table(name = "ACTIVITY")
+@SoftDelete(columnName = "deleted")
 public class Activity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,8 +33,17 @@ public class Activity {
     @Column(length = 1000, name = "description", nullable = false)
     private String description;
 
-    @Column(length = 200, name = "location", nullable = false)
-    private String location;
+    @Column(length = 200, name = "destination", nullable = false)
+    private String destination;
+
+    @Column(length = 500, name = "address")
+    private String address;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
 
     @Column(name = "day_number")
     private Integer dayNumber;
@@ -47,6 +58,9 @@ public class Activity {
 
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ActivityDeparture> departures;
+
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL)
+    private List<Image> images = new ArrayList<>();
 
 
 }

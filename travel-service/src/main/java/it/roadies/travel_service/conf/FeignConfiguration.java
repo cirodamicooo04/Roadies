@@ -1,4 +1,4 @@
-package it.roadies.booking_service.conf;
+package it.roadies.travel_service.conf;
 
 import feign.RequestInterceptor;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +16,7 @@ public class FeignConfiguration {
             if (attributes != null) {
                 String authHeader = attributes.getRequest().getHeader("Authorization");
                 if (authHeader != null) {
+                    // Propaga il token JWT dal travel-service al booking-service
                     requestTemplate.header("Authorization", authHeader);
                 }
             }
