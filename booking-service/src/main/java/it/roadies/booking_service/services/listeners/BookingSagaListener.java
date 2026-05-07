@@ -20,9 +20,7 @@ public class BookingSagaListener {
         bookingRepository.findById(event.getBookingId()).ifPresent(booking -> {
             if (booking.getStatus() != BookingStatus.CANCELLED) {
                 booking.setStatus(BookingStatus.RESERVE_CONFIRMED);
-                if (booking.getExpiresAt() != null) {
-                    booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));
-                }
+                booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));
                 bookingRepository.save(booking);
             }
         });

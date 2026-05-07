@@ -4,8 +4,13 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
+import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.request.PaymentRequest;
 import it.roadies.booking_service.data.dto.response.PaymentResponse;
+import it.roadies.booking_service.data.entities.Booking;
+import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
+import it.roadies.booking_service.exceptions.BookingNotFoundException;
+import it.roadies.booking_service.exceptions.StatusException;
 import it.roadies.booking_service.services.BookingService;
 import it.roadies.booking_service.services.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -20,6 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
     private final BookingService bookingService;
+    private final BookingRepository bookingRepository;
 
     @Override
     public void processStripeEvent(Event event) {
@@ -44,12 +52,27 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    @Override
     public PaymentResponse createPaymentIntent(PaymentRequest request) throws StripeException {
+        Booking booking = bookingRepository.findById(request.getBookingId()).orElseThrow(() -> new BookingNotFoundException(request.getBookingId()));
+
+        if (!booking.getStatus().equals(BookingStatus.RESERVE_CONFIRMED)) {
+            throw new StatusException("Puoi pagare solo una prenotazione con posti confermati");
+        }
+
+        if (booking.getExpiresAt() == null || booking.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new StatusException("La prenotazione è scaduta");
+        }
+
+        if (booking.getTotalPrice() == null || booking.getTotalPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new StatusException("Prezzo della prenotazione non valido");
+        }
+
         PaymentIntentCreateParams params =
                 PaymentIntentCreateParams.builder()
-                        .setAmount(request.getAmount().multiply(new BigDecimal("100")).longValue())
-                        .setCurrency(request.getCurrency())
-                        .putMetadata("bookingId", request.getBookingId().toString())
+                        .setAmount(booking.getTotalPrice().longValue())
+                        .setCurrency("eur")
+                        .putMetadata("bookingId", booking.getId().toString())
                         .setAutomaticPaymentMethods(
                                 PaymentIntentCreateParams.AutomaticPaymentMethods
                                         .builder()

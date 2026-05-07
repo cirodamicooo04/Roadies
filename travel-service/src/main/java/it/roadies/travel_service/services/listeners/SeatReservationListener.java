@@ -23,11 +23,11 @@ public class SeatReservationListener {
         try {
             travelDepartureService.reserveSeats(command.getTravelId(), command.getPeopleCount());
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.reserved", successEvent);
+            rabbitTemplate.convertAndSend( "booking.reserved.queue", successEvent);
 
         } catch (Exception e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.failed", failedEvent);
+            rabbitTemplate.convertAndSend( "booking.failed.queue", failedEvent);
         }
     }
 

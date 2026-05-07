@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -25,52 +26,53 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + " : " + error.getDefaultMessage())
                 .collect(Collectors.joining(" | "));
 
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error("Field validation failed")
-                .message(message)
-                .path(request.getRequestURI())
-                .build();
-
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Field validation failed", message, request.getRequestURI());
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(ex.getStatusCode().value())
-                .error(ex.getStatusCode().toString())
-                .message(ex.getReason())
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, ex.getStatusCode());
+    @ExceptionHandler({BookingNotFoundException.class, DocumentNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleNotFoundExceptions(RuntimeException ex, HttpServletRequest request) {
+        log.warn("Risorsa non trovata: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Resource Not Found", ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpServletRequest request) {
+        log.warn("Rotta non trovata: {}", request.getRequestURI());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Endpoint Not Found", "La rotta richiesta non esiste", request.getRequestURI());
+    }
+
+    @ExceptionHandler({StatusException.class, SeatsNotAvailableException.class})
+    public ResponseEntity<ErrorResponse> handleBusinessExceptions(RuntimeException ex, HttpServletRequest request) {
+        log.warn("Errore di logica di business: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Business Logic Error", ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.FORBIDDEN.value())
-                .error("Access denied")
-                .message("You don't have the required permissions to access this resource.")
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        log.warn("Accesso negato: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.FORBIDDEN, "Access denied", "Non hai i permessi per accedere a questa risorsa.", request.getRequestURI());
+    }
+
+    @ExceptionHandler(com.stripe.exception.StripeException.class)
+    public ResponseEntity<ErrorResponse> handleStripeException(com.stripe.exception.StripeException ex, HttpServletRequest request) {
+        log.error("Errore di comunicazione con Stripe: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.BAD_GATEWAY, "Payment Gateway Error", "Impossibile elaborare il pagamento al momento.", request.getRequestURI());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
-        log.error("Errore critico imprevisto: ", ex);
+        log.error("Errore critico imprevisto sulla rotta {}: ", request.getRequestURI(), ex);
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Si è verificato un errore imprevisto.", request.getRequestURI());
+    }
 
+    private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String error, String message, String path) {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error("Generic error")
-                .message("Internal error occurred.")
-                .path(request.getRequestURI())
+                .status(status.value())
+                .error(error)
+                .message(message)
+                .path(path)
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(response, status);
     }
 }
