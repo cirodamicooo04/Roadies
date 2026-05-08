@@ -1,0 +1,83 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: travel-service
+          uri: lb://TRAVEL-SERVICE
+          predicates:
+            - Path=/api/v1/travels/**, /api/v1/activities/**, /api/v1/metadata/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: travel-service-circuit-breaker
+                fallbackUri: forward:/fallback/travel
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: user-service-circuit-breaker
+                fallbackUri: forward:/fallback/user
+        - id: review-service
+          uri: lb://REVIEW-SERVICE
+          predicates:
+            - Path=/api/v1/reviews/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: review-service-circuit-breaker
+                fallbackUri: forward:/fallback/review
+        - id: chat-service
+          uri: lb://CHAT-SERVICE
+          predicates:
+            - Path=/api/v1/chats/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: chat-service-circuit-breaker
+                fallbackUri: forward:/fallback/chat
+        - id: booking-service
+          uri: lb://BOOKING-SERVICE
+          predicates:
+            - Path=/api/v1/bookings/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: booking-service-circuit-breaker
+                fallbackUri: forward:/fallback/booking
+      default-filters:
+        - TokenRelay #Inietta il token nella richiesta al microservizio
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/roadies-app
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10 #Guarda le ultime 10 richieste
+        failureRateThreshold: 50 #Se il 50% è fallito apre il circuito dunque non invia richieste al microservizio
+        waitDurationInOpenState: 10000 #Dopo 10s si puo riprovare
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 3s #Se non risponde in 3s considero fallita la richiesta
+        cancelRunningFuture: true
+      travel-service-circuit-breaker:
+        timeout-duration:
+          seconds: 3

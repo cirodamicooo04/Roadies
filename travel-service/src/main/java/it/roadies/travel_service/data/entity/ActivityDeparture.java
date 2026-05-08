@@ -1,0 +1,64 @@
+package it.roadies.travel_service.data.entity;
+
+import it.roadies.travel_service.data.entity.enumerations.Status;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.SoftDelete;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@Table(name = "ACTIVITY_SESSIONS")
+@SoftDelete(columnName = "deleted")
+public class ActivityDeparture {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "activity_id")
+    private Activity activity;
+
+    @Column(name = "start_timestamp")
+    private LocalDateTime startTimestamp;
+
+    @Column(name = "end_timestamp")
+    private LocalDateTime endTimestamp;
+
+    @Column(name = "max_slots", nullable = false)
+    private Integer maxSlots;
+
+    @Column(name = "available_slots", nullable = false)
+    private Integer availableSlots;
+
+    @Version
+    private Long version;
+
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status = Status.PLANNED;
+
+    @PrePersist
+    public void prePersist() {
+        if (price == null) {
+            price = BigDecimal.ZERO;
+        }
+
+        if (this.availableSlots == null) {
+            this.availableSlots = maxSlots;
+        }
+
+    }
+
+}
