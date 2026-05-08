@@ -6,10 +6,12 @@ import it.roadies.user_service.data.dto.request.UserDocumentRequestDTO;
 import it.roadies.user_service.data.dto.response.UserDocumentResponseDTO;
 import it.roadies.user_service.services.UserDocumentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,12 +23,13 @@ import java.util.UUID;
 public class UserDocumentController {
     private final UserDocumentService userDocumentService;
 
-    @PostMapping("/upload/{userId}")
+    @PostMapping(value = "/upload/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Carica documento", description = "Carica un documento. Solo l'utente stesso può farlo.")
     public ResponseEntity<UserDocumentResponseDTO> upload(
             @PathVariable String userId,
-            @RequestBody UserDocumentRequestDTO dto){
-        return ResponseEntity.ok(userDocumentService.uploadDocument(userId, dto));
+            @RequestPart("document") UserDocumentRequestDTO dto,
+            @RequestPart("file") MultipartFile file){
+        return ResponseEntity.ok(userDocumentService.uploadDocument(userId, dto, file));
     }
 
     @GetMapping("/user/{userId}")

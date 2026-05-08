@@ -23,5 +23,6 @@ public interface UserDocumentMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "rejectionReason", ignore = true)
     @Mapping(target = "verifiedAt", ignore = true)
+    @Mapping(target = "fileUrl", ignore = true)
     UserDocument toEntity(UserDocumentRequestDTO dto);
 }
