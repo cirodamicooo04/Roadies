@@ -15,6 +15,7 @@ import it.roadies.travel_service.data.entity.Activity;
 import it.roadies.travel_service.data.entity.ActivityDeparture;
 import it.roadies.travel_service.data.entity.Image;
 import it.roadies.travel_service.data.entity.TravelDeparture;
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import it.roadies.travel_service.data.entity.enumerations.ImageStatus;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import it.roadies.travel_service.data.mapper.ActivityMapper;
@@ -34,6 +35,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -105,10 +107,12 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ActivitySummaryResponse> searchActivities(String destination, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+    public Page<ActivitySummaryResponse> searchActivities(Continent continent,String country,String destination, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
         Specification<Activity> specification = Specification.where(ActivitySpecification.hasDestination(destination))
-                .and(ActivitySpecification.hasPriceRange(minPrice, maxPrice)
-                        .and(ActivitySpecification.isStandalone()));
+                .and(ActivitySpecification.hasPriceRange(minPrice, maxPrice))
+                        .and(ActivitySpecification.isStandalone())
+                        .and(ActivitySpecification.hasContinent(continent))
+                        .and(ActivitySpecification.hasCountry(country));
 
         Page<Activity> activities = activityRepository.findAll(specification, pageable);
         return activities.map(activityMapper::toSummaryResponse);
@@ -177,8 +181,11 @@ public class ActivityServiceImpl implements ActivityService {
         return activityMapper.toDeparturesResponse(departure);
     }
 
-    public List<String> getUniqueDestinations() {
-        return activityRepository.findUniqueDestinations();
+    public List<String> getUniqueDestinations(Continent continent, String country) {
+        Specification<Activity> specification = Specification.where(ActivitySpecification.hasContinent(continent)).and(ActivitySpecification.hasCountry(country));
+        List<Activity> activities = activityRepository.findAll(specification);
+
+        return activities.stream().map(Activity::getDestination).filter(Objects::nonNull).distinct().sorted().toList();
     }
 
     @Transactional

@@ -2,6 +2,7 @@ package it.roadies.travel_service.controller;
 
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import it.roadies.travel_service.services.ActivityService;
 import it.roadies.travel_service.services.ImageService;
 import it.roadies.travel_service.services.TravelDepartureService;
@@ -71,12 +72,12 @@ public class TravelController {
     }
 
     @GetMapping("/public/search")
-    public ResponseEntity<?> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays , @RequestParam(required = false, defaultValue = "TRAVEL") String type, Pageable pageable){
+    public ResponseEntity<?> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays , @RequestParam(required = false, defaultValue = "TRAVEL") String type, @RequestParam(required = false)Continent continent, @RequestParam(required = false) String country, Pageable pageable){
         if(!type.equalsIgnoreCase("ACTIVITY")){
-            Page<TravelSummaryResponse> travels = travelService.searchTravels(destination, minPrice, maxPrice, minDurationDays, maxDurationDays, pageable);
+            Page<TravelSummaryResponse> travels = travelService.searchTravels(continent,country,destination, minPrice, maxPrice, minDurationDays, maxDurationDays, pageable);
             return ResponseEntity.ok(travels);
         }
-        Page<ActivitySummaryResponse> activities = activityService.searchActivities(destination, minPrice, maxPrice, pageable);
+        Page<ActivitySummaryResponse> activities = activityService.searchActivities(continent,country,destination, minPrice, maxPrice, pageable);
         return ResponseEntity.ok(activities);
     }
 

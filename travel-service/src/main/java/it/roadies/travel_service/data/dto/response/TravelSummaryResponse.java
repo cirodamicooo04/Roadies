@@ -1,5 +1,6 @@
 package it.roadies.travel_service.data.dto.response;
 
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -12,6 +13,8 @@ public class TravelSummaryResponse {
     private UUID id;
     private String ownerId;
     private String title;
+    private Continent continent;
+    private String country;
     private String destination;
     private Integer durationDays;
     private BigDecimal startingFromPrice;

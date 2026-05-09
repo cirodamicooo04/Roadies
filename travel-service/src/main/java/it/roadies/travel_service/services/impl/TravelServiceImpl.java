@@ -6,6 +6,7 @@ import it.roadies.travel_service.data.dao.specification.TravelSpecification;
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.data.entity.*;
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import it.roadies.travel_service.data.entity.enumerations.ImageStatus;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import it.roadies.travel_service.data.mapper.ActivityMapper;
@@ -192,10 +193,12 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TravelSummaryResponse> searchTravels(String destination, BigDecimal minPrice, BigDecimal maxPrice, Integer minDurationDays, Integer maxDurationDays, Pageable pageable){
+    public Page<TravelSummaryResponse> searchTravels(Continent continent,String country,String destination, BigDecimal minPrice, BigDecimal maxPrice, Integer minDurationDays, Integer maxDurationDays, Pageable pageable){
         Specification<Travel> travelSpecification = Specification.where(TravelSpecification.hasDestination(destination))
                 .and(TravelSpecification.hasPriceRange(minPrice, maxPrice))
-                .and(TravelSpecification.hasDurationRange(minDurationDays, maxDurationDays));
+                .and(TravelSpecification.hasDurationRange(minDurationDays, maxDurationDays))
+                .and(TravelSpecification.hasContinent(continent))
+                .and(TravelSpecification.hasCountry(country));
 
         Page<Travel> travels = travelRepository.findAll(travelSpecification, pageable);
         return travels.map(travelMapper::toSummaryResponse);
@@ -317,8 +320,11 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Override
-    public List<String> getUniqueDestinations() {
-        return travelRepository.findUniqueDestinations();
+    public List<String> getUniqueDestinations(Continent continent, String country) {
+        Specification<Travel> travelSpecification = Specification.where(TravelSpecification.hasContinent(continent)).and(TravelSpecification.hasCountry(country));
+
+        List<Travel> travels = travelRepository.findAll(travelSpecification);
+        return travels.stream().map(Travel::getDestination).filter(Objects::nonNull).distinct().sorted().toList();
     }
 
     @Transactional

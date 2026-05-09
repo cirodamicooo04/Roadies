@@ -1,5 +1,6 @@
 package it.roadies.travel_service.data.entity;
 
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -34,6 +35,13 @@ public class Travel {
 
     @Column(length = 10000, name = "description", nullable = false)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "continent", nullable = false)
+    private Continent continent;
+
+    @Column(name = "country", nullable = false)
+    private String country;
 
     @Column(length = 150, name = "destination", nullable = false)
     private String destination;

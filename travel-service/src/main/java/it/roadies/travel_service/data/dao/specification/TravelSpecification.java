@@ -2,6 +2,7 @@ package it.roadies.travel_service.data.dao.specification;
 
 import it.roadies.travel_service.data.entity.Travel;
 import it.roadies.travel_service.data.entity.TravelDeparture;
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -12,9 +13,23 @@ public class TravelSpecification {
 
         return (root, query, cb) -> {
             if (destination == null) return null;
-            return cb.equal(root.get("destination"), destination);
+            return cb.equal(cb.lower(root.get("destination")), destination.toLowerCase().trim());
         };
 
+    }
+
+    public static Specification<Travel> hasContinent(Continent continent){
+        return (root,query,cb) -> {
+            if (continent == null) return null;
+            return cb.equal(root.get("continent"), continent);
+        };
+    }
+
+    public static Specification<Travel> hasCountry(String country){
+        return (root,query,cb) -> {
+            if (country == null) return null;
+            return cb.equal(cb.lower(root.get("country")), country.toLowerCase().trim());
+        };
     }
 
     public static Specification<Travel> hasPriceRange(BigDecimal minPrice, BigDecimal maxPrice){
