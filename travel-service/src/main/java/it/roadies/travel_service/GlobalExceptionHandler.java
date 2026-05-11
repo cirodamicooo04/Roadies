@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder().
                 timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Filed validation failed")
+                .error("Field validation failed")
                 .message(e.getBindingResult().getFieldError().getDefaultMessage())
                 .build();
 

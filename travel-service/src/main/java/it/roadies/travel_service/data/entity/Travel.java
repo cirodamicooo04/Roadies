@@ -9,6 +9,9 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,6 +25,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "TRAVELS")
 @SoftDelete(columnName = "deleted")
+@EntityListeners(value = {AuditingEntityListener.class})
 public class Travel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -54,6 +58,12 @@ public class Travel {
 
     @Column(name = "duration_days", nullable = false)
     private int durationDays;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastUpdatedBy;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

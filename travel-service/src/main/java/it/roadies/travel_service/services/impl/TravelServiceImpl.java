@@ -75,10 +75,17 @@ public class TravelServiceImpl implements TravelService {
             }
         }
 
+        Map<UUID, Tag> tagsMap = tagRepository.findAll().stream().collect(Collectors.toMap(Tag::getId, t -> t));
+
+        if (!tagsMap.isEmpty() && (travelCreateRequest.getTagScores() == null || travelCreateRequest.getTagScores().size() < tagsMap.size())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must provide all the tags available.");
+        }
+
         if(travelCreateRequest.getTagScores() != null){
             List<TravelTagRequest> tagScores = travelCreateRequest.getTagScores();
             for (TravelTagRequest ts : tagScores.stream().distinct().toList()) {
-                Tag tag = tagRepository.findById(ts.getTagId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
+                Tag tag = tagsMap.get(ts.getTagId());
+                if (tag == null) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag not found");}
                 TravelTag travelTag = new TravelTag();
                 travelTag.setTravel(travel);
                 travelTag.setTag(tag);
@@ -147,10 +154,17 @@ public class TravelServiceImpl implements TravelService {
         travelMapper.updateTravelFromDto(travelUpdateRequest, travel);
         validateTravelLogic(travel);
 
+        Map<UUID, Tag> tagsMap = tagRepository.findAll().stream().collect(Collectors.toMap(Tag::getId, t -> t));
+
+        if (!tagsMap.isEmpty() && (travelUpdateRequest.getTagScores() == null || travelUpdateRequest.getTagScores().size() < tagsMap.size())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must provide all the tags available.");
+        }
+
         if (travelUpdateRequest.getTagScores() != null){
             travel.getTagScores().clear();
             for (TravelTagRequest ts : travelUpdateRequest.getTagScores().stream().distinct().toList()) {
-                Tag tag =  tagRepository.findById(ts.getTagId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
+                Tag tag =  tagsMap.get(ts.getTagId());
+                if (tag == null) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag not found");}
                 TravelTag travelTag = new TravelTag();
                 travelTag.setTravel(travel);
                 travelTag.setTag(tag);

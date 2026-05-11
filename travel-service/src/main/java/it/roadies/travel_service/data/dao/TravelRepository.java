@@ -22,4 +22,6 @@ public interface TravelRepository extends JpaRepository<Travel, UUID>, JpaSpecif
 
     @Query("SELECT t FROM Travel t WHERE t.id NOT IN :bookedIds")
     List<Travel> findCandidateTravels(@Param("bookedIds") List<UUID> bookedIds, Pageable pageable);
+
+    Travel getTravelById(UUID id);
 }
