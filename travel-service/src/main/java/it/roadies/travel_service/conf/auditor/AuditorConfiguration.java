@@ -1,4 +1,4 @@
-package it.roadies.travel_service.conf;
+package it.roadies.travel_service.conf.auditor;
 
 
 import org.springframework.context.annotation.Bean;

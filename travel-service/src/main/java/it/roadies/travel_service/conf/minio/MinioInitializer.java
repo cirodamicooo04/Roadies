@@ -1,4 +1,4 @@
-package it.roadies.travel_service.conf;
+package it.roadies.travel_service.conf.minio;
 
 import io.minio.*;
 import jakarta.annotation.PostConstruct;

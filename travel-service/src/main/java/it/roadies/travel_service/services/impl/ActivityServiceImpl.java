@@ -1,5 +1,6 @@
 package it.roadies.travel_service.services.impl;
 
+import it.roadies.travel_service.conf.i8n.MessageLang;
 import it.roadies.travel_service.data.dao.ActivityDepartureRepository;
 import it.roadies.travel_service.data.dao.ActivityRepository;
 import it.roadies.travel_service.data.dao.ImageRepository;
@@ -46,13 +47,14 @@ public class ActivityServiceImpl implements ActivityService {
     private final ActivityDepartureRepository activityDepartureRepository;
     private final ImageRepository imageRepository;
     private final ImageService imageService;
+    private final MessageLang messageLang;
 
     private void validateActivity(Activity activity){
-        if (activity.getTravel() != null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Standalone activity can't have a travel");
+        if (activity.getTravel() != null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.standalone.activity.cant.have.travel"));
 
         for (ActivityDeparture departure : activity.getDepartures()){
             if (!departure.getStartTimestamp().isBefore(departure.getEndTimestamp())){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure start date must be before end date");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departures.dates.not.valid"));
             }
         }
     }
@@ -70,11 +72,11 @@ public class ActivityServiceImpl implements ActivityService {
             images.forEach(i -> {
                 // Controllo sicurezza: L'immagine è tua?
                 if (!i.getOwnerId().equals(ownerId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi usare un'immagine non tua");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.image.not.owned"));
                 }
                 // Controllo sicurezza: L'immagine non deve essere già associata a qualcos'altro
                 if (i.getTravel() != null || (i.getActivity() != null && !i.getActivity().getId().equals(savedActivity.getId()))) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Immagine già associata a un'altra entità");
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.image.already.associated"));
                 }
 
                 i.setActivity(savedActivity);
@@ -88,14 +90,14 @@ public class ActivityServiceImpl implements ActivityService {
 
 
     public ActivityResponse getActivityById(UUID id){
-        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
         return activityMapper.toResponse(activity);
     }
 
     @Transactional
     public void deleteActivityById(UUID id, String ownerId){
-        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
-        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this activity");
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
+        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.activity.not.owned"));
 
         if (activity.getImages() != null) {
             for (Image image : activity.getImages()) {
@@ -120,8 +122,8 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Transactional
     public ActivityDepartureResponse addDeparture(UUID activityId, ActivityDepartureCreateRequest request,  String ownerId) {
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
-        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to add a departure to this activity");
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
+        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.activity.not.owned"));
 
         ActivityDeparture departure = activityMapper.toDepartureEntity(request);
         departure.setActivity(activity);
@@ -135,25 +137,25 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Transactional
     public void deleteDeparture(UUID activityId, UUID departureId, String ownerId){
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
-        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this departure");
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
+        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.activity.not.owned"));
 
-        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Departure not found"));
-        if (!departure.getActivity().getId().equals(activityId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure not found in this activity");
+        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.departure.not.found")));
+        if (!departure.getActivity().getId().equals(activityId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departure.not.found.in.this.activity"));
 
-        if (departure.getStatus() == Status.CONFIRMED) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't delete a confirmed departure");
+        if (departure.getStatus() == Status.CONFIRMED) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departure.already.confirmed"));
         activity.getDepartures().remove(departure);
         activityDepartureRepository.delete(departure);
     }
 
     @Transactional
     public ActivityDepartureResponse updateDeparture(UUID activityId, UUID departureId, ActivityDepartureUpdateRequest request, String ownerId) {
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
-        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to update this departure");
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
+        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.activity.not.owned"));
 
-        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Departure not found"));
-        if (!departure.getActivity().getId().equals(activityId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure not found in this activity");
-        if (departure.getStatus() == Status.CONFIRMED) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update a confirmed departure");
+        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.departure.not.found")));
+        if (!departure.getActivity().getId().equals(activityId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departure.not.found.in.this.activity"));
+        if (departure.getStatus() == Status.CONFIRMED) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departure.already.confirmed"));
 
         activityMapper.updateDepartureEntity(request, departure);
         validateActivity(activity);
@@ -164,18 +166,18 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Transactional(readOnly = true)
     public List<ActivityDepartureResponse> getDepartures(UUID activityId) {
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
         return activity.getDepartures().stream().filter(d -> d.getStartTimestamp().isAfter(LocalDateTime.now())).sorted(Comparator.comparing(ActivityDeparture::getStartTimestamp)).map(activityMapper::toDeparturesResponse).toList();
     }
 
     @Transactional
     public ActivityDepartureResponse confirmDeparture(UUID activityId, UUID departureId, String ownerId) {
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
-        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to confirm this departure");
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
+        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.activity.not.owned"));
 
-        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Departure not found"));
-        if (!departure.getActivity().getId().equals(activityId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departure not found in this activity");
-        if (departure.getStatus() == Status.CONFIRMED) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This departure is already confirmed");
+        ActivityDeparture departure = activityDepartureRepository.findById(departureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.departure.not.found")));
+        if (!departure.getActivity().getId().equals(activityId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departure.not.found.in.this.activity"));
+        if (departure.getStatus() == Status.CONFIRMED) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departure.already.confirmed"));
         departure.setStatus(Status.CONFIRMED);
         activityDepartureRepository.save(departure);
         return activityMapper.toDeparturesResponse(departure);
@@ -190,11 +192,11 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Transactional
     public ActivityResponse updateActivity(UUID id, ActivityUpdateRequest request, String ownerId) {
-        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
-        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to update this activity");
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
+        if (!activity.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.activity.not.owned"));
 
         boolean hasConfirmedDepartures = activity.getDepartures().stream().anyMatch(d -> d.getStatus() == Status.CONFIRMED);
-        if (hasConfirmedDepartures) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't update an activity with confirmed departures");
+        if (hasConfirmedDepartures) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.activity.has.confirmed.departures"));
 
         activityMapper.updateActivityFromDto(request, activity);
         validateActivity(activity);
@@ -213,10 +215,10 @@ public class ActivityServiceImpl implements ActivityService {
             //associo le nuove immagini
             for (Image img : requestedImages) {
                 if (!img.getOwnerId().equals(ownerId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't add an image to an activity that is not yours.");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.image.not.owned"));
                 }
                 if (img.getTravel() != null || (img.getActivity() != null && !img.getActivity().getId().equals(activity.getId()))) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image already associated with another activity.");
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.image.already.associated"));
                 }
 
                 if (img.getStatus() == ImageStatus.TEMPORARY) {

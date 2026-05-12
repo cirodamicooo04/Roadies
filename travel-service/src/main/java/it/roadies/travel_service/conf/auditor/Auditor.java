@@ -1,4 +1,4 @@
-package it.roadies.travel_service.conf;
+package it.roadies.travel_service.conf.auditor;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

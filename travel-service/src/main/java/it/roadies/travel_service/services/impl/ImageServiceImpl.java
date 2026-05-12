@@ -2,6 +2,7 @@ package it.roadies.travel_service.services.impl;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import it.roadies.travel_service.conf.i8n.MessageLang;
 import it.roadies.travel_service.data.dao.ImageRepository;
 import it.roadies.travel_service.data.dto.response.ImageResponse;
 import it.roadies.travel_service.data.entity.Image;
@@ -25,6 +26,7 @@ public class ImageServiceImpl implements ImageService {
 
     private final MinioClient minioClient;
     private final ImageRepository imageRepository;
+    private final MessageLang messageLang;
 
     @Value("${minio.travelBucket}")
     private String travelBucket;
@@ -77,7 +79,7 @@ public class ImageServiceImpl implements ImageService {
             return response;
 
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error uploading image to MinIO");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, messageLang.getMessage("error.image.minio.upload"));
         }
 
     }
