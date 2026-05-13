@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -24,4 +26,7 @@ public interface TravelDepartureRepository extends JpaRepository<TravelDeparture
     boolean existsByTravel(Travel travel);
 
     List<TravelDeparture> findAllByTravel(Travel travel);
+
+    @Query("SELECT t.price FROM TravelDeparture t WHERE t.id = :id")
+    Optional<BigDecimal> findPriceById(@Param("id") UUID id);
 }

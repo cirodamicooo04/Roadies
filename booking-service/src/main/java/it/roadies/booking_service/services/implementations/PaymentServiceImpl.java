@@ -70,7 +70,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         PaymentIntentCreateParams params =
                 PaymentIntentCreateParams.builder()
-                        .setAmount(booking.getTotalPrice().longValue())
+                        .setAmount(booking.getTotalPrice().multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).longValue())
                         .setCurrency("eur")
                         .putMetadata("bookingId", booking.getId().toString())
                         .setAutomaticPaymentMethods(

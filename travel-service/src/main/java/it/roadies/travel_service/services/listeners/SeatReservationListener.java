@@ -37,11 +37,11 @@ public class SeatReservationListener {
             activityDepartureService.reserveSeats(command.getActivityId(), command.getPeopleCount());
 
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.reserved", successEvent);
+            rabbitTemplate.convertAndSend("booking.reserved.queue", successEvent);
 
         } catch (NotEnoughSeatsException e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.failed", failedEvent);
+            rabbitTemplate.convertAndSend("booking.failed.queue", failedEvent);
         }
     }
 
@@ -50,11 +50,11 @@ public class SeatReservationListener {
         try {
             travelDepartureService.releaseSeats(command.getTravelId(), command.getPeopleCount());
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.reserved", successEvent);
+            rabbitTemplate.convertAndSend("booking.reserved.queue", successEvent);
 
         } catch (Exception e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.failed", failedEvent);
+            rabbitTemplate.convertAndSend("booking.failed.queue", failedEvent);
         }
     }
 
@@ -64,11 +64,11 @@ public class SeatReservationListener {
             activityDepartureService.releaseSeats(command.getActivityId(), command.getPeopleCount());
 
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.reserved", successEvent);
+            rabbitTemplate.convertAndSend("booking.reserved.queue", successEvent);
 
         } catch (NotEnoughSeatsException e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.failed", failedEvent);
+            rabbitTemplate.convertAndSend("booking.failed.queue", failedEvent);
         }
     }
 

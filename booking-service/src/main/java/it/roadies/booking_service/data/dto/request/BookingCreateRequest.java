@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -18,8 +17,6 @@ public class BookingCreateRequest {
     private UUID bookingId;
     @Min(1)
     private Integer peopleCount;
-    @Min(1)
-    private BigDecimal totalPrice;
 
     @AssertTrue(message = "activityId e travelId non posso essere entrambi campi notnull")
     public boolean ValidTarget() {

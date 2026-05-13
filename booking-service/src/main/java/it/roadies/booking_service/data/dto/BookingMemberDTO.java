@@ -1,8 +1,8 @@
 package it.roadies.booking_service.data.dto;
 
+import it.roadies.booking_service.data.dto.request.MemberDocumentRequest;
 import it.roadies.booking_service.data.entities.Booking;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Data;
 
@@ -20,6 +20,5 @@ public class BookingMemberDTO {
     private String notes;
     @NotBlank
     private String phoneNumber;
-    private Booking booking;
-    private List<MemberDocumentDTO> documents;
+    private List<MemberDocumentRequest> documents;
 }

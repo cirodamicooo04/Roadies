@@ -20,7 +20,7 @@ public class MemberDocument {
     @Column(nullable = false)
     private DocumentType type;
 
-    @Column(name = "file_url", nullable = false)
+    @Column(name = "file_url")
     private String fileUrl;
 
     @Enumerated(EnumType.STRING)
