@@ -3,6 +3,10 @@ package it.roadies.booking_service.data.entities;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,11 +38,20 @@ public class Booking {
     @Column(name = "total_price", nullable = false)
     private BigDecimal totalPrice;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastUpdatedBy;
+
 
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
@@ -54,7 +67,6 @@ public class Booking {
 
     @PrePersist
     public void setCreatedAtAndStatus() {
-        this.createdAt = LocalDateTime.now();
         if (this.status == null) {
             this.status = BookingStatus.DRAFT;
         }
