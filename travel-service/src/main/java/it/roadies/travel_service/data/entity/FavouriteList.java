@@ -19,7 +19,7 @@ public class FavouriteList {
     private UUID id;
 
     @Column(name = "owner_id", nullable = false)
-    private UUID ownerId;
+    private String ownerId;
 
     @Column(nullable = false, length = 100)
     private String name;

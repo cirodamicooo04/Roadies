@@ -1,7 +1,6 @@
-package it.roadies.user_service.entities;
+package it.roadies.user_service.data.entities;
 
-import it.roadies.user_service.entities.enumeration.Badge;
-import it.roadies.user_service.entities.enumeration.Status;
+import it.roadies.user_service.data.entities.enumeration.Badge;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,11 +11,11 @@ import lombok.Data;
 
 public class Gamification {
     @Id
-    private String user_id;
+    private String userId;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name="user_id")
+    @JoinColumn(name="userId", referencedColumnName = "keycloakId")
     private User user;
 
     @Column
