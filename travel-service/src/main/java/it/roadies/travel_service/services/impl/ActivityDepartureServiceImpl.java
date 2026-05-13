@@ -3,11 +3,13 @@ package it.roadies.travel_service.services.impl;
 import it.roadies.travel_service.data.dao.ActivityDepartureRepository;
 import it.roadies.travel_service.data.entity.ActivityDeparture;
 import it.roadies.travel_service.exceptions.NotEnoughSeatsException;
+import it.roadies.travel_service.exceptions.StatusException;
 import it.roadies.travel_service.services.ActivityDepartureService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -35,4 +37,14 @@ public class ActivityDepartureServiceImpl implements ActivityDepartureService {
         activityDeparture.setAvailableSlots(activityDeparture.getAvailableSlots() + peopleCount);
         activitySessionRepository.save(activityDeparture);
     }
+
+    public boolean isValidActivity(UUID travelDepartureId){
+        return activitySessionRepository.existsById(travelDepartureId);
+    }
+
+    public BigDecimal getActivityPriceById(UUID activityDepartureId){
+        return activitySessionRepository.findPriceById(activityDepartureId).orElseThrow(() -> new StatusException("Viaggio non trovato con ID: " + activityDepartureId));
+    }
+
+
 }

@@ -7,6 +7,7 @@ import it.roadies.travel_service.services.ActivityService;
 import it.roadies.travel_service.services.ImageService;
 import it.roadies.travel_service.services.TravelDepartureService;
 import it.roadies.travel_service.services.TravelService;
+import it.roadies.travel_service.services.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -149,16 +150,19 @@ public class TravelController {
 
 
     //BOOKING AREA
-    @PostMapping("/{travelId}/reserve")
-    public ResponseEntity<Void> reserveSeats(@PathVariable UUID travelId, @RequestParam Integer spots) {
-        travelDepartureService.reserveSeats(travelId, spots);
-        return ResponseEntity.ok().build();
+
+    @GetMapping("/{travelId}")
+    public ResponseEntity<Void> isValidTravel(@PathVariable UUID travelId) {
+        if (travelDepartureService.isValidTravel(travelId)) {
+            return ResponseEntity.ok().build();
+        }
+        else return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/{travelId}/release")
-    public ResponseEntity<Void> releaseSeats(@PathVariable UUID travelId, @RequestParam Integer spots) {
-        travelDepartureService.releaseSeats(travelId, spots);
-        return ResponseEntity.ok().build();
+    @GetMapping("/{travelId}/price")
+    public ResponseEntity<BigDecimal> getTravelPrice(@PathVariable UUID travelId) {
+        BigDecimal response = travelDepartureService.getTravelPriceById(travelId);
+        return ResponseEntity.ok(response);
     }
 
     //IMAGES AREA

@@ -29,7 +29,7 @@ public class PaymentController {
     private String endpointSecret;
 
     @PreAuthorize("hasRole('TRAVELER')")
-    @PostMapping("/private/create-payment-intent")
+    @PostMapping("/create-payment-intent")
     public ResponseEntity<PaymentResponse> createPaymentIntent(@Valid @RequestBody PaymentRequest request) throws StripeException {
         PaymentResponse response = stripePaymentService.createPaymentIntent(request);
         return ResponseEntity.ok(response);

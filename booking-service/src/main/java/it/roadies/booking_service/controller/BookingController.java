@@ -5,13 +5,13 @@ import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
 import it.roadies.booking_service.data.dto.request.BookingMemberRequest;
 import it.roadies.booking_service.data.dto.response.BookingDraftResponse;
 import it.roadies.booking_service.data.dto.response.BookingStatusResponse;
+import it.roadies.booking_service.data.dto.response.BookingStep2Response;
 import it.roadies.booking_service.services.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.web.configurers.JeeConfigurer;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -27,24 +27,24 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PreAuthorize("hasRole('TRAVELER')")
-    @PostMapping("/public/create_draft")
+    @PostMapping("/create-draft")
     public ResponseEntity<BookingDraftResponse> createDraftBooking(@Valid @RequestBody BookingDraftRequest request) {
         BookingDraftResponse response = bookingService.createDraft(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PreAuthorize("hasRole('TRAVELER')")
-    @PostMapping("/public/create_pending")
+    @PutMapping("/create-pending")
     public ResponseEntity<Void> createBooking(@Valid @RequestBody BookingCreateRequest request) {
         bookingService.createBookingStep1(request);
         return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasRole('TRAVELER')")
-    @PostMapping("/public/create_members")
-    public ResponseEntity<Void> createMembers(@Valid @RequestBody BookingMemberRequest request) {
-        bookingService.createBookingStep2(request);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/create-members")
+    public ResponseEntity<BookingStep2Response> createMembers(@Valid @RequestBody BookingMemberRequest request) {
+        BookingStep2Response response = bookingService.createBookingStep2(request);
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasRole('TRAVELER')")
@@ -53,13 +53,14 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getBookingStatus(bookingId));
     }
 
-    @PostMapping("/public/{bookingId}/confirm")
+    @PreAuthorize("hasRole('TRAVELER')")
+    @PatchMapping("/{bookingId}/confirm")
     public ResponseEntity<Void> confirmBooking(@PathVariable UUID bookingId) {
         bookingService.confirmBooking(bookingId);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/public/{bookingId}/delete")
+    @DeleteMapping("/{bookingId}")
     public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId) {
         bookingService.deleteBooking(bookingId);
         return ResponseEntity.noContent().build();
