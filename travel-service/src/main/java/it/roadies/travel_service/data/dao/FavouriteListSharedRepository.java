@@ -8,4 +8,7 @@ import java.util.UUID;
 
 @Repository
 public interface FavouriteListSharedRepository extends JpaRepository<FavouriteListShared, UUID> {
+    boolean existsByListIdAndUserId(UUID listId, String userId);
+
+    void deleteByListIdAndUserId(UUID listId, String friendId);
 }
