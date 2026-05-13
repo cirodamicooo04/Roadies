@@ -6,7 +6,12 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SoftDelete;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,6 +23,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "ACTIVITY_SESSIONS")
 @SoftDelete(columnName = "deleted")
+@EntityListeners(value = {AuditingEntityListener.class})
 public class ActivityDeparture {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,6 +44,18 @@ public class ActivityDeparture {
 
     @Column(name = "available_slots", nullable = false)
     private Integer availableSlots;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastUpdatedBy;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @Version
     private Long version;

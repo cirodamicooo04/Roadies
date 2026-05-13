@@ -1,4 +1,4 @@
-package it.roadies.travel_service.conf;
+package it.roadies.travel_service.conf.minio;
 
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,6 +1,7 @@
 package it.roadies.travel_service.data.dto.response;
 
 import it.roadies.travel_service.data.entity.TravelTag;
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +13,8 @@ public class TravelResponse {
     private String ownerId;
     private String title;
     private String description;
+    private Continent continent;
+    private String country;
     private String destination;
     private Double latitude;
     private Double longitude;

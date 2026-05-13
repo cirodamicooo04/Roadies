@@ -1,5 +1,6 @@
 package it.roadies.travel_service.data.dto.request;
 
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -14,7 +15,11 @@ public class TravelCreateRequest {
     private String title;
     @NotBlank @Size(max = 10000)
     private String description;
-    @NotBlank @Size(max = 150)
+    @NotNull
+    private Continent continent;
+    @Pattern(regexp = ".*\\S.*")
+    private String country;
+    @Pattern(regexp = ".*\\S.*")
     private String destination;
     @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0")
     private Double latitude;
