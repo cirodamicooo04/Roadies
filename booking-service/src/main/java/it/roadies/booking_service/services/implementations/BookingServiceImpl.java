@@ -34,6 +34,7 @@ public class BookingServiceImpl implements BookingService {
     private final RabbitTemplate rabbitTemplate;
     private final BookingMemberMapper bookingMemberMapper;
 
+    //flusso caso d'uso di successo
     @Transactional
     public BookingDraftResponse createDraft(BookingDraftRequest requestDto) {
         log.info("Iniziata creazione draft per userId: {}", requestDto.getUserId());
@@ -53,33 +54,38 @@ public class BookingServiceImpl implements BookingService {
         int oldPeopleCount = booking.getPeopleCount();
         int newPeopleCount = requestDto.getPeopleCount();
 
-        booking.setStatus(BookingStatus.PENDING);
+        int difference = Math.abs(newPeopleCount - oldPeopleCount);
+
+        if (difference != 0) {
+            booking.setStatus(BookingStatus.PENDING);
+        }
         booking.setTravelId(requestDto.getTravelId());
         booking.setActivityId(requestDto.getActivityId());
+        //il prezzo lo andrò a prendere dal travel, non lo manda il client
         booking.setTotalPrice(requestDto.getTotalPrice());
-        booking.setPeopleCount(newPeopleCount - oldPeopleCount);
+        booking.setPeopleCount(newPeopleCount);
         bookingRepository.save(booking);
 
         ReserveSeatCommand command = new ReserveSeatCommand(
                 booking.getId(),
                 requestDto.getTravelId(),
                 requestDto.getActivityId(),
-                requestDto.getPeopleCount()
+                difference
         );
 
         log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), (newPeopleCount - oldPeopleCount));
 
         if (newPeopleCount - oldPeopleCount > 0) {
             if (requestDto.getTravelId() != null && requestDto.getActivityId() == null) {
-                rabbitTemplate.convertAndSend("travel.exchange", "travel.reserve", command);
+                rabbitTemplate.convertAndSend("travel.reserve.queue", command);
             } else if (requestDto.getTravelId() == null && requestDto.getActivityId() != null)
-                rabbitTemplate.convertAndSend("activity.exchange", "activity.reserve", command);
+                rabbitTemplate.convertAndSend("activity.reserve.queue", command);
 
         } else if (newPeopleCount - oldPeopleCount < 0){
             if (requestDto.getTravelId() != null && requestDto.getActivityId() == null) {
-                rabbitTemplate.convertAndSend("travel.exchange", "travel.release", command);
+                rabbitTemplate.convertAndSend("travel.release.queue", command);
             } else if (requestDto.getTravelId() == null && requestDto.getActivityId() != null)
-                rabbitTemplate.convertAndSend("activity.exchange", "activity.release", command);
+                rabbitTemplate.convertAndSend("activity.release.queue", command);
         }
     }
 
@@ -115,11 +121,13 @@ public class BookingServiceImpl implements BookingService {
         //qui aggiungerò un qualche evento
     }
 
+    //metodi caso d'insuccesso
+
     @Transactional
     @Override
     public void deleteBooking(UUID bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
-        bookingRepository.deleteById(booking.getId());
+        booking.setStatus(BookingStatus.CANCELLED);
         if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED) {
             ReserveSeatCommand command = new ReserveSeatCommand(
                     booking.getId(),
@@ -132,7 +140,6 @@ public class BookingServiceImpl implements BookingService {
             } else if (booking.getTravelId() == null && booking.getActivityId() != null)
                 rabbitTemplate.convertAndSend("activity.exchange", "activity.release", command);
         }
-
         //qui aggiungerò un qualche evento
     }
 

@@ -13,9 +13,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaymentRequest {
-    @Positive
-    private BigDecimal amount;
-    private String currency;
     @NotNull
     private UUID bookingId;
 }

@@ -3,6 +3,7 @@ package it.roadies.travel_service.services.impl;
 import it.roadies.travel_service.data.dao.TravelDepartureRepository;
 import it.roadies.travel_service.data.entity.TravelDeparture;
 import it.roadies.travel_service.data.mapper.TravelDepartureMapper;
+import it.roadies.travel_service.exceptions.NotEnoughSeatsException;
 import it.roadies.travel_service.services.TravelDepartureService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,7 @@ public class TravelDepartureServiceImpl implements TravelDepartureService {
             travel.setAvailableSlots(newSlotsNumber);
             travelDepartureRepository.save(travel);
         } else {
-            //qui andrò a modificare non appena aggiungiamo la gestione delle eccezioni
-            throw new RuntimeException("Posti insufficienti per questo viaggio");
+            throw new NotEnoughSeatsException("Posti insufficienti per questo viaggio");
         }
     }
 

@@ -148,15 +148,14 @@ public class TravelController {
 
 
     //BOOKING AREA
-
     @PostMapping("/{travelId}/reserve")
-    public ResponseEntity<Void> reserveSpots(@PathVariable UUID travelId, @RequestParam Integer spots) {
+    public ResponseEntity<Void> reserveSeats(@PathVariable UUID travelId, @RequestParam Integer spots) {
         travelDepartureService.reserveSeats(travelId, spots);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{travelId}/release")
-    public ResponseEntity<Void> releaseSpots(@PathVariable UUID travelId, @RequestParam int spots) {
+    public ResponseEntity<Void> releaseSeats(@PathVariable UUID travelId, @RequestParam Integer spots) {
         travelDepartureService.releaseSeats(travelId, spots);
         return ResponseEntity.ok().build();
     }

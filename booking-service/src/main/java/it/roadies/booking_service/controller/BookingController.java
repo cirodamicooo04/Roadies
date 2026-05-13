@@ -26,36 +26,40 @@ import java.util.UUID;
 public class BookingController {
     private final BookingService bookingService;
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/public/create_draft")
     public ResponseEntity<BookingDraftResponse> createDraftBooking(@Valid @RequestBody BookingDraftRequest request) {
         BookingDraftResponse response = bookingService.createDraft(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/public/create_pending")
     public ResponseEntity<Void> createBooking(@Valid @RequestBody BookingCreateRequest request) {
         bookingService.createBookingStep1(request);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/public/create_members")
     public ResponseEntity<Void> createMembers(@Valid @RequestBody BookingMemberRequest request) {
         bookingService.createBookingStep2(request);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{bookingId}/status")
+    @PreAuthorize("hasRole('TRAVELER')")
+    @GetMapping("/public/{bookingId}/status")
     public ResponseEntity<BookingStatusResponse> getStatus(@PathVariable UUID bookingId) {
         return ResponseEntity.ok(bookingService.getBookingStatus(bookingId));
     }
 
-    @PostMapping("/{bookingId}/confirm")
+    @PostMapping("/public/{bookingId}/confirm")
     public ResponseEntity<Void> confirmBooking(@PathVariable UUID bookingId) {
         bookingService.confirmBooking(bookingId);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{bookingId}/confirm")
+    @DeleteMapping("/public/{bookingId}/delete")
     public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId) {
         bookingService.deleteBooking(bookingId);
         return ResponseEntity.noContent().build();
