@@ -1,4 +1,4 @@
-package it.roadies.travel_service.listeners;
+package it.roadies.travel_service.services.listeners;
 
 import it.roadies.travel_service.data.dao.UserFriendshipRepository;
 import it.roadies.travel_service.data.dto.event.FriendshipEvent;
