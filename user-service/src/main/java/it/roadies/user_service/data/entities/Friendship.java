@@ -3,6 +3,7 @@ package it.roadies.user_service.data.entities;
 import it.roadies.user_service.data.entities.enumeration.Status;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedBy;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -30,4 +31,7 @@ public class Friendship {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 }

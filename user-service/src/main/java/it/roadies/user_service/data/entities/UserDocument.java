@@ -4,6 +4,11 @@ import it.roadies.user_service.data.entities.enumeration.DocumentStatus;
 import it.roadies.user_service.data.entities.enumeration.DocumentType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -30,8 +35,21 @@ public class UserDocument {
     @Column(nullable = false)
     private DocumentStatus status;
 
+    @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updatedAt", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @CreatedBy
+    @Column(name = "createdBy", nullable = false, updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    @Column(name = "updatedBy", nullable = false, updatable = false)
+    private String updateBy;
 
     @Column(name = "rejectionReason")
     private String rejectionReason;

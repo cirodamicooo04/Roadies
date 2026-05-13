@@ -2,6 +2,8 @@ package it.roadies.user_service.data.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,8 +37,13 @@ public class User {
     @Column(nullable = false)
     private LocalDate birthDate;
 
-    @Column(nullable = false)
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime updatedAt;
 
     @Column(nullable = false)
     private LocalDateTime lastLogin;
