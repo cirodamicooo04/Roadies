@@ -1,8 +1,5 @@
 package it.roadies.booking_service.services.implementations;
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
-import it.roadies.booking_service.clients.TravelServiceClient;
 import it.roadies.booking_service.config.i8n.MessageLang;
 import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.BookingMemberDTO;
@@ -23,7 +20,6 @@ import it.roadies.booking_service.data.entities.enumeration.DocumentStatus;
 import it.roadies.booking_service.exceptions.BookingNotFoundException;
 import it.roadies.booking_service.data.mapper.BookingMapper;
 import it.roadies.booking_service.exceptions.StatusException;
-import it.roadies.booking_service.exceptions.TravelNotFoundException;
 import it.roadies.booking_service.services.BookingService;
 import it.roadies.booking_service.services.clients.TravelService;
 import jakarta.transaction.Transactional;
@@ -54,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDraftResponse createDraft(BookingDraftRequest requestDto) {
         travelService.verifyTravelExists(requestDto.getTravelId(), requestDto.getActivityId());
 
-        log.info("Iniziata creazione draft per userId: {}", requestDto.getUserId());
+        log.info("Iniziata creazione draft per userId");
         Booking booking = bookingMapper.toEntity(requestDto);
         booking.setTotalPrice(BigDecimal.ZERO);
         booking.setPeopleCount(0);

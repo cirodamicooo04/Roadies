@@ -20,7 +20,7 @@ public class MinioServiceImpl implements MinioService {
     private final MinioClient minioClient;
     private final MessageLang messageLang;
 
-    @Value("${minio.travelBucket}")
+    @Value("${minio.bookingBucket}")
     private String bucketName;
 
     @Value("${minio.url}")
