@@ -7,12 +7,14 @@ import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.result.UserSyncResult;
 import it.roadies.user_service.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class UserController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody UserSyncRequestDTO requestDto) {
 
+        log.info("Ricevuta richiesta di sincronizzazione utente dal subject JWT: {}", jwt.getSubject());
         requestDto.setKeycloakId(jwt.getSubject());
 
         UserSyncResult result = userService.syncUser(requestDto);
@@ -42,12 +45,14 @@ public class UserController {
     @GetMapping("/me")
     @Operation(summary = "Il mio profilo", description = "Recupera i dati dell'utente loggato")
     public ResponseEntity<UserProfileResponseDTO> getMyProfile(@AuthenticationPrincipal Jwt jwt) {
+        log.info("Ricevuta richiesta di recupero profilo personale dal subject JWT: {}", jwt.getSubject());
         return ResponseEntity.ok(userService.getProfile(jwt.getSubject()));
     }
 
     @GetMapping("/search/{username}")
     @Operation(summary = "Cerca utente", description = "Ricerca pubblica di un profilo")
     public ResponseEntity<UserProfileResponseDTO> searchUser(@PathVariable String username) {
+        log.info("Ricevuta richiesta REST di ricerca utente per username: {}", username);
         return ResponseEntity.ok(userService.getProfileByUsername(username));
     }
 
@@ -56,12 +61,14 @@ public class UserController {
     public ResponseEntity<UserProfileResponseDTO> updateProfile(
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody UserSyncRequestDTO updateDto) {
+        log.info("Ricevuta richiesta di aggiornamento profilo dal subject JWT: {}", jwt.getSubject());
         return ResponseEntity.ok(userService.updateProfile(jwt.getSubject(), updateDto));
     }
 
     @DeleteMapping("/delete")
     @Operation(summary = "Elimina profilo", description = "Rimozione definitiva dell'account")
     public ResponseEntity<Void> deleteProfile(@AuthenticationPrincipal Jwt jwt) {
+        log.info("Ricevuta richiesta di eliminazione profilo dal subject JWT: {}", jwt.getSubject());
         userService.deleteProfile(jwt.getSubject());
         return ResponseEntity.noContent().build();
     }

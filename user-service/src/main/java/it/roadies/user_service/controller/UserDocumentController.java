@@ -6,6 +6,7 @@ import it.roadies.user_service.data.dto.request.UserDocumentRequestDTO;
 import it.roadies.user_service.data.dto.response.UserDocumentResponseDTO;
 import it.roadies.user_service.services.UserDocumentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class UserDocumentController {
             @PathVariable String userId,
             @RequestPart("document") UserDocumentRequestDTO dto,
             @RequestPart("file") MultipartFile file){
+        log.info("Ricevuta richiesta di upload documento per l'utente ID: {} con nome file: {}", userId, file.getOriginalFilename());
         return ResponseEntity.ok(userDocumentService.uploadDocument(userId, dto, file));
     }
 
@@ -36,6 +39,7 @@ public class UserDocumentController {
     @Operation(summary = "Lista documenti utente", description = "Recupera i documenti di un utente. Accessibile al proprietario, all'organizzatore o all'admin.")
     public ResponseEntity<List<UserDocumentResponseDTO>> getDocumentsByUser(
             @PathVariable String userId) {
+        log.info("Ricevuta richiesta di elenco documenti per l'utente ID: {}", userId);
         return ResponseEntity.ok(userDocumentService.getUserDocuments(userId));
     }
 
@@ -45,6 +49,7 @@ public class UserDocumentController {
             @PathVariable UUID docId,
             @RequestParam boolean approved,
             @RequestParam (required = false) String reason){
+        log.info("Ricevuta richiesta di verifica per il documento ID: {}. Approvato: {}", docId, approved);
         return ResponseEntity.ok(userDocumentService.verifyDocument(docId, approved, reason));
     }
 
@@ -53,6 +58,7 @@ public class UserDocumentController {
     public ResponseEntity<Void> deleteDocument(
             @PathVariable UUID docId,
             @AuthenticationPrincipal Jwt jwt){
+        log.info("Ricevuta richiesta di eliminazione per il documento ID: {} dal subject JWT: {}", docId, jwt.getSubject());
         userDocumentService.deleteDocument(docId, jwt.getSubject());
         return ResponseEntity.noContent().build();
     }

@@ -8,6 +8,7 @@ import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.entities.enumeration.Status;
 import it.roadies.user_service.services.FriendshipService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/friends")
 @RequiredArgsConstructor
@@ -30,8 +32,8 @@ public class FriendshipController {
     public ResponseEntity<Void> send(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String receiverUsername) {
-        String myId = jwt.getSubject();
-        friendshipService.sendRequest(myId, receiverUsername);
+        log.info("Ricevuta richiesta di amicizia dal subject JWT: {} verso lo username: {}", jwt.getSubject(), receiverUsername);
+        friendshipService.sendRequest(jwt.getSubject(), receiverUsername);
         return ResponseEntity.ok().build();
     }
 
@@ -41,34 +43,30 @@ public class FriendshipController {
             @PathVariable UUID friendshipId,
             @RequestParam Status status,
             @AuthenticationPrincipal Jwt jwt) {
-        String myId = jwt.getSubject();
-        friendshipService.respondToRequest(friendshipId, status, myId);
+        log.info("Ricevuta risposta ({}) alla richiesta di amicizia ID: {} dal subject JWT: {}", status, friendshipId, jwt.getSubject());
+        friendshipService.respondToRequest(friendshipId, status, jwt.getSubject());
         return ResponseEntity.ok().build();
     }
 
-    //Lista di amicizia rapida
     @GetMapping("/list")
     @Operation(summary = "Lista amici rapida", description = "Restituisce i profili base di tutti gli amici confermati.")
     public ResponseEntity<List<UserProfileResponseDTO>> getFriends(@AuthenticationPrincipal Jwt jwt) {
-        String myId = jwt.getSubject();
-        List<UserProfileResponseDTO> friends = friendshipService.getFriendsList(myId);
-        return ResponseEntity.ok(friends);
+        log.info("Ricevuta richiesta di elenco amici base dal subject JWT: {}", jwt.getSubject());
+        return ResponseEntity.ok(friendshipService.getFriendsList(jwt.getSubject()));
     }
 
-    // Lista amici DETTAGLIATA (come dicevamo all'interno della repository avrà l'account completo dell'amico, l'id dell'amicizia
-    // e anche la data dell'inizio dell'amicizia
     @GetMapping("/detailed-list")
     @Operation(summary = "Lista amici dettagliata", description = "Restituisce i profili degli amici con dettagli sulla data di inizio amicizia.")
     public ResponseEntity<List<FriendshipResponseDTO>> getDetailedFriends(@AuthenticationPrincipal Jwt jwt) {
-        String myId = jwt.getSubject();
-        return ResponseEntity.ok(friendshipService.getDetailedFriendsList(myId));
+        log.info("Ricevuta richiesta di elenco amici dettagliato dal subject JWT: {}", jwt.getSubject());
+        return ResponseEntity.ok(friendshipService.getDetailedFriendsList(jwt.getSubject()));
     }
 
     @GetMapping("/requests/pending")
     @Operation(summary = "Richieste in sospeso", description = "Recupera le richieste di amicizia ricevute in attesa di risposta.")
     public ResponseEntity<List<FriendshipResponseDTO>> getPendingRequests(@AuthenticationPrincipal Jwt jwt) {
-        String myId = jwt.getSubject();
-        return ResponseEntity.ok(friendshipService.getPendingRequests(myId));
+        log.info("Ricevuta richiesta di elenco richieste in sospeso dal subject JWT: {}", jwt.getSubject());
+        return ResponseEntity.ok(friendshipService.getPendingRequests(jwt.getSubject()));
     }
 
     @DeleteMapping("/{friendshipId}")
@@ -77,8 +75,8 @@ public class FriendshipController {
     public ResponseEntity<Void> removeFriend(
             @PathVariable UUID friendshipId,
             @AuthenticationPrincipal Jwt jwt) {
-        String myId = jwt.getSubject();
-        friendshipService.removeFriend(friendshipId, myId);
+        log.info("Ricevuta richiesta di rimozione amicizia ID: {} dal subject JWT: {}", friendshipId, jwt.getSubject());
+        friendshipService.removeFriend(friendshipId, jwt.getSubject());
         return ResponseEntity.noContent().build();
     }
 }
