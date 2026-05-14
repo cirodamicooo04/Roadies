@@ -3,6 +3,7 @@ package it.roadies.booking_service.services.implementations;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import it.roadies.booking_service.clients.TravelServiceClient;
+import it.roadies.booking_service.config.i8n.MessageLang;
 import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.BookingMemberDTO;
 import it.roadies.booking_service.data.dto.MemberIdResponse;
@@ -46,6 +47,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
     private final RabbitTemplate rabbitTemplate;
     private final TravelService travelService;
+    private final MessageLang messageLang;
 
     //flusso caso d'uso di successo
     @Transactional
@@ -64,7 +66,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public void createBookingStep1(BookingCreateRequest requestDto) {
         Booking booking = bookingRepository.findById(requestDto.getBookingId())
-                .orElseThrow(() -> new BookingNotFoundException(requestDto.getBookingId()));
+                .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 
         int oldPeopleCount = booking.getPeopleCount();
         int newPeopleCount = requestDto.getPeopleCount();
@@ -110,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingStep2Response createBookingStep2(BookingMemberRequest requestDto) {
         Booking booking = bookingRepository.findById(requestDto.getBookingId())
-                .orElseThrow(() -> new BookingNotFoundException(requestDto.getBookingId()));
+                .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 
         if (booking.getStatus() != BookingStatus.RESERVE_CONFIRMED) {
             throw new StatusException("Stato non valido per l'inserimento membri");
@@ -168,19 +170,19 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingStatusResponse getBookingStatus(UUID bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", bookingId)));
         return new BookingStatusResponse(booking.getId(), booking.getStatus(), booking.getTravelId(), booking.getActivityId());
     }
 
     @Transactional
     @Override
     public void confirmBooking(UUID bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", bookingId)));
         if (booking.getStatus() != BookingStatus.RESERVE_CONFIRMED) {
-            throw new StatusException("La prenotazione non è confermabile");
+            throw new StatusException(messageLang.getMessage("error.status.reserve"));
         }
         if (booking.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new StatusException("La prenotazione è scaduta");
+            throw new StatusException(messageLang.getMessage("error.status.time"));
         }
         booking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(booking);
@@ -192,7 +194,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public void deleteBooking(UUID bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", bookingId)));
         if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED) {
             booking.setStatus(BookingStatus.CANCELLED);
             bookingRepository.save(booking);

@@ -11,17 +11,17 @@ import org.springframework.stereotype.Component;
 public class MinioInitializer {
     private final MinioClient minioClient;
 
-    @Value("${minio.travelBucket}")
-    private String travelBucket;
+    @Value("${minio.bookingBucket}")
+    private String bookingBucket;
 
     @PostConstruct
     public void init() {
         try {
-            boolean travelBucketExists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(travelBucket).build());
-            if (!travelBucketExists) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(travelBucket).build());
+            boolean bookingBucketExists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bookingBucket).build());
+            if (!bookingBucketExists) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bookingBucket).build());
             }
-            setPublicReadOnlyPolicy(travelBucket);
+            setPublicReadOnlyPolicy(bookingBucket);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

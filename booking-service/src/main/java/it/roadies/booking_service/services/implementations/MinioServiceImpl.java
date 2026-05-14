@@ -2,7 +2,8 @@ package it.roadies.booking_service.services.implementations;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import io.minio.errors.MinioException;
+import it.roadies.booking_service.config.i8n.MessageLang;
+import it.roadies.booking_service.exceptions.StorageException;
 import it.roadies.booking_service.services.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class MinioServiceImpl implements MinioService {
 
     private final MinioClient minioClient;
+    private final MessageLang messageLang;
 
     @Value("${minio.travelBucket}")
     private String bucketName;
@@ -24,7 +26,7 @@ public class MinioServiceImpl implements MinioService {
     @Value("${minio.url}")
     private String minioUrl;
 
-    public String uploadFile(MultipartFile file) throws MinioException {
+    public String uploadFile(MultipartFile file) {
         try {
             String extension = getFileExtension(file.getOriginalFilename());
             String fileName = UUID.randomUUID().toString() + extension;
@@ -43,7 +45,7 @@ public class MinioServiceImpl implements MinioService {
             return minioUrl + "/" + bucketName + "/" + fileName;
 
         } catch (Exception e) {
-            throw new MinioException("Errore durante l'upload del file su MinIO", e);
+            throw new StorageException(messageLang.getMessage("error.minio"));
         }
     }
 

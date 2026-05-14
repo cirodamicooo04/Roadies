@@ -9,8 +9,6 @@ import java.util.UUID;
 
 @Data
 public class BookingCreateRequest {
-    @NotNull
-    private String userId;
     private UUID travelId;
     private UUID activityId;
     @NotNull

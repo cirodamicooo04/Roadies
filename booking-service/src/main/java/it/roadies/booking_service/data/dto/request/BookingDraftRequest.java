@@ -8,8 +8,6 @@ import java.util.UUID;
 
 @Data
 public class BookingDraftRequest {
-    @NotNull
-    private String userId;
     private UUID travelId;
     private UUID activityId;
 

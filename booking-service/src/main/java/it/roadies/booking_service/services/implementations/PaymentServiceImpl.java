@@ -4,6 +4,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
+import it.roadies.booking_service.config.i8n.MessageLang;
 import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.request.PaymentRequest;
 import it.roadies.booking_service.data.dto.response.PaymentResponse;
@@ -28,6 +29,7 @@ import java.util.UUID;
 public class PaymentServiceImpl implements PaymentService {
     private final BookingService bookingService;
     private final BookingRepository bookingRepository;
+    private final MessageLang messageLang;
 
     @Override
     public void processStripeEvent(Event event) {
@@ -54,18 +56,18 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentResponse createPaymentIntent(PaymentRequest request) throws StripeException {
-        Booking booking = bookingRepository.findById(request.getBookingId()).orElseThrow(() -> new BookingNotFoundException(request.getBookingId()));
+        Booking booking = bookingRepository.findById(request.getBookingId()).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", request.getBookingId())));
 
         if (!booking.getStatus().equals(BookingStatus.RESERVE_CONFIRMED)) {
-            throw new StatusException("Puoi pagare solo una prenotazione con posti confermati");
+            throw new StatusException(messageLang.getMessage("error.status.payment.reserve"));
         }
 
         if (booking.getExpiresAt() == null || booking.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new StatusException("La prenotazione è scaduta");
+            throw new StatusException(messageLang.getMessage("error.status.time"));
         }
 
         if (booking.getTotalPrice() == null || booking.getTotalPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new StatusException("Prezzo della prenotazione non valido");
+            throw new StatusException(messageLang.getMessage("error.status.payment.price"));
         }
 
         PaymentIntentCreateParams params =

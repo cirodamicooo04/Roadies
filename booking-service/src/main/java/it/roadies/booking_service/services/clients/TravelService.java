@@ -5,6 +5,7 @@ import feign.RetryableException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import it.roadies.booking_service.clients.TravelServiceClient;
+import it.roadies.booking_service.config.i8n.MessageLang;
 import it.roadies.booking_service.exceptions.ServiceUnavailableException;
 import it.roadies.booking_service.exceptions.TravelNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class TravelService {
 
     private final TravelServiceClient travelServiceClient;
+    private final MessageLang messageLang;
 
     @Retry(name = "travelService")
     @CircuitBreaker(name = "travelService")
@@ -38,23 +40,23 @@ public class TravelService {
         } catch (FeignException.NotFound e) {
             if (travelId == null) {
                 log.warn("Attività {} non esiste", activityId);
-                throw new TravelNotFoundException("Attività inesistente");
+                throw new TravelNotFoundException(messageLang.getMessage("error.activity.not.found"));
             }
 
             log.warn("Viaggio {} non esiste", travelId);
-            throw new TravelNotFoundException("Viaggio inesistente");
+            throw new TravelNotFoundException(messageLang.getMessage("error.travel.not.found"));
 
         } catch (FeignException.Unauthorized | FeignException.Forbidden e) {
             log.warn("Accesso non autorizzato al travel-service. Status: {}", e.status());
-            throw new ServiceUnavailableException("Impossibile verificare viaggio/attività per problemi di autorizzazione");
+            throw new ServiceUnavailableException(messageLang.getMessage("error.service.authorization"));
 
         } catch (RetryableException e) {
             log.error("Travel-service non raggiungibile durante la verifica viaggio/attività", e);
-            throw new ServiceUnavailableException("Travel-service non disponibile");
+            throw new ServiceUnavailableException(messageLang.getMessage("error.retry.travel"));
 
         } catch (Exception e) {
             log.error("Errore imprevisto durante la verifica viaggio/attività", e);
-            throw new ServiceUnavailableException("Errore imprevisto durante la verifica viaggio/attività");
+            throw new ServiceUnavailableException(messageLang.getMessage("error.any.travel"));
         }
     }
 
@@ -71,7 +73,7 @@ public class TravelService {
 
         } catch (Exception e) {
             log.error("Errore imprevisto durante la verifica viaggio/attività", e);
-            throw new ServiceUnavailableException("Errore imprevisto durante la verifica viaggio/attività");
+            throw new ServiceUnavailableException(messageLang.getMessage("error.any.travel"));
         }
     }
 }
