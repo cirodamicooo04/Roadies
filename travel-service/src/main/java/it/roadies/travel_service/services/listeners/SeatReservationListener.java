@@ -3,7 +3,7 @@ package it.roadies.travel_service.services.listeners;
 import it.roadies.travel_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.travel_service.data.dto.event.SeatReservationFailedEvent;
 import it.roadies.travel_service.data.dto.event.SeatReservedEvent;
-import it.roadies.travel_service.exceptions.SeatsNotAvailableException;
+import it.roadies.travel_service.exceptions.NotEnoughSeatsException;
 import it.roadies.travel_service.services.impl.ActivityDepartureServiceImpl;
 import it.roadies.travel_service.services.TravelDepartureService;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +23,11 @@ public class SeatReservationListener {
         try {
             travelDepartureService.reserveSeats(command.getTravelId(), command.getPeopleCount());
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.reserved", successEvent);
+            rabbitTemplate.convertAndSend( "booking.reserved.queue", successEvent);
 
         } catch (Exception e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.failed", failedEvent);
+            rabbitTemplate.convertAndSend( "booking.failed.queue", failedEvent);
         }
     }
 
@@ -37,11 +37,11 @@ public class SeatReservationListener {
             activityDepartureService.reserveSeats(command.getActivityId(), command.getPeopleCount());
 
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.reserved", successEvent);
+            rabbitTemplate.convertAndSend("booking.reserved.queue", successEvent);
 
-        } catch (SeatsNotAvailableException e) {
+        } catch (NotEnoughSeatsException e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.failed", failedEvent);
+            rabbitTemplate.convertAndSend("booking.failed.queue", failedEvent);
         }
     }
 
@@ -50,11 +50,11 @@ public class SeatReservationListener {
         try {
             travelDepartureService.releaseSeats(command.getTravelId(), command.getPeopleCount());
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.reserved", successEvent);
+            rabbitTemplate.convertAndSend("booking.reserved.queue", successEvent);
 
         } catch (Exception e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.failed", failedEvent);
+            rabbitTemplate.convertAndSend("booking.failed.queue", failedEvent);
         }
     }
 
@@ -64,11 +64,11 @@ public class SeatReservationListener {
             activityDepartureService.releaseSeats(command.getActivityId(), command.getPeopleCount());
 
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.reserved", successEvent);
+            rabbitTemplate.convertAndSend("booking.reserved.queue", successEvent);
 
-        } catch (SeatsNotAvailableException e) {
+        } catch (NotEnoughSeatsException e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.exchange", "booking.failed", failedEvent);
+            rabbitTemplate.convertAndSend("booking.failed.queue", failedEvent);
         }
     }
 

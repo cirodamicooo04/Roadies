@@ -6,6 +6,7 @@ import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest
 import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
+import it.roadies.travel_service.services.ActivityDepartureService;
 import it.roadies.travel_service.services.ActivityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class ActivityController {
 
     private final ActivityService activityService;
+    private final ActivityDepartureService activityDepartureService;
 
     @PreAuthorize("hasRole('ORGANIZER')")
     @PostMapping
@@ -82,6 +85,22 @@ public class ActivityController {
     @PatchMapping("/{activityId}/departures/{departureId}/confirm")
     public ResponseEntity<ActivityDepartureResponse> confirmDeparture(@PathVariable UUID activityId, @PathVariable UUID departureId, @AuthenticationPrincipal Jwt jwt){
         ActivityDepartureResponse response = activityService.confirmDeparture(activityId,departureId,jwt.getClaim("sub"));
+        return ResponseEntity.ok(response);
+    }
+
+    //BOOKING AREA
+
+    @GetMapping("/{activityId}")
+    public ResponseEntity<Void> isValidActivity(@PathVariable UUID activityId) {
+        if (activityDepartureService.isValidActivity(activityId)) {
+            return ResponseEntity.ok().build();
+        }
+        else return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{activityId}/price")
+    public ResponseEntity<BigDecimal> getActivityPrice(@PathVariable UUID activityId) {
+        BigDecimal response = activityDepartureService.getActivityPriceById(activityId);
         return ResponseEntity.ok(response);
     }
 }

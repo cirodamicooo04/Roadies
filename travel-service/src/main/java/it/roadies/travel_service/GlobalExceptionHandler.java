@@ -1,5 +1,6 @@
 package it.roadies.travel_service;
 
+import it.roadies.travel_service.conf.i8n.MessageLang;
 import it.roadies.travel_service.data.dto.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +17,19 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+    private final MessageLang messageLang;
+
+    public GlobalExceptionHandler(MessageLang messageLang) {
+        this.messageLang = messageLang;
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
 
         ErrorResponse response = ErrorResponse.builder().
                 timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Filed validation failed")
+                .error("Field validation failed")
                 .message(e.getBindingResult().getFieldError().getDefaultMessage())
                 .build();
 
@@ -47,8 +54,8 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.FORBIDDEN.value())
-                .error("Access denied")
-                .message("You don't have the required permissions to access this resource.")
+                .error(messageLang.getMessage("error.access.denied"))
+                .message(messageLang.getMessage("error.access.denied.message"))
                 .path(request.getRequestURI())
                 .build();
 
@@ -63,8 +70,8 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error("Generic error")
-                .message("Internal error occured.")
+                .error(messageLang.getMessage("error.internal.server.error"))
+                .message(messageLang.getMessage("error.internal.server.error.message"))
                 .path(request.getRequestURI())
                 .build();
 

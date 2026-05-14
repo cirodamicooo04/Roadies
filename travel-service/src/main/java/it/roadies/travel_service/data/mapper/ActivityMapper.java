@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Objects;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {ImageMapper.class})
 public interface ActivityMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "travel", ignore = true)

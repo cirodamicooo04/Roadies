@@ -1,6 +1,7 @@
 package it.roadies.travel_service.controller;
 
 import it.roadies.travel_service.data.dto.response.TagResponse;
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import it.roadies.travel_service.services.ActivityService;
 import it.roadies.travel_service.services.TagService;
 import it.roadies.travel_service.services.TravelService;
@@ -30,12 +31,17 @@ public class MetadataController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/public/destinations")
-    public ResponseEntity<Set<String>> getDestinations(){
-        Set<String> destinations = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        destinations.addAll(travelService.getUniqueDestinations());
-        destinations.addAll(activityService.getUniqueDestinations());
-        return ResponseEntity.ok(destinations);
+//    @GetMapping("/public/destinations")
+//    public ResponseEntity<Set<String>> getDestinations(@RequestParam(required = false) Continent continent, @RequestParam(required = false) String country){
+//        Set<String> destinations = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+//        destinations.addAll(travelService.getUniqueDestinations(continent,country));
+//        destinations.addAll(activityService.getUniqueDestinations(continent,country));
+//        return ResponseEntity.ok(destinations);
+//    }
+
+    @GetMapping("/public/continents")
+    public ResponseEntity<List<Continent>> getContinents(){
+        return ResponseEntity.ok(List.of(Continent.values()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

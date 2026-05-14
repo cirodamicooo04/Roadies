@@ -18,5 +18,5 @@ public class FavouriteListShared {
     private FavouriteList list;
 
     @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    private String userId;
 }

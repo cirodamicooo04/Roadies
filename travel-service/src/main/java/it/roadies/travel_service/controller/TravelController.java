@@ -2,16 +2,23 @@ package it.roadies.travel_service.controller;
 
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import it.roadies.travel_service.services.ActivityService;
+import it.roadies.travel_service.services.ImageService;
 import it.roadies.travel_service.services.TravelDepartureService;
 import it.roadies.travel_service.services.TravelService;
+import it.roadies.travel_service.services.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,6 +32,7 @@ public class TravelController {
     private final TravelService travelService;
     private final TravelDepartureService travelDepartureService;
     private final ActivityService activityService;
+    private final ImageService imageService;
 
     //ORGANIZER AREA
 
@@ -65,12 +73,12 @@ public class TravelController {
     }
 
     @GetMapping("/public/search")
-    public ResponseEntity<?> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays , @RequestParam(required = false, defaultValue = "TRAVEL") String type){
+    public ResponseEntity<?> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays , @RequestParam(required = false, defaultValue = "TRAVEL") String type, @RequestParam(required = false)Continent continent, @RequestParam(required = false) String country, Pageable pageable){
         if(!type.equalsIgnoreCase("ACTIVITY")){
-            List<TravelSummaryResponse> travels = travelService.searchTravels(destination, minPrice, maxPrice, minDurationDays, maxDurationDays);
+            Page<TravelSummaryResponse> travels = travelService.searchTravels(continent,country,destination, minPrice, maxPrice, minDurationDays, maxDurationDays, pageable);
             return ResponseEntity.ok(travels);
         }
-        List<ActivitySummaryResponse> activities = activityService.searchActivities(destination, minPrice, maxPrice);
+        Page<ActivitySummaryResponse> activities = activityService.searchActivities(continent,country,destination, minPrice, maxPrice, pageable);
         return ResponseEntity.ok(activities);
     }
 
@@ -132,19 +140,37 @@ public class TravelController {
         return ResponseEntity.ok(response);
     }
 
+    //RECOMMENDATIONS
+    @PreAuthorize("hasRole('TRAVELER')")
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<TravelSummaryResponse>> getRecommendations(@AuthenticationPrincipal Jwt jwt){
+        List<TravelSummaryResponse> responses = travelService.getRecommendedTravels(jwt.getClaim("sub"));
+        return ResponseEntity.ok(responses);
+    }
+
 
     //BOOKING AREA
 
-    @PostMapping("/{travelId}/reserve")
-    public ResponseEntity<Void> reserveSpots(@PathVariable UUID travelId, @RequestParam Integer spots) {
-        travelDepartureService.reserveSeats(travelId, spots);
-        return ResponseEntity.ok().build();
+    @GetMapping("/{travelId}")
+    public ResponseEntity<Void> isValidTravel(@PathVariable UUID travelId) {
+        if (travelDepartureService.isValidTravel(travelId)) {
+            return ResponseEntity.ok().build();
+        }
+        else return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/{travelId}/release")
-    public ResponseEntity<Void> releaseSpots(@PathVariable UUID travelId, @RequestParam int spots) {
-        travelDepartureService.releaseSeats(travelId, spots);
-        return ResponseEntity.ok().build();
+    @GetMapping("/{travelId}/price")
+    public ResponseEntity<BigDecimal> getTravelPrice(@PathVariable UUID travelId) {
+        BigDecimal response = travelDepartureService.getTravelPriceById(travelId);
+        return ResponseEntity.ok(response);
+    }
+
+    //IMAGES AREA
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PostMapping(path = "/images",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImageResponse> uploadImage(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Jwt jwt){
+        ImageResponse response = imageService.uploadImage(file, jwt.getClaim("sub"));
+        return ResponseEntity.status(201).body(response);
     }
 
 

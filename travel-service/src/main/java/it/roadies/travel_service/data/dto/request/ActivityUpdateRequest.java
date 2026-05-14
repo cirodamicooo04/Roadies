@@ -1,5 +1,6 @@
 package it.roadies.travel_service.data.dto.request;
 
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -16,6 +17,10 @@ public class ActivityUpdateRequest {
     @Size(min = 1, max = 1000)
     private String description;
     @Size(min = 1, max = 200)
+    @NotNull
+    private Continent continent;
+    @Pattern(regexp = ".*\\S.*")
+    private String country;
     @Pattern(regexp = ".*\\S.*")
     private String destination;
     @Size(min = 1, max = 200)
@@ -27,4 +32,6 @@ public class ActivityUpdateRequest {
     private Double longitude;
     @Min(1)
     private Integer dayNumber;
+
+    private List<UUID> imageIds;
 }

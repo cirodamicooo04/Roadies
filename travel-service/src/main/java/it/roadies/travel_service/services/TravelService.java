@@ -2,7 +2,9 @@ package it.roadies.travel_service.services;
 
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
-import jakarta.validation.Valid;
+import it.roadies.travel_service.data.entity.enumerations.Continent;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,15 +15,16 @@ public interface TravelService {
     TravelResponse getTravelById(UUID id);
     void deleteTravelById(UUID id, String ownerId);
     TravelResponse updateTravel(TravelUpdateRequest travelUpdateRequest, String ownerId, UUID travelId);
-    List<TravelSummaryResponse> searchTravels(String destination, BigDecimal minPrice, BigDecimal maxPrice, Integer minDurationDays, Integer maxDurationDays);
+    Page<TravelSummaryResponse> searchTravels(Continent continent,String country, String destination, BigDecimal minPrice, BigDecimal maxPrice, Integer minDurationDays, Integer maxDurationDays, Pageable pageable);
     OrganizerTravelsActivityResponse getOrganizerTravelsActivity(String ownerId);
     TravelDepartureResponse addDeparture(UUID travelId, TravelDepartureCreateRequest departureCreateRequest, String ownerId);
     void deleteDeparture(UUID travelId, UUID departureId, String ownerId);
     List<TravelDepartureResponse> getTravelDepartures(UUID travelId);
     TravelDepartureResponse updateDeparture(UUID travelId, UUID departureId, TravelDepartureUpdateRequest request, String ownerId);
     TravelDepartureResponse confirmDeparture(UUID travelId, UUID departureId, String ownerId);
-    List<String> getUniqueDestinations();
+    List<String> getUniqueDestinations(Continent continent, String country);
     TravelResponse addActivity(UUID travelId, ActivityCreateRequest request, String ownerId);
     void deleteTravelActivity(UUID travelId, UUID activityId, String ownerId);
     TravelResponse updateTravelActivity(UUID travelId, UUID activityId, ActivityUpdateRequest request, String ownerId);
+    List<TravelSummaryResponse> getRecommendedTravels(String id);
 }

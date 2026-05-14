@@ -1,12 +1,17 @@
 package it.roadies.travel_service.data.entity;
 
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +19,7 @@ import java.util.UUID;
 @Data
 @Table(name = "ACTIVITY")
 @SoftDelete(columnName = "deleted")
+@EntityListeners(value = {AuditingEntityListener.class})
 public class Activity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,6 +38,13 @@ public class Activity {
     @Column(length = 1000, name = "description", nullable = false)
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "continent", nullable = false)
+    private Continent continent;
+
+    @Column(name = "country", nullable = false)
+    private String country;
+
     @Column(length = 200, name = "destination", nullable = false)
     private String destination;
 
@@ -47,6 +60,12 @@ public class Activity {
     @Column(name = "day_number")
     private Integer dayNumber;
 
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastUpdatedBy;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -57,6 +76,9 @@ public class Activity {
 
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ActivityDeparture> departures;
+
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL)
+    private List<Image> images = new ArrayList<>();
 
 
 }

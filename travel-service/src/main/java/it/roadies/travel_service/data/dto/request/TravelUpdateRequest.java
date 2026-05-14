@@ -1,10 +1,12 @@
 package it.roadies.travel_service.data.dto.request;
 
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class TravelUpdateRequest {
@@ -15,6 +17,10 @@ public class TravelUpdateRequest {
     @Pattern(regexp = ".*\\S.*")
     private String description;
     @Size(min = 1, max = 150)
+    @NotNull
+    private Continent continent;
+    @Pattern(regexp = ".*\\S.*")
+    private String country;
     @Pattern(regexp = ".*\\S.*")
     private String destination;
     @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0")
@@ -23,6 +29,8 @@ public class TravelUpdateRequest {
     private Double longitude;
     @Min(1)
     private Integer durationDays;
+
+    private List<UUID> imageIds;
 
     @Valid
     private List<TravelTagRequest> tagScores;

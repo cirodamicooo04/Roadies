@@ -5,28 +5,30 @@ import it.roadies.booking_service.data.dto.event.SeatReservationFailedEvent;
 import it.roadies.booking_service.data.dto.event.SeatReservedEvent;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingSagaListener {
     private final BookingRepository bookingRepository;
+    private final RabbitTemplate rabbitTemplate;
 
     @RabbitListener(queues = "booking.reserved.queue")
     public void handleSeatReserved(SeatReservedEvent event) {
         bookingRepository.findById(event.getBookingId()).ifPresent(booking -> {
-            if (booking.getStatus() != BookingStatus.CANCELLED) {
+            if (booking.getStatus() != BookingStatus.EXPIRED && booking.getStatus() != BookingStatus.CANCELLED) {
                 booking.setStatus(BookingStatus.RESERVE_CONFIRMED);
-                if (booking.getExpiresAt() != null) {
-                    booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));
-                }
+                booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));
                 bookingRepository.save(booking);
+                rabbitTemplate.convertAndSend("booking-delay-queue", booking.getId().toString());
             }
         });
-
     }
 
     @RabbitListener(queues = "booking.failed.queue")

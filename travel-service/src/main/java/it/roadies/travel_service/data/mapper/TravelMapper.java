@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Objects;
 
-@Mapper(componentModel = "spring", uses = {ActivityMapper.class, TagMapper.class}, nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring", uses = {ActivityMapper.class, TagMapper.class, ImageMapper.class}, nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
 public interface TravelMapper {
     @Mapping(target = "ownerId", source = "ownerId") //mappo il campo ownerId che prendo dal jwt
     @Mapping(target = "tagScores", ignore = true)

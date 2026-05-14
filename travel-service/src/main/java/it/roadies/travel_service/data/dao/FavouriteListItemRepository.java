@@ -8,4 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface FavouriteListItemRepository extends JpaRepository<FavouriteListItem, UUID> {
+    void deleteByListIdAndTravelId(UUID listId, UUID travelId);
+    void deleteByListIdAndActivityId(UUID listId, UUID activityId);
 }

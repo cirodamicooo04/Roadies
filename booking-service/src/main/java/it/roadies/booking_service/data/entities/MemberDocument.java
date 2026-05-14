@@ -4,6 +4,10 @@ import it.roadies.booking_service.data.entities.enumeration.DocumentStatus;
 import it.roadies.booking_service.data.entities.enumeration.DocumentType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,13 +24,14 @@ public class MemberDocument {
     @Column(nullable = false)
     private DocumentType type;
 
-    @Column(name = "file_url", nullable = false)
+    @Column(name = "file_url")
     private String fileUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DocumentStatus status;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -35,6 +40,15 @@ public class MemberDocument {
 
     @Column(name = "verified_at")
     private LocalDateTime verifiedAt;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastUpdatedBy;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
@@ -45,6 +59,5 @@ public class MemberDocument {
         if (this.status == null) {
             this.status = DocumentStatus.PENDING;
         }
-        this.createdAt = LocalDateTime.now();
     }
 }

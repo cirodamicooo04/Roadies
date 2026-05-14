@@ -3,11 +3,15 @@ package it.roadies.travel_service.services.impl;
 import it.roadies.travel_service.data.dao.TravelDepartureRepository;
 import it.roadies.travel_service.data.entity.TravelDeparture;
 import it.roadies.travel_service.data.mapper.TravelDepartureMapper;
+import it.roadies.travel_service.exceptions.NotEnoughSeatsException;
+import it.roadies.travel_service.exceptions.NotValidTravelId;
+import it.roadies.travel_service.exceptions.StatusException;
 import it.roadies.travel_service.services.TravelDepartureService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -26,8 +30,7 @@ public class TravelDepartureServiceImpl implements TravelDepartureService {
             travel.setAvailableSlots(newSlotsNumber);
             travelDepartureRepository.save(travel);
         } else {
-            //qui andrò a modificare non appena aggiungiamo la gestione delle eccezioni
-            throw new RuntimeException("Posti insufficienti per questo viaggio");
+            throw new NotEnoughSeatsException("Posti insufficienti per questo viaggio");
         }
     }
 
@@ -38,5 +41,13 @@ public class TravelDepartureServiceImpl implements TravelDepartureService {
 
         travel.setAvailableSlots(travel.getAvailableSlots() + spots);
         travelDepartureRepository.save(travel);
+    }
+
+    public boolean isValidTravel(UUID travelDepartureId){
+        return travelDepartureRepository.existsById(travelDepartureId);
+    }
+
+    public BigDecimal getTravelPriceById(UUID travelDepartureId){
+        return travelDepartureRepository.findPriceById(travelDepartureId).orElseThrow(() -> new StatusException("Viaggio non trovato con ID: " + travelDepartureId));
     }
 }

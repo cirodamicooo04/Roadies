@@ -1,10 +1,17 @@
 package it.roadies.travel_service.data.entity;
 
+import it.roadies.travel_service.data.entity.enumerations.Continent;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,9 +20,12 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "TRAVELS")
 @SoftDelete(columnName = "deleted")
+@EntityListeners(value = {AuditingEntityListener.class})
 public class Travel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -30,6 +40,13 @@ public class Travel {
     @Column(length = 10000, name = "description", nullable = false)
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "continent", nullable = false)
+    private Continent continent;
+
+    @Column(name = "country", nullable = false)
+    private String country;
+
     @Column(length = 150, name = "destination", nullable = false)
     private String destination;
 
@@ -41,6 +58,12 @@ public class Travel {
 
     @Column(name = "duration_days", nullable = false)
     private int durationDays;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastUpdatedBy;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -58,6 +81,9 @@ public class Travel {
 
     @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelTag> tagScores = new ArrayList<>();
+
+    @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL)
+    private List<Image> images = new ArrayList<>();
 
 }
 

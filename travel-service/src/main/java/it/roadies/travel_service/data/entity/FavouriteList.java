@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,7 +21,7 @@ public class FavouriteList {
     private UUID id;
 
     @Column(name = "owner_id", nullable = false)
-    private UUID ownerId;
+    private String ownerId;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -35,6 +37,14 @@ public class FavouriteList {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @CreatedBy
+    @Column(name = "created_by")
+    private LocalDateTime createdBy;
+
+    @LastModifiedBy
+    @Column(name = "modified_by")
+    private LocalDateTime modifiedBy;
 
     @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FavouriteListItem> items;
