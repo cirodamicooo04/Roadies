@@ -4,6 +4,7 @@ import it.roadies.user_service.conf.i8n.MessageLang;
 import it.roadies.user_service.data.entities.Gamification;
 import it.roadies.user_service.data.entities.enumeration.Badge;
 import it.roadies.user_service.data.repositories.GamificationRepository;
+import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.services.GamificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +29,14 @@ public class GamificationServiceImpl implements GamificationService {
     public void addPointsBySpending(String userId, double amountSpent) {
         log.info("Iniziato calcolo punti gamification per l'utente ID: {} per una spesa di {}€", userId, amountSpent);
 
+        if (amountSpent <= 0) {
+            throw new IllegalArgumentException(messageLang.getMessage("error.points.negative.or.zero"));
+        }
+
         Gamification gamification = gamificationRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("Impossibile aggiornare i punti: profilo gamification non trovato per l'utente ID: {}", userId);
-                    return new RuntimeException(messageLang.getMessage("error.gamification.points"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.gamification.points"));
                 });
 
         long pointsToAdd = Math.round(amountSpent * POINTS_PER_EURO);

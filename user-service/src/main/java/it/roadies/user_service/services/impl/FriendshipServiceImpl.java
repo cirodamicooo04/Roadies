@@ -7,12 +7,15 @@ import it.roadies.user_service.data.entities.User;
 import it.roadies.user_service.data.entities.enumeration.Status;
 import it.roadies.user_service.data.repositories.FriendshipRepository;
 import it.roadies.user_service.data.repositories.UserRepository;
+import it.roadies.user_service.exception.ConflictException;
+import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.mappers.FriendshipMapper;
 import it.roadies.user_service.mappers.UserMapper;
 import it.roadies.user_service.services.FriendshipService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -45,18 +48,18 @@ public class FriendshipServiceImpl implements FriendshipService {
         User receiver = userRepository.findByUsername(receiverUsername)
                 .orElseThrow(() -> {
                     log.error("Invio richiesta fallito: utente ricevente non trovato ({})", receiverUsername);
-                    return new RuntimeException(messageLang.getMessage("error.user.notfound"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
                 });
 
         if (senderId.equals(receiver.getKeycloakId())) {
             log.warn("Tentativo di auto-aggiunta amicizia bloccato per l'utente ID: {}", senderId);
-            throw new RuntimeException(messageLang.getMessage("error.friendship.self"));
+            throw new ConflictException(messageLang.getMessage("error.friendship.self"));
         }
 
         friendshipRepository.findExistingFriendship(senderId, receiver.getKeycloakId())
                 .ifPresent(f -> {
                     log.warn("Richiesta di amicizia già esistente tra {} e {}", senderId, receiver.getKeycloakId());
-                    throw new RuntimeException(messageLang.getMessage("error.friendship.exists"));
+                    throw new ConflictException(messageLang.getMessage("error.friendship.exists"));
                 });
 
         Friendship friendship = new Friendship();
@@ -78,12 +81,16 @@ public class FriendshipServiceImpl implements FriendshipService {
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> {
                     log.error("Risposta fallita: amicizia non trovata (ID: {})", friendshipId);
-                    return new RuntimeException(messageLang.getMessage("error.friendship.request.notfound"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.friendship.request.notfound"));
                 });
+
+        if (friendship.getStatus() != Status.PENDING) {
+            throw new ConflictException(messageLang.getMessage("error.friendship.already.respond"));
+        }
 
         if (!friendship.getReceiverId().getKeycloakId().equals(currentUserId)) {
             log.error("Tentativo non autorizzato di risposta alla richiesta di amicizia ID: {} da parte dell'utente ID: {}", friendshipId, currentUserId);
-            throw new RuntimeException(messageLang.getMessage("error.unauthorized"));
+            throw new AccessDeniedException(messageLang.getMessage("error.unauthorized"));
         }
 
         friendship.setStatus(newStatus);
@@ -153,7 +160,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> {
                     log.error("Rimozione fallita: amicizia non trovata (ID: {})", friendshipId);
-                    return new RuntimeException(messageLang.getMessage("error.friendship.notfound"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.friendship.notfound"));
                 });
 
         boolean isParticipant = friendship.getRequesterId().getKeycloakId().equals(currentUserId) ||
@@ -161,7 +168,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         if (!isParticipant) {
             log.error("Tentativo non autorizzato di eliminazione dell'amicizia ID: {} da parte dell'utente ID: {}", friendshipId, currentUserId);
-            throw new RuntimeException(messageLang.getMessage("error.unauthorized"));
+            throw new AccessDeniedException(messageLang.getMessage("error.unauthorized"));
         }
 
         friendshipRepository.delete(friendship);

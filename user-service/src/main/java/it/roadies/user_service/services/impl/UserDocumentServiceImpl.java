@@ -11,6 +11,8 @@ import it.roadies.user_service.data.entities.UserDocument;
 import it.roadies.user_service.data.entities.enumeration.DocumentStatus;
 import it.roadies.user_service.data.repositories.UserDocumentRepository;
 import it.roadies.user_service.data.repositories.UserRepository;
+import it.roadies.user_service.exception.ConflictException;
+import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.mappers.UserDocumentMapper;
 import it.roadies.user_service.services.UserDocumentService;
 import jakarta.transaction.Transactional;
@@ -50,10 +52,14 @@ public class UserDocumentServiceImpl implements UserDocumentService {
     public UserDocumentResponseDTO uploadDocument(String userId, UserDocumentRequestDTO dto, MultipartFile file){
         log.info("Iniziato caricamento documento per l'utente ID: {}", userId);
 
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException(messageLang.getMessage("error.file.empty"));
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("Upload documento fallito: Utente non trovato con ID: {}", userId);
-                    return new RuntimeException(messageLang.getMessage("error.user.notfound"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
                 });
 
         String fileUrl;
@@ -104,8 +110,12 @@ public class UserDocumentServiceImpl implements UserDocumentService {
         UserDocument doc = documentRepository.findById(docId)
                 .orElseThrow(() -> {
                     log.error("Verifica fallita: Documento ID: {} non trovato", docId);
-                    return new RuntimeException(messageLang.getMessage("error.document.notfound"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.document.notfound"));
                 });
+
+        if (doc.getStatus() != DocumentStatus.PENDING) {
+            throw new ConflictException(messageLang.getMessage("error.document.already.approved"));
+        }
 
         if(approved){
             doc.setStatus(DocumentStatus.VERIFIED);
@@ -132,12 +142,12 @@ public class UserDocumentServiceImpl implements UserDocumentService {
         UserDocument doc = documentRepository.findById(docId)
                 .orElseThrow(() -> {
                     log.error("Eliminazione fallita: Documento ID: {} non trovato", docId);
-                    return new RuntimeException(messageLang.getMessage("error.document.notfound"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.document.notfound"));
                 });
 
         if (!doc.getUserId().getKeycloakId().equals(userId)) {
             log.error("Tentativo non autorizzato di eliminare il documento ID: {} dall'utente ID: {}", docId, userId);
-            throw new RuntimeException(messageLang.getMessage("error.unauthorized"));
+            throw new org.springframework.security.access.AccessDeniedException(messageLang.getMessage("error.unauthorized"));
         }
 
         try {

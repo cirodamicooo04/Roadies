@@ -9,6 +9,8 @@ import it.roadies.user_service.data.repositories.UserRepository;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.result.UserSyncResult;
+import it.roadies.user_service.exception.ConflictException;
+import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.mappers.UserMapper;
 import it.roadies.user_service.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -81,7 +83,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(keycloakId)
                 .orElseThrow(() -> {
                     log.error("Impossibile recuperare il profilo: utente non trovato (ID: {})", keycloakId);
-                    return new RuntimeException(messageLang.getMessage("error.user.notfound"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
                 });
         return userMapper.toDto(user);
     }
@@ -93,7 +95,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
                     log.error("Impossibile recuperare il profilo: username non trovato ({})", username);
-                    return new RuntimeException(messageLang.getMessage("error.username.notfound"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.username.notfound"));
                 });
         return userMapper.toDto(user);
     }
@@ -106,8 +108,14 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(keycloakId)
                 .orElseThrow(() -> {
                     log.error("Impossibile aggiornare il profilo: utente non trovato (ID: {})", keycloakId);
-                    return new RuntimeException(messageLang.getMessage("error.user.notfound"));
+                    return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
                 });
+
+        if (updateDto.getUsername() != null && !updateDto.getUsername().equals(user.getUsername())) {
+            if (userRepository.findByUsername(updateDto.getUsername()).isPresent()) {
+                throw new ConflictException(messageLang.getMessage("error.user.username.exists"));
+            }
+        }
 
         userMapper.updateEntityFromRequest(updateDto, user);
         User updatedUser = userRepository.save(user);
@@ -123,7 +131,7 @@ public class UserServiceImpl implements UserService {
         log.info("Richiesta di eliminazione profilo per l'utente ID: {}", keycloakId);
         if (!userRepository.existsById(keycloakId)) {
             log.error("Impossibile eliminare il profilo: utente non trovato (ID: {})", keycloakId);
-            throw new RuntimeException(messageLang.getMessage("error.user.notfound"));
+            throw new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
         }
 
         userRepository.deleteById(keycloakId);
