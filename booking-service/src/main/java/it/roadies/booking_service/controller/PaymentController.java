@@ -6,7 +6,6 @@ import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 import it.roadies.booking_service.data.dto.request.PaymentRequest;
 import it.roadies.booking_service.data.dto.response.PaymentResponse;
-import it.roadies.booking_service.services.BookingService;
 import it.roadies.booking_service.services.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -30,8 +31,8 @@ public class PaymentController {
 
     @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/create-payment-intent")
-    public ResponseEntity<PaymentResponse> createPaymentIntent(@Valid @RequestBody PaymentRequest request) throws StripeException {
-        PaymentResponse response = stripePaymentService.createPaymentIntent(request);
+    public ResponseEntity<PaymentResponse> createPaymentIntent(@Valid @RequestBody PaymentRequest request, @AuthenticationPrincipal Jwt userJwt) throws StripeException {
+        PaymentResponse response = stripePaymentService.createPaymentIntent(request, userJwt.getSubject());
         return ResponseEntity.ok(response);
     }
 

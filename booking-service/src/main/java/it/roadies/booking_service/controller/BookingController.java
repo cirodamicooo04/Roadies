@@ -28,41 +28,41 @@ public class BookingController {
 
     @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/create-draft")
-    public ResponseEntity<BookingDraftResponse> createDraftBooking(@Valid @RequestBody BookingDraftRequest request) {
-        BookingDraftResponse response = bookingService.createDraft(request);
+    public ResponseEntity<BookingDraftResponse> createDraftBooking(@Valid @RequestBody BookingDraftRequest request, @AuthenticationPrincipal Jwt userJwt) {
+        BookingDraftResponse response = bookingService.createDraft(request, userJwt.getSubject());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PreAuthorize("hasRole('TRAVELER')")
     @PutMapping("/create-pending")
-    public ResponseEntity<Void> createBooking(@Valid @RequestBody BookingCreateRequest request) {
-        bookingService.createBookingStep1(request);
+    public ResponseEntity<Void> createBooking(@Valid @RequestBody BookingCreateRequest request, @AuthenticationPrincipal Jwt userJwt) {
+        bookingService.createBookingStep1(request, userJwt.getSubject());
         return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/create-members")
-    public ResponseEntity<BookingStep2Response> createMembers(@Valid @RequestBody BookingMemberRequest request) {
-        BookingStep2Response response = bookingService.createBookingStep2(request);
+    public ResponseEntity<BookingStep2Response> createMembers(@Valid @RequestBody BookingMemberRequest request, @AuthenticationPrincipal Jwt userJwt) {
+        BookingStep2Response response = bookingService.createBookingStep2(request, userJwt.getSubject());
         return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasRole('TRAVELER')")
-    @GetMapping("/public/{bookingId}/status")
-    public ResponseEntity<BookingStatusResponse> getStatus(@PathVariable UUID bookingId) {
-        return ResponseEntity.ok(bookingService.getBookingStatus(bookingId));
+    @GetMapping("/{bookingId}/status")
+    public ResponseEntity<BookingStatusResponse> getStatus(@PathVariable UUID bookingId, @AuthenticationPrincipal Jwt userJwt) {
+        return ResponseEntity.ok(bookingService.getBookingStatus(bookingId, userJwt.getSubject()));
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
-    @PatchMapping("/{bookingId}/confirm")
-    public ResponseEntity<Void> confirmBooking(@PathVariable UUID bookingId) {
-        bookingService.confirmBooking(bookingId);
-        return ResponseEntity.noContent().build();
-    }
+//    @PreAuthorize("hasRole('TRAVELER')")
+//    @PatchMapping("/{bookingId}/confirm")
+//    public ResponseEntity<Void> confirmBooking(@PathVariable UUID bookingId) {
+//        bookingService.confirmBookingAfterPayment(bookingId);
+//        return ResponseEntity.noContent().build();
+//    }
 
     @DeleteMapping("/{bookingId}")
-    public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId) {
-        bookingService.deleteBooking(bookingId);
+    public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId, @AuthenticationPrincipal Jwt userJwt) {
+        bookingService.deleteBooking(bookingId, userJwt.getSubject());
         return ResponseEntity.noContent().build();
     }
 

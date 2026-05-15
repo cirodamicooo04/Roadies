@@ -7,9 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 public interface BookingMemberService {
-    public void updateDocument (MemberDocumentUpdateRequest memberDocument);
-    public void acceptDocument (MemberDocumentUpdateRequest memberDocument);
-    public void rejectDocument (MemberDocumentUpdateRequest memberDocument);
+//    public void updateDocument (MemberDocumentUpdateRequest memberDocument);
+     void acceptDocument (MemberDocumentUpdateRequest memberDocument);
+     void rejectDocument (MemberDocumentUpdateRequest memberDocument);
 
-    String uploadDocumentPhoto(UUID documentId, MultipartFile file) throws MinioException;
+    String uploadDocumentPhoto(UUID documentId, MultipartFile file, String userJwt) throws MinioException;
 }

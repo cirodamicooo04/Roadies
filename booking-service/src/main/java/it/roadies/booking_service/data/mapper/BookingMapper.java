@@ -7,7 +7,8 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BookingMapper {
-    Booking toEntity(BookingDraftRequest requestDto);
+    @Mapping(source = "userId", target = "userId")
+    Booking toEntity(BookingDraftRequest requestDto, String userId);
 
     @Mapping(source = "id", target = "bookingId")
     BookingDraftResponse toDto(Booking entity);

@@ -7,7 +7,7 @@ import it.roadies.booking_service.data.dto.response.PaymentResponse;
 
 
 public interface PaymentService {
-    public PaymentResponse createPaymentIntent(PaymentRequest request) throws StripeException;
+    PaymentResponse createPaymentIntent(PaymentRequest request, String userJwt) throws StripeException;
 
     void processStripeEvent(Event event);
 }

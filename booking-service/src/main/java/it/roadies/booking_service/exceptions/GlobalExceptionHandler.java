@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleNoHandlerFoundException(HttpServletRequest request) {
         log.warn("Rotta non trovata: {}", request.getRequestURI());
         return buildErrorResponse(HttpStatus.NOT_FOUND, messageLang.getMessage("error.endpoint.not.found"), messageLang.getMessage("error.endpoint.message"), request.getRequestURI());
     }
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
         log.warn("Accesso negato: {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.FORBIDDEN, messageLang.getMessage("error.access.denied.title"), messageLang.getMessage("error.access.denied.message"), request.getRequestURI());
+        return buildErrorResponse(HttpStatus.FORBIDDEN, messageLang.getMessage("error.access.denied"), messageLang.getMessage("error.access.denied.message"), request.getRequestURI());
     }
 
     @ExceptionHandler(com.stripe.exception.StripeException.class)

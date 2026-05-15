@@ -1,6 +1,7 @@
 package it.roadies.booking_service.data.dto.request;
 
 import it.roadies.booking_service.data.dto.BookingMemberDTO;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -12,5 +13,6 @@ public class BookingMemberRequest {
     @NotNull
     private UUID bookingId;
     @NotNull
+    @Valid
     private List<BookingMemberDTO> members;
 }

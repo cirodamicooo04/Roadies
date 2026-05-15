@@ -10,6 +10,7 @@ import it.roadies.booking_service.data.dto.request.PaymentRequest;
 import it.roadies.booking_service.data.dto.response.PaymentResponse;
 import it.roadies.booking_service.data.entities.Booking;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
+import it.roadies.booking_service.exceptions.AccessDeniedException;
 import it.roadies.booking_service.exceptions.BookingNotFoundException;
 import it.roadies.booking_service.exceptions.StatusException;
 import it.roadies.booking_service.services.BookingService;
@@ -40,7 +41,7 @@ public class PaymentServiceImpl implements PaymentService {
                 String bookingIdStr = paymentIntent.getMetadata().get("bookingId");
                 try {
                     UUID bookingId = UUID.fromString(bookingIdStr);
-                    bookingService.confirmBooking(bookingId);
+                    bookingService.confirmBookingAfterPayment(bookingId);
                     log.info("Pagamento Stripe riuscito. Prenotazione {} confermata.", bookingId);
                 } catch (IllegalArgumentException e) {
                     log.error("Il bookingId ricevuto da Stripe non è un UUID valido: {}", bookingIdStr, e);
@@ -55,10 +56,13 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentResponse createPaymentIntent(PaymentRequest request) throws StripeException {
+    public PaymentResponse createPaymentIntent(PaymentRequest request, String userJwt) throws StripeException {
         Booking booking = bookingRepository.findById(request.getBookingId()).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", request.getBookingId())));
+        if (!booking.getUserId().equals(userJwt)){
+            throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
+        }
 
-        if (!booking.getStatus().equals(BookingStatus.RESERVE_CONFIRMED)) {
+        if (!booking.getStatus().equals(BookingStatus.READY_FOR_PAYMENT)) {
             throw new StatusException(messageLang.getMessage("error.status.payment.reserve"));
         }
 
@@ -69,6 +73,8 @@ public class PaymentServiceImpl implements PaymentService {
         if (booking.getTotalPrice() == null || booking.getTotalPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new StatusException(messageLang.getMessage("error.status.payment.price"));
         }
+
+        log.info("Creazione PaymentIntent per bookingId={}, peopleCount={}, totalPrice={}", booking.getId(), booking.getPeopleCount(), booking.getTotalPrice());
 
         PaymentIntentCreateParams params =
                 PaymentIntentCreateParams.builder()

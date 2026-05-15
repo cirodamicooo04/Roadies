@@ -27,7 +27,7 @@ public class BookingExpirationListener {
         log.info("Timer scaduto! Controllo lo stato del booking ID: {}", bookingId);
 
         bookingRepository.findById(bookingId).ifPresent(booking -> {
-            if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED && booking.getExpiresAt().isBefore(LocalDateTime.now())) {
+            if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED || booking.getStatus() == BookingStatus.READY_FOR_PAYMENT && booking.getExpiresAt().isBefore(LocalDateTime.now())) {
                 log.warn("Il booking {} è ancora RESERVE_CONFIRMED. Lo annullo e libero i posti.", bookingId);
 
                 booking.setStatus(BookingStatus.EXPIRED);
