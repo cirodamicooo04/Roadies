@@ -1,4 +1,4 @@
-package it.roadies.booking_service.data.dto;
+package it.roadies.booking_service.data.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

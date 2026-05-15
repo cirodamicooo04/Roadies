@@ -1,6 +1,5 @@
 package it.roadies.booking_service.data.dto.response;
 
-import it.roadies.booking_service.data.dto.MemberIdResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
