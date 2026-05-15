@@ -1,5 +1,9 @@
 package it.roadies.booking_service.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.roadies.booking_service.data.dto.request.BookingCreateRequest;
 import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
 import it.roadies.booking_service.data.dto.request.BookingMemberRequest;
@@ -23,9 +27,17 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/bookings")
 @RequiredArgsConstructor
+@Tag(name = "Gestione Prenotazioni", description = "API per la creazione, la visualizzazione e la gestione delle prenotazioni dei viaggi")
 public class BookingController {
     private final BookingService bookingService;
 
+    @Operation(summary = "Crea una bozza di prenotazione", description = "Inizializza una nuova prenotazione in stato di bozza")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Bozza creata con successo"),
+            @ApiResponse(responseCode = "400", description = "Dati della richiesta non validi"),
+            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
+            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
+    })
     @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/create-draft")
     public ResponseEntity<BookingDraftResponse> createDraftBooking(@Valid @RequestBody BookingDraftRequest request, @AuthenticationPrincipal Jwt userJwt) {
@@ -33,6 +45,14 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+
+    @Operation(summary = "Richiedi riserva posti per un tempo pre-stabilito", description = "Permette di riservare i posti se ancora disponibili e iniziare il processo di prenotazione")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Booking aggiornato"),
+            @ApiResponse(responseCode = "400", description = "Dati della richiesta non validi"),
+            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
+            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
+    })
     @PreAuthorize("hasRole('TRAVELER')")
     @PutMapping("/create-pending")
     public ResponseEntity<Void> createBooking(@Valid @RequestBody BookingCreateRequest request, @AuthenticationPrincipal Jwt userJwt) {
@@ -40,6 +60,15 @@ public class BookingController {
         return ResponseEntity.ok().build();
     }
 
+
+    @Operation(summary = "Inizializza membri", description = "Permette di inizializzare la lista di membri di una prenotazione")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Booking aggiornato"),
+            @ApiResponse(responseCode = "400", description = "Dati della richiesta non validi"),
+            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
+            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
+            @ApiResponse(responseCode = "404", description = "Prenotazione non trovata")
+    })
     @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/create-members")
     public ResponseEntity<BookingStep2Response> createMembers(@Valid @RequestBody BookingMemberRequest request, @AuthenticationPrincipal Jwt userJwt) {
@@ -47,12 +76,22 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
+
+    @Operation(summary = "Ottieni lo stato della prenotazione", description = "Restituisce lo stato attuale di una prenotazione specifica tramite il suo ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Stato recuperato con successo"),
+            @ApiResponse(responseCode = "404", description = "Prenotazione non trovata"),
+            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
+            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
+    })
     @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/{bookingId}/status")
     public ResponseEntity<BookingStatusResponse> getStatus(@PathVariable UUID bookingId, @AuthenticationPrincipal Jwt userJwt) {
         return ResponseEntity.ok(bookingService.getBookingStatus(bookingId, userJwt.getSubject()));
     }
 
+
+    //@Operation(summary = "Conferma una prenotazione", description = "Permette di confermare una prenotazione dopo il pagamento")
 //    @PreAuthorize("hasRole('TRAVELER')")
 //    @PatchMapping("/{bookingId}/confirm")
 //    public ResponseEntity<Void> confirmBooking(@PathVariable UUID bookingId) {
@@ -60,6 +99,12 @@ public class BookingController {
 //        return ResponseEntity.noContent().build();
 //    }
 
+    @Operation(summary = "Elimina una prenotazione", description = "Permette l'eleminazione una prenotazione precedenetemente creata")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Prenotazione eliminata con successo"),
+            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
+            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
+    })
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId, @AuthenticationPrincipal Jwt userJwt) {
         bookingService.deleteBooking(bookingId, userJwt.getSubject());
@@ -67,6 +112,12 @@ public class BookingController {
     }
 
     //TRAVEL SERVICE RECOMMENDATION
+    @Operation(summary = "Ottieni tutte le prenotazioni", description = "Permette di ottenere tutte le prenotazioni dell'utente che ne fa richiesta")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Prenotazioni restituite con successo"),
+            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
+            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
+    })
     @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/users/me")
     public ResponseEntity<List<UUID>> getBookingsFromUser(@AuthenticationPrincipal Jwt jwt){
