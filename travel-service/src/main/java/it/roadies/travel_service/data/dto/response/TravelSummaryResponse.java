@@ -20,4 +20,5 @@ public class TravelSummaryResponse {
     private BigDecimal startingFromPrice;
     private String type;
     private List<ImageResponse> images;
+    private Double averageRating;
 }

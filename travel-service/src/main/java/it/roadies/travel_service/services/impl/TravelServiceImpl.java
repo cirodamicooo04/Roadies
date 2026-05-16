@@ -4,6 +4,7 @@ import it.roadies.travel_service.conf.i8n.MessageLang;
 import it.roadies.travel_service.controller.client.BookingClient;
 import it.roadies.travel_service.data.dao.*;
 import it.roadies.travel_service.data.dao.specification.TravelSpecification;
+import it.roadies.travel_service.data.dto.event.ReviewTravelUpdateEvent;
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.data.entity.*;
@@ -342,6 +343,14 @@ public class TravelServiceImpl implements TravelService {
 
         List<Travel> travels = travelRepository.findAll(travelSpecification);
         return travels.stream().map(Travel::getDestination).filter(Objects::nonNull).distinct().sorted().toList();
+    }
+
+    @Transactional
+    public void updateTravelReviews(ReviewTravelUpdateEvent event) {
+        Travel travel = travelRepository.findById(event.getTravelId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.travel.not.found")));
+        travel.setAverageRating(event.getAverageRating());
+        travel.setNumberOfRatings(event.getNumberOfRatings());
+        travelRepository.save(travel);
     }
 
     @Transactional

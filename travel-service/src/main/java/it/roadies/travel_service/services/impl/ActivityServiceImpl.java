@@ -5,6 +5,7 @@ import it.roadies.travel_service.data.dao.ActivityDepartureRepository;
 import it.roadies.travel_service.data.dao.ActivityRepository;
 import it.roadies.travel_service.data.dao.ImageRepository;
 import it.roadies.travel_service.data.dao.specification.ActivitySpecification;
+import it.roadies.travel_service.data.dto.event.ReviewActivityUpdateEvent;
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest;
@@ -188,6 +189,14 @@ public class ActivityServiceImpl implements ActivityService {
         List<Activity> activities = activityRepository.findAll(specification);
 
         return activities.stream().map(Activity::getDestination).filter(Objects::nonNull).distinct().sorted().toList();
+    }
+
+    @Transactional
+    public void updateActivityReviews(ReviewActivityUpdateEvent event) {
+        Activity activity = activityRepository.findById(event.getActivityId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
+        activity.setAverageRating(event.getAverageRating());
+        activity.setNumberOfRatings(event.getNumberOfRatings());
+        activityRepository.save(activity);
     }
 
     @Transactional

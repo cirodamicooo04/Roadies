@@ -1,5 +1,6 @@
 package it.roadies.travel_service.services;
 
+import it.roadies.travel_service.data.dto.event.ReviewActivityUpdateEvent;
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest;
@@ -32,4 +33,5 @@ public interface ActivityService {
     ActivityDepartureResponse confirmDeparture(UUID activityId, UUID departureId, String ownerId);
     List<String> getUniqueDestinations(Continent continent, String country);
     ActivityResponse updateActivity(UUID id, ActivityUpdateRequest request, String ownerId);
+    void updateActivityReviews(ReviewActivityUpdateEvent event);
 }

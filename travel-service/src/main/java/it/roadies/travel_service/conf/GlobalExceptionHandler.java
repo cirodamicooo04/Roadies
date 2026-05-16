@@ -1,4 +1,4 @@
-package it.roadies.travel_service;
+package it.roadies.travel_service.conf;
 
 import it.roadies.travel_service.conf.i8n.MessageLang;
 import it.roadies.travel_service.data.dto.response.ErrorResponse;

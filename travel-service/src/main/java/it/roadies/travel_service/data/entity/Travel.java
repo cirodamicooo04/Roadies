@@ -73,6 +73,12 @@ public class Travel {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "average_rating", nullable = false)
+    private Double averageRating = 0.0;
+
+    @Column(name = "number_of_ratings", nullable = false)
+    private Integer numberOfRatings = 0;
+
     @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelDeparture> departures = new ArrayList<>();
 

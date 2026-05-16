@@ -17,5 +17,6 @@ public class ActivitySummaryResponse {
     private String destination;
     private BigDecimal startingFromPrice;
     private String type;
+    private Double averageRating;
     private List<ImageResponse> images;
 }

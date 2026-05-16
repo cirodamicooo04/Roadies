@@ -1,5 +1,7 @@
 package it.roadies.travel_service.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.data.entity.enumerations.Continent;
@@ -27,6 +29,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/travels")
 @RequiredArgsConstructor
+@Tag(name = "Viaggi", description = "API per la gestione, ricerca e prenotazione dei viaggi")
 public class TravelController {
 
     private final TravelService travelService;
@@ -36,6 +39,7 @@ public class TravelController {
 
     //ORGANIZER AREA
 
+    @Operation(summary = "Crea viaggio", description = "Crea un nuovo viaggio associato all'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @PostMapping
     public ResponseEntity<TravelResponse> createTravel(@RequestBody @Valid TravelCreateRequest travelCreateRequest, @AuthenticationPrincipal Jwt jwt) {
@@ -43,6 +47,7 @@ public class TravelController {
         return ResponseEntity.status(201).body(response);
     }
 
+    @Operation(summary = "Elimina viaggio", description = "Elimina un viaggio creato dall'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTravel(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
@@ -50,6 +55,7 @@ public class TravelController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Aggiorna viaggio", description = "Modifica i dati di un viaggio creato dall'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @PutMapping("/{id}")
     public ResponseEntity<TravelResponse> updateTravel(@PathVariable UUID id, @RequestBody @Valid TravelUpdateRequest request, @AuthenticationPrincipal Jwt jwt) {
@@ -57,6 +63,7 @@ public class TravelController {
         return ResponseEntity.ok(response);
   }
 
+    @Operation(summary = "I miei viaggi", description = "Recupera viaggi e attività creati dall'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @GetMapping("/my-travels")
     public ResponseEntity<OrganizerTravelsActivityResponse> getMyTravels(@AuthenticationPrincipal Jwt jwt){
@@ -66,12 +73,14 @@ public class TravelController {
 
     //PUBLIC AREA
 
+    @Operation(summary = "Dettaglio viaggio", description = "Recupera i dettagli pubblici di un viaggio.")
     @GetMapping("/public/{id}")
     public ResponseEntity<TravelResponse> getTravelById(@PathVariable UUID id){
         TravelResponse response = travelService.getTravelById(id);
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Cerca viaggi o attività", description = "Ricerca viaggi o attività usando filtri pubblici come destinazione, prezzo, durata, continente e paese.")
     @GetMapping("/public/search")
     public ResponseEntity<?> searchTravels(@RequestParam(required = false) String destination, @RequestParam(required = false) BigDecimal minPrice, @RequestParam(required = false) BigDecimal maxPrice, @RequestParam(required = false) Integer minDurationDays, @RequestParam(required = false) Integer maxDurationDays , @RequestParam(required = false, defaultValue = "TRAVEL") String type, @RequestParam(required = false)Continent continent, @RequestParam(required = false) String country, Pageable pageable){
         if(!type.equalsIgnoreCase("ACTIVITY")){
@@ -84,6 +93,7 @@ public class TravelController {
 
     //TRAVEL DEPARTURES AREA
 
+    @Operation(summary = "Aggiungi partenza viaggio", description = "Aggiunge una nuova partenza a un viaggio dell'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @PostMapping("/{travelId}/departures")
     public ResponseEntity<TravelDepartureResponse> addDeparture(@PathVariable UUID travelId, @RequestBody @Valid TravelDepartureCreateRequest request, @AuthenticationPrincipal Jwt jwt){
@@ -91,6 +101,7 @@ public class TravelController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Elimina partenza viaggio", description = "Elimina una partenza da un viaggio dell'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @DeleteMapping("/{travelId}/departures/{departureId}")
     public ResponseEntity<?> deleteDeparture(@PathVariable UUID travelId, @PathVariable UUID departureId, @AuthenticationPrincipal Jwt jwt){
@@ -98,12 +109,14 @@ public class TravelController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Lista partenze viaggio", description = "Recupera le partenze disponibili per un viaggio.")
     @GetMapping("/public/{travelId}/departures")
     public ResponseEntity<List<TravelDepartureResponse>> getDepartures(@PathVariable UUID travelId){
         List<TravelDepartureResponse> departures = travelService.getTravelDepartures(travelId);
         return ResponseEntity.ok(departures);
     }
 
+    @Operation(summary = "Aggiorna partenza viaggio", description = "Modifica una partenza di un viaggio dell'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @PutMapping("/{travelId}/departures/{departureId}")
     public ResponseEntity<TravelDepartureResponse> updateDeparture(@PathVariable UUID travelId, @PathVariable UUID departureId, @RequestBody @Valid TravelDepartureUpdateRequest request, @AuthenticationPrincipal Jwt jwt){
@@ -111,6 +124,7 @@ public class TravelController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Conferma partenza viaggio", description = "Conferma una partenza di un viaggio dell'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @PatchMapping("/{travelId}/departures/{departureId}/confirm")
     public ResponseEntity<TravelDepartureResponse> confirmDeparture(@PathVariable UUID travelId, @PathVariable UUID departureId, @AuthenticationPrincipal Jwt jwt){
@@ -119,6 +133,7 @@ public class TravelController {
     }
 
     //TRAVEL ACTIVITIES AREA
+    @Operation(summary = "Aggiungi attività al viaggio", description = "Aggiunge un'attività a un viaggio dell'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @PostMapping("/{travelId}/activities")
     public ResponseEntity<TravelResponse> addActivity(@PathVariable UUID travelId, @RequestBody @Valid ActivityCreateRequest request, @AuthenticationPrincipal Jwt jwt){
@@ -126,6 +141,7 @@ public class TravelController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Rimuovi attività dal viaggio", description = "Rimuove un'attività collegata a un viaggio dell'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @DeleteMapping("/{travelId}/activities/{activityId}")
     public ResponseEntity<?> deleteActivity(@PathVariable UUID travelId, @PathVariable UUID activityId, @AuthenticationPrincipal Jwt jwt){
@@ -133,6 +149,7 @@ public class TravelController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Aggiorna attività del viaggio", description = "Modifica un'attività collegata a un viaggio dell'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @PutMapping("/{travelId}/activities/{activityId}")
     public ResponseEntity<TravelResponse> updateActivity(@PathVariable UUID travelId, @PathVariable UUID activityId, @RequestBody @Valid ActivityUpdateRequest request, @AuthenticationPrincipal Jwt jwt){
@@ -141,6 +158,7 @@ public class TravelController {
     }
 
     //RECOMMENDATIONS
+    @Operation(summary = "Viaggi consigliati", description = "Recupera i viaggi consigliati per il viaggiatore autenticato.")
     @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/recommendations")
     public ResponseEntity<List<TravelSummaryResponse>> getRecommendations(@AuthenticationPrincipal Jwt jwt){
@@ -151,6 +169,7 @@ public class TravelController {
 
     //BOOKING AREA
 
+    @Operation(summary = "Verifica viaggio", description = "Verifica se un viaggio è valido per il processo di prenotazione.")
     @GetMapping("/{travelId}")
     public ResponseEntity<Void> isValidTravel(@PathVariable UUID travelId) {
         if (travelDepartureService.isValidTravel(travelId)) {
@@ -159,6 +178,7 @@ public class TravelController {
         else return ResponseEntity.notFound().build();
     }
 
+    @Operation(summary = "Prezzo viaggio", description = "Recupera il prezzo del viaggio per il processo di prenotazione.")
     @GetMapping("/{travelId}/price")
     public ResponseEntity<BigDecimal> getTravelPrice(@PathVariable UUID travelId) {
         BigDecimal response = travelDepartureService.getTravelPriceById(travelId);
@@ -166,6 +186,7 @@ public class TravelController {
     }
 
     //IMAGES AREA
+    @Operation(summary = "Carica immagine", description = "Carica un'immagine associata all'organizzatore autenticato.")
     @PreAuthorize("hasRole('ORGANIZER')")
     @PostMapping(path = "/images",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImageResponse> uploadImage(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Jwt jwt){

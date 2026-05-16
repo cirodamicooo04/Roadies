@@ -22,6 +22,8 @@ import java.util.Objects;
 public interface TravelMapper {
     @Mapping(target = "ownerId", source = "ownerId") //mappo il campo ownerId che prendo dal jwt
     @Mapping(target = "tagScores", ignore = true)
+    @Mapping(target = "averageRating", ignore = true)
+    @Mapping(target = "numberOfRatings", ignore = true)
     @Mapping(target = "id", ignore = true) //evito manipolazioni
     Travel toEntity(TravelCreateRequest request, String ownerId);
 
@@ -33,6 +35,8 @@ public interface TravelMapper {
     @Mapping(target = "tagScores", ignore = true)
     @Mapping(target = "departures", ignore = true)
     @Mapping(target = "activities", ignore = true)
+    @Mapping(target = "averageRating", ignore = true)
+    @Mapping(target = "numberOfRatings", ignore = true)
     void updateTravelFromDto(TravelUpdateRequest request, @MappingTarget Travel travel);
 
     @Mapping(target = "startingFromPrice" , ignore = true)

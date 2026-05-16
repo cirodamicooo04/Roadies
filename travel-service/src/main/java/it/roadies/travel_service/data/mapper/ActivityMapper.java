@@ -23,6 +23,8 @@ public interface ActivityMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "travel", ignore = true)
     @Mapping(target = "ownerId", ignore = true)
+    @Mapping(target = "averageRating", ignore = true)
+    @Mapping(target = "numberOfRatings", ignore = true)
     Activity toEntity(ActivityCreateRequest activityCreateRequest);
 
     @Mapping(target = "travelId", source = "travel.id")
@@ -50,6 +52,8 @@ public interface ActivityMapper {
     @Mapping(target = "travel", ignore = true)
     @Mapping(target = "ownerId", ignore = true)
     @Mapping(target = "departures", ignore = true)
+    @Mapping(target = "averageRating", ignore = true)
+    @Mapping(target = "numberOfRatings", ignore = true)
     void updateActivityFromDto(ActivityUpdateRequest request, @MappingTarget Activity activity);
 
     @AfterMapping

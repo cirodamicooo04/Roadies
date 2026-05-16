@@ -1,5 +1,6 @@
 package it.roadies.travel_service.services;
 
+import it.roadies.travel_service.data.dto.event.ReviewTravelUpdateEvent;
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.data.entity.enumerations.Continent;
@@ -27,4 +28,5 @@ public interface TravelService {
     void deleteTravelActivity(UUID travelId, UUID activityId, String ownerId);
     TravelResponse updateTravelActivity(UUID travelId, UUID activityId, ActivityUpdateRequest request, String ownerId);
     List<TravelSummaryResponse> getRecommendedTravels(String id);
+    void updateTravelReviews(ReviewTravelUpdateEvent event);
 }

@@ -44,5 +44,13 @@ public class RabbitConfiguration {
         return new Queue("travel-service.friendship.deleted.queue", true);
     }
 
+    @Bean
+    public Queue addedTravelReviewQueue() {
+        return new Queue("travel-service.added.tr.review.queue", true);
+    }
+
+    @Bean
+    public Queue addedActivityReviewQueue() { return new Queue("travel-service.added.ac.review.queue", true);}
+
 }
 
