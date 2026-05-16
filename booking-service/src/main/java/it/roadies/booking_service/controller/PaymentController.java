@@ -4,6 +4,10 @@ import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.roadies.booking_service.data.dto.request.PaymentRequest;
 import it.roadies.booking_service.data.dto.response.PaymentResponse;
 import it.roadies.booking_service.services.PaymentService;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
+@Tag(name = "Gestione Pagamento", description = "API per la creazione e la conferma di una richiesta di pagamento")
 public class PaymentController {
 
     private final PaymentService stripePaymentService;
@@ -29,6 +34,12 @@ public class PaymentController {
     @Value("${stripe.webhook.secret}")
     private String endpointSecret;
 
+    @Operation(summary = "Crea richiesta pagamento", description = "Permette di creare una richiesta di pagamento")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Richiesta di pagamento effettuata con successo"),
+            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
+            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
+    })
     @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/create-payment-intent")
     public ResponseEntity<PaymentResponse> createPaymentIntent(@Valid @RequestBody PaymentRequest request, @AuthenticationPrincipal Jwt userJwt) throws StripeException {

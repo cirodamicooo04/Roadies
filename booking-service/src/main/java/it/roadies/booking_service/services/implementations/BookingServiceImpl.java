@@ -3,7 +3,7 @@ package it.roadies.booking_service.services.implementations;
 import it.roadies.booking_service.config.i8n.MessageLang;
 import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.BookingMemberDTO;
-import it.roadies.booking_service.data.dto.MemberIdResponse;
+import it.roadies.booking_service.data.dto.response.MemberIdResponse;
 import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.booking_service.data.dto.request.BookingCreateRequest;
 import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
@@ -179,7 +179,7 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.getUserId().equals(userId)){
             throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
         }
-        return new BookingStatusResponse(booking.getId(), booking.getStatus(), booking.getTravelId(), booking.getActivityId());
+        return new BookingStatusResponse(booking.getStatus());
     }
 
     @Transactional
