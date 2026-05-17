@@ -13,4 +13,7 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.travelId = :travelId")
     Double findAverageRatingByTravelId(UUID travelId);
+
+    // Per scopi di debug o amministrativi, potresti voler recuperare tutte le recensioni
+    List<Review> findAll();
 }

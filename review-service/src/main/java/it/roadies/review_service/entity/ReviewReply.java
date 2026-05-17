@@ -12,22 +12,28 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "review_responses")
-public class ReviewResponse {
+public class ReviewReply {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "review_id")
+    @OneToOne
+    @JoinColumn(name = "review_id", referencedColumnName = "id", unique = true, nullable = false)
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     private Review review;
 
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    private String userId;        // This is the id of the user who made the response, not the review author
 
     @Column(nullable = false)
-    private String comment;
+    private String content;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

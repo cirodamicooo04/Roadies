@@ -1,6 +1,8 @@
 package it.roadies.review_service.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Data;
@@ -21,6 +23,8 @@ public class Review {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
+    @Min(1)
+    @Max(5)
     @Column(nullable = false)
     private int rating;
 
@@ -28,5 +32,4 @@ public class Review {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
-
 }
