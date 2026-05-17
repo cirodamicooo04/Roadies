@@ -24,6 +24,7 @@ public class ReviewService {
         review.setTravelId(request.getTravelId());
         review.setRating(request.getRating());
         review.setComment(request.getComment());
+        review.setReviewType(request.getReviewType());
         review.setUserId(userId);
 
         return repository.save(review);

@@ -30,6 +30,10 @@ public class Review {
 
     private String comment;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "review_type", nullable = false)
+    private ReviewType reviewType;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 }
