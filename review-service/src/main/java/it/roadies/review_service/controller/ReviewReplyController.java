@@ -1,11 +1,14 @@
 package it.roadies.review_service.controller;
 
-import it.roadies.review_service.dto.ReplyRequest;
-import it.roadies.review_service.entity.ReviewReply;
+import it.roadies.review_service.data.dto.ReplyRequest;
+import it.roadies.review_service.data.dto.ReplyResponse;
+import it.roadies.review_service.data.entity.ReviewReply;
 import it.roadies.review_service.service.ReviewReplyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,17 +28,18 @@ public class ReviewReplyController {
     @PostMapping("/{reviewId}")
     public ResponseEntity<ReviewReply> createReply(
             @PathVariable UUID reviewId,
+            @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody ReplyRequest request) {
 
-        ReviewReply createdReply = replyService.createReply(reviewId, request);
+        ReviewReply createdReply = replyService.createReply(request, reviewId, jwt.getSubject());
         return new ResponseEntity<>(createdReply, HttpStatus.CREATED);
     }
 
     // Get the reply for a specific review based on the review's id
     // GET /reviews/replies/{reviewId}
     @GetMapping("/{reviewId}")
-    public ResponseEntity<ReviewReply> getReplyByReviewId(@PathVariable UUID reviewId) {
-        ReviewReply reply = replyService.getReplyByReviewId(reviewId);
+    public ResponseEntity<ReplyResponse> getReplyByReviewId(@PathVariable UUID reviewId) {
+        ReplyResponse reply = replyService.getReplyByReviewId(reviewId);
         return ResponseEntity.ok(reply);
     }
 

@@ -1,11 +1,15 @@
 package it.roadies.review_service.controller;
 
-import it.roadies.review_service.dto.ReviewRequest;
-import it.roadies.review_service.entity.Review;
+import it.roadies.review_service.data.dto.ReviewRequest;
+import it.roadies.review_service.data.dto.ReviewResponse;
+import it.roadies.review_service.data.dto.ReviewUpdateRequest;
 import it.roadies.review_service.service.ReviewService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,25 +17,22 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/reviews")
+@RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService service;
 
-    public ReviewController(ReviewService service) {
-        this.service = service;
-    }
-
-    // Creat a review by user (id)
+    // Create a review by travel/activity (id)
     @PostMapping
-    public ResponseEntity<Review> create(@Valid @RequestBody ReviewRequest request) {
-        String userId = "test-user"; // to make sure it is the correct user (should be done later)
-        Review createdReview = service.createReview(request, userId);
-        return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
+    public ResponseEntity<Void> create(@Valid @RequestBody ReviewRequest request, @AuthenticationPrincipal Jwt jwt) {
+        service.createReview(request, jwt.getSubject());
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // Get all the reviews of a travel by its id
+    // Get all the reviews of a travel or activity by its id
     @GetMapping("/travel/{travelId}")
-    public ResponseEntity<List<Review>> getByTravel(@PathVariable UUID travelId) {
+    public ResponseEntity<List<ReviewResponse>> getByTravel(@PathVariable UUID travelId) {
         return ResponseEntity.ok(service.getByTravel(travelId));
     }
 
@@ -43,24 +44,23 @@ public class ReviewController {
 
     // Edit the review by its id
     @PutMapping("/{reviewId}")
-    public ResponseEntity<Review> updateReview(
+    public ResponseEntity<ReviewUpdateRequest> updateReview(
             @PathVariable UUID reviewId,
-            @Valid @RequestBody ReviewRequest request) {
-        String userId = "test-user"; // to make sure it is the correct user (should be done later)
-        Review updatedReview = service.updateReview(reviewId, request, userId);
-        return ResponseEntity.ok(updatedReview);
+            @Valid @RequestBody ReviewUpdateRequest request) {
+        service.updateReview(request, reviewId);
+        return ResponseEntity.ok().build();
     }
 
     // Delete the review by its id
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable ("id")UUID reviewlId) {
+    public ResponseEntity<Void> deleteReview(@PathVariable("id") UUID reviewlId) {
         service.deleteReview(reviewlId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     // for testing purposes only
     @GetMapping("/all")
-    public ResponseEntity<List<Review>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<List<ReviewResponse>> getAll() {
+        return ResponseEntity.ok(service.getAll().stream().map(review -> service.createReviewResponse(review.getId())).toList());
     }
 }

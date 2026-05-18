@@ -1,10 +1,12 @@
 package it.roadies.review_service.service;
 
-import it.roadies.review_service.dto.ReplyRequest;
-import it.roadies.review_service.entity.Review;
-import it.roadies.review_service.entity.ReviewReply;
+import it.roadies.review_service.data.dto.ReplyRequest;
+import it.roadies.review_service.data.dto.ReplyResponse;
+import it.roadies.review_service.data.entity.Review;
+import it.roadies.review_service.data.entity.ReviewReply;
 import it.roadies.review_service.ReviewRepository;
 import it.roadies.review_service.ReviewReplyRepository;
+import it.roadies.review_service.data.mapper.ReplyMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +15,7 @@ import java.util.UUID;
 @Service
 public class ReviewReplyService {
 
+    private ReplyMapper replyMapper;
     private final ReviewReplyRepository replyRepository;
     private final ReviewRepository reviewRepository; // To validate the existence of the original review before creating a reply
 
@@ -23,7 +26,7 @@ public class ReviewReplyService {
 
     // Create a new reply for a specific review
     @Transactional
-    public ReviewReply createReply(UUID reviewId, ReplyRequest request) {
+    public ReviewReply createReply(ReplyRequest request, UUID reviewId, String userId) {
 
         // First validation: Ensure the original review exists before allowing a reply to be created
         Review review = reviewRepository.findById(reviewId)
@@ -35,18 +38,15 @@ public class ReviewReplyService {
         }
 
         // If both validations pass, proceed to create and save the new reply
-        ReviewReply reply = new ReviewReply();
-        reply.setContent(request.getContent());
-        reply.setReview(review); // Establish the relationship by setting the review reference in the reply entity
-        reply.setUserId("test-user-manager"); // Placeholder for user ID, should be replaced with actual user authentication logic
-
+        ReviewReply reply = replyMapper.toEntity(request, userId);
+        reply.setReview(review);
         return replyRepository.save(reply);
     }
 
     // Get the reply for a specific review by the review's ID
-    public ReviewReply getReplyByReviewId(UUID reviewId) {
-        return replyRepository.findByReviewId(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("No reply found for the specified review!"));
+    public ReplyResponse getReplyByReviewId(UUID reviewId) {
+        ReplyResponse reply = createReplyResponse(reviewId);
+        return reply;
     }
 
     // Edit the content of an existing reply by its ID
@@ -66,5 +66,11 @@ public class ReviewReplyService {
             throw new IllegalArgumentException("The reply you are trying to delete does not exist!");
         }
         replyRepository.deleteById(replyId);
+    }
+
+    public ReplyResponse createReplyResponse(UUID replyTd) {
+        ReviewReply reply = replyRepository.findById(replyTd)
+                .orElseThrow(() -> new IllegalArgumentException("No reply found for the specified ID!"));
+        return replyMapper.toReplyResponse(reply);
     }
 }

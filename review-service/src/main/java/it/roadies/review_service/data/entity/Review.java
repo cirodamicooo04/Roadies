@@ -1,10 +1,10 @@
-package it.roadies.review_service.entity;
+package it.roadies.review_service.data.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
+
 import lombok.Data;
 
 @Entity
@@ -12,7 +12,6 @@ import lombok.Data;
 @Table(name = "reviews",
         uniqueConstraints = @UniqueConstraint(columnNames = {"travel_id", "user_id"}))
 public class Review {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -23,12 +22,10 @@ public class Review {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Min(1)
-    @Max(5)
     @Column(nullable = false)
     private int rating;
 
-    private String comment;
+    private String content;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "review_type", nullable = false)

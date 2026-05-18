@@ -1,6 +1,6 @@
 package it.roadies.review_service;
 
-import it.roadies.review_service.entity.Review;
+import it.roadies.review_service.data.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
