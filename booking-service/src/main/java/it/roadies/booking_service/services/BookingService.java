@@ -21,4 +21,5 @@ public interface BookingService {
     void deleteBooking(UUID bookingId, String userJwt);
     List<UUID> getUserBookings(String userId);
     void updateBookingIfAllDocumentsUploaded(Booking booking);
+    void deleteMinioDocument(Booking booking);
 }

@@ -45,6 +45,7 @@ public class BookingServiceImpl implements BookingService {
     private final RabbitTemplate rabbitTemplate;
     private final TravelService travelService;
     private final MessageLang messageLang;
+    private final MinioServiceImpl minioService;
 
     //flusso caso d'uso di successo
     @Transactional
@@ -209,6 +210,7 @@ public class BookingServiceImpl implements BookingService {
         }
         if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED || booking.getStatus() == BookingStatus.READY_FOR_PAYMENT) {
             booking.setStatus(BookingStatus.CANCELLED);
+            deleteMinioDocument(booking);
             bookingRepository.save(booking);
             ReserveSeatCommand command = new ReserveSeatCommand(
                     booking.getId(),
@@ -222,6 +224,19 @@ public class BookingServiceImpl implements BookingService {
                 rabbitTemplate.convertAndSend("activity.release.queue", command);
         }
         //qui aggiungerò un qualche evento
+    }
+
+    public void deleteMinioDocument(Booking booking){
+        if (booking.getMembers() != null) {
+            for (BookingMember member : booking.getMembers()) {
+                if (member.getDocuments() != null) {
+                    for (MemberDocument doc : member.getDocuments()) {
+                        minioService.deleteFileByUrl(doc.getFileUrl());
+                        doc.setFileUrl(null);
+                    }
+                }
+            }
+        }
     }
 
     @Override

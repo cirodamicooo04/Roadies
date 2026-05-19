@@ -32,7 +32,7 @@ public class RabbitConfiguration {
     @Bean
     public Queue delayQueue() {
         return QueueBuilder.durable("booking-delay-queue")
-                .withArgument("x-message-ttl", 10000)
+                .withArgument("x-message-ttl", 900000)
                 .withArgument("x-dead-letter-exchange", "")
                 .withArgument("x-dead-letter-routing-key", "booking-expiration-queue")
                 .build();

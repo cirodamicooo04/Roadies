@@ -2,10 +2,12 @@ package it.roadies.booking_service.services.implementations;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import it.roadies.booking_service.config.i8n.MessageLang;
 import it.roadies.booking_service.exceptions.StorageException;
 import it.roadies.booking_service.services.MinioService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +17,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MinioServiceImpl implements MinioService {
 
     private final MinioClient minioClient;
@@ -29,7 +32,7 @@ public class MinioServiceImpl implements MinioService {
     public String uploadFile(MultipartFile file) {
         try {
             String extension = getFileExtension(file.getOriginalFilename());
-            String fileName = UUID.randomUUID().toString() + extension;
+            String fileName = UUID.randomUUID() + extension;
 
             InputStream inputStream = file.getInputStream();
 
@@ -54,5 +57,25 @@ public class MinioServiceImpl implements MinioService {
             return fileName.substring(fileName.lastIndexOf("."));
         }
         return "";
+    }
+
+    public void deleteFileByUrl(String fileUrl) {
+        if (fileUrl == null || !fileUrl.contains("/")) {
+            return;
+        }
+        try {
+            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fileName)
+                            .build()
+            );
+            log.info("File rimosso da MinIO con successo: {}", fileName);
+        } catch (Exception e) {
+            log.error("Impossibile eliminare il file da MinIO: {}", e.getMessage());
+            throw new StorageException(messageLang.getMessage("error.minio.delete"));
+        }
     }
 }

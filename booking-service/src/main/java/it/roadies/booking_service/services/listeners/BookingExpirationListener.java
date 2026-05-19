@@ -3,6 +3,7 @@ package it.roadies.booking_service.services.listeners;
 import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
+import it.roadies.booking_service.services.implementations.BookingServiceImpl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class BookingExpirationListener {
     private final BookingRepository bookingRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final BookingServiceImpl bookingService;
 
     @Transactional
     @RabbitListener(queues = "booking-expiration-queue")
@@ -27,10 +29,11 @@ public class BookingExpirationListener {
         log.info("Timer scaduto! Controllo lo stato del booking ID: {}", bookingId);
 
         bookingRepository.findById(bookingId).ifPresent(booking -> {
-            if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED || booking.getStatus() == BookingStatus.READY_FOR_PAYMENT && booking.getExpiresAt().isBefore(LocalDateTime.now())) {
+            if ((booking.getStatus() == BookingStatus.RESERVE_CONFIRMED || booking.getStatus() == BookingStatus.READY_FOR_PAYMENT) && booking.getExpiresAt().isBefore(LocalDateTime.now())) {
                 log.warn("Il booking {} è ancora RESERVE_CONFIRMED. Lo annullo e libero i posti.", bookingId);
 
                 booking.setStatus(BookingStatus.EXPIRED);
+                bookingService.deleteMinioDocument(booking);
                 bookingRepository.save(booking);
 
                 if (booking.getActivityId()!=null){
