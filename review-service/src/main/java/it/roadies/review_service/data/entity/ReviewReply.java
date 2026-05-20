@@ -5,6 +5,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.*;
 
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,6 +17,7 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "review_responses")
+@EntityListeners(AuditingEntityListener.class)
 public class ReviewReply {
 
     @Id
@@ -30,10 +36,15 @@ public class ReviewReply {
     private String content;
 
     @Column(name = "created_at")
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastUpdatedBy;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

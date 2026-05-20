@@ -1,4 +1,4 @@
-package it.roadies.review_service;
+package it.roadies.review_service.data.dao;
 
 import it.roadies.review_service.data.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;

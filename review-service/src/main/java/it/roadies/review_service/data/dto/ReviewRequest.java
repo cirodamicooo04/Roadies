@@ -1,7 +1,5 @@
 package it.roadies.review_service.data.dto;
 
-import java.util.UUID;
-
 import it.roadies.review_service.data.entity.ReviewType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -3,8 +3,9 @@ package it.roadies.review_service.controller;
 import it.roadies.review_service.data.dto.ReplyRequest;
 import it.roadies.review_service.data.dto.ReplyResponse;
 import it.roadies.review_service.data.entity.ReviewReply;
-import it.roadies.review_service.service.ReviewReplyService;
+import it.roadies.review_service.service.impl.ReviewReplyServiceImpl;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,25 +15,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/reviews/replies")
+@RequestMapping("/api/v1/reviews/replies")
+@RequiredArgsConstructor
 public class ReviewReplyController {
 
-    private final ReviewReplyService replyService;
+    private final ReviewReplyServiceImpl replyService;
 
-    public ReviewReplyController(ReviewReplyService replyService) {
-        this.replyService = replyService;
-    }
-
-    // Create a reply for a specific review based on the review's id
-    // POST /reviews/replies/{reviewId}
     @PostMapping("/{reviewId}")
-    public ResponseEntity<ReviewReply> createReply(
+    public ResponseEntity<Void> createReply(
             @PathVariable UUID reviewId,
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody ReplyRequest request) {
 
-        ReviewReply createdReply = replyService.createReply(request, reviewId, jwt.getSubject());
-        return new ResponseEntity<>(createdReply, HttpStatus.CREATED);
+        replyService.createReply(request, reviewId, jwt.getSubject());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // Get the reply for a specific review based on the review's id

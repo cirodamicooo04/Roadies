@@ -6,11 +6,17 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Data
 @Table(name = "reviews",
         uniqueConstraints = @UniqueConstraint(columnNames = {"travel_id", "user_id"}))
+@EntityListeners(AuditingEntityListener.class)
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,5 +38,15 @@ public class Review {
     private ReviewType reviewType;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastUpdatedBy;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
