@@ -16,5 +16,4 @@ public interface ReviewReplyService {
 
     void deleteReply(UUID replyId);
 
-    ReplyResponse createReplyResponse(UUID replyId);
 }

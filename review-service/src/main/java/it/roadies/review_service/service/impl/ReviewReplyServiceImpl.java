@@ -71,11 +71,4 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
         }
         replyRepository.deleteById(replyId);
     }
-
-    @Override
-    public ReplyResponse createReplyResponse(UUID replyTd) {
-        ReviewReply reply = replyRepository.findById(replyTd)
-                .orElseThrow(() -> new IllegalArgumentException("No reply found for the specified ID!"));
-        return replyMapper.toReplyResponse(reply);
-    }
 }
