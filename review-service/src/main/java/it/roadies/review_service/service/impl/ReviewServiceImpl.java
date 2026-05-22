@@ -1,11 +1,13 @@
 package it.roadies.review_service.service.impl;
 
+import it.roadies.review_service.conf.i8n.MessageLang;
 import it.roadies.review_service.data.dao.ReviewRepository;
 import it.roadies.review_service.data.dto.ReviewRequest;
 import it.roadies.review_service.data.dto.ReviewResponse;
 import it.roadies.review_service.data.dto.ReviewUpdateRequest;
 import it.roadies.review_service.data.entity.Review;
 import it.roadies.review_service.data.mapper.ReviewMapper;
+import it.roadies.review_service.exceptions.ReviewNotFoundException;
 import it.roadies.review_service.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ import java.util.UUID;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewMapper reviewMapper;
-
+    private final MessageLang messageLang;
     private final ReviewRepository repository;
 
     @Override
@@ -39,12 +41,12 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public double getAverageRating(UUID travelId) {
         Double avg = repository.findAverageRatingByTravelId(travelId);
-        return avg != null ? avg : 0.0;
+        return avg;
     }
 
     public void deleteReview(UUID reviewId) {
         if (!repository.existsById(reviewId)) {
-            throw new RuntimeException("Review does not exist");
+            throw new ReviewNotFoundException(messageLang.getMessage("review.not.exists"));
         }
         repository.deleteById(reviewId);
     }
@@ -58,7 +60,7 @@ public class ReviewServiceImpl implements ReviewService {
     // Update the review by its id
     @Override
     public Review updateReview(ReviewUpdateRequest reviewUpdateRequest, UUID reviewId) {
-        Review existingReview = repository.findById(reviewId).orElseThrow(() -> new RuntimeException("Review not found"));
+        Review existingReview = repository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("review.not.found")));
 
         existingReview.setRating(reviewUpdateRequest.getRating());
         existingReview.setContent(reviewUpdateRequest.getContent());
@@ -69,7 +71,7 @@ public class ReviewServiceImpl implements ReviewService {
     // Convert a Review entity to a ReviewResponse DTO by its id
     @Override
     public ReviewResponse createReviewResponse(UUID id) {
-        Review review = repository.findById(id).orElseThrow(() -> new RuntimeException("Review not found"));
+        Review review = repository.findById(id).orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("review.not.found")));
         return reviewMapper.toReviewResponse(review);
     }
 }
