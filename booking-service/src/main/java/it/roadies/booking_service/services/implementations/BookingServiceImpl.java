@@ -17,6 +17,7 @@ import it.roadies.booking_service.data.entities.BookingMember;
 import it.roadies.booking_service.data.entities.MemberDocument;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
 import it.roadies.booking_service.data.entities.enumeration.DocumentStatus;
+import it.roadies.booking_service.data.mapper.BookingMemberMapper;
 import it.roadies.booking_service.exceptions.AccessDeniedException;
 import it.roadies.booking_service.exceptions.BookingNotFoundException;
 import it.roadies.booking_service.data.mapper.BookingMapper;
@@ -42,6 +43,7 @@ import java.util.UUID;
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
+    private final BookingMemberMapper bookingMemberMapper;
     private final RabbitTemplate rabbitTemplate;
     private final TravelService travelService;
     private final MessageLang messageLang;
@@ -131,27 +133,13 @@ public class BookingServiceImpl implements BookingService {
         List<BookingMember> entities = new ArrayList<>();
 
         for (BookingMemberDTO memberDto : requestDto.getMembers()) {
-            BookingMember member = new BookingMember();
-            member.setFirstName(memberDto.getFirstName());
-            member.setLastName(memberDto.getLastName());
-            member.setBirthDate(memberDto.getBirthDate());
-            member.setNotes(memberDto.getNotes());
-            member.setPhoneNumber(memberDto.getPhoneNumber());
+            BookingMember member = bookingMemberMapper.toEntity(memberDto);
             member.setBooking(booking);
 
-            List<MemberDocument> documents = new ArrayList<>();
-
-            if (memberDto.getDocuments() != null) {
-                for (MemberDocumentRequest docDto : memberDto.getDocuments()) {
-                    MemberDocument doc = new MemberDocument();
-                    doc.setType(docDto.getType());
-                    doc.setStatus(DocumentStatus.PENDING);
-                    doc.setMember(member);
-                    documents.add(doc);
-                }
+            if (member.getDocuments() != null) {
+                member.getDocuments().forEach(doc -> doc.setStatus(DocumentStatus.PENDING));
             }
 
-            member.setDocuments(documents);
             entities.add(member);
         }
 
