@@ -13,5 +13,6 @@ public interface ReplyMapper {
     @Mapping(source = "userId", target = "userId")
     ReviewReply toEntity(ReplyRequest replyRequest, String userId);
 
+    @Mapping(source = "review.id", target = "reviewId")
     ReplyResponse toReplyResponse(ReviewReply reply);
 }

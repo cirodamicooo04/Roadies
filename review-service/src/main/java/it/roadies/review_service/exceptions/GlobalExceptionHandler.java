@@ -70,12 +70,6 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageLang.getMessage("error.internal"), messageLang.getMessage("error.internal.message"), request.getRequestURI());
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-        log.warn("Accesso negato: {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.FORBIDDEN, messageLang.getMessage("error.access.denied.title"), messageLang.getMessage("error.access.denied.message"), request.getRequestURI());
-    }
-
     private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String error, String message, String path) {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
