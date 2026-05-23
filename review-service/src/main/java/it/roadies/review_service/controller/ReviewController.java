@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,7 @@ public class ReviewController {
             summary = "Crea una nuova recensione",
             description = "Permette a un utente autenticato di lasciare una recensione (voto e commento) per un determinato viaggio o attività."
     )
+    @PreAuthorize("hasRole('TRAVELER') or hasRole('ADMIN')")
     @PostMapping("/{travelId}")
     public ResponseEntity<Void> create(
             @PathVariable("travelId") UUID travelId,
@@ -56,15 +58,16 @@ public class ReviewController {
     @PutMapping("/{reviewId}")
     public ResponseEntity<ReviewUpdateRequest> updateReview(
             @PathVariable UUID reviewId,
-            @Valid @RequestBody ReviewUpdateRequest request) {
-        service.updateReview(request, reviewId);
+            @Valid @RequestBody ReviewUpdateRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        service.updateReview(request, reviewId, jwt.getSubject());
         return ResponseEntity.ok().build();
     }
 
     // Delete the review by its id
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable("id") UUID reviewlId) {
-        service.deleteReview(reviewlId);
+    public ResponseEntity<Void> deleteReview(@PathVariable("id") UUID reviewlId, @AuthenticationPrincipal Jwt jwt) {
+        service.deleteReview(reviewlId, jwt.getSubject());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

@@ -8,6 +8,7 @@ import it.roadies.review_service.data.dto.ReviewUpdateRequest;
 import it.roadies.review_service.data.entity.Review;
 import it.roadies.review_service.data.mapper.ReviewMapper;
 import it.roadies.review_service.exceptions.ReviewNotFoundException;
+import it.roadies.review_service.exceptions.AccessDeniedException;
 import it.roadies.review_service.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,10 @@ public class ReviewServiceImpl implements ReviewService {
     public void createReview(ReviewRequest request, UUID travelId, String userId) {
         Review review = reviewMapper.toEntity(request, userId);
         review.setTravelId(travelId);
+        // Check if the user has already reviewed this travel
+        if (repository.existsByTravelIdAndUserId(travelId, userId)) {
+            throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
+        }
         repository.save(review);
     }
 
@@ -44,9 +49,12 @@ public class ReviewServiceImpl implements ReviewService {
         return avg;
     }
 
-    public void deleteReview(UUID reviewId) {
+    public void deleteReview(UUID reviewId, String userId) {
         if (!repository.existsById(reviewId)) {
             throw new ReviewNotFoundException(messageLang.getMessage("review.not.exists"));
+        }
+        if (!repository.findById(reviewId).get().getUserId().equals(userId)) {
+            throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
         }
         repository.deleteById(reviewId);
     }
@@ -59,9 +67,12 @@ public class ReviewServiceImpl implements ReviewService {
 
     // Update the review by its id
     @Override
-    public Review updateReview(ReviewUpdateRequest reviewUpdateRequest, UUID reviewId) {
+    public Review updateReview(ReviewUpdateRequest reviewUpdateRequest, UUID reviewId, String userId) {
         Review existingReview = repository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("review.not.found")));
-
+        // Only the user who created the review can update it
+        if (!existingReview.getUserId().equals(userId)) {
+            throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
+        }
         existingReview.setRating(reviewUpdateRequest.getRating());
         existingReview.setContent(reviewUpdateRequest.getContent());
 

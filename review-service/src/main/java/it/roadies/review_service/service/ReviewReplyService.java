@@ -12,8 +12,8 @@ public interface ReviewReplyService {
 
     ReplyResponse getReplyByReviewId(UUID reviewId);
 
-    ReviewReply updateReply(UUID replyId, ReplyRequest request);
+    ReviewReply updateReply(UUID replyId, ReplyRequest request, String userId);
 
-    void deleteReply(UUID replyId);
+    void deleteReply(UUID replyId, String userId);
 
 }

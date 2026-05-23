@@ -16,4 +16,7 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     // Per scopi di debug o amministrativi, potresti voler recuperare tutte le recensioni
     List<Review> findAll();
+
+    // Implementazione personalizzata per verificare se l'utente ha già recensito questo viaggio
+    boolean existsByTravelIdAndUserId(UUID travelId, String userId);
 }

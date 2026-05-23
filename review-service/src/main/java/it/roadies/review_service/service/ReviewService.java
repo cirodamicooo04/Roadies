@@ -16,14 +16,16 @@ public interface ReviewService {
 
     double getAverageRating(UUID travelId);
 
-    void deleteReview(UUID reviewId);
+    void deleteReview(UUID reviewId, String userId);
 
     // For administrative purposes
     List<Review> getAll();
 
     // Update the review by its id
-    Review updateReview(ReviewUpdateRequest reviewUpdateRequest, UUID reviewId);
+    Review updateReview(ReviewUpdateRequest reviewUpdateRequest, UUID reviewId, String userId);
 
     // Convert a Review entity to a ReviewResponse DTO by its id
     ReviewResponse createReviewResponse(UUID id);
+
+
 }

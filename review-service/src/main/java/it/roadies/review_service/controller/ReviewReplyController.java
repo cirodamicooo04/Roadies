@@ -44,17 +44,18 @@ public class ReviewReplyController {
     @PutMapping("/replyId/{replyId}")
     public ResponseEntity<ReviewReply> updateReply(
             @PathVariable UUID replyId,
-            @Valid @RequestBody ReplyRequest request) {
+            @Valid @RequestBody ReplyRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
 
-        ReviewReply updatedReply = replyService.updateReply(replyId, request);
+        ReviewReply updatedReply = replyService.updateReply(replyId, request, jwt.getSubject());
         return ResponseEntity.ok(updatedReply);
     }
 
     // delete the reply based on the reply's id
     // DELETE /reviews/replies/id/{replyId}
     @DeleteMapping("/replyId/{replyId}")
-    public ResponseEntity<Void> deleteReply(@PathVariable UUID replyId) {
-        replyService.deleteReply(replyId);
+    public ResponseEntity<Void> deleteReply(@PathVariable UUID replyId, @AuthenticationPrincipal Jwt jwt) {
+        replyService.deleteReply(replyId, jwt.getSubject());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
