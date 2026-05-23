@@ -1,4 +1,4 @@
-package it.roadies.booking_service.services.implementations;
+package it.roadies.booking_service.services.impl;
 
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;

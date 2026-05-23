@@ -22,8 +22,8 @@ public class ReserveSeatCommand {
     @Positive
     private Integer peopleCount;
 
-    @AssertTrue(message = "activityId e travelId non posso essere entrambi campi notnull")
-    public boolean ValidTarget() {
+    @AssertTrue(message = "Devi specificare uno e un solo target tra travelId e activityId")
+    public boolean isValidTarget() {
         boolean hasTravel = travelId != null;
         boolean hasActivity = activityId != null;
 

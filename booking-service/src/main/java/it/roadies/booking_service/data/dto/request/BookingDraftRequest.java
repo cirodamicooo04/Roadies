@@ -1,7 +1,6 @@
 package it.roadies.booking_service.data.dto.request;
 
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.UUID;
@@ -11,8 +10,8 @@ public class BookingDraftRequest {
     private UUID travelId;
     private UUID activityId;
 
-    @AssertTrue(message = "activityId e travelId non posso essere entrambi campi notnull")
-    public boolean ValidTarget() {
+    @AssertTrue(message = "Devi specificare uno e un solo target tra travelId e activityId")
+    public boolean isValidTarget() {
         boolean hasTravel = travelId != null;
         boolean hasActivity = activityId != null;
 

@@ -1,4 +1,4 @@
-package it.roadies.booking_service.services.implementations;
+package it.roadies.booking_service.services.impl;
 
 import it.roadies.booking_service.config.i8n.MessageLang;
 import it.roadies.booking_service.data.dao.BookingRepository;
@@ -8,7 +8,6 @@ import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.booking_service.data.dto.request.BookingCreateRequest;
 import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
 import it.roadies.booking_service.data.dto.request.BookingMemberRequest;
-import it.roadies.booking_service.data.dto.request.MemberDocumentRequest;
 import it.roadies.booking_service.data.dto.response.BookingDraftResponse;
 import it.roadies.booking_service.data.dto.response.BookingStatusResponse;
 import it.roadies.booking_service.data.dto.response.BookingStep2Response;
@@ -64,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Transactional
-    public void createBookingStep1(BookingCreateRequest requestDto, String userId) {
+    public void createPendingAndReserveSeats(BookingCreateRequest requestDto, String userId) {
         Booking booking = bookingRepository.findById(requestDto.getBookingId())
                 .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 
@@ -114,7 +113,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingStep2Response createBookingStep2(BookingMemberRequest requestDto, String userId) {
+    public BookingStep2Response insertMembers(BookingMemberRequest requestDto, String userId) {
         Booking booking = bookingRepository.findById(requestDto.getBookingId())
                 .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 

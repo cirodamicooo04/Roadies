@@ -11,13 +11,13 @@ import java.util.UUID;
 @FeignClient(name = "travelService", url = "${travel-service.url}", configuration = FeignConfiguration.class)
 public interface TravelServiceClient {
 
-    @GetMapping("/api/v1/travels/{travelId}/price")
+    @GetMapping("/api/v1/travels/{travelId}")
     void verifyTravelExists(@PathVariable UUID travelId);
 
     @GetMapping("/api/v1/travels/{travelId}/price")
     BigDecimal getTravelPrice(@PathVariable UUID travelId);
 
-    @GetMapping("/api/v1/activities/{activityId}/price")
+    @GetMapping("/api/v1/activities/{activityId}")
     void verifyActivityExists(@PathVariable UUID activityId);
 
     @GetMapping("/api/v1/activities/{activityId}/price")
