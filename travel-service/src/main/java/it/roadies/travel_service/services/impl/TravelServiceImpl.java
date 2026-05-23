@@ -397,6 +397,11 @@ public class TravelServiceImpl implements TravelService {
         activityRepository.save(activity);
         return travelMapper.toResponse(travel);
     }
+
+    //REVIEW AREA
+    public boolean isValidTravel(UUID travelId){
+        return travelRepository.existsById(travelId);
+    }
 }
 
 

@@ -10,6 +10,7 @@ import it.roadies.review_service.data.mapper.ReviewMapper;
 import it.roadies.review_service.exceptions.ReviewNotFoundException;
 import it.roadies.review_service.exceptions.AccessDeniedException;
 import it.roadies.review_service.service.ReviewService;
+import it.roadies.review_service.service.client.TravelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,12 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewMapper reviewMapper;
     private final MessageLang messageLang;
     private final ReviewRepository repository;
+    private final TravelService travelService;
 
     @Override
     public void createReview(ReviewRequest request, UUID travelId, String userId) {
         Review review = reviewMapper.toEntity(request, userId);
+        travelService.verifyTravelExists(travelId, request.getReviewType());
         review.setTravelId(travelId);
         // Check if the user has already reviewed this travel
         if (repository.existsByTravelIdAndUserId(travelId, userId)) {

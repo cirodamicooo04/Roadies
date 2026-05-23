@@ -32,4 +32,7 @@ public interface ActivityService {
     ActivityDepartureResponse confirmDeparture(UUID activityId, UUID departureId, String ownerId);
     List<String> getUniqueDestinations(Continent continent, String country);
     ActivityResponse updateActivity(UUID id, ActivityUpdateRequest request, String ownerId);
+
+    public boolean isValidActivityAndIsNotIntoATravel(UUID activityId);
+
 }

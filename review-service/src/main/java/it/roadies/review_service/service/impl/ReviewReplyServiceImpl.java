@@ -13,6 +13,7 @@ import it.roadies.review_service.exceptions.ReplyNotFoundException;
 import it.roadies.review_service.exceptions.ReviewBusinessException;
 import it.roadies.review_service.exceptions.ReviewNotFoundException;
 import it.roadies.review_service.service.ReviewReplyService;
+import it.roadies.review_service.service.client.TravelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     private final ReviewReplyRepository replyRepository;
     private final ReviewRepository reviewRepository;
     private final MessageLang messageLang;
+    private final TravelService travelServiceClient;
 
     // Create a new reply for a specific review
     @Transactional
@@ -36,6 +38,8 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
         // First validation: Ensure the original review exists before allowing a reply to be created
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("error.resource.not.found")));
+
+        travelServiceClient.verifyTravelExists(review.getTravelId(), review.getReviewType());
 
         // Second validation: Ensure that a reply does not already exist for this review (enforcing the one-to-one relationship)
         if (replyRepository.existsByReviewId(reviewId)) {

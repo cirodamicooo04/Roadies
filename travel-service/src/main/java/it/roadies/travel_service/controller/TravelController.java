@@ -152,7 +152,7 @@ public class TravelController {
     //BOOKING AREA
 
     @GetMapping("/{travelId}")
-    public ResponseEntity<Void> isValidTravel(@PathVariable UUID travelId) {
+    public ResponseEntity<Void> isValidTravelDeparture(@PathVariable UUID travelId) {
         if (travelDepartureService.isValidTravel(travelId)) {
             return ResponseEntity.ok().build();
         }
@@ -163,6 +163,16 @@ public class TravelController {
     public ResponseEntity<BigDecimal> getTravelPrice(@PathVariable UUID travelId) {
         BigDecimal response = travelDepartureService.getTravelPriceById(travelId);
         return ResponseEntity.ok(response);
+    }
+
+    //REVIEW AREA
+
+    @GetMapping("/review/{travelId}")
+    public ResponseEntity<Void> isValidTravel(@PathVariable UUID travelId) {
+        if (travelService.isValidTravel(travelId)) {
+            return ResponseEntity.ok().build();
+        }
+        else return ResponseEntity.notFound().build();
     }
 
     //IMAGES AREA
