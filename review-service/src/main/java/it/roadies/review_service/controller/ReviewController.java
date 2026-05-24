@@ -8,6 +8,7 @@ import it.roadies.review_service.data.dto.ReviewUpdateRequest;
 import it.roadies.review_service.service.impl.ReviewServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,18 +44,30 @@ public class ReviewController {
 
 
     // Get all the reviews of a travel or activity by its id
+    @Operation(
+            summary = "Recupera le recensioni di un viaggio o attività",
+            description = "Restituisce tutte le recensioni associate a un determinato viaggio o attività, identificato dal suo ID."
+    )
     @GetMapping("/{travelId}")
     public ResponseEntity<List<ReviewResponse>> getByTravel(@PathVariable UUID travelId) {
         return ResponseEntity.ok(service.getByTravel(travelId));
     }
 
     // Get the average rating of a travel or activity by its id
+    @Operation(
+            summary = "Recupera la valutazione media di un viaggio o attività",
+            description = "Restituisce la valutazione media (voto) di un determinato viaggio o attività, identificato dal suo ID."
+    )
     @GetMapping("/{travelId}/average")
     public ResponseEntity<Double> getAverageRating(@PathVariable UUID travelId) {
         return ResponseEntity.ok(service.getAverageRating(travelId));
     }
 
     // Edit the review by its id
+    @Operation(
+            summary = "Modifica una recensione esistente",
+            description = "Permette a un utente autenticato di modificare il contenuto di una recensione esistente, identificata dal suo ID."
+    )
     @PutMapping("/{reviewId}")
     public ResponseEntity<ReviewUpdateRequest> updateReview(
             @PathVariable UUID reviewId,
@@ -65,6 +78,10 @@ public class ReviewController {
     }
 
     // Delete the review by its id
+    @Operation(
+            summary = "Elimina una recensione",
+            description = "Permette a un utente autenticato di eliminare una recensione esistente, identificata dal suo ID."
+    )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable("id") UUID reviewlId, @AuthenticationPrincipal Jwt jwt) {
         service.deleteReview(reviewlId, jwt.getSubject());

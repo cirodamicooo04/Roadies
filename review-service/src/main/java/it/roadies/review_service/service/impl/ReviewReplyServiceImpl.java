@@ -14,11 +14,13 @@ import it.roadies.review_service.exceptions.ReviewBusinessException;
 import it.roadies.review_service.exceptions.ReviewNotFoundException;
 import it.roadies.review_service.service.ReviewReplyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewReplyServiceImpl implements ReviewReplyService {
@@ -32,6 +34,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     @Transactional
     @Override
     public void createReply(ReplyRequest request, UUID reviewId, String userId) {
+        log.info("provo a creare una risposta ad una recensione - reviewId: {} userId: {}", reviewId, userId);
 
         // First validation: Ensure the original review exists before allowing a reply to be created
         Review review = reviewRepository.findById(reviewId)
@@ -49,9 +52,9 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     }
 
     // Get the reply for a specific review by the review's ID
-
     @Override
     public ReplyResponse getReplyByReviewId(UUID reviewId) {
+        log.info("provo a recuperare la risposta ad una recensione - reviewId: {}", reviewId);
         return replyRepository.findByReviewId(reviewId)
                 .map(replyMapper::toReplyResponse)
                 .orElseThrow(() -> new ReplyNotFoundException(messageLang.getMessage("review.not.found")));
@@ -61,6 +64,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     @Transactional
     @Override
     public ReviewReply updateReply(UUID replyId, ReplyRequest request, String userId) {
+        log.info("provo ad aggiornare una risposta di una recensione - replyId: {} userId: {}", replyId, userId);
         ReviewReply existingReply = replyRepository.findById(replyId)
                 .orElseThrow(() -> new ReplyNotFoundException(messageLang.getMessage("review.reply.not.found",replyId)));
         // Ensure that only the user who created the reply can edit it
@@ -75,6 +79,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     @Transactional
     @Override
     public void deleteReply(UUID replyId, String userId) {
+        log.info("provo a cancellare una risposta di una recensione - replyId: {} userId: {}", replyId, userId);
         if (!replyRepository.existsById(replyId)) {
             throw new ReplyNotFoundException(messageLang.getMessage("review.reply.not.found", replyId));
         }

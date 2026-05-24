@@ -11,6 +11,7 @@ import it.roadies.review_service.exceptions.ReviewNotFoundException;
 import it.roadies.review_service.exceptions.AccessDeniedException;
 import it.roadies.review_service.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewMapper reviewMapper;
@@ -26,6 +28,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public void createReview(ReviewRequest request, UUID travelId, String userId) {
+        log.info("provo a creare una recensione - userId: {} travelId: {}", userId, travelId);
         Review review = reviewMapper.toEntity(request, userId);
         review.setTravelId(travelId);
         // Check if the user has already reviewed this travel
@@ -37,6 +40,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewResponse> getByTravel(UUID travelId) {
+        log.info("provo a recuperare le recensioni di un viaggio - travelId: {}", travelId);
         return repository.findByTravelId(travelId)
                 .stream()
                 .map(reviewMapper::toReviewResponse)
@@ -45,11 +49,13 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public double getAverageRating(UUID travelId) {
+        log.info("provo a recuperare la valutazione media di un viaggio - travelId: {}", travelId);
         Double avg = repository.findAverageRatingByTravelId(travelId);
         return avg;
     }
 
     public void deleteReview(UUID reviewId, String userId) {
+        log.info("provo a cancellare una recensione - reviewId: {} userId: {}", reviewId, userId);
         if (!repository.existsById(reviewId)) {
             throw new ReviewNotFoundException(messageLang.getMessage("review.not.exists"));
         }
@@ -62,12 +68,14 @@ public class ReviewServiceImpl implements ReviewService {
     // For administrative purposes
     @Override
     public List<Review> getAll() {
+        log.info("provo a recuperare tutte le recensioni");
         return repository.findAll();
     }
 
     // Update the review by its id
     @Override
     public Review updateReview(ReviewUpdateRequest reviewUpdateRequest, UUID reviewId, String userId) {
+        log.info("provo a modificare una recensione - reviewId: {} userId: {}", reviewId, userId);
         Review existingReview = repository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("review.not.found")));
         // Only the user who created the review can update it
         if (!existingReview.getUserId().equals(userId)) {
