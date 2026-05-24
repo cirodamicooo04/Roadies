@@ -1,5 +1,6 @@
 package it.roadies.review_service.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.roadies.review_service.data.dto.ReplyRequest;
 import it.roadies.review_service.data.dto.ReplyResponse;
 import it.roadies.review_service.data.entity.ReviewReply;
@@ -22,6 +23,10 @@ public class ReviewReplyController {
     private final ReviewReplyServiceImpl replyService;
 
     @PostMapping("/{reviewId}")
+    @Operation(
+            summary = "Crea una nuova risposta a una recensione",
+            description = "Permette a un utente autenticato di creare una risposta (commento) a una recensione specifica, identificata dal suo ID."
+    )
     public ResponseEntity<Void> createReply(
             @PathVariable UUID reviewId,
             @AuthenticationPrincipal Jwt jwt,
@@ -34,6 +39,10 @@ public class ReviewReplyController {
     // Get the reply for a specific review based on the review's id
     // GET /reviews/replies/{reviewId}
     @GetMapping("/{reviewId}")
+    @Operation(
+            summary = "Recupera la risposta a una recensione",
+            description = "Restituisce la risposta (commento) associata a una recensione specifica, identificata dal suo ID."
+    )
     public ResponseEntity<ReplyResponse> getReplyByReviewId(@PathVariable UUID reviewId) {
         ReplyResponse reply = replyService.getReplyByReviewId(reviewId);
         return ResponseEntity.ok(reply);
@@ -42,6 +51,10 @@ public class ReviewReplyController {
     // Edit the content of a reply based on the reply's id
     // PUT /reviews/replies/id/{replyId}
     @PutMapping("/replyId/{replyId}")
+    @Operation(
+            summary = "Modifica una risposta a una recensione",
+            description = "Permette a un utente autenticato di modificare il contenuto di una risposta (commento) esistente, identificata dal suo ID."
+    )
     public ResponseEntity<ReviewReply> updateReply(
             @PathVariable UUID replyId,
             @Valid @RequestBody ReplyRequest request,
@@ -53,6 +66,10 @@ public class ReviewReplyController {
 
     // delete the reply based on the reply's id
     // DELETE /reviews/replies/id/{replyId}
+    @Operation(
+            summary = "Elimina una risposta a una recensione",
+            description = "Permette a un utente autenticato di eliminare una risposta (commento) esistente, identificata dal suo ID."
+    )
     @DeleteMapping("/replyId/{replyId}")
     public ResponseEntity<Void> deleteReply(@PathVariable UUID replyId, @AuthenticationPrincipal Jwt jwt) {
         replyService.deleteReply(replyId, jwt.getSubject());
