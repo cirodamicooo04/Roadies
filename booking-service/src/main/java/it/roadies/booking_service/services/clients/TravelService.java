@@ -54,7 +54,7 @@ public class TravelService {
             log.error("Travel-service non raggiungibile durante la verifica viaggio/attività", e);
             throw new ServiceUnavailableException(messageLang.getMessage("error.retry.travel"));
 
-        } catch (Exception e) {
+        } catch (FeignException e){
             log.error("Errore imprevisto durante la verifica viaggio/attività", e);
             throw new ServiceUnavailableException(messageLang.getMessage("error.any.travel"));
         }

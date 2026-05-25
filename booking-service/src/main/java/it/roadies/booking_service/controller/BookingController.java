@@ -31,7 +31,7 @@ import java.util.UUID;
 public class BookingController {
     private final BookingService bookingService;
 
-    @Operation(summary = "Crea una bozza di prenotazione", description = "Inizializza una nuova prenotazione in stato di bozza")
+    @Operation(summary = "Crea una bozza di prenotazione (passo 1)", description = "Inizializza una nuova prenotazione in stato di bozza")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Bozza creata con successo"),
             @ApiResponse(responseCode = "400", description = "Dati della richiesta non validi"),
@@ -39,14 +39,14 @@ public class BookingController {
             @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
     })
     @PreAuthorize("hasRole('TRAVELER')")
-    @PostMapping("/create-draft")
-    public ResponseEntity<BookingDraftResponse> createDraftBooking(@Valid @RequestBody BookingDraftRequest request, @AuthenticationPrincipal Jwt userJwt) {
+    @PostMapping("/draft")
+    public ResponseEntity<BookingDraftResponse> createDraft(@Valid @RequestBody BookingDraftRequest request, @AuthenticationPrincipal Jwt userJwt) {
         BookingDraftResponse response = bookingService.createDraft(request, userJwt.getSubject());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 
-    @Operation(summary = "Richiedi riserva posti per un tempo pre-stabilito", description = "Permette di riservare i posti se ancora disponibili e iniziare il processo di prenotazione")
+    @Operation(summary = "Richiedi riserva posti per un tempo pre-stabilito (passo 2)", description = "Permette di riservare i posti, se ancora disponibili, e iniziare il processo di prenotazione dopo la creazione della draft")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Booking aggiornato"),
             @ApiResponse(responseCode = "400", description = "Dati della richiesta non validi"),
@@ -54,14 +54,14 @@ public class BookingController {
             @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
     })
     @PreAuthorize("hasRole('TRAVELER')")
-    @PutMapping("/create-pending")
-    public ResponseEntity<Void> createBooking(@Valid @RequestBody BookingCreateRequest request, @AuthenticationPrincipal Jwt userJwt) {
-        bookingService.createBookingStep1(request, userJwt.getSubject());
+    @PutMapping("/pending")
+    public ResponseEntity<Void> createPendingAndReserveSeats(@Valid @RequestBody BookingCreateRequest request, @AuthenticationPrincipal Jwt userJwt) {
+        bookingService.createPendingAndReserveSeats(request, userJwt.getSubject());
         return ResponseEntity.ok().build();
     }
 
 
-    @Operation(summary = "Inizializza membri", description = "Permette di inizializzare la lista di membri di una prenotazione")
+    @Operation(summary = "Inizializza membri", description = "Permette di inizializzare la lista dei membri di una prenotazione")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Booking aggiornato"),
             @ApiResponse(responseCode = "400", description = "Dati della richiesta non validi"),
@@ -70,9 +70,9 @@ public class BookingController {
             @ApiResponse(responseCode = "404", description = "Prenotazione non trovata")
     })
     @PreAuthorize("hasRole('TRAVELER')")
-    @PostMapping("/create-members")
-    public ResponseEntity<BookingStep2Response> createMembers(@Valid @RequestBody BookingMemberRequest request, @AuthenticationPrincipal Jwt userJwt) {
-        BookingStep2Response response = bookingService.createBookingStep2(request, userJwt.getSubject());
+    @PostMapping("/members")
+    public ResponseEntity<BookingStep2Response> insertMembers(@Valid @RequestBody BookingMemberRequest request, @AuthenticationPrincipal Jwt userJwt) {
+        BookingStep2Response response = bookingService.insertMembers(request, userJwt.getSubject());
         return ResponseEntity.ok(response);
     }
 

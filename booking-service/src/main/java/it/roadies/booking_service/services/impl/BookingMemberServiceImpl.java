@@ -1,4 +1,4 @@
-package it.roadies.booking_service.services.implementations;
+package it.roadies.booking_service.services.impl;
 
 import io.minio.errors.MinioException;
 import it.roadies.booking_service.config.i8n.MessageLang;

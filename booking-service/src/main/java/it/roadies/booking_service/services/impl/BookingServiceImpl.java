@@ -1,4 +1,4 @@
-package it.roadies.booking_service.services.implementations;
+package it.roadies.booking_service.services.impl;
 
 import it.roadies.booking_service.config.i8n.MessageLang;
 import it.roadies.booking_service.data.dao.BookingRepository;
@@ -8,7 +8,6 @@ import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.booking_service.data.dto.request.BookingCreateRequest;
 import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
 import it.roadies.booking_service.data.dto.request.BookingMemberRequest;
-import it.roadies.booking_service.data.dto.request.MemberDocumentRequest;
 import it.roadies.booking_service.data.dto.response.BookingDraftResponse;
 import it.roadies.booking_service.data.dto.response.BookingStatusResponse;
 import it.roadies.booking_service.data.dto.response.BookingStep2Response;
@@ -17,6 +16,7 @@ import it.roadies.booking_service.data.entities.BookingMember;
 import it.roadies.booking_service.data.entities.MemberDocument;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
 import it.roadies.booking_service.data.entities.enumeration.DocumentStatus;
+import it.roadies.booking_service.data.mapper.BookingMemberMapper;
 import it.roadies.booking_service.exceptions.AccessDeniedException;
 import it.roadies.booking_service.exceptions.BookingNotFoundException;
 import it.roadies.booking_service.data.mapper.BookingMapper;
@@ -42,6 +42,7 @@ import java.util.UUID;
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
+    private final BookingMemberMapper bookingMemberMapper;
     private final RabbitTemplate rabbitTemplate;
     private final TravelService travelService;
     private final MessageLang messageLang;
@@ -52,7 +53,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDraftResponse createDraft(BookingDraftRequest requestDto, String userId) {
         travelService.verifyTravelExists(requestDto.getTravelId(), requestDto.getActivityId());
 
-        log.info("Iniziata creazione draft per userId");
+        log.info("Iniziata creazione draft per userId={}", userId);
         Booking booking = bookingMapper.toEntity(requestDto, userId);
         booking.setTotalPrice(BigDecimal.ZERO);
         booking.setPeopleCount(0);
@@ -62,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Transactional
-    public void createBookingStep1(BookingCreateRequest requestDto, String userId) {
+    public void createPendingAndReserveSeats(BookingCreateRequest requestDto, String userId) {
         Booking booking = bookingRepository.findById(requestDto.getBookingId())
                 .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 
@@ -70,12 +71,21 @@ public class BookingServiceImpl implements BookingService {
             throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
         }
 
+        log.info("Inizio modica booking precedentemente in stato di draft per la prenotazione {}", booking.getId());
         int oldPeopleCount = booking.getPeopleCount();
         int newPeopleCount = requestDto.getPeopleCount();
+
+        log.debug("bookingId={} oldPeopleCount={} newPeopleCount={}", booking.getId(), oldPeopleCount, newPeopleCount);
 
         int difference = Math.abs(newPeopleCount - oldPeopleCount);
 
         if (difference != 0) {
+            if (oldPeopleCount == 0){
+                log.info("L'utente {} richiede la riserva posti per la prima volta per {} persone", userId, difference);
+            }
+            else {
+                log.info("L'utente {} ha cambiato il numero di posti da {} a {}", userId, oldPeopleCount, newPeopleCount);
+            }
             booking.setStatus(BookingStatus.PENDING);
         }
 
@@ -94,25 +104,23 @@ public class BookingServiceImpl implements BookingService {
                 difference
         );
 
-        log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), (newPeopleCount - oldPeopleCount));
-
         if (newPeopleCount - oldPeopleCount > 0) {
-            if (requestDto.getTravelId() != null && requestDto.getActivityId() == null) {
+            log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), difference);
+            if (requestDto.getTravelId() != null) {
                 rabbitTemplate.convertAndSend("travel.reserve.queue", command);
-            } else if (requestDto.getTravelId() == null && requestDto.getActivityId() != null)
-                rabbitTemplate.convertAndSend("activity.reserve.queue", command);
+            } else rabbitTemplate.convertAndSend("activity.reserve.queue", command);
 
         } else if (newPeopleCount - oldPeopleCount < 0){
-            if (requestDto.getTravelId() != null && requestDto.getActivityId() == null) {
+            log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), difference);
+            if (requestDto.getTravelId() != null) {
                 rabbitTemplate.convertAndSend("travel.release.queue", command);
-            } else if (requestDto.getTravelId() == null && requestDto.getActivityId() != null)
-                rabbitTemplate.convertAndSend("activity.release.queue", command);
+            } else rabbitTemplate.convertAndSend("activity.release.queue", command);
         }
     }
 
     @Override
     @Transactional
-    public BookingStep2Response createBookingStep2(BookingMemberRequest requestDto, String userId) {
+    public BookingStep2Response insertMembers(BookingMemberRequest requestDto, String userId) {
         Booking booking = bookingRepository.findById(requestDto.getBookingId())
                 .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 
@@ -131,27 +139,13 @@ public class BookingServiceImpl implements BookingService {
         List<BookingMember> entities = new ArrayList<>();
 
         for (BookingMemberDTO memberDto : requestDto.getMembers()) {
-            BookingMember member = new BookingMember();
-            member.setFirstName(memberDto.getFirstName());
-            member.setLastName(memberDto.getLastName());
-            member.setBirthDate(memberDto.getBirthDate());
-            member.setNotes(memberDto.getNotes());
-            member.setPhoneNumber(memberDto.getPhoneNumber());
+            BookingMember member = bookingMemberMapper.toEntity(memberDto);
             member.setBooking(booking);
 
-            List<MemberDocument> documents = new ArrayList<>();
-
-            if (memberDto.getDocuments() != null) {
-                for (MemberDocumentRequest docDto : memberDto.getDocuments()) {
-                    MemberDocument doc = new MemberDocument();
-                    doc.setType(docDto.getType());
-                    doc.setStatus(DocumentStatus.PENDING);
-                    doc.setMember(member);
-                    documents.add(doc);
-                }
+            if (member.getDocuments() != null) {
+                member.getDocuments().forEach(doc -> doc.setStatus(DocumentStatus.PENDING));
             }
 
-            member.setDocuments(documents);
             entities.add(member);
         }
 
@@ -194,9 +188,9 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new StatusException(messageLang.getMessage("error.status.time"));
         }
+        log.info("Booking {} confermato con successo", bookingId);
         booking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(booking);
-        //qui aggiungerò un qualche evento
     }
 
     //metodi caso d'insuccesso
@@ -209,6 +203,7 @@ public class BookingServiceImpl implements BookingService {
             throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
         }
         if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED || booking.getStatus() == BookingStatus.READY_FOR_PAYMENT) {
+            log.info("Booking {} cancellata con successo", bookingId);
             booking.setStatus(BookingStatus.CANCELLED);
             deleteMinioDocument(booking);
             bookingRepository.save(booking);
@@ -218,10 +213,9 @@ public class BookingServiceImpl implements BookingService {
                     booking.getActivityId(),
                     booking.getPeopleCount()
             );
-            if (booking.getTravelId() != null && booking.getActivityId() == null) {
+            if (booking.getTravelId() != null) {
                 rabbitTemplate.convertAndSend("travel.release.queue", command);
-            } else if (booking.getTravelId() == null && booking.getActivityId() != null)
-                rabbitTemplate.convertAndSend("activity.release.queue", command);
+            } else rabbitTemplate.convertAndSend("activity.release.queue", command);
         }
         //qui aggiungerò un qualche evento
     }

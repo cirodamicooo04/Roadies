@@ -14,8 +14,8 @@ import java.util.UUID;
 
 public interface BookingService {
     BookingDraftResponse createDraft(BookingDraftRequest b, String userJwt);
-    void createBookingStep1(BookingCreateRequest b, String userJwt);
-    BookingStep2Response createBookingStep2(BookingMemberRequest b, String userJwt);
+    void createPendingAndReserveSeats(BookingCreateRequest b, String userJwt);
+    BookingStep2Response insertMembers(BookingMemberRequest b, String userJwt);
     BookingStatusResponse getBookingStatus(UUID bookingId, String userJwt);
     void confirmBookingAfterPayment(UUID bookingId);
     void deleteBooking(UUID bookingId, String userJwt);
