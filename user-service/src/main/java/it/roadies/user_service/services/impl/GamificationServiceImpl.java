@@ -26,7 +26,7 @@ public class GamificationServiceImpl implements GamificationService {
     @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     @Transactional
-    public void addPointsBySpending(String userId, double amountSpent) {
+    public void addPointsBySpending(String userId, Long amountSpent) {
         log.info("Iniziato calcolo punti gamification per l'utente ID: {} per una spesa di {}€", userId, amountSpent);
 
         if (amountSpent <= 0) {

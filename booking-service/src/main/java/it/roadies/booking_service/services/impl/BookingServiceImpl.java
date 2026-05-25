@@ -3,6 +3,8 @@ package it.roadies.booking_service.services.impl;
 import it.roadies.booking_service.config.i8n.MessageLang;
 import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.BookingMemberDTO;
+import it.roadies.booking_service.data.dto.event.GamificationEvent;
+import it.roadies.booking_service.data.dto.event.NotificationEvent;
 import it.roadies.booking_service.data.dto.response.MemberIdResponse;
 import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.booking_service.data.dto.request.BookingCreateRequest;
@@ -191,13 +193,14 @@ public class BookingServiceImpl implements BookingService {
         log.info("Booking {} confermato con successo", bookingId);
         booking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(booking);
+        rabbitTemplate.convertAndSend("gamification-queue", new GamificationEvent(booking.getUserId(), booking.getTotalPrice().longValue()));
     }
 
     //metodi caso d'insuccesso
 
     @Transactional
     @Override
-    public void deleteBooking(UUID bookingId, String userId) {
+    public void deleteBooking(UUID bookingId, String userId, String mailTo) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", bookingId)));
         if (!booking.getUserId().equals(userId)){
             throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
@@ -217,8 +220,7 @@ public class BookingServiceImpl implements BookingService {
                 rabbitTemplate.convertAndSend("travel.release.queue", command);
             } else rabbitTemplate.convertAndSend("activity.release.queue", command);
         }
-        //qui aggiungerò un qualche evento
-    }
+        rabbitTemplate.convertAndSend("send-mail-queue", new NotificationEvent(mailTo, "Eliminazione Account", "Ciao,\n\nti confermiamo che il tuo account è stato eliminato. Ci dispiace vederti andare via!\n\nSe cambierai idea, sarai sempre il benvenuto.\n\nUn saluto,\nIl Team"));    }
 
     public void deleteMinioDocument(Booking booking){
         if (booking.getMembers() != null) {

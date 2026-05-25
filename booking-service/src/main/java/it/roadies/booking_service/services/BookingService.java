@@ -18,7 +18,7 @@ public interface BookingService {
     BookingStep2Response insertMembers(BookingMemberRequest b, String userJwt);
     BookingStatusResponse getBookingStatus(UUID bookingId, String userJwt);
     void confirmBookingAfterPayment(UUID bookingId);
-    void deleteBooking(UUID bookingId, String userJwt);
+    void deleteBooking(UUID bookingId, String userJwt, String mailTo);
     List<UUID> getUserBookings(String userId);
     void updateBookingIfAllDocumentsUploaded(Booking booking);
     void deleteMinioDocument(Booking booking);

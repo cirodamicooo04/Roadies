@@ -1,0 +1,21 @@
+package it.roadies.user_service.services.listeners;
+
+import it.roadies.user_service.conf.i8n.MessageLang;
+import it.roadies.user_service.data.dto.event.GamificationEvent;
+import it.roadies.user_service.services.GamificationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class GamificationListener {
+    private final GamificationService gamificationService;
+    private final MessageLang messageLang;
+
+    @RabbitListener(queues = "gamification-queue")
+    public void addGamificationPoints(GamificationEvent gamificationEvent) {
+        gamificationService.addPointsBySpending(gamificationEvent.getUserId(), gamificationEvent.getPrice());
+    }
+
+}
