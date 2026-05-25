@@ -53,7 +53,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDraftResponse createDraft(BookingDraftRequest requestDto, String userId) {
         travelService.verifyTravelExists(requestDto.getTravelId(), requestDto.getActivityId());
 
-        log.info("Iniziata creazione draft per userId");
+        log.info("Iniziata creazione draft per userId={}", userId);
         Booking booking = bookingMapper.toEntity(requestDto, userId);
         booking.setTotalPrice(BigDecimal.ZERO);
         booking.setPeopleCount(0);
@@ -71,12 +71,21 @@ public class BookingServiceImpl implements BookingService {
             throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
         }
 
+        log.info("Inizio modica booking precedentemente in stato di draft per la prenotazione {}", booking.getId());
         int oldPeopleCount = booking.getPeopleCount();
         int newPeopleCount = requestDto.getPeopleCount();
+
+        log.debug("bookingId={} oldPeopleCount={} newPeopleCount={}", booking.getId(), oldPeopleCount, newPeopleCount);
 
         int difference = Math.abs(newPeopleCount - oldPeopleCount);
 
         if (difference != 0) {
+            if (oldPeopleCount == 0){
+                log.info("L'utente {} richiede la riserva posti per la prima volta per {} persone", userId, difference);
+            }
+            else {
+                log.info("L'utente {} ha cambiato il numero di posti da {} a {}", userId, oldPeopleCount, newPeopleCount);
+            }
             booking.setStatus(BookingStatus.PENDING);
         }
 
@@ -95,19 +104,17 @@ public class BookingServiceImpl implements BookingService {
                 difference
         );
 
-        log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), (newPeopleCount - oldPeopleCount));
-
         if (newPeopleCount - oldPeopleCount > 0) {
-            if (requestDto.getTravelId() != null && requestDto.getActivityId() == null) {
+            log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), difference);
+            if (requestDto.getTravelId() != null) {
                 rabbitTemplate.convertAndSend("travel.reserve.queue", command);
-            } else if (requestDto.getTravelId() == null && requestDto.getActivityId() != null)
-                rabbitTemplate.convertAndSend("activity.reserve.queue", command);
+            } else rabbitTemplate.convertAndSend("activity.reserve.queue", command);
 
         } else if (newPeopleCount - oldPeopleCount < 0){
-            if (requestDto.getTravelId() != null && requestDto.getActivityId() == null) {
+            log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), difference);
+            if (requestDto.getTravelId() != null) {
                 rabbitTemplate.convertAndSend("travel.release.queue", command);
-            } else if (requestDto.getTravelId() == null && requestDto.getActivityId() != null)
-                rabbitTemplate.convertAndSend("activity.release.queue", command);
+            } else rabbitTemplate.convertAndSend("activity.release.queue", command);
         }
     }
 
@@ -181,9 +188,9 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new StatusException(messageLang.getMessage("error.status.time"));
         }
+        log.info("Booking {} confermato con successo", bookingId);
         booking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(booking);
-        //qui aggiungerò un qualche evento
     }
 
     //metodi caso d'insuccesso
@@ -196,6 +203,7 @@ public class BookingServiceImpl implements BookingService {
             throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
         }
         if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED || booking.getStatus() == BookingStatus.READY_FOR_PAYMENT) {
+            log.info("Booking {} cancellata con successo", bookingId);
             booking.setStatus(BookingStatus.CANCELLED);
             deleteMinioDocument(booking);
             bookingRepository.save(booking);
@@ -205,10 +213,9 @@ public class BookingServiceImpl implements BookingService {
                     booking.getActivityId(),
                     booking.getPeopleCount()
             );
-            if (booking.getTravelId() != null && booking.getActivityId() == null) {
+            if (booking.getTravelId() != null) {
                 rabbitTemplate.convertAndSend("travel.release.queue", command);
-            } else if (booking.getTravelId() == null && booking.getActivityId() != null)
-                rabbitTemplate.convertAndSend("activity.release.queue", command);
+            } else rabbitTemplate.convertAndSend("activity.release.queue", command);
         }
         //qui aggiungerò un qualche evento
     }

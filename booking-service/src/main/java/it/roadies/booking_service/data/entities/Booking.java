@@ -5,8 +5,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,6 +19,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "BOOKING")
 @Data
+@EntityListeners(AuditingEntityListener.class)
+@Audited
 public class Booking {
 
     @Id
@@ -62,6 +67,7 @@ public class Booking {
     @Version
     private Long version;
 
+    @NotAudited
     @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<BookingMember> members;
 
@@ -70,10 +76,5 @@ public class Booking {
         if (this.status == null) {
             this.status = BookingStatus.DRAFT;
         }
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 }
