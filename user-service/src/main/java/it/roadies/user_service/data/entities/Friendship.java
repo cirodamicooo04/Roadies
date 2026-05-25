@@ -4,6 +4,7 @@ import it.roadies.user_service.data.entities.enumeration.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Entity
 @Table(name= "FRIENDSHIP")
 @Data
-
+@EntityListeners(AuditingEntityListener.class)
 public class Friendship {
 
     @Id
