@@ -3,6 +3,7 @@ package it.roadies.user_service;
 import it.roadies.user_service.conf.i8n.MessageLang;
 import it.roadies.user_service.data.dto.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,10 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
     private final MessageLang messageLang;
-
-    public GlobalExceptionHandler(MessageLang messageLang) {
-        this.messageLang = messageLang;
-    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {

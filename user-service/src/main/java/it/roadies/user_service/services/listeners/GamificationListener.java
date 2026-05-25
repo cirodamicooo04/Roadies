@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GamificationListener {
     private final GamificationService gamificationService;
-    private final MessageLang messageLang;
 
     @RabbitListener(queues = "gamification-queue")
     public void addGamificationPoints(GamificationEvent gamificationEvent) {
