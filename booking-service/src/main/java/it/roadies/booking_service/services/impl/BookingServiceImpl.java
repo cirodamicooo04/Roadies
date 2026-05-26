@@ -24,6 +24,7 @@ import it.roadies.booking_service.exceptions.BookingNotFoundException;
 import it.roadies.booking_service.data.mapper.BookingMapper;
 import it.roadies.booking_service.exceptions.StatusException;
 import it.roadies.booking_service.services.BookingService;
+import it.roadies.booking_service.services.MinioService;
 import it.roadies.booking_service.services.clients.TravelService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,7 @@ public class BookingServiceImpl implements BookingService {
     private final RabbitTemplate rabbitTemplate;
     private final TravelService travelService;
     private final MessageLang messageLang;
-    private final MinioServiceImpl minioService;
+    private final MinioService minioService;
 
     //flusso caso d'uso di successo
     @Transactional

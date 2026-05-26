@@ -38,7 +38,7 @@ public class BookingController {
         return jwt.getClaims();
     }
 
-    @Operation(summary = "Crea una bozza di prenotazione (passo 1)", description = "Inizializza una nuova prenotazione in stato di bozza")
+    @Operation(summary = "Crea una bozza di prenotazione (passo 1)", description = "Inizializza una nuova prenotazione in stato DRAFT")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Bozza creata con successo"),
             @ApiResponse(responseCode = "400", description = "Dati della richiesta non validi"),
@@ -68,7 +68,7 @@ public class BookingController {
     }
 
 
-    @Operation(summary = "Inizializza membri", description = "Permette di inizializzare la lista dei membri di una prenotazione")
+    @Operation(summary = "Inizializza membri (passo 3)", description = "Permette di inizializzare la lista dei membri di una prenotazione in stato PENDING")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Booking aggiornato"),
             @ApiResponse(responseCode = "400", description = "Dati della richiesta non validi"),

@@ -1,5 +1,6 @@
 package it.roadies.travel_service.services.impl;
 
+import it.roadies.travel_service.conf.i8n.MessageLang;
 import it.roadies.travel_service.data.dao.TravelDepartureRepository;
 import it.roadies.travel_service.data.entity.TravelDeparture;
 import it.roadies.travel_service.data.mapper.TravelDepartureMapper;
@@ -9,7 +10,10 @@ import it.roadies.travel_service.exceptions.StatusException;
 import it.roadies.travel_service.services.TravelDepartureService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.bridge.Message;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -19,6 +23,7 @@ import java.util.UUID;
 public class TravelDepartureServiceImpl implements TravelDepartureService {
 
     private final TravelDepartureRepository travelDepartureRepository;
+    private final MessageLang messageLang;
 
     @Transactional
     @Override
@@ -48,6 +53,6 @@ public class TravelDepartureServiceImpl implements TravelDepartureService {
     }
 
     public BigDecimal getTravelPriceById(UUID travelDepartureId){
-        return travelDepartureRepository.findPriceById(travelDepartureId).orElseThrow(() -> new StatusException("Viaggio non trovato con ID: " + travelDepartureId));
+        return travelDepartureRepository.findPriceById(travelDepartureId).orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.departure.not.found")));
     }
 }

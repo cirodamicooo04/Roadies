@@ -71,6 +71,17 @@ public class TravelService {
                 return travelServiceClient.getTravelPrice(travelId);
             } else return travelServiceClient.getActivityPrice(activityId);
 
+        } catch (FeignException.NotFound e) {
+            if (travelId == null) {
+                log.warn("Attività {} non esiste", activityId);
+                throw new TravelNotFoundException(messageLang.getMessage("error.activity.not.found"));
+            }
+            log.warn("Viaggio {} non esiste", travelId);
+            throw new TravelNotFoundException(messageLang.getMessage("error.travel.not.found"));
+
+        } catch (FeignException.Unauthorized | FeignException.Forbidden e) {
+            log.warn("Accesso non autorizzato al travel-service. Status: {}", e.status());
+            throw new ServiceUnavailableException(messageLang.getMessage("error.service.authorization"));
         } catch (Exception e) {
             log.error("Errore imprevisto durante la verifica viaggio/attività", e);
             throw new ServiceUnavailableException(messageLang.getMessage("error.any.travel"));
