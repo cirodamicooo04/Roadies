@@ -8,7 +8,7 @@ import it.roadies.review_service.data.entity.ReviewReply;
 import it.roadies.review_service.data.dao.ReviewRepository;
 import it.roadies.review_service.data.dao.ReviewReplyRepository;
 import it.roadies.review_service.data.mapper.ReplyMapper;
-import it.roadies.review_service.exceptions.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import it.roadies.review_service.exceptions.ReplyNotFoundException;
 import it.roadies.review_service.exceptions.ReviewBusinessException;
 import it.roadies.review_service.exceptions.ReviewNotFoundException;
@@ -73,7 +73,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
                 .orElseThrow(() -> new ReplyNotFoundException(messageLang.getMessage("review.reply.not.found",replyId)));
         // Ensure that only the user who created the reply can edit it
         if (!existingReply.getUserId().equals(userId)) {
-            throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
+            throw new AccessDeniedException("l'utente " + userId + " ha tentato di accedere ad una risorsa non autorizzato");
         }
         existingReply.setContent(request.getContent());
         return replyRepository.save(existingReply);
@@ -84,12 +84,10 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     @Override
     public void deleteReply(UUID replyId, String userId) {
         log.info("provo a cancellare una risposta di una recensione - replyId: {} userId: {}", replyId, userId);
-        if (!replyRepository.existsById(replyId)) {
-            throw new ReplyNotFoundException(messageLang.getMessage("review.reply.not.found", replyId));
-        }
+        ReviewReply existingReply = replyRepository.findById(replyId).orElseThrow(() -> new ReplyNotFoundException(messageLang.getMessage("review.reply.not.found",replyId)));
         // Ensure that only the user who created the reply can edit it
-        if (!replyRepository.existsByUserId(userId)) {
-            throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
+        if (!existingReply.getUserId().equals(userId)) {
+            throw new AccessDeniedException("l'utente " + userId + " ha tentato di accedere ad una risorsa non autorizzato");
         }
         replyRepository.deleteById(replyId);
     }

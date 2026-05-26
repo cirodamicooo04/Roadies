@@ -31,14 +31,14 @@ public class TravelService {
         try {
             if (reviewType == ReviewType.TRAVEL) {
                 travelServiceClient.verifyTravelExists(travelId);
-                log.info("Esistenza attività {} verificata con successo", travelId);
+                log.info("Esistenza viaggio {} verificata con successo", travelId);
             } else {
                 travelServiceClient.verifyActivityExistsAndIsNotIntoATravel(travelId);
-                log.info("Esistenza viaggio {} verificata con successo", travelId);
+                log.info("Esistenza attività {} verificata con successo", travelId);
             }
 
         } catch (FeignException.NotFound e) {
-            if (travelId == null) {
+            if (reviewType == ReviewType.ACTIVITY) {
                 log.warn("Attività {} non esiste", travelId);
                 throw new TravelNotFoundException(messageLang.getMessage("error.activity.not.found"));
             }

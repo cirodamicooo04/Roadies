@@ -89,6 +89,7 @@ public class ReviewController {
     }
 
     // for testing purposes only
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<List<ReviewResponse>> getAll() {
         return ResponseEntity.ok(service.getAll().stream().map(review -> service.createReviewResponse(review.getId())).toList());
