@@ -19,7 +19,7 @@ import it.roadies.booking_service.data.entities.MemberDocument;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
 import it.roadies.booking_service.data.entities.enumeration.DocumentStatus;
 import it.roadies.booking_service.data.mapper.BookingMemberMapper;
-import it.roadies.booking_service.exceptions.AccessDeniedException;
+import it.roadies.booking_service.exceptions.UnauthorizedActionException;
 import it.roadies.booking_service.exceptions.BookingNotFoundException;
 import it.roadies.booking_service.data.mapper.BookingMapper;
 import it.roadies.booking_service.exceptions.StatusException;
@@ -71,7 +71,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 
         if (!booking.getUserId().equals(userId)){
-            throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
+            throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
 
         log.info("Inizio modica booking precedentemente in stato di draft per la prenotazione {}", booking.getId());
@@ -128,7 +128,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 
         if (!booking.getUserId().equals(userId)){
-            throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
+            throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
 
         if (booking.getStatus() != BookingStatus.RESERVE_CONFIRMED) {
@@ -175,7 +175,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingStatusResponse getBookingStatus(UUID bookingId, String userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", bookingId)));
         if (!booking.getUserId().equals(userId)){
-            throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
+            throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
         return new BookingStatusResponse(booking.getStatus());
     }
@@ -204,7 +204,7 @@ public class BookingServiceImpl implements BookingService {
     public void deleteBooking(UUID bookingId, String userId, String mailTo) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", bookingId)));
         if (!booking.getUserId().equals(userId)){
-            throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
+            throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
         if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED || booking.getStatus() == BookingStatus.READY_FOR_PAYMENT) {
             log.info("Booking {} cancellata con successo", bookingId);
@@ -221,7 +221,7 @@ public class BookingServiceImpl implements BookingService {
                 rabbitTemplate.convertAndSend("travel.release.queue", command);
             } else rabbitTemplate.convertAndSend("activity.release.queue", command);
         }
-        rabbitTemplate.convertAndSend("send-mail-queue", new NotificationEvent(mailTo, "Eliminazione Account", "Ciao,\n\nti confermiamo che il tuo account è stato eliminato. Ci dispiace vederti andare via!\n\nSe cambierai idea, sarai sempre il benvenuto.\n\nUn saluto,\nIl Team"));    }
+        rabbitTemplate.convertAndSend("send-mail-queue", new NotificationEvent(mailTo, "Eliminazione Prenotazione", "Ciao,\n\nti confermiamo che la tua prenotazione è stata cancellata con successo.\n\nUn saluto,\nIl Team"));    }
 
     public void deleteMinioDocument(Booking booking){
         if (booking.getMembers() != null) {
@@ -236,9 +236,11 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    @Transactional
     @Override
-    public void updateBookingIfAllDocumentsUploaded(Booking booking) {
-        if (booking.getMembers()==null) return;
+    public void updateBookingIfAllDocumentsUploaded(UUID bookingId) {
+        Booking booking = bookingRepository.findById(bookingId).orElse(null);
+        if (booking == null || booking.getMembers() == null) return;
         boolean allDocumentsUploaded = booking.getMembers()
                 .stream()
                 .flatMap(member -> member.getDocuments().stream())

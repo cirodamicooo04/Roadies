@@ -7,13 +7,14 @@ import it.roadies.booking_service.data.dto.request.MemberDocumentUpdateRequest;
 import it.roadies.booking_service.data.entities.Booking;
 import it.roadies.booking_service.data.entities.MemberDocument;
 import it.roadies.booking_service.data.entities.enumeration.DocumentStatus;
-import it.roadies.booking_service.exceptions.AccessDeniedException;
+import it.roadies.booking_service.exceptions.UnauthorizedActionException;
 import it.roadies.booking_service.exceptions.DocumentNotFoundException;
 import it.roadies.booking_service.services.BookingMemberService;
 import it.roadies.booking_service.services.BookingService;
 import it.roadies.booking_service.services.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
@@ -33,6 +34,7 @@ public class BookingMemberServiceImpl implements BookingMemberService {
 //        memberDocumentRepository.save(member);
 //    }
 
+    @Transactional
     @Override
     public void acceptDocument(MemberDocumentUpdateRequest memberDocument) {
         MemberDocument member = memberDocumentRepository.findById(memberDocument.getId()).orElseThrow(()-> new DocumentNotFoundException(messageLang.getMessage("error.document.not.exists")));
@@ -40,6 +42,7 @@ public class BookingMemberServiceImpl implements BookingMemberService {
         memberDocumentRepository.save(member);
     }
 
+    @Transactional
     @Override
     public void rejectDocument(MemberDocumentUpdateRequest memberDocument) {
         MemberDocument member = memberDocumentRepository.findById(memberDocument.getId()).orElseThrow(()-> new DocumentNotFoundException(messageLang.getMessage("error.document.not.exists")));
@@ -55,7 +58,7 @@ public class BookingMemberServiceImpl implements BookingMemberService {
 
         Booking booking = document.getMember().getBooking();
         if (!booking.getUserId().equals(userId)) {
-            throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
+            throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
 
         String fileUrl = minioService.uploadFile(file);
@@ -63,7 +66,7 @@ public class BookingMemberServiceImpl implements BookingMemberService {
         document.setFileUrl(fileUrl);
         memberDocumentRepository.save(document);
 
-        bookingService.updateBookingIfAllDocumentsUploaded(booking);
+        bookingService.updateBookingIfAllDocumentsUploaded(booking.getId());
 
         return fileUrl;
     }

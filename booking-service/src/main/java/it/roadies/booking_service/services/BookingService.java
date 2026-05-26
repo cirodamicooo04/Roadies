@@ -20,6 +20,6 @@ public interface BookingService {
     void confirmBookingAfterPayment(UUID bookingId);
     void deleteBooking(UUID bookingId, String userJwt, String mailTo);
     List<UUID> getUserBookings(String userId);
-    void updateBookingIfAllDocumentsUploaded(Booking booking);
+    void updateBookingIfAllDocumentsUploaded(UUID bookingId);
     void deleteMinioDocument(Booking booking);
 }

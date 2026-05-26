@@ -45,14 +45,14 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, messageLang.getMessage("error.endpoint.not.found"), messageLang.getMessage("error.endpoint.message"), request.getRequestURI());
     }
 
-    @ExceptionHandler({StatusException.class, SeatsNotAvailableException.class})
+    @ExceptionHandler({StatusException.class, SeatsNotAvailableException.class, StorageException.class})
     public ResponseEntity<ErrorResponse> handleBusinessExceptions(RuntimeException ex, HttpServletRequest request) {
         log.warn("Errore di logica di business: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.business.title"), ex.getMessage(), request.getRequestURI());
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+    @ExceptionHandler({AccessDeniedException.class, UnauthorizedActionException.class})
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(RuntimeException ex, HttpServletRequest request) {
         log.warn("Accesso negato: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.FORBIDDEN, messageLang.getMessage("error.access.denied"), messageLang.getMessage("error.access.denied.message"), request.getRequestURI());
     }

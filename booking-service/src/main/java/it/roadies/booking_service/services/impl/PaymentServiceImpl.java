@@ -10,7 +10,7 @@ import it.roadies.booking_service.data.dto.request.PaymentRequest;
 import it.roadies.booking_service.data.dto.response.PaymentResponse;
 import it.roadies.booking_service.data.entities.Booking;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
-import it.roadies.booking_service.exceptions.AccessDeniedException;
+import it.roadies.booking_service.exceptions.UnauthorizedActionException;
 import it.roadies.booking_service.exceptions.BookingNotFoundException;
 import it.roadies.booking_service.exceptions.StatusException;
 import it.roadies.booking_service.services.BookingService;
@@ -59,7 +59,7 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentResponse createPaymentIntent(PaymentRequest request, String userJwt) throws StripeException {
         Booking booking = bookingRepository.findById(request.getBookingId()).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", request.getBookingId())));
         if (!booking.getUserId().equals(userJwt)){
-            throw new AccessDeniedException(messageLang.getMessage("error.access.denied"));
+            throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
 
         if (!booking.getStatus().equals(BookingStatus.READY_FOR_PAYMENT)) {
