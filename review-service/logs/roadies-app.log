@@ -1,0 +1,27 @@
+2026-05-22 12:00:53.581 INFO  [background-preinit] [] o.h.validator.internal.util.Version  --- HV000001: Hibernate Validator 9.0.1.Final 
+2026-05-22 12:00:53.601 INFO  [main] [] i.r.r.ReviewServiceApplication       --- Starting ReviewServiceApplication using Java 25.0.1 with PID 8561 (/Users/crxstqn/Desktop/Roadies/review-service/target/classes started by crxstqn in /Users/crxstqn/Desktop/Roadies/review-service) 
+2026-05-22 12:00:53.601 DEBUG [main] [] i.r.r.ReviewServiceApplication       --- Running with Spring Boot v4.0.5, Spring v7.0.6 
+2026-05-22 12:00:53.602 INFO  [main] [] i.r.r.ReviewServiceApplication       --- No active profile set, falling back to 1 default profile: "default" 
+2026-05-22 12:00:54.407 INFO  [main] [] o.a.coyote.http11.Http11NioProtocol  --- Initializing ProtocolHandler ["http-nio-8084"] 
+2026-05-22 12:00:54.408 INFO  [main] [] o.a.catalina.core.StandardService    --- Starting service [Tomcat] 
+2026-05-22 12:00:54.408 INFO  [main] [] o.a.catalina.core.StandardEngine     --- Starting Servlet engine: [Apache Tomcat/11.0.20] 
+2026-05-22 12:00:54.536 INFO  [main] [] org.hibernate.orm.jpa                --- HHH008540: Processing PersistenceUnitInfo [name: default] 
+2026-05-22 12:00:54.566 INFO  [main] [] org.hibernate.orm.core               --- HHH000001: Hibernate ORM core version 7.2.7.Final 
+2026-05-22 12:00:54.980 INFO  [main] [] o.hibernate.orm.connections.pooling  --- HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/review_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.13
+	Default catalog/schema: review_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown 
+2026-05-22 12:00:55.458 INFO  [main] [] org.hibernate.orm.core               --- HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration) 
+2026-05-22 12:00:55.995 WARN  [main] [] o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration --- spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning 
+2026-05-22 12:00:56.580 INFO  [main] [] o.a.coyote.http11.Http11NioProtocol  --- Starting ProtocolHandler ["http-nio-8084"] 
+2026-05-22 12:00:56.593 INFO  [main] [] i.r.r.ReviewServiceApplication       --- Started ReviewServiceApplication in 3.184 seconds (process running for 3.926) 
+2026-05-22 12:00:56.594 WARN  [main] [] o.s.c.events.SpringDocAppInitializer --- SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false' 
+2026-05-22 12:00:56.594 WARN  [main] [] o.s.c.events.SpringDocAppInitializer --- SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false' 

@@ -21,6 +21,8 @@ import it.roadies.travel_service.data.entity.enumerations.Continent;
 import it.roadies.travel_service.data.entity.enumerations.ImageStatus;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import it.roadies.travel_service.data.mapper.ActivityMapper;
+import it.roadies.travel_service.exceptions.NotValidTravelId;
+import it.roadies.travel_service.exceptions.StatusException;
 import it.roadies.travel_service.services.ActivityService;
 import it.roadies.travel_service.services.ImageService;
 import lombok.RequiredArgsConstructor;
@@ -241,5 +243,15 @@ public class ActivityServiceImpl implements ActivityService {
 
         activityRepository.save(activity);
         return activityMapper.toResponse(activity);
+    }
+
+    //REVIEW AREA
+    @Override
+    public boolean isValidActivityAndIsNotIntoATravel(UUID activityId) {
+        Activity activity = activityRepository.findById(activityId).orElseThrow(()->new StatusException(""));
+        if (activity.getTravel()!=null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage(""));
+        }
+        return true;
     }
 }

@@ -117,4 +117,13 @@ public class ActivityController {
         BigDecimal response = activityDepartureService.getActivityPriceById(activityId);
         return ResponseEntity.ok(response);
     }
+
+    //REVIEW AREA
+    @GetMapping("/review/{activityId}/")
+    public ResponseEntity<Void> isValidActivityAndIsNotIntoATravel(@PathVariable UUID activityId) {
+        if (activityService.isValidActivityAndIsNotIntoATravel(activityId)) {
+            return ResponseEntity.ok().build();
+        }
+        else return ResponseEntity.notFound().build();
+    }
 }
