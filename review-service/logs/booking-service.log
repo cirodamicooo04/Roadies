@@ -1,0 +1,108 @@
+2026-05-26 17:34:47 INFO  i.r.r.ReviewServiceApplication - Starting ReviewServiceApplication using Java 25.0.1 with PID 31178 (/Users/crxstqn/Desktop/Roadies/review-service/target/classes started by crxstqn in /Users/crxstqn/Desktop/Roadies/review-service)
+2026-05-26 17:34:47 DEBUG i.r.r.ReviewServiceApplication - Running with Spring Boot v4.0.5, Spring v7.0.6
+2026-05-26 17:34:47 INFO  i.r.r.ReviewServiceApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-26 17:34:47 INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 9.0.1.Final
+2026-05-26 17:34:49 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8084"]
+2026-05-26 17:34:49 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-26 17:34:49 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-26 17:34:49 INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-26 17:34:49 INFO  org.hibernate.orm.core - HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-05-26 17:34:50 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-05-26 17:34:50 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@e98004e
+2026-05-26 17:34:50 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-05-26 17:34:50 INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/review_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.13
+	Default catalog/schema: review_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-26 17:34:51 INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-26 17:34:54 INFO  c.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2026-05-26 17:34:54 INFO  c.n.d.s.r.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2026-05-26 17:34:54 INFO  c.netflix.discovery.DiscoveryClient - Disable delta property : false
+2026-05-26 17:34:54 INFO  c.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2026-05-26 17:34:54 INFO  c.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2026-05-26 17:34:54 INFO  c.netflix.discovery.DiscoveryClient - Application is null : false
+2026-05-26 17:34:54 INFO  c.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2026-05-26 17:34:54 INFO  c.netflix.discovery.DiscoveryClient - Application version is -1: true
+2026-05-26 17:34:54 INFO  c.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2026-05-26 17:34:55 INFO  c.netflix.discovery.DiscoveryClient - The response status is 200
+2026-05-26 17:34:55 INFO  c.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 30
+2026-05-26 17:34:55 INFO  c.n.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-05-26 17:34:55 INFO  c.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1779809695366 with initial instances count: 1
+2026-05-26 17:34:55 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1779809695401, current=UP, previous=STARTING]
+2026-05-26 17:34:55 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084: registering service...
+2026-05-26 17:34:55 INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8084"]
+2026-05-26 17:34:55 INFO  i.r.r.ReviewServiceApplication - Started ReviewServiceApplication in 8.839 seconds (process running for 10.879)
+2026-05-26 17:34:55 WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-05-26 17:34:55 WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-05-26 17:34:55 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084 - registration status: 204
+2026-05-26 17:37:01 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1779809821819, current=DOWN, previous=UP]
+2026-05-26 17:37:01 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084: registering service...
+2026-05-26 17:37:01 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084 - registration status: 204
+2026-05-26 17:37:01 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-05-26 17:37:01 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-05-26 17:37:01 INFO  c.netflix.discovery.DiscoveryClient - Shutting down DiscoveryClient ...
+2026-05-26 17:37:04 INFO  c.netflix.discovery.DiscoveryClient - Unregistering ...
+2026-05-26 17:37:04 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084 - deregister  status: 200
+2026-05-26 17:37:04 INFO  c.netflix.discovery.DiscoveryClient - Completed shut down of DiscoveryClient
+2026-05-26 17:37:07 INFO  i.r.r.ReviewServiceApplication - Starting ReviewServiceApplication using Java 25.0.1 with PID 31291 (/Users/crxstqn/Desktop/Roadies/review-service/target/classes started by crxstqn in /Users/crxstqn/Desktop/Roadies/review-service)
+2026-05-26 17:37:07 DEBUG i.r.r.ReviewServiceApplication - Running with Spring Boot v4.0.5, Spring v7.0.6
+2026-05-26 17:37:07 INFO  i.r.r.ReviewServiceApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-26 17:37:07 INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 9.0.1.Final
+2026-05-26 17:37:09 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8084"]
+2026-05-26 17:37:09 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-26 17:37:09 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-26 17:37:09 INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-26 17:37:09 INFO  org.hibernate.orm.core - HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-05-26 17:37:10 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-05-26 17:37:10 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@516370c1
+2026-05-26 17:37:10 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-05-26 17:37:10 INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/review_db]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.13
+	Default catalog/schema: review_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-26 17:37:11 INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2026-05-26 17:37:14 INFO  c.n.d.s.r.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Disable delta property : false
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Application is null : false
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Application version is -1: true
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - The response status is 200
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 30
+2026-05-26 17:37:14 INFO  c.n.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1779809834441 with initial instances count: 1
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1779809834453, current=UP, previous=STARTING]
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084: registering service...
+2026-05-26 17:37:14 INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8084"]
+2026-05-26 17:37:14 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084 - registration status: 204
+2026-05-26 17:37:14 INFO  i.r.r.ReviewServiceApplication - Started ReviewServiceApplication in 7.106 seconds (process running for 8.503)
+2026-05-26 17:37:14 WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-05-26 17:37:14 WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-05-26 17:37:44 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1779809864758, current=DOWN, previous=UP]
+2026-05-26 17:37:44 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084: registering service...
+2026-05-26 17:37:44 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084 - registration status: 204
+2026-05-26 17:37:44 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-05-26 17:37:44 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-05-26 17:37:44 INFO  c.netflix.discovery.DiscoveryClient - Shutting down DiscoveryClient ...
+2026-05-26 17:37:47 INFO  c.netflix.discovery.DiscoveryClient - Unregistering ...
+2026-05-26 17:37:47 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_REVIEW-SERVICE/160.97.131.19:review-service:8084 - deregister  status: 200
+2026-05-26 17:37:47 INFO  c.netflix.discovery.DiscoveryClient - Completed shut down of DiscoveryClient
