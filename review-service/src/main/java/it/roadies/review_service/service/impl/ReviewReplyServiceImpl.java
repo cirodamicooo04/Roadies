@@ -40,12 +40,13 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
 
         // First validation: Ensure the original review exists before allowing a reply to be created
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("error.resource.not.found")));
+                .orElseThrow(() ->new ReviewNotFoundException(messageLang.getMessage("error.resource.not.found")));
 
         travelServiceClient.verifyTravelExists(review.getTravelId(), review.getReviewType());
 
         // Second validation: Ensure that a reply does not already exist for this review (enforcing the one-to-one relationship)
         if (replyRepository.existsByReviewId(reviewId)) {
+            log.error("tentativo di creare una risposta ad una recensione che ha già una risposta - reviewId: {}", reviewId);
             throw new ReviewBusinessException(messageLang.getMessage("review.reply.already.exists"));
         }
 
@@ -53,6 +54,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
         ReviewReply reply = replyMapper.toEntity(request, userId);
         reply.setReview(review);
         replyRepository.save(reply);
+            log.info("risposta ad una recensione creata con successo - reviewId: {} userId: {}", reviewId, userId);
     }
 
     // Get the reply for a specific review by the review's ID
@@ -73,9 +75,11 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
                 .orElseThrow(() -> new ReplyNotFoundException(messageLang.getMessage("review.reply.not.found",replyId)));
         // Ensure that only the user who created the reply can edit it
         if (!existingReply.getUserId().equals(userId)) {
+            log.error("tentativo di aggiornare una risposta ad una recensione da parte di un utente non autorizzato - replyId: {} userId: {}", replyId, userId);
             throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
         }
         existingReply.setContent(request.getContent());
+        log.info("risposta ad una recensione aggiornata con successo - replyId: {} userId: {}", replyId, userId);
         return replyRepository.save(existingReply);
     }
 
@@ -85,12 +89,15 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     public void deleteReply(UUID replyId, String userId) {
         log.info("provo a cancellare una risposta di una recensione - replyId: {} userId: {}", replyId, userId);
         if (!replyRepository.existsById(replyId)) {
+            log.error("tentativo di cancellare una risposta ad una recensione che non esiste - replyId: {}", replyId);
             throw new ReplyNotFoundException(messageLang.getMessage("review.reply.not.found", replyId));
         }
         // Ensure that only the user who created the reply can edit it
         if (!replyRepository.existsByUserId(userId)) {
+            log.error("tentativo di cancellare una risposta ad una recensione da parte di un utente non autorizzato - replyId: {} userId: {}", replyId, userId);
             throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
         }
         replyRepository.deleteById(replyId);
+        log.info("risposta ad una recensione cancellata con successo - replyId: {} userId: {}", replyId, userId);
     }
 }

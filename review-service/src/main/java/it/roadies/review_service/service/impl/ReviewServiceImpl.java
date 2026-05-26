@@ -39,6 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
         }
         repository.save(review);
+        log.info("recensione creata con successo - reviewId: {} userId: {} travelId: {}", review.getId(), userId, travelId);
     }
 
     @Override
@@ -60,9 +61,11 @@ public class ReviewServiceImpl implements ReviewService {
     public void deleteReview(UUID reviewId, String userId) {
         log.info("provo a cancellare una recensione - reviewId: {} userId: {}", reviewId, userId);
         if (!repository.existsById(reviewId)) {
+            log.error("delete fallito rcensione non trovata - reviewId: {}", reviewId);
             throw new ReviewNotFoundException(messageLang.getMessage("review.not.exists"));
         }
         if (!repository.findById(reviewId).get().getUserId().equals(userId)) {
+            log.error("delete fallito utente non autorizzato - reviewId: {} userId: {}", reviewId, userId);
             throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
         }
         repository.deleteById(reviewId);
@@ -82,11 +85,12 @@ public class ReviewServiceImpl implements ReviewService {
         Review existingReview = repository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("review.not.found")));
         // Only the user who created the review can update it
         if (!existingReview.getUserId().equals(userId)) {
+            log.error("update fallito utente non autorizzato");
             throw new AccessDeniedException("l'utente" + userId + "ha tentato di accedere ad una risorsa non autorizzato");
         }
         existingReview.setRating(reviewUpdateRequest.getRating());
         existingReview.setContent(reviewUpdateRequest.getContent());
-
+        log.info("recensione modificata con successo - reviewId: {} userId: {}", reviewId, userId);
         return repository.save(existingReview);
     }
 
