@@ -20,6 +20,6 @@ public class TravelDepartureUpdateRequest {
     @Future
     private LocalDate endDate;
 
-    @PositiveOrZero
+    @Positive
     private BigDecimal price;
 }

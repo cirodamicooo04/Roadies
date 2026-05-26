@@ -3,10 +3,7 @@ package it.roadies.travel_service.data.dto.request;
 import it.roadies.travel_service.data.entity.Activity;
 import it.roadies.travel_service.data.entity.enumerations.Status;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -20,6 +17,6 @@ public class ActivityDepartureUpdateRequest {
     private LocalDateTime startTimestamp;
     @Future
     private LocalDateTime endTimestamp;
-    @PositiveOrZero
+    @Positive
     private BigDecimal price;
 }

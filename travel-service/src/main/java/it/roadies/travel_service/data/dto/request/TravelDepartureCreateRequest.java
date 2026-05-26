@@ -16,7 +16,7 @@ public class TravelDepartureCreateRequest {
     @Future
     private LocalDate endDate;
     @NotNull
-    @PositiveOrZero
+    @Positive
     private BigDecimal price;
     @NotNull
     @Positive
