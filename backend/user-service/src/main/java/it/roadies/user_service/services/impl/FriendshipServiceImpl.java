@@ -12,7 +12,7 @@ import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.mappers.FriendshipMapper;
 import it.roadies.user_service.mappers.UserMapper;
 import it.roadies.user_service.services.FriendshipService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;

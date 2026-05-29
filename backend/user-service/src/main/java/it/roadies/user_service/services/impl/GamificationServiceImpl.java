@@ -6,7 +6,7 @@ import it.roadies.user_service.data.entities.enumeration.Badge;
 import it.roadies.user_service.data.repositories.GamificationRepository;
 import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.services.GamificationService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
