@@ -46,7 +46,6 @@ public class TravelServiceImpl implements TravelService {
     private final ImageRepository imageRepository;
     private final ImageService imageService;
     private final MessageLang messageLang;
-    private final View error;
 
     private void validateTravelLogic(Travel travel){
         for (TravelDeparture departure : travel.getDepartures()){
