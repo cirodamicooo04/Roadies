@@ -35,7 +35,7 @@ public class UserDocument {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private DocumentStatus status;
+    private DocumentStatus status = DocumentStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
@@ -50,7 +50,7 @@ public class UserDocument {
     private String createdBy;
 
     @LastModifiedBy
-    @Column(name = "updatedBy", nullable = false, updatable = false)
+    @Column(name = "updatedBy", nullable = false)
     private String updateBy;
 
     @Column(name = "rejectionReason")
@@ -62,11 +62,4 @@ public class UserDocument {
     @ManyToOne
     @JoinColumn(name = "userId", referencedColumnName = "keycloakId", nullable = false)
     private User userId;
-
-    @PrePersist
-    public void onPrePersist() {
-        if (this.status == null) {
-            this.status = DocumentStatus.PENDING;
-        }
-    }
 }

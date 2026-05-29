@@ -1,6 +1,7 @@
 package it.roadies.user_service.services.impl;
 
 import it.roadies.user_service.conf.i8n.MessageLang;
+import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.entities.Gamification;
 import it.roadies.user_service.data.entities.User;
 import it.roadies.user_service.data.entities.enumeration.Badge;
@@ -40,10 +41,6 @@ public class UserServiceImpl implements UserService {
     public UserSyncResult syncUser(UserSyncRequestDTO requestDto) {
         log.info("Iniziata sincronizzazione per l'utente con ID: {}", requestDto.getKeycloakId());
 
-        if (requestDto.getUsername() != null &&
-                userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
-            throw new ConflictException(messageLang.getMessage("error.username.exist"));
-        }
 
         Optional<User> existingUserOpt = userRepository.findById(requestDto.getKeycloakId());
 
@@ -58,6 +55,11 @@ public class UserServiceImpl implements UserService {
         }
 
         log.info("Utente non trovato. Creazione di un nuovo profilo in corso...");
+
+        if (requestDto.getUsername() != null &&
+                userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
+            throw new ConflictException(messageLang.getMessage("error.username.exist"));
+        }
 
         // Nel caso in cui ci troviamo davanti ad un nuovo utente lo mappiamo e restitiamo che è un nuovo utente
         User newUser = userMapper.toEntity(requestDto);
@@ -194,7 +196,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserProfileResponseDTO> getPendingOrganizerRequests() {
+    public List<PendingOrganizerRequestResponseDTO> getPendingOrganizerRequests() {
         log.info("Recupero lista utenti con richiesta organizzatore in sospeso");
 
         List<User> pending = userRepository.findByOrganizerRequestStatus(OrganizerRequestStatus.PENDING);
@@ -205,7 +207,7 @@ public class UserServiceImpl implements UserService {
         }
 
         return pending.stream()
-                .map(userMapper::toDto)
+                .map(userMapper::toPendingDto)
                 .toList();
     }
 }

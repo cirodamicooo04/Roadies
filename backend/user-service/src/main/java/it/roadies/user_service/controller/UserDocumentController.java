@@ -46,8 +46,8 @@ public class UserDocumentController {
         log.info("Ricevuta richiesta di elenco documenti per l'utente ID: {}", userId);
         return ResponseEntity.ok(userDocumentService.getMyDocuments(userId,jwt.getSubject()));
     }
-    @PreAuthorize("hasAnyRole('TRAVELER','ADMIN')")
-    @GetMapping("/admin/user/{userId}")
+    @PreAuthorize("hasAnyRole('ORGANIZER','ADMIN')")
+    @GetMapping("/admin/document/{userId}")
     @Operation(summary = "Lista documenti utente", description = "Recupera i documenti di un utente. Accessibile al proprietario, all'organizzatore o all'admin.")
     public ResponseEntity<List<UserDocumentResponseDTO>> getDocumentsByUser(
             @PathVariable String userId) {
@@ -55,7 +55,7 @@ public class UserDocumentController {
         return ResponseEntity.ok(userDocumentService.getUserDocuments(userId));
     }
 
-    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/verify/{docId}")
     @Operation(summary = "Verifica documento", description = "Approvazione o rifiuto. Solo per Organizzatori o Admin.")
     public ResponseEntity<UserDocumentResponseDTO> verifyDocument(

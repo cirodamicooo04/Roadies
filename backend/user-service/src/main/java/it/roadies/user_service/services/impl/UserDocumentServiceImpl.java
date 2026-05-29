@@ -17,7 +17,7 @@ import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.mappers.UserDocumentMapper;
 import it.roadies.user_service.services.MinioService;
 import it.roadies.user_service.services.UserDocumentService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

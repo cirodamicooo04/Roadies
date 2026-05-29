@@ -3,6 +3,7 @@ package it.roadies.user_service.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
+import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.result.UserSyncResult;
 import it.roadies.user_service.services.UserService;
@@ -100,7 +101,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/organizer-requests/pending")
     @Operation(summary = "Lista richieste organizzatore in sospeso")
-    public ResponseEntity<List<UserProfileResponseDTO>> getPendingOrganizerRequests() {
+    public ResponseEntity<List<PendingOrganizerRequestResponseDTO>> getPendingOrganizerRequests() {
         return ResponseEntity.ok(userService.getPendingOrganizerRequests());
     }
 }

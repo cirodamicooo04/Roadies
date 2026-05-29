@@ -1,5 +1,6 @@
 package it.roadies.user_service.mappers;
 
+import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
 import it.roadies.user_service.data.entities.User;
@@ -23,10 +24,24 @@ public interface UserMapper {
     @Mapping(source = "gamification.badge", target = "badge")
     UserProfileResponseDTO toDto(User user);
 
+    @Mapping(source = "keycloakId", target = "keycloakId")
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "firstName", target = "firstName")
+    @Mapping(source = "lastName", target = "lastName")
+    @Mapping(source = "email", target = "email")
+    @Mapping(source = "organizerRequestStatus", target = "organizerRequestStatus")
+    @Mapping(source = "organizerRequestedAt", target = "organizerRequestedAt")
+    PendingOrganizerRequestResponseDTO toPendingDto(User user);
+
     @Mapping(target = "keycloakId", ignore = true)
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "gamification", ignore = true)
+    @Mapping(target = "gamification", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "documents", ignore = true)
+    @Mapping(target = "requesterFriendships", ignore = true)
+    @Mapping(target = "receiverFriendships", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(UserSyncRequestDTO dto, @MappingTarget User entity);
 }

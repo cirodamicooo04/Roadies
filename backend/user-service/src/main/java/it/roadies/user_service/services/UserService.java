@@ -1,6 +1,7 @@
 package it.roadies.user_service.services;
 
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
+import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.result.UserSyncResult;
 
@@ -14,5 +15,5 @@ public interface UserService {
     void deleteProfile(String keycloakId);
     void requestOrganizerRole(String keycloakId);
     void reviewOrganizerRequest(String targetKeycloakId, boolean approved, String reason);
-    List<UserProfileResponseDTO> getPendingOrganizerRequests();
+    List<PendingOrganizerRequestResponseDTO> getPendingOrganizerRequests();
 }
