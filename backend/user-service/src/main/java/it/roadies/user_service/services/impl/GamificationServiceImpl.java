@@ -23,7 +23,7 @@ public class GamificationServiceImpl implements GamificationService {
     //Stabiliamo che ogni euro speso si ottengono 10 punti
     private static final int POINTS_PER_EURO = 10;
 
-    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
+    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     @Transactional
     public void addPointsBySpending(String userId, Long amountSpent) {
@@ -44,8 +44,8 @@ public class GamificationServiceImpl implements GamificationService {
         gamification.setBadge(calculateBadge(gamification.getPoints()));
 
         gamificationRepository.save(gamification);
-        log.info("Aggiunti {} punti all'utente ID: {}. Punti totali: {}. Nuovo badge: {}",
-                pointsToAdd, userId, gamification.getPoints(), gamification.getBadge());
+        log.info("Aggiunti {} punti all'utente. Punti totali: {}. Nuovo badge: {}",
+                pointsToAdd, gamification.getPoints(), gamification.getBadge());
     }
 
     private Badge calculateBadge(Long points) {

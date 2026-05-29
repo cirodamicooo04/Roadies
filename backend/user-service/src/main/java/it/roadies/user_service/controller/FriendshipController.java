@@ -10,6 +10,7 @@ import it.roadies.user_service.services.FriendshipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,7 @@ public class FriendshipController {
 
     private final FriendshipService friendshipService;
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/request/{receiverUsername}")
     @Operation(summary = "Invia una richiesta", description = "Invia una richiesta di amicizia a un utente tramite il suo username.")
     @ApiResponse(responseCode = "200", description = "Richiesta inviata con successo")
@@ -37,6 +39,7 @@ public class FriendshipController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @PatchMapping("/respond/{friendshipId}")
     @Operation(summary = "Rispondi a una richiesta", description = "Accetta o rifiuta una richiesta di amicizia ricevuta.")
     public ResponseEntity<Void> respond(
@@ -48,6 +51,7 @@ public class FriendshipController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/list")
     @Operation(summary = "Lista amici rapida", description = "Restituisce i profili base di tutti gli amici confermati.")
     public ResponseEntity<List<UserProfileResponseDTO>> getFriends(@AuthenticationPrincipal Jwt jwt) {
@@ -55,6 +59,7 @@ public class FriendshipController {
         return ResponseEntity.ok(friendshipService.getFriendsList(jwt.getSubject()));
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/detailed-list")
     @Operation(summary = "Lista amici dettagliata", description = "Restituisce i profili degli amici con dettagli sulla data di inizio amicizia.")
     public ResponseEntity<List<FriendshipResponseDTO>> getDetailedFriends(@AuthenticationPrincipal Jwt jwt) {
@@ -62,6 +67,7 @@ public class FriendshipController {
         return ResponseEntity.ok(friendshipService.getDetailedFriendsList(jwt.getSubject()));
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/requests/pending")
     @Operation(summary = "Richieste in sospeso", description = "Recupera le richieste di amicizia ricevute in attesa di risposta.")
     public ResponseEntity<List<FriendshipResponseDTO>> getPendingRequests(@AuthenticationPrincipal Jwt jwt) {
@@ -69,6 +75,7 @@ public class FriendshipController {
         return ResponseEntity.ok(friendshipService.getPendingRequests(jwt.getSubject()));
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @DeleteMapping("/{friendshipId}")
     @Operation(summary = "Rimuovi un amico", description = "Elimina una relazione di amicizia esistente.")
     @ApiResponse(responseCode = "204", description = "Amicizia rimossa correttamente")

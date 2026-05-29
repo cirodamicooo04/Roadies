@@ -1,5 +1,6 @@
 package it.roadies.user_service.data.entities;
 
+import it.roadies.user_service.data.entities.enumeration.OrganizerRequestStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,16 +24,16 @@ public class User {
     @Column(length = 255,unique = true,nullable = false)
     private String email;
 
-    @Column(length = 255,unique = true, nullable = false)
+    @Column(length = 30,unique = true, nullable = false)
     private String username;
 
-    @Column(length = 255,nullable = false)
+    @Column(length = 30,nullable = false)
     private String firstName;
 
-    @Column(length = 255,nullable = false)
+    @Column(length = 30,nullable = false)
     private String lastName;
 
-    @Column(length = 255)
+    @Column()
     private String avatarUrl;
 
     @Column(nullable = false)
@@ -43,7 +44,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
@@ -60,5 +61,18 @@ public class User {
 
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserDocument> documents;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrganizerRequestStatus organizerRequestStatus = OrganizerRequestStatus.NONE;
+
+    @Column
+    private LocalDateTime organizerRequestedAt;
+
+    @Column
+    private LocalDateTime organizerReviewedAt;
+
+    @Column
+    private String organizerRejectionReason;
 
 }

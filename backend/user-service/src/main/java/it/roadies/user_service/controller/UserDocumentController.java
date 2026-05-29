@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -25,17 +26,28 @@ import java.util.UUID;
 public class UserDocumentController {
     private final UserDocumentService userDocumentService;
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping(value = "/upload/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Carica documento", description = "Carica un documento. Solo l'utente stesso può farlo.")
     public ResponseEntity<UserDocumentResponseDTO> upload(
             @PathVariable String userId,
             @RequestPart("document") UserDocumentRequestDTO dto,
-            @RequestPart("file") MultipartFile file){
+            @RequestPart("file") MultipartFile file,
+            @AuthenticationPrincipal Jwt jwt) {
         log.info("Ricevuta richiesta di upload documento per l'utente ID: {} con nome file: {}", userId, file.getOriginalFilename());
-        return ResponseEntity.ok(userDocumentService.uploadDocument(userId, dto, file));
+        return ResponseEntity.ok(userDocumentService.uploadDocument(userId, dto, file,jwt.getSubject()));
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/user/{userId}")
+    @Operation(summary = "Lista documenti utente", description = "Recupera i documenti di un utente. Accessibile al proprietario, all'organizzatore o all'admin.")
+    public ResponseEntity<List<UserDocumentResponseDTO>> getMyDocumentsByUser(
+            @PathVariable String userId, @AuthenticationPrincipal Jwt jwt) {
+        log.info("Ricevuta richiesta di elenco documenti per l'utente ID: {}", userId);
+        return ResponseEntity.ok(userDocumentService.getMyDocuments(userId,jwt.getSubject()));
+    }
+    @PreAuthorize("hasAnyRole('TRAVELER','ADMIN')")
+    @GetMapping("/admin/user/{userId}")
     @Operation(summary = "Lista documenti utente", description = "Recupera i documenti di un utente. Accessibile al proprietario, all'organizzatore o all'admin.")
     public ResponseEntity<List<UserDocumentResponseDTO>> getDocumentsByUser(
             @PathVariable String userId) {
@@ -43,6 +55,7 @@ public class UserDocumentController {
         return ResponseEntity.ok(userDocumentService.getUserDocuments(userId));
     }
 
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     @PatchMapping("/verify/{docId}")
     @Operation(summary = "Verifica documento", description = "Approvazione o rifiuto. Solo per Organizzatori o Admin.")
     public ResponseEntity<UserDocumentResponseDTO> verifyDocument(
@@ -53,6 +66,7 @@ public class UserDocumentController {
         return ResponseEntity.ok(userDocumentService.verifyDocument(docId, approved, reason));
     }
 
+    @PreAuthorize("hasRole('TRAVELER')")
     @DeleteMapping("/{docId}")
     @Operation(summary = "Elimina documento", description = "Elimina un documento. Solo il proprietario o l'admin possono farlo.")
     public ResponseEntity<Void> deleteDocument(

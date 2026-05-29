@@ -39,11 +39,14 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     private final RabbitTemplate rabbitTemplate;
 
-    @PreAuthorize("hasRole('TRAVELER') and #senderId == authentication.name")
+    //@PreAuthorize("hasRole('TRAVELER') and #senderId == authentication.name")
     @Override
     @Transactional
     public void sendRequest(String senderId, String receiverUsername) {
-        log.info("Iniziato invio richiesta di amicizia da ID: {} verso lo username: {}", senderId, receiverUsername);
+        log.info("Iniziato invio richiesta di amicizia verso lo username: {}", receiverUsername);
+
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new ResourceNotFoundException(messageLang.getMessage("error.user.notfound")));
 
         User receiver = userRepository.findByUsername(receiverUsername)
                 .orElseThrow(() -> {
@@ -52,31 +55,34 @@ public class FriendshipServiceImpl implements FriendshipService {
                 });
 
         if (senderId.equals(receiver.getKeycloakId())) {
-            log.warn("Tentativo di auto-aggiunta amicizia bloccato per l'utente ID: {}", senderId);
+            log.warn("Tentativo di auto-aggiunta amicizia bloccato per l'utente");
             throw new ConflictException(messageLang.getMessage("error.friendship.self"));
         }
 
         friendshipRepository.findExistingFriendship(senderId, receiver.getKeycloakId())
                 .ifPresent(f -> {
-                    log.warn("Richiesta di amicizia già esistente tra {} e {}", senderId, receiver.getKeycloakId());
+                    log.warn("Richiesta di amicizia già esistente");
                     throw new ConflictException(messageLang.getMessage("error.friendship.exists"));
                 });
 
         Friendship friendship = new Friendship();
-        friendship.setRequesterId(userRepository.getReferenceById(senderId));
+        friendship.setRequesterId(sender);
         friendship.setReceiverId(receiver);
         friendship.setStatus(Status.PENDING);
-        friendship.setCreatedAt(LocalDateTime.now());
 
         friendshipRepository.save(friendship);
-        log.info("Richiesta di amicizia inviata con successo da {} a {}", senderId, receiver.getKeycloakId());
+        log.info("Richiesta di amicizia inviata con successo");
     }
 
-    @PreAuthorize("hasRole('TRAVELER') and #currentUserId == authentication.name")
+    //@PreAuthorize("hasRole('TRAVELER') and #currentUserId == authentication.name")
     @Override
     @Transactional
     public void respondToRequest(UUID friendshipId, Status newStatus, String currentUserId) {
         log.info("Gestione risposta alla richiesta di amicizia ID: {} con stato: {}", friendshipId, newStatus);
+
+        if (newStatus != Status.ACCEPTED && newStatus != Status.REJECTED) {
+            throw new IllegalArgumentException("Stato non valido per una risposta");
+        }
 
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> {
@@ -89,7 +95,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         }
 
         if (!friendship.getReceiverId().getKeycloakId().equals(currentUserId)) {
-            log.error("Tentativo non autorizzato di risposta alla richiesta di amicizia ID: {} da parte dell'utente ID: {}", friendshipId, currentUserId);
+            log.error("Tentativo non autorizzato di risposta alla richiesta di amicizia ID: {} da parte dell'utente", friendshipId);
             throw new AccessDeniedException(messageLang.getMessage("error.unauthorized"));
         }
 
@@ -101,17 +107,17 @@ public class FriendshipServiceImpl implements FriendshipService {
             FriendshipEvent event = new FriendshipEvent();
             event.setUserId1(friendship.getRequesterId().getKeycloakId());
             event.setUserId2(friendship.getReceiverId().getKeycloakId());
-            event.setStatus("ACCEPTED");
+            event.setStatus(Status.ACCEPTED);
 
-            log.info("Invio evento RabbitMQ 'travel-service.friendship.accepted.queue' per l'amicizia tra {} e {}", event.getUserId1(), event.getUserId2());
+            log.info("Invio evento RabbitMQ 'travel-service.friendship.accepted.queue' per l'amicizia}");
             rabbitTemplate.convertAndSend("travel-service.friendship.accepted.queue", event);
         }
     }
 
-    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
+    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     public List<UserProfileResponseDTO> getFriendsList(String userId) {
-        log.info("Recupero lista amici base per l'utente ID: {}", userId);
+        log.info("Recupero lista amici base per l'utente");
         List<User> friends = friendshipRepository.findAcceptedFriendsByUser(userId);
 
         return friends.stream()
@@ -119,10 +125,10 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
+    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     public List<FriendshipResponseDTO> getDetailedFriendsList(String userId) {
-        log.info("Recupero lista amici dettagliata per l'utente ID: {}", userId);
+        log.info("Recupero lista amici dettagliata per l'utente}");
         List<Friendship> friendships = friendshipRepository.findAllAcceptedFriendshipsByUser(userId);
 
         return friendships.stream().map(f -> {
@@ -137,11 +143,12 @@ public class FriendshipServiceImpl implements FriendshipService {
         }).collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
+    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     public List<FriendshipResponseDTO> getPendingRequests(String userId) {
         log.info("Recupero richieste di amicizia in sospeso per l'utente ID: {}", userId);
-        User receiver = userRepository.getReferenceById(userId);
+        User receiver = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(messageLang.getMessage("error.user.notfound")));
         List<Friendship> pending = friendshipRepository.findByReceiverIdAndStatus(receiver, Status.PENDING);
 
         return pending.stream().map(f -> {
@@ -151,11 +158,11 @@ public class FriendshipServiceImpl implements FriendshipService {
         }).collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasRole('TRAVELER') and #currentUserId == authentication.name")
+    //@PreAuthorize("hasRole('TRAVELER') and #currentUserId == authentication.name")
     @Override
     @Transactional
     public void removeFriend(UUID friendshipId, String currentUserId) {
-        log.info("Richiesta rimozione amicizia ID: {} da parte dell'utente ID: {}", friendshipId, currentUserId);
+        log.info("Richiesta rimozione amicizia ID: {} da parte dell'utente", friendshipId);
 
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> {
@@ -167,7 +174,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 friendship.getReceiverId().getKeycloakId().equals(currentUserId);
 
         if (!isParticipant) {
-            log.error("Tentativo non autorizzato di eliminazione dell'amicizia ID: {} da parte dell'utente ID: {}", friendshipId, currentUserId);
+            log.error("Tentativo non autorizzato di eliminazione dell'amicizia ID: {} da parte dell'utente", friendshipId);
             throw new AccessDeniedException(messageLang.getMessage("error.unauthorized"));
         }
 
@@ -177,9 +184,9 @@ public class FriendshipServiceImpl implements FriendshipService {
         FriendshipEvent event = new FriendshipEvent();
         event.setUserId1(friendship.getRequesterId().getKeycloakId());
         event.setUserId2(friendship.getReceiverId().getKeycloakId());
-        event.setStatus("DELETED");
+        event.setStatus(Status.REJECTED);
 
-        log.info("Invio evento RabbitMQ 'travel-service.friendship.deleted.queue' per l'amicizia rimossa tra {} e {}", event.getUserId1(), event.getUserId2());
+        log.info("Invio evento RabbitMQ 'travel-service.friendship.deleted.queue' per l'amicizia rimossa");
         rabbitTemplate.convertAndSend("travel-service.friendship.deleted.queue", event);
     }
 }

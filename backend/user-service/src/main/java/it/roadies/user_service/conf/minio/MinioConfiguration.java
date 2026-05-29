@@ -1,4 +1,4 @@
-package it.roadies.user_service.conf;
+package it.roadies.user_service.conf.minio;
 
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;

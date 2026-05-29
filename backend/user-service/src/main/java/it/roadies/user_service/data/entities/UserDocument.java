@@ -68,6 +68,5 @@ public class UserDocument {
         if (this.status == null) {
             this.status = DocumentStatus.PENDING;
         }
-        this.createdAt = LocalDateTime.now();
     }
 }

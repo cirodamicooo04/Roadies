@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserDocumentService {
-    UserDocumentResponseDTO uploadDocument(String userId, UserDocumentRequestDTO dto, MultipartFile file);
+    UserDocumentResponseDTO uploadDocument(String userId, UserDocumentRequestDTO dto, MultipartFile file,String jwt);
+    List<UserDocumentResponseDTO> getMyDocuments(String userId, String UserJWT);
     List<UserDocumentResponseDTO> getUserDocuments(String userId);
     UserDocumentResponseDTO verifyDocument(UUID docId, boolean approved, String reason);
     void deleteDocument(UUID docId,String userId);
+
 }

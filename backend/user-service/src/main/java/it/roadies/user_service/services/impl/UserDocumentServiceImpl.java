@@ -3,6 +3,7 @@ package it.roadies.user_service.services.impl;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.errors.MinioException;
 import it.roadies.user_service.conf.i8n.MessageLang;
 import it.roadies.user_service.data.dto.request.UserDocumentRequestDTO;
 import it.roadies.user_service.data.dto.response.UserDocumentResponseDTO;
@@ -14,6 +15,7 @@ import it.roadies.user_service.data.repositories.UserRepository;
 import it.roadies.user_service.exception.ConflictException;
 import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.mappers.UserDocumentMapper;
+import it.roadies.user_service.services.MinioService;
 import it.roadies.user_service.services.UserDocumentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -39,6 +42,7 @@ public class UserDocumentServiceImpl implements UserDocumentService {
     private final UserDocumentMapper userDocumentMapper;
     private final MinioClient minioClient;
     private final MessageLang messageLang;
+    private final MinioService minioService;
 
     @Value("${minio.documentBucket:user-documents}")
     private String documentBucket;
@@ -48,40 +52,31 @@ public class UserDocumentServiceImpl implements UserDocumentService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
-    public UserDocumentResponseDTO uploadDocument(String userId, UserDocumentRequestDTO dto, MultipartFile file){
-        log.info("Iniziato caricamento documento per l'utente ID: {}", userId);
+    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
+    public UserDocumentResponseDTO uploadDocument(String userId, UserDocumentRequestDTO dto, MultipartFile file,String id) {
+        log.info("Iniziato caricamento documento per l'utente");
 
+        if(!Objects.equals(userId, id)){
+            log.error("Tentativo non autorizzato di aggiungere un documento da parte dell'utente");
+            throw new org.springframework.security.access.AccessDeniedException(messageLang.getMessage("error.unauthorized"));
+        }
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException(messageLang.getMessage("error.file.empty"));
         }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.error("Upload documento fallito: Utente non trovato con ID: {}", userId);
+                    log.error("Upload documento fallito: Utente non trovato");
                     return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
                 });
 
         String fileUrl;
         try {
-            String filename = UUID.randomUUID() + "-" + file.getOriginalFilename().replace(" ", "_");
-            log.info("Salvataggio file {} su MinIO nel bucket {}", filename, documentBucket);
-
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(documentBucket)
-                            .object(filename)
-                            .stream(file.getInputStream(), file.getSize(), -1L)
-                            .contentType(file.getContentType())
-                            .build()
-            );
-
-            fileUrl = minioUrl + "/" + documentBucket + "/" + filename;
-            log.info("File salvato con successo su MinIO. URL: {}", fileUrl);
-
+            fileUrl = minioService.uploadFile(file, documentBucket);
         } catch (Exception e) {
-            log.error("Errore critico durante il caricamento del documento su MinIO per l'utente {}", userId, e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, messageLang.getMessage("error.image.minio.upload"));
+            log.error("Errore durante l'upload del file su MinIO per l'utente", e);
+
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Errore durante il caricamento del documento su MinIO");
         }
 
         UserDocument doc = userDocumentMapper.toEntity(dto);
@@ -89,27 +84,41 @@ public class UserDocumentServiceImpl implements UserDocumentService {
         doc.setFileUrl(fileUrl);
 
         UserDocument saved = documentRepository.save(doc);
-        log.info("Documento salvato nel database con ID: {}", saved.getId());
+        log.info("Documento salvato nel database");
         return userDocumentMapper.toDto(saved);
     }
 
     @Override
-    @PreAuthorize("(hasRole('TRAVELER') and #userId == authentication.name) or hasAnyRole('ORGANIZER', 'ADMIN')")
-    public List<UserDocumentResponseDTO> getUserDocuments(String userId){
+    //@PreAuthorize("(hasRole('TRAVELER') and #userId == authentication.name) or hasAnyRole('ORGANIZER', 'ADMIN')")
+    public List<UserDocumentResponseDTO> getMyDocuments(String userId, String userJWT){
         log.info("Recupero documenti per l'utente ID: {}", userId);
+
+        if (!userJWT.equals(userId)) {
+            log.error("Tentativo non autorizzato di aggiungere un documento da parte dell'utente");
+            throw new org.springframework.security.access.AccessDeniedException(messageLang.getMessage("error.unauthorized"));
+        }
+
+        List<UserDocument> docs = documentRepository.findByUserId(userId);
+        return userDocumentMapper.toDtoList(docs);
+    }
+
+    @Override
+    public List<UserDocumentResponseDTO> getUserDocuments(String userId){
+        log.info("Recupero documenti per l'utente");
+
         List<UserDocument> docs = documentRepository.findByUserId(userId);
         return userDocumentMapper.toDtoList(docs);
     }
 
     @Override
     @Transactional
-    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    //@PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public UserDocumentResponseDTO verifyDocument(UUID docId, boolean approved, String reason){
-        log.info("Iniziata verifica documento ID: {}. Esito approvazione: {}", docId, approved);
+        log.info("Iniziata verifica documento. Esito approvazione: {}", approved);
 
         UserDocument doc = documentRepository.findById(docId)
                 .orElseThrow(() -> {
-                    log.error("Verifica fallita: Documento ID: {} non trovato", docId);
+                    log.error("Verifica fallita: Documento non trovato");
                     return new ResourceNotFoundException(messageLang.getMessage("error.document.notfound"));
                 });
 
@@ -127,7 +136,7 @@ public class UserDocumentServiceImpl implements UserDocumentService {
             doc.setStatus(DocumentStatus.REJECTED);
             doc.setRejectionReason(reason);
             doc.setVerifiedAt(null);
-            log.info("Documento ID: {} RIFIUTATO. Motivo: {}", docId, reason);
+            log.info("Documento RIFIUTATO. Motivo: {}", reason);
         }
 
         return userDocumentMapper.toDto(documentRepository.save(doc));
@@ -135,18 +144,18 @@ public class UserDocumentServiceImpl implements UserDocumentService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
+    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     public void deleteDocument(UUID docId, String userId) {
-        log.info("Richiesta di eliminazione documento ID: {} da parte dell'utente ID: {}", docId, userId);
+        log.info("Richiesta di eliminazione documento da parte dell'utente");
 
         UserDocument doc = documentRepository.findById(docId)
                 .orElseThrow(() -> {
-                    log.error("Eliminazione fallita: Documento ID: {} non trovato", docId);
+                    log.error("Eliminazione fallita: Documento non trovato");
                     return new ResourceNotFoundException(messageLang.getMessage("error.document.notfound"));
                 });
 
         if (!doc.getUserId().getKeycloakId().equals(userId)) {
-            log.error("Tentativo non autorizzato di eliminare il documento ID: {} dall'utente ID: {}", docId, userId);
+            log.error("Tentativo non autorizzato di eliminare il documento dall'utente");
             throw new org.springframework.security.access.AccessDeniedException(messageLang.getMessage("error.unauthorized"));
         }
 
@@ -155,19 +164,16 @@ public class UserDocumentServiceImpl implements UserDocumentService {
             String filename = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
 
             log.info("Cancellazione file {} dal bucket MinIO {}", filename, documentBucket);
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder()
-                            .bucket(documentBucket)
-                            .object(filename)
-                            .build()
-            );
+
+            minioService.deleteFile(doc.getFileUrl(), documentBucket);
+
             log.info("File eliminato da MinIO con successo");
         } catch (Exception e) {
-            log.error("Errore durante l'eliminazione del file da MinIO per il documento ID: {}", docId, e);
+            log.error("Errore durante l'eliminazione del file da MinIO per il documento", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, messageLang.getMessage("error.image.minio.delete"));
         }
 
         documentRepository.deleteById(docId);
-        log.info("Documento ID: {} rimosso dal database", docId);
+        log.info("Documento rimosso dal database");
     }
 }

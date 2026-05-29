@@ -8,6 +8,14 @@ import org.mapstruct.*;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper {
 
+    @Mapping(target = "keycloakId", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "lastLogin", ignore = true)
+    @Mapping(target = "gamification", ignore = true)
+    @Mapping(target = "documents", ignore = true)
+    @Mapping(target = "requesterFriendships", ignore = true)
+    @Mapping(target = "receiverFriendships", ignore = true)
     User toEntity(UserSyncRequestDTO dto);
 
 

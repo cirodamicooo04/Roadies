@@ -1,4 +1,3 @@
-// File: UserProfileResponseDTO.java
 package it.roadies.user_service.data.dto.response;
 
 import it.roadies.user_service.data.entities.enumeration.Badge;

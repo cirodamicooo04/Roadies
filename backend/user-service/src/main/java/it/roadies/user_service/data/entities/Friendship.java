@@ -3,7 +3,10 @@ package it.roadies.user_service.data.entities;
 import it.roadies.user_service.data.entities.enumeration.Status;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -30,9 +33,11 @@ public class Friendship {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @CreatedDate
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 }

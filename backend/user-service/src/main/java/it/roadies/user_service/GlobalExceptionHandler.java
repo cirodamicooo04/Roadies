@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.PAYLOAD_TOO_LARGE.value())
                 .error("Payload Too Large")
-                .message("error.image.big")
+                .message(messageLang.getMessage("error.image.big"))
                 .path(request.getRequestURI())
                 .build();
 
