@@ -81,7 +81,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         log.info("Gestione risposta alla richiesta di amicizia ID: {} con stato: {}", friendshipId, newStatus);
 
         if (newStatus != Status.ACCEPTED && newStatus != Status.REJECTED) {
-            throw new IllegalArgumentException("Stato non valido per una risposta");
+            throw new IllegalArgumentException(messageLang.getMessage("error.friendship.status"));
         }
 
         Friendship friendship = friendshipRepository.findById(friendshipId)

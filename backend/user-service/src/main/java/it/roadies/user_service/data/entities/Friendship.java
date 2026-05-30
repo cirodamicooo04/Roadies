@@ -37,7 +37,7 @@ public class Friendship {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 }

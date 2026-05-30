@@ -3,6 +3,7 @@ package it.roadies.user_service.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
+import it.roadies.user_service.data.dto.request.UserUpdateRequestDTO;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.result.UserSyncResult;
@@ -49,7 +50,7 @@ public class UserController {
 
     @GetMapping("/me")
     @Operation(summary = "Il mio profilo", description = "Recupera i dati dell'utente loggato")
-    public ResponseEntity<UserProfileResponseDTO> getMyProfile(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<UserProfileResponseDTO> getProfile(@AuthenticationPrincipal Jwt jwt) {
         log.info("Ricevuta richiesta di recupero profilo personale dal subject JWT: {}", jwt.getSubject());
         return ResponseEntity.ok(userService.getProfile(jwt.getSubject()));
     }
@@ -65,7 +66,7 @@ public class UserController {
     @Operation(summary = "Aggiorna profilo", description = "Modifica i dati del proprio profilo")
     public ResponseEntity<UserProfileResponseDTO> updateProfile(
             @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody UserSyncRequestDTO updateDto) {
+            @Valid @RequestBody UserUpdateRequestDTO updateDto) {
         log.info("Ricevuta richiesta di aggiornamento profilo dal subject JWT: {}", jwt.getSubject());
         return ResponseEntity.ok(userService.updateProfile(jwt.getSubject(), updateDto));
     }

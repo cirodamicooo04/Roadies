@@ -9,6 +9,7 @@ import it.roadies.user_service.data.entities.enumeration.OrganizerRequestStatus;
 import it.roadies.user_service.data.repositories.GamificationRepository;
 import it.roadies.user_service.data.repositories.UserRepository;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
+import it.roadies.user_service.data.dto.request.UserUpdateRequestDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.result.UserSyncResult;
 import it.roadies.user_service.exception.ConflictException;
@@ -111,7 +112,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     //@PreAuthorize("isAuthenticated() and #keycloakId == authentication.name")
-    public UserProfileResponseDTO updateProfile(String keycloakId, UserSyncRequestDTO updateDto) {
+    public UserProfileResponseDTO updateProfile(String keycloakId, UserUpdateRequestDTO updateDto) {
         log.info("Iniziato aggiornamento profilo per l'utente");
         User user = userRepository.findById(keycloakId)
                 .orElseThrow(() -> {
