@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Roadies</string>
+    <string name="home">Home</string>
+    <string name="travel">Viaggia</string>
+    <string name="bookings">Prenotazioni</string>
+    <string name="profile">Profilo</string>
+</resources>
