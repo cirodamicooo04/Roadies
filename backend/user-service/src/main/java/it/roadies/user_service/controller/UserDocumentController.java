@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.roadies.user_service.data.dto.request.UserDocumentRequestDTO;
 import it.roadies.user_service.data.dto.response.UserDocumentResponseDTO;
 import it.roadies.user_service.services.UserDocumentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -31,7 +32,7 @@ public class UserDocumentController {
     @Operation(summary = "Carica documento", description = "Carica un documento. Solo l'utente stesso può farlo.")
     public ResponseEntity<UserDocumentResponseDTO> upload(
             @PathVariable String userId,
-            @RequestPart("document") UserDocumentRequestDTO dto,
+            @Valid @RequestPart("document") UserDocumentRequestDTO dto,
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal Jwt jwt) {
         log.info("Ricevuta richiesta di upload documento per l'utente ID: {} con nome file: {}", userId, file.getOriginalFilename());

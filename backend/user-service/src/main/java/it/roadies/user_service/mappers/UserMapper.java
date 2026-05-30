@@ -3,6 +3,7 @@ package it.roadies.user_service.mappers;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
+import it.roadies.user_service.data.dto.request.UserUpdateRequestDTO;
 import it.roadies.user_service.data.entities.User;
 import org.mapstruct.*;
 
@@ -17,6 +18,8 @@ public interface UserMapper {
     @Mapping(target = "documents", ignore = true)
     @Mapping(target = "requesterFriendships", ignore = true)
     @Mapping(target = "receiverFriendships", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updateBy", ignore = true)
     User toEntity(UserSyncRequestDTO dto);
 
 
@@ -36,12 +39,16 @@ public interface UserMapper {
     @Mapping(target = "keycloakId", ignore = true)
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "gamification", ignore = true)
-    @Mapping(target = "gamification", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "lastLogin", ignore = true)
+    @Mapping(target = "gamification", ignore = true)
     @Mapping(target = "documents", ignore = true)
     @Mapping(target = "requesterFriendships", ignore = true)
     @Mapping(target = "receiverFriendships", ignore = true)
+    @Mapping(target = "organizerRequestStatus", ignore = true)
+    @Mapping(target = "organizerRequestedAt", ignore = true)
+    @Mapping(target = "organizerReviewedAt", ignore = true)
+    @Mapping(target = "organizerRejectionReason", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromRequest(UserSyncRequestDTO dto, @MappingTarget User entity);
+    void updateEntityFromRequest(UserUpdateRequestDTO dto, @MappingTarget User entity);
 }

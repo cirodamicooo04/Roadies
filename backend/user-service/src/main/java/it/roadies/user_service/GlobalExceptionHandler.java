@@ -32,7 +32,9 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Field validation failed")
-                .message(e.getBindingResult().getFieldError().getDefaultMessage())
+                .message(e.getBindingResult().getFieldError() != null
+                        ? e.getBindingResult().getFieldError().getDefaultMessage()
+                        : "Errore di validazione")
                 .path(request.getRequestURI())
                 .build();
 

@@ -1,9 +1,6 @@
 package it.roadies.user_service.data.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.time.LocalDate;
 
@@ -11,15 +8,24 @@ import java.time.LocalDate;
 public class UserSyncRequestDTO {
     private String keycloakId;
 
+    @NotBlank
     @Email
-    @Size(max=255)
+    @Size(max = 255)
     private String email;
-    @Size(min=3, max=30)
+
+    @NotBlank
+    @Size(min = 3, max = 30)
     private String username;
-    @Size(min=1, max=30)
+
+    @NotBlank
+    @Size(min = 1, max = 30)
     private String firstName;
-    @Size(min=1, max=30)
+
+    @NotBlank
+    @Size(min = 1, max = 30)
     private String lastName;
+
+    @NotNull
     @Past
     private LocalDate birthDate;
 }
