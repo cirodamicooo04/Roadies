@@ -18,8 +18,6 @@ public interface UserMapper {
     @Mapping(target = "documents", ignore = true)
     @Mapping(target = "requesterFriendships", ignore = true)
     @Mapping(target = "receiverFriendships", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "updateBy", ignore = true)
     User toEntity(UserSyncRequestDTO dto);
 
 
