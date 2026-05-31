@@ -20,9 +20,13 @@ public interface UserDocumentMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updateBy", ignore = true)
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "rejectionReason", ignore = true)
     @Mapping(target = "verifiedAt", ignore = true)
     @Mapping(target = "fileUrl", ignore = true)
+
     UserDocument toEntity(UserDocumentRequestDTO dto);
 }
