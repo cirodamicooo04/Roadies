@@ -2,24 +2,44 @@ package it.roadies.android_app.repository
 
 import android.util.Base64
 import it.roadies.android_app.auth.TokenStorage
+import net.openid.appauth.AuthorizationService
+import net.openid.appauth.AuthState
 import org.json.JSONObject
+import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 
 class AuthRepository @Inject constructor(private val tokenStorage: TokenStorage) {
-    suspend fun saveTokens( accessToken: String, refreshToken: String) {
-        tokenStorage.saveTokens(accessToken, refreshToken)
+    suspend fun saveAuthState(authState: AuthState) {
+        tokenStorage.saveAuthState(authState.jsonSerializeString())
     }
 
-    suspend fun getAccessToken(): String? {
-        return tokenStorage.getAccessToken()
+    suspend fun getAuthState(): AuthState {
+        return readAuthState() ?: AuthState()
     }
 
-    suspend fun getRefreshToken(): String? {
-        return tokenStorage.getRefreshToken()
+    suspend fun getFreshAccessToken(authorizationService: AuthorizationService): String? {
+        val authState = getAuthState()
+        if (!authState.isAuthorized) return null
+
+        return suspendCancellableCoroutine { continuation ->
+            authState.performActionWithFreshTokens(authorizationService) { accessToken, _, exception ->
+                if (continuation.isCancelled) return@performActionWithFreshTokens
+
+                if (exception != null) {
+                    continuation.resume(null)
+                    return@performActionWithFreshTokens
+                }
+
+                continuation.resume(accessToken)
+            }
+        }.also {
+            saveAuthState(authState)
+        }
     }
 
     suspend fun logout() {
-        tokenStorage.clearTokens()
+        tokenStorage.clearAuthState()
     }
 
     fun extractRoles(accessToken: String): List<String> {
@@ -58,5 +78,12 @@ class AuthRepository @Inject constructor(private val tokenStorage: TokenStorage)
 
             roles.toList()
         }.getOrDefault(emptyList())
+    }
+
+    private suspend fun readAuthState(): AuthState? {
+        val authStateJson = tokenStorage.getAuthStateJson() ?: return null
+        return runCatching {
+            AuthState.jsonDeserialize(authStateJson)
+        }.getOrNull()
     }
 }

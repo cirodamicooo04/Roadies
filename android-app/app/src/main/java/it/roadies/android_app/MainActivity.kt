@@ -16,6 +16,7 @@ import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
+import net.openid.appauth.AuthState
 import net.openid.appauth.connectivity.ConnectionBuilder
 import java.net.HttpURLConnection
 import java.net.URL
@@ -72,9 +73,14 @@ class MainActivity : ComponentActivity() {
         }
 
         val authResponse = AuthorizationResponse.fromIntent(data) ?: return
+        val appAuthState = AuthState()
+        appAuthState.update(authResponse, authException)
+
         val tokenRequest = authResponse.createTokenExchangeRequest()
 
         authorizationService.performTokenRequest(tokenRequest) { tokenResponse, tokenException ->
+            appAuthState.update(tokenResponse, tokenException)
+
             if (tokenException != null) {
                 Log.e(TAG, "Errore durante lo scambio token", tokenException)
                 return@performTokenRequest
@@ -85,15 +91,7 @@ class MainActivity : ComponentActivity() {
                 return@performTokenRequest
             }
 
-            val accessToken = tokenResponse.accessToken
-            val refreshToken = tokenResponse.refreshToken
-
-            if (accessToken != null && refreshToken != null) {
-                authViewModel.onLoginSuccess(
-                    accessToken = accessToken,
-                    refreshToken = refreshToken
-                )
-            }
+            authViewModel.onLoginSuccess(appAuthState)
         }
     }
 

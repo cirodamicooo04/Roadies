@@ -14,34 +14,25 @@ class TokenStorage @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val cryptoStore: CryptoStore
 ) {
-    suspend fun saveTokens(
-        accessToken: String,
-        refreshToken: String
-    ) {
+    suspend fun saveAuthState(authStateJson: String) {
         context.tokenDataStore.edit { prefs ->
-            prefs[ACCESS_TOKEN] = cryptoStore.encrypt(accessToken)
-            prefs[REFRESH_TOKEN] = cryptoStore.encrypt(refreshToken)
+            prefs.clear()
+            prefs[AUTH_STATE] = cryptoStore.encrypt(authStateJson)
         }
     }
 
-    suspend fun getAccessToken(): String? {
-        val encrypted = context.tokenDataStore.data.first()[ACCESS_TOKEN]
+    suspend fun getAuthStateJson(): String? {
+        val encrypted = context.tokenDataStore.data.first()[AUTH_STATE]
         return encrypted?.let { cryptoStore.decrypt(it) }
     }
 
-    suspend fun getRefreshToken(): String? {
-        val encrypted = context.tokenDataStore.data.first()[REFRESH_TOKEN]
-        return encrypted?.let { cryptoStore.decrypt(it) }
-    }
-
-    suspend fun clearTokens() {
+    suspend fun clearAuthState() {
         context.tokenDataStore.edit { prefs ->
             prefs.clear()
         }
     }
 
     companion object {
-        private val ACCESS_TOKEN = stringPreferencesKey("access_token")
-        private val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+        private val AUTH_STATE = stringPreferencesKey("auth_state")
     }
 }
