@@ -4,4 +4,9 @@
     <string name="travel">Travel</string>
     <string name="bookings">Bookings</string>
     <string name="profile">Profile</string>
+    <string name="login">Login</string>
+    <string name="chat">Chat</string>
+    <string name="handle_users">Handle users</string>
+    <string name="statistics">Statistics</string>
+    <string name="handle_travels">Handle Travels</string>
 </resources>
