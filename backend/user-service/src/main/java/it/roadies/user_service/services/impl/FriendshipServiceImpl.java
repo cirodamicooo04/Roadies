@@ -110,7 +110,7 @@ public class FriendshipServiceImpl implements FriendshipService {
             event.setStatus(Status.ACCEPTED);
 
             log.info("Invio evento RabbitMQ 'travel-service.friendship.accepted.queue' per l'amicizia}");
-            rabbitTemplate.convertAndSend("travel-service.friendship.accepted.queue", event);
+            rabbitTemplate.convertAndSend("user.exchange", "user.friendship.accepted", event);
         }
     }
 
@@ -186,7 +186,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         event.setUserId2(friendship.getReceiverId().getKeycloakId());
         event.setStatus(Status.REJECTED);
 
-        log.info("Invio evento RabbitMQ 'travel-service.friendship.deleted.queue' per l'amicizia rimossa");
-        rabbitTemplate.convertAndSend("travel-service.friendship.deleted.queue", event);
+        log.info("Invio evento RabbitMQ 'user.exchange' per l'amicizia rimossa");
+        rabbitTemplate.convertAndSend("user.exchange", "user.friendship.deleted", event);
     }
 }

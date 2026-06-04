@@ -23,11 +23,11 @@ public class SeatReservationListener {
         try {
             travelDepartureService.reserveSeats(command.getTravelId(), command.getPeopleCount());
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend( "booking.reserved.queue", successEvent);
+            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.reserved", successEvent);
 
         } catch (Exception e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend( "booking.failed.queue", failedEvent);
+            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.failed", failedEvent);
         }
     }
 
@@ -37,11 +37,11 @@ public class SeatReservationListener {
             activityDepartureService.reserveSeats(command.getActivityId(), command.getPeopleCount());
 
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.reserved.queue", successEvent);
+            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.reserved", successEvent);
 
         } catch (NotEnoughSeatsException e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.failed.queue", failedEvent);
+            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.failed", failedEvent);
         }
     }
 
@@ -50,11 +50,11 @@ public class SeatReservationListener {
         try {
             travelDepartureService.releaseSeats(command.getTravelId(), command.getPeopleCount());
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.reserved.queue", successEvent);
+            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.reserved", successEvent);
 
         } catch (Exception e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.failed.queue", failedEvent);
+            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.failed", failedEvent);
         }
     }
 
@@ -64,11 +64,11 @@ public class SeatReservationListener {
             activityDepartureService.releaseSeats(command.getActivityId(), command.getPeopleCount());
 
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.reserved.queue", successEvent);
+            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.reserved", successEvent);
 
         } catch (NotEnoughSeatsException e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("booking.failed.queue", failedEvent);
+            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.failed", failedEvent);
         }
     }
 

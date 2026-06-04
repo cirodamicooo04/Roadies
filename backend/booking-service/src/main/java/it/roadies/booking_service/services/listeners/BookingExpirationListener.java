@@ -3,7 +3,7 @@ package it.roadies.booking_service.services.listeners;
 import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
-import it.roadies.booking_service.services.impl.BookingServiceImpl;
+import it.roadies.booking_service.services.BookingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.util.UUID;
 public class BookingExpirationListener {
     private final BookingRepository bookingRepository;
     private final RabbitTemplate rabbitTemplate;
-    private final BookingServiceImpl bookingService;
+    private final BookingService bookingService;
 
     @Transactional
     @RabbitListener(queues = "booking-expiration-queue")
@@ -37,10 +37,10 @@ public class BookingExpirationListener {
                 bookingRepository.save(booking);
 
                 if (booking.getActivityId()!=null){
-                    rabbitTemplate.convertAndSend("activity.release.queue", new ReserveSeatCommand(bookingId, null, booking.getActivityId(), booking.getPeopleCount()));
+                    rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.release.activity", new ReserveSeatCommand(bookingId, null, booking.getActivityId(), booking.getPeopleCount()));
                 }
 
-                else rabbitTemplate.convertAndSend("travel.release.queue", new ReserveSeatCommand(bookingId, booking.getTravelId(), null, booking.getPeopleCount()));
+                else rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.release.travel", new ReserveSeatCommand(bookingId, booking.getTravelId(), null, booking.getPeopleCount()));
 
 
             } else {

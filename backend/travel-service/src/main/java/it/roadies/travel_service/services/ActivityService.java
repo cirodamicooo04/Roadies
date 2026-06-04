@@ -1,5 +1,6 @@
 package it.roadies.travel_service.services;
 
+import it.roadies.travel_service.data.dto.event.ReviewActivityUpdateEvent;
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest;
@@ -7,14 +8,9 @@ import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.data.dto.response.ActivitySummaryResponse;
-import it.roadies.travel_service.data.entity.Activity;
 import it.roadies.travel_service.data.entity.enumerations.Continent;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
