@@ -232,7 +232,7 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             //Creare un activity con all'interno la composable desiderata che accetta come parametro un NavHostController
         }
         composable(route = "travel" ){
-            SearchTravelActivity( navHostController= navHostController)
+            SearchTravelActivity( navHostController= navHostController, )
         }
         composable(route = "handle_users"){
 
