@@ -7,10 +7,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import it.roadies.android_app.BuildConfig
-import it.roadies.android_app.client.apis.AttivitApi
-import it.roadies.android_app.client.apis.FavouriteListsManagementApi
-import it.roadies.android_app.client.apis.MetadatiApi
-import it.roadies.android_app.client.apis.ViaggiApi
+import it.roadies.android_app.client.apis.travel.AttivitApi
+import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
+import it.roadies.android_app.client.apis.travel.MetadatiApi
+import it.roadies.android_app.client.apis.travel.ViaggiApi
 import it.roadies.android_app.client.infrastructure.Serializer
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationService
@@ -73,6 +73,7 @@ object NetworkModule {
             .addConverterFactory(GsonConverterFactory.create(Serializer.gson))
             .build()
 
+    // travel service apis
     @Provides
     @Singleton
     fun provideViaggiApi(retrofit: Retrofit): ViaggiApi =
@@ -87,6 +88,22 @@ object NetworkModule {
     @Singleton
     fun provideMetadatiApi(retrofit: Retrofit): MetadatiApi =
         retrofit.create(MetadatiApi::class.java)
+
+    //booking service provides
+    @Provides
+    @Singleton
+    fun provideGestionePrenotazioniApi(retrofit: Retrofit): GestionePrenotazioniApi =
+        retrofit.create(GestionePrenotazioniApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGestionePagamentoApi(retrofit: Retrofit): GestionePagamentoApi =
+        retrofit.create(GestionePagamentoApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGestioneDocumentiApi(retrofit: Retrofit): GestioneDocumentiApi =
+        retrofit.create(GestioneDocumentiApi::class.java)
 
     @Provides
     @Singleton
