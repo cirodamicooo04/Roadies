@@ -7,6 +7,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import it.roadies.android_app.BuildConfig
+import it.roadies.android_app.client.apis.GestioneDocumentiApi
+import it.roadies.android_app.client.apis.GestionePagamentoApi
+import it.roadies.android_app.client.apis.GestionePrenotazioniApi
 import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
 import it.roadies.android_app.client.apis.travel.MetadatiApi

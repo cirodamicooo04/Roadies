@@ -12,16 +12,23 @@ class AuthTokenInterceptor @Inject constructor(
     private val authorizationService: AuthorizationService
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+        val path = originalRequest.url.encodedPath
+
+        if (path.contains("/public/")){
+            return chain.proceed(originalRequest)
+        }
+
         val accessToken = runBlocking {
             authRepository.getFreshAccessToken(authorizationService)
         }
+
         val request = if (!accessToken.isNullOrBlank()) {
-            chain.request()
-                .newBuilder()
+            originalRequest.newBuilder()
                 .addHeader("Authorization", "Bearer $accessToken")
                 .build()
         } else {
-            chain.request()
+            originalRequest
         }
         return chain.proceed(request)
     }

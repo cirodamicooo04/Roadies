@@ -9,4 +9,5 @@
     <string name="handle_users">Handle users</string>
     <string name="statistics">Statistics</string>
     <string name="handle_travels">Handle Travels</string>
+    <string name="no_internet_connection">No internet connection</string>
 </resources>

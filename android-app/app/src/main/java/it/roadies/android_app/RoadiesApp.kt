@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import it.roadies.android_app.viewmodel.AuthViewModel
+import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -224,6 +225,9 @@ fun RoadiesApp(
 fun NavigationView(navHostController: NavHostController, modifier: Modifier = Modifier, isAdmin: Boolean) {
     val startDestination: String = if (isAdmin) "handle_users" else "home"
 
+    //id di prova
+    val travelId: UUID = UUID.fromString("3e58e89d-81ee-4b7a-a90d-0f6e2b588384")
+
     NavHost(navController = navHostController, startDestination = startDestination, modifier = modifier) {
         composable(route = "home") {
             //Creare un activity con all'interno la composable desiderata che accetta come parametro un NavHostController
@@ -232,7 +236,8 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             //Creare un activity con all'interno la composable desiderata che accetta come parametro un NavHostController
         }
         composable(route = "travel" ){
-            SearchTravelActivity( navHostController= navHostController, )
+            //prova
+            TravelDetailScreen(navHostController, travelId)
         }
         composable(route = "handle_users"){
 
