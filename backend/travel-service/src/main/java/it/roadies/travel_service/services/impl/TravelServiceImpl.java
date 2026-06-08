@@ -222,7 +222,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Transactional
-    public List<TravelSummaryResponse> getRecommendedTravels(String id) {
+    public List<TravelSummaryResponse> getRecommendedTravels() {
         List<UUID> pastTravelsIds = bookingClient.getUserBookings();
         log.info("User past bookings: {}", pastTravelsIds);
         //Se non ha mai effettuato alcun viaggio, restituisco gli ultimi 10 viaggi creati

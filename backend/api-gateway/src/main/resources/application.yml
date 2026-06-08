@@ -59,7 +59,9 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081/realms/roadies-app
+          issuer-uri: http://10.0.2.2:8081/realms/roadies-app
+          jwk-set-uri: http://localhost:8081/realms/roadies-app/protocol/openid-connect/certs
+
 
 eureka:
   client:

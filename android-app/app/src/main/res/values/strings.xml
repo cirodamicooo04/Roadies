@@ -10,4 +10,6 @@
     <string name="statistics">Statistics</string>
     <string name="handle_travels">Handle Travels</string>
     <string name="no_internet_connection">No internet connection</string>
+    <string name="starting_from">Starting from</string>
+    <string name="insert_destination">Insert a destination</string>
 </resources>

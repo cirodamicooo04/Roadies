@@ -148,21 +148,21 @@ fun RoadiesApp(
                             Text(stringResource(R.string.home))
                         }
                     )
-                    NavigationBarItem(
-                        selected = currentRoute == "travel",
-                        onClick = {
-                            navHostController.navigate("travel")
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Default.FlightTakeoff,
-                                contentDescription = stringResource(R.string.travel)
-                            )
-                        },
-                        label = {
-                            Text(stringResource(R.string.travel))
-                        }
-                    )
+//                    NavigationBarItem(
+//                        selected = currentRoute == "travel",
+//                        onClick = {
+//                            navHostController.navigate("travel")
+//                        },
+//                        icon = {
+//                            Icon(
+//                                imageVector = Icons.Default.FlightTakeoff,
+//                                contentDescription = stringResource(R.string.travel)
+//                            )
+//                        },
+//                        label = {
+//                            Text(stringResource(R.string.travel))
+//                        }
+//                    )
                     NavigationBarItem(
                         selected = currentRoute == "bookings",
                         onClick = {
@@ -230,14 +230,10 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
 
     NavHost(navController = navHostController, startDestination = startDestination, modifier = modifier) {
         composable(route = "home") {
-            //Creare un activity con all'interno la composable desiderata che accetta come parametro un NavHostController
+            HomeScreen(navHostController)
         }
         composable(route ="bookings"){
             //Creare un activity con all'interno la composable desiderata che accetta come parametro un NavHostController
-        }
-        composable(route = "travel" ){
-            //prova
-            TravelDetailScreen(navHostController, travelId)
         }
         composable(route = "handle_users"){
 

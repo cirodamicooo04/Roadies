@@ -27,7 +27,7 @@ public interface TravelService {
     TravelResponse addActivity(UUID travelId, ActivityCreateRequest request, String ownerId);
     void deleteTravelActivity(UUID travelId, UUID activityId, String ownerId);
     TravelResponse updateTravelActivity(UUID travelId, UUID activityId, ActivityUpdateRequest request, String ownerId);
-    List<TravelSummaryResponse> getRecommendedTravels(String id);
+    List<TravelSummaryResponse> getRecommendedTravels();
     void updateTravelReviews(ReviewTravelUpdateEvent event);
     boolean isValidTravel(UUID travelId);
 }

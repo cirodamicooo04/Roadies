@@ -162,7 +162,7 @@ public class TravelController {
     @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/recommendations")
     public ResponseEntity<List<TravelSummaryResponse>> getRecommendations(@AuthenticationPrincipal Jwt jwt){
-        List<TravelSummaryResponse> responses = travelService.getRecommendedTravels(jwt.getClaim("sub"));
+        List<TravelSummaryResponse> responses = travelService.getRecommendedTravels();
         return ResponseEntity.ok(responses);
     }
 

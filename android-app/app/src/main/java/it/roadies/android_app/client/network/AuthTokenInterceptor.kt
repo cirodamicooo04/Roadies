@@ -1,5 +1,6 @@
 package it.roadies.android_app.client.network
 
+import android.util.Log
 import it.roadies.android_app.repository.AuthRepository
 import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthorizationService
@@ -30,6 +31,7 @@ class AuthTokenInterceptor @Inject constructor(
         } else {
             originalRequest
         }
+        Log.d("AuthInterceptor", "path=$path, tokenPresent=${!accessToken.isNullOrBlank()} token=${accessToken}")
         return chain.proceed(request)
     }
 }
