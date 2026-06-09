@@ -23,7 +23,7 @@
 
 package it.roadies.android_app.client.models.booking
 
-import it.roadies.android_app.client.models.MemberDocumentRequest
+import it.roadies.android_app.client.models.booking.MemberDocumentRequest
 
 import com.google.gson.annotations.SerializedName
 

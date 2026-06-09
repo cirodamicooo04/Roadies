@@ -6,7 +6,7 @@ import retrofit2.Response
 import okhttp3.RequestBody
 import com.google.gson.annotations.SerializedName
 
-import it.roadies.android_app.client.models.MemberDocumentUpdateRequest
+import it.roadies.android_app.client.models.booking.MemberDocumentUpdateRequest
 
 import okhttp3.MultipartBody
 

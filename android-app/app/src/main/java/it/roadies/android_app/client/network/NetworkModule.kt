@@ -7,13 +7,16 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import it.roadies.android_app.BuildConfig
-import it.roadies.android_app.client.apis.GestioneDocumentiApi
-import it.roadies.android_app.client.apis.GestionePagamentoApi
-import it.roadies.android_app.client.apis.GestionePrenotazioniApi
+import it.roadies.android_app.client.apis.booking.GestioneDocumentiApi
+import it.roadies.android_app.client.apis.booking.GestionePagamentoApi
+import it.roadies.android_app.client.apis.booking.GestionePrenotazioniApi
 import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
 import it.roadies.android_app.client.apis.travel.MetadatiApi
 import it.roadies.android_app.client.apis.travel.ViaggiApi
+import it.roadies.android_app.client.apis.user.DocumentManagementApi
+import it.roadies.android_app.client.apis.user.FriendshipManagementApi
+import it.roadies.android_app.client.apis.user.UserManagementApi
 import it.roadies.android_app.client.infrastructure.Serializer
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationService
@@ -112,6 +115,22 @@ object NetworkModule {
     @Singleton
     fun provideFavouriteListsManagementApi(retrofit: Retrofit): FavouriteListsManagementApi =
         retrofit.create(FavouriteListsManagementApi::class.java)
+
+    //user service provide
+    @Provides
+    @Singleton
+    fun provideFriendshipManagementApi(retrofit: Retrofit): FriendshipManagementApi =
+        retrofit.create(FriendshipManagementApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideDocumentManagementApi(retrofit: Retrofit): DocumentManagementApi =
+        retrofit.create(DocumentManagementApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUserManagementApi(retrofit: Retrofit): UserManagementApi =
+        retrofit.create(UserManagementApi::class.java)
 
     private val devConnectionBuilder = ConnectionBuilder { uri ->
         URL(uri.toString()).openConnection() as HttpURLConnection

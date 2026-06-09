@@ -6,12 +6,12 @@ import retrofit2.Response
 import okhttp3.RequestBody
 import com.google.gson.annotations.SerializedName
 
-import it.roadies.android_app.client.models.BookingCreateRequest
-import it.roadies.android_app.client.models.BookingDraftRequest
-import it.roadies.android_app.client.models.BookingDraftResponse
-import it.roadies.android_app.client.models.BookingMemberRequest
-import it.roadies.android_app.client.models.BookingStatusResponse
-import it.roadies.android_app.client.models.BookingStep2Response
+import it.roadies.android_app.client.models.booking.BookingCreateRequest
+import it.roadies.android_app.client.models.booking.BookingDraftRequest
+import it.roadies.android_app.client.models.booking.BookingDraftResponse
+import it.roadies.android_app.client.models.booking.BookingMemberRequest
+import it.roadies.android_app.client.models.booking.BookingStatusResponse
+import it.roadies.android_app.client.models.booking.BookingStep2Response
 
 interface GestionePrenotazioniApi {
     /**

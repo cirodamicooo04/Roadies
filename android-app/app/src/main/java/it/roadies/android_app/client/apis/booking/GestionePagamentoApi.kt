@@ -6,8 +6,8 @@ import retrofit2.Response
 import okhttp3.RequestBody
 import com.google.gson.annotations.SerializedName
 
-import it.roadies.android_app.client.models.PaymentRequest
-import it.roadies.android_app.client.models.PaymentResponse
+import it.roadies.android_app.client.models.booking.PaymentRequest
+import it.roadies.android_app.client.models.booking.PaymentResponse
 
 interface GestionePagamentoApi {
     /**
