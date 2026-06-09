@@ -21,7 +21,7 @@
     "unused"
 )
 
-package it.roadies.android_app.client.models.booking
+package it.roadies.android_app.client.models.user
 
 
 import com.google.gson.annotations.SerializedName
@@ -29,26 +29,34 @@ import com.google.gson.annotations.SerializedName
 /**
  * 
  *
- * @param memberId 
+ * @param email 
+ * @param username 
  * @param firstName 
  * @param lastName 
- * @param documentIds 
+ * @param birthDate 
+ * @param keycloakId 
  */
 
 
-data class MemberIdResponse (
+data class UserSyncRequestDTO (
 
-    @SerializedName("memberId")
-    val memberId: java.util.UUID? = null,
+    @SerializedName("email")
+    val email: kotlin.String,
+
+    @SerializedName("username")
+    val username: kotlin.String,
 
     @SerializedName("firstName")
-    val firstName: kotlin.String? = null,
+    val firstName: kotlin.String,
 
     @SerializedName("lastName")
-    val lastName: kotlin.String? = null,
+    val lastName: kotlin.String,
 
-    @SerializedName("documentIds")
-    val documentIds: kotlin.collections.List<java.util.UUID>? = null
+    @SerializedName("birthDate")
+    val birthDate: java.time.LocalDate,
+
+    @SerializedName("keycloakId")
+    val keycloakId: kotlin.String? = null
 
 ) {
 

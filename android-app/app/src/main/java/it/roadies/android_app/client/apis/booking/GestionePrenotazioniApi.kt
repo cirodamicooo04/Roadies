@@ -1,4 +1,4 @@
-package it.roadies.android_app.client.apis
+package it.roadies.android_app.client.apis.booking
 
 import it.roadies.android_app.client.infrastructure.CollectionFormats.*
 import retrofit2.http.*

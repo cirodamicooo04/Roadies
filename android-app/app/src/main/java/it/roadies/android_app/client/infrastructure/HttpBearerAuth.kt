@@ -1,5 +1,6 @@
 package it.roadies.android_app.client.infrastructure
 
+import android.R.attr.scheme
 import okhttp3.Interceptor
 import okhttp3.Response
 

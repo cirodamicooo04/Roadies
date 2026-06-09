@@ -21,7 +21,7 @@
     "unused"
 )
 
-package it.roadies.android_app.client.models.booking
+package it.roadies.android_app.client.models.user
 
 
 import com.google.gson.annotations.SerializedName
@@ -29,14 +29,18 @@ import com.google.gson.annotations.SerializedName
 /**
  * 
  *
- * @param type 
+ * @param documentType 
+ * @param documentNumber 
  */
 
 
-data class MemberDocumentRequest (
+data class UserDocumentRequestDTO (
 
-    @SerializedName("type")
-    val type: MemberDocumentRequest.Type
+    @SerializedName("documentType")
+    val documentType: UserDocumentRequestDTO.DocumentType,
+
+    @SerializedName("documentNumber")
+    val documentNumber: kotlin.String
 
 ) {
 
@@ -45,7 +49,7 @@ data class MemberDocumentRequest (
      *
      * Values: ID_CARD,DRIVER_LICENSE,PASSPORT
      */
-    enum class Type(val value: kotlin.String) {
+    enum class DocumentType(val value: kotlin.String) {
         @SerializedName(value = "ID_CARD") ID_CARD("ID_CARD"),
         @SerializedName(value = "DRIVER_LICENSE") DRIVER_LICENSE("DRIVER_LICENSE"),
         @SerializedName(value = "PASSPORT") PASSPORT("PASSPORT");

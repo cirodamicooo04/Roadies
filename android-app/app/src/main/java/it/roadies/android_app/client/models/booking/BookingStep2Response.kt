@@ -21,7 +21,7 @@
     "unused"
 )
 
-package it.roadies.android_app.client.models
+package it.roadies.android_app.client.models.booking
 
 import it.roadies.android_app.client.models.MemberIdResponse
 
