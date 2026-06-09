@@ -1,13 +1,10 @@
 package it.roadies.android_app
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.PeopleAlt
@@ -74,80 +71,82 @@ fun RoadiesApp(
                     }
                 },
                 actions = {
-                    if (!authState.isLogged){
-                        Button(
-                            onClick = onLoginClick
-                        ) {
-                            Text(stringResource(R.string.login))
-                        }
-                    }
-                    else {
-                        IconButton(
-                            onClick = {
-                                // Decidere se aprire una nuova schermata o menu a tendina.
+                    if (!authState.isLoading) {
+                        if (!authState.isLogged) {
+                            Button(
+                                onClick = onLoginClick
+                            ) {
+                                Text(stringResource(R.string.login))
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = stringResource(R.string.profile)
-                            )
+                        } else {
+                            IconButton(
+                                onClick = {
+                                    // Decidere se aprire una nuova schermata o menu a tendina.
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = stringResource(R.string.profile)
+                                )
+                            }
                         }
                     }
                 }
             )
         },
         bottomBar = {
-            NavigationBar() {
-                if ("ADMIN" in authState.roles) {
-                    NavigationBarItem(
-                        selected = currentRoute == "handle_users",
-                        onClick = {
-                            navHostController.navigate("handle_users")
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Default.PeopleAlt,
-                                contentDescription = stringResource(R.string.handle_users)
-                            )
-                        },
-                        label = {
-                            Text(stringResource(R.string.handle_users))
-                        }
-                    )
+            if (!authState.isLoading) {
+                NavigationBar() {
+                    if ("ADMIN" in authState.roles) {
+                        NavigationBarItem(
+                            selected = currentRoute == "handle_users",
+                            onClick = {
+                                navHostController.navigate("handle_users")
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.PeopleAlt,
+                                    contentDescription = stringResource(R.string.handle_users)
+                                )
+                            },
+                            label = {
+                                Text(stringResource(R.string.handle_users))
+                            }
+                        )
 
-                    NavigationBarItem(
-                        selected = currentRoute == "statistics",
-                        onClick = {
-                            navHostController.navigate("statistics")
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Default.QueryStats,
-                                contentDescription = stringResource(R.string.statistics)
-                            )
-                        },
-                        label = {
-                            Text(stringResource(R.string.statistics))
-                        }
-                    )
+                        NavigationBarItem(
+                            selected = currentRoute == "statistics",
+                            onClick = {
+                                navHostController.navigate("statistics")
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.QueryStats,
+                                    contentDescription = stringResource(R.string.statistics)
+                                )
+                            },
+                            label = {
+                                Text(stringResource(R.string.statistics))
+                            }
+                        )
 
-                } else {
+                    } else {
 
-                    NavigationBarItem(
-                        selected = currentRoute == "home",
-                        onClick = {
-                            navHostController.navigate("home")
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Default.Home,
-                                contentDescription = stringResource(R.string.home)
-                            )
-                        },
-                        label = {
-                            Text(stringResource(R.string.home))
-                        }
-                    )
+                        NavigationBarItem(
+                            selected = currentRoute == "home",
+                            onClick = {
+                                navHostController.navigate("home")
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.Home,
+                                    contentDescription = stringResource(R.string.home)
+                                )
+                            },
+                            label = {
+                                Text(stringResource(R.string.home))
+                            }
+                        )
 //                    NavigationBarItem(
 //                        selected = currentRoute == "travel",
 //                        onClick = {
@@ -163,61 +162,69 @@ fun RoadiesApp(
 //                            Text(stringResource(R.string.travel))
 //                        }
 //                    )
-                    NavigationBarItem(
-                        selected = currentRoute == "bookings",
-                        onClick = {
-                            navHostController.navigate("bookings")
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Default.AssignmentTurnedIn,
-                                contentDescription = stringResource(R.string.bookings)
+                        NavigationBarItem(
+                            selected = currentRoute == "bookings",
+                            onClick = {
+                                navHostController.navigate("bookings")
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.AssignmentTurnedIn,
+                                    contentDescription = stringResource(R.string.bookings)
+                                )
+                            },
+                            label = {
+                                Text(stringResource(R.string.bookings))
+                            }
+                        )
+                        if (authState.isLogged) {
+                            NavigationBarItem(
+                                selected = currentRoute == "chat",
+                                onClick = {
+                                    navHostController.navigate(("chat"))
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.Chat,
+                                        contentDescription = stringResource(R.string.chat)
+                                    )
+                                },
+                                label = {
+                                    Text(stringResource(R.string.chat))
+                                }
                             )
-                        },
-                        label = {
-                            Text(stringResource(R.string.bookings))
                         }
-                    )
-                    if (authState.isLogged) {
-                        NavigationBarItem(
-                            selected = currentRoute == "chat",
-                            onClick = {
-                                navHostController.navigate(("chat"))
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Chat,
-                                    contentDescription = stringResource(R.string.chat)
-                                )
-                            },
-                            label = {
-                                Text(stringResource(R.string.chat))
-                            }
-                        )
-                    }
-                    if ("ORGANIZER" in authState.roles){
-                        NavigationBarItem(
-                            selected = currentRoute == "handle_travels",
-                            onClick = {
-                                navHostController.navigate(("handle_travels"))
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Filled.Luggage,
-                                    contentDescription = stringResource(R.string.handle_travels)
-                                )
-                            },
-                            label = {
-                                Text(stringResource(R.string.handle_travels))
-                            }
-                        )
+                        if ("ORGANIZER" in authState.roles) {
+                            NavigationBarItem(
+                                selected = currentRoute == "handle_travels",
+                                onClick = {
+                                    navHostController.navigate(("handle_travels"))
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Luggage,
+                                        contentDescription = stringResource(R.string.handle_travels)
+                                    )
+                                },
+                                label = {
+                                    Text(stringResource(R.string.handle_travels))
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
 
     ) {
-        paddingValues -> NavigationView(navHostController = navHostController, modifier = Modifier.padding(paddingValues), isAdmin = "ADMIN" in authState.roles )
+        paddingValues ->
+        if (!authState.isLoading) {
+            NavigationView(
+                navHostController = navHostController,
+                modifier = Modifier.padding(paddingValues),
+                isAdmin = "ADMIN" in authState.roles
+            )
+        }
     }
 }
 

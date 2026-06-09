@@ -30,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,10 +53,6 @@ import it.roadies.android_app.viewmodel.HomeScreenViewModel
 fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeScreenViewModel = hiltViewModel()){
     val uiState by homeScreenViewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        homeScreenViewModel.loadRecommendedTravel()
-    }
-
     LazyColumn(modifier = Modifier.
         fillMaxSize().
         padding(16.dp),
@@ -75,6 +70,7 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
                     fontSize = 18.sp,
                 )
                 if (uiState.isLoading || uiState.errorMessage != null){
+                    //TODO: Cambiarlo con skeleton loading se riesco
                     CircularProgressIndicator()
                 }
                 RecommendedTravel(uiState.recommendedTravels)

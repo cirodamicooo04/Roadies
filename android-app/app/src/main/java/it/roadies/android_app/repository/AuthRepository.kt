@@ -2,16 +2,36 @@ package it.roadies.android_app.repository
 
 import android.util.Base64
 import it.roadies.android_app.auth.TokenStorage
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthState
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
+import javax.inject.Singleton
 
+data class AuthSessionState(
+    val isLoading: Boolean = true,
+    val isLogged: Boolean = false,
+    val roles: List<String> = emptyList()
+)
+
+@Singleton
 class AuthRepository @Inject constructor(private val tokenStorage: TokenStorage) {
+
+    private val _authState = MutableStateFlow(AuthSessionState())
+    val authState = _authState.asStateFlow()
+
+    suspend fun checkSession() {
+        val appAuthState = getAuthState()
+        _authState.value = appAuthState.toAuthSessionState()
+    }
+
     suspend fun saveAuthState(authState: AuthState) {
         tokenStorage.saveAuthState(authState.jsonSerializeString())
+        _authState.value = authState.toAuthSessionState()
     }
 
     suspend fun getAuthState(): AuthState {
@@ -40,6 +60,11 @@ class AuthRepository @Inject constructor(private val tokenStorage: TokenStorage)
 
     suspend fun logout() {
         tokenStorage.clearAuthState()
+        _authState.value = AuthSessionState(
+            isLoading = false,
+            isLogged = false,
+            roles = emptyList()
+        )
     }
 
     fun extractRoles(accessToken: String): List<String> {
@@ -85,5 +110,23 @@ class AuthRepository @Inject constructor(private val tokenStorage: TokenStorage)
         return runCatching {
             AuthState.jsonDeserialize(authStateJson)
         }.getOrNull()
+    }
+
+    private fun AuthState.toAuthSessionState(): AuthSessionState {
+        val currentAccessToken = this.accessToken
+
+        if (!isAuthorized || currentAccessToken == null) {
+            return AuthSessionState(
+                isLoading = false,
+                isLogged = false,
+                roles = emptyList()
+            )
+        }
+
+        return AuthSessionState(
+            isLoading = false,
+            isLogged = true,
+            roles = extractRoles(currentAccessToken)
+        )
     }
 }
