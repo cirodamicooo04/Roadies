@@ -2,7 +2,7 @@
 <configuration>
     <conversionRule conversionWord="clr" class="org.springframework.boot.logging.logback.ColorConverter" />
 
-    <property name="LOG_FILE" value="logs/booking-service" />
+    <property name="LOG_FILE" value="logs/review-service" />
 
     <logger name="org.springframework" level="ERROR"/>
     <logger name="it.roadies" level="DEBUG"/>

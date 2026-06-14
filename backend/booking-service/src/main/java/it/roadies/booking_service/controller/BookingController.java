@@ -21,7 +21,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 
@@ -31,12 +30,6 @@ import java.util.UUID;
 @Tag(name = "Gestione Prenotazioni", description = "API per la creazione, la visualizzazione e la gestione delle prenotazioni dei viaggi")
 public class BookingController {
     private final BookingService bookingService;
-
-    //TODO: devo eliminarlo prima della consegna
-    @GetMapping("/debug")
-    public Map<String, Object> debugToken(@AuthenticationPrincipal Jwt jwt) {
-        return jwt.getClaims();
-    }
 
     @Operation(summary = "Crea una bozza di prenotazione (passo 1)", description = "Inizializza una nuova prenotazione in stato DRAFT")
     @ApiResponses(value = {

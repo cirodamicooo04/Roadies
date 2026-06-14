@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -39,6 +40,7 @@ public class BookingMemberServiceImpl implements BookingMemberService {
     public void acceptDocument(MemberDocumentUpdateRequest memberDocument) {
         MemberDocument member = memberDocumentRepository.findById(memberDocument.getId()).orElseThrow(()-> new DocumentNotFoundException(messageLang.getMessage("error.document.not.exists")));
         member.setStatus(DocumentStatus.VERIFIED);
+        member.setVerifiedAt(LocalDateTime.now());
         memberDocumentRepository.save(member);
     }
 

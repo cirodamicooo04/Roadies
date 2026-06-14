@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Roadies</string>
+    <string name="home">Home</string>
+    <string name="travel">Viaggia</string>
+    <string name="bookings">Prenotazioni</string>
+    <string name="profile">Profilo</string>
+    <string name="login">Accedi</string>
+    <string name="chat">Messaggi</string>
+    <string name="handle_users">Gestisci utenti</string>
+    <string name="statistics">Statistiche</string>
+    <string name="handle_travels">Gestisci viaggi</string>
+    <string name="no_internet_connection">Connessione non disponibile</string>
+    <string name="starting_from">A partire da</string>
+    <string name="insert_destination">Inserisci una meta</string>
+</resources>
