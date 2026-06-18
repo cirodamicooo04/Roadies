@@ -1,11 +1,9 @@
 package it.roadies.android_app
 
-import android.R.attr.text
-import android.media.Image
-import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.content.MediaType.Companion.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +22,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -37,8 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -62,14 +61,28 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
             SearchBar()
         }
 
+
         item {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Consigliati per te",
+                    text = stringResource(R.string.discover_world),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    fontSize = 28.sp,
                 )
-                if (uiState.isLoading || uiState.errorMessage != null){
+                ContinentDestinations(onContinentClick = {
+                    selectedContinent -> navHostController.navigate("search_screen?continent=$selectedContinent")
+                })
+            }
+        }
+
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(R.string.recommended),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                )
+                if (uiState.isLoading || uiState.errorMessage != null) {
                     //TODO: Cambiarlo con skeleton loading se riesco
                     CircularProgressIndicator()
                 }
@@ -77,6 +90,7 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
             }
         }
     }
+
 }
 
 @Composable
@@ -89,12 +103,79 @@ fun SearchBar() {
             onValueChange = { query = it },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(stringResource(R.string.insert_destination)) },
-            leadingIcon = { Icons.Default.Search },
-            trailingIcon = { Icons.Default.Tune },
+            leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "search") },
+            trailingIcon = { Icon(imageVector =  Icons.Default.Tune, contentDescription = "filter") },
             singleLine = true,
             shape = RoundedCornerShape(20.dp)
         )
         //Riga filtri LazyRow
+    }
+}
+
+@Composable
+fun ContinentDestinations(onContinentClick: (String) -> Unit){
+    val continents: List<String> = listOf<String>("EUROPE", "ASIA", "OCEANIA", "AFRICA", "AMERICA" )
+
+    LazyRow(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        items(continents){
+            continent -> ContinentCard(continent, onContinentClick)
+        }
+    }
+}
+
+@Composable
+fun ContinentCard(continent: String, onCardClick: (String) -> Unit ) {
+    val imageResId = when (continent.lowercase()) {
+        "europe" -> R.drawable.europe_wallpaper
+        "asia" -> R.drawable.asia_wallpaper
+        "africa" -> R.drawable.africa_wallpaper
+        "america" -> R.drawable.america_wallpaper
+        "oceania" -> R.drawable.oceania_wallpaper
+        else -> R.drawable.fallback
+    }
+
+    Card(modifier = Modifier.width(200.dp).height(250.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(6.dp),
+        onClick = {onCardClick(continent)}
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            Image(
+                painter = painterResource(id = imageResId),
+                contentDescription = "Immagine di $continent",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // Sfumatura grigia a meta per risaltare testo
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            )
+                        )
+                    )
+            )
+
+            Text(
+                text = continent,
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp)
+            )
+        }
     }
 }
 

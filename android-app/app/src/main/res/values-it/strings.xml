@@ -13,4 +13,6 @@
     <string name="no_internet_connection">Connessione non disponibile</string>
     <string name="starting_from">A partire da</string>
     <string name="insert_destination">Inserisci una meta</string>
+    <string name="recommended">Consigliati per te</string>
+    <string name="discover_world">Scopri il mondo</string>
 </resources>
