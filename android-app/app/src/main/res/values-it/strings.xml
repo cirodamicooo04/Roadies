@@ -15,4 +15,7 @@
     <string name="insert_destination">Inserisci una meta</string>
     <string name="recommended">Consigliati per te</string>
     <string name="discover_world">Scopri il mondo</string>
+    <string name="no_activities_found">Nessuna attività trovata per la tua ricerca</string>
+    <string name="no_travels_found">Nessuna attività trovata per la tua ricerca</string>
+    <string name="days">Giorni</string>
 </resources>

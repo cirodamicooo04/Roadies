@@ -80,7 +80,7 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
                 Text(
                     text = stringResource(R.string.recommended),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp,
+                    fontSize = 28.sp,
                 )
                 if (uiState.isLoading || uiState.errorMessage != null) {
                     //TODO: Cambiarlo con skeleton loading se riesco

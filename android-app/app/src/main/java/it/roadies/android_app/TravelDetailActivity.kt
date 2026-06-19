@@ -17,27 +17,6 @@ import it.roadies.android_app.viewmodel.TravelDetailViewModel
 import java.util.UUID
 
 @Composable
-fun TravelDetailScreen(navHostController: NavHostController ,travelId: UUID, viewModel: TravelDetailViewModel = hiltViewModel()){
-    val uiState by viewModel.state.collectAsState()
-
-    LaunchedEffect(travelId) {
-        viewModel.loadTravel(travelId)
-    }
-
-    when {
-        uiState.isLoading -> CircularProgressIndicator()
-        uiState.travel != null -> TravelDetailContent(uiState.travel!!)
-        uiState.errorMessage != null -> Text(uiState.errorMessage!!)
-    }
-
-
-}
-
-@Composable
-fun TravelDetailContent(travel: TravelResponse){
-    Column(){
-        Text(text = travel.title ?: "Senza titolo")
-        Text(text = travel.description ?: "Nessuna descrizione")
-        Text(text = travel.destination?: "Nessuna destinazione")
-    }
+fun TravelDetailScreen(navHostController: NavHostController ,id: UUID, viewModel: TravelDetailViewModel = hiltViewModel()){
+    Text(text = "$id")
 }

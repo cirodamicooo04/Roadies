@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -46,7 +47,8 @@ fun RoadiesApp(
 
     //Per il parametro selected dei NavigationBarItem
     val navBackStackEntry by navHostController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentDestination = navBackStackEntry?.destination
+    val currentRoute = currentDestination?.route
 
     val bottomRoutes = listOf("home", "home_graph", "travel", "bookings", "chat", "handle_users", "statistics", "handle_travels")
     val showBackButton = currentRoute !in bottomRoutes
@@ -102,7 +104,7 @@ fun RoadiesApp(
                 NavigationBar() {
                     if ("ADMIN" in authState.roles) {
                         NavigationBarItem(
-                            selected = currentRoute == "handle_users",
+                            selected = currentDestination?.hierarchy?.any { it.route == "handle_users" } == true,
                             onClick = {
                                 navHostController.navigate("handle_users") {
                                     popUpTo(navHostController.graph.startDestinationId) { saveState = true }
@@ -122,7 +124,7 @@ fun RoadiesApp(
                         )
 
                         NavigationBarItem(
-                            selected = currentRoute == "statistics",
+                            selected = currentDestination?.hierarchy?.any { it.route == "statistics" } == true,
                             onClick = {
                                 navHostController.navigate("statistics") {
                                     popUpTo(navHostController.graph.startDestinationId) { saveState = true }
@@ -144,7 +146,7 @@ fun RoadiesApp(
                     } else {
 
                         NavigationBarItem(
-                            selected = currentRoute == "home" || currentRoute == "home_graph",
+                            selected = currentDestination?.hierarchy?.any { it.route == "home_graph" } == true,
                             onClick = {
                                 navHostController.navigate("home_graph") {
                                     popUpTo(navHostController.graph.startDestinationId) { saveState = true }
@@ -178,7 +180,7 @@ fun RoadiesApp(
 //                        }
 //                    )
                         NavigationBarItem(
-                            selected = currentRoute == "bookings",
+                            selected = currentDestination?.hierarchy?.any { it.route == "bookings" } == true,
                             onClick = {
                                 navHostController.navigate("bookings") {
                                     popUpTo(navHostController.graph.startDestinationId) { saveState = true }
@@ -198,7 +200,7 @@ fun RoadiesApp(
                         )
                         if (authState.isLogged) {
                             NavigationBarItem(
-                                selected = currentRoute == "chat",
+                                selected = currentDestination?.hierarchy?.any { it.route == "chat" } == true,
                                 onClick = {
                                     navHostController.navigate("chat") {
                                         popUpTo(navHostController.graph.startDestinationId) { saveState = true }
@@ -219,7 +221,7 @@ fun RoadiesApp(
                         }
                         if ("ORGANIZER" in authState.roles) {
                             NavigationBarItem(
-                                selected = currentRoute == "handle_travels",
+                                selected = currentDestination?.hierarchy?.any { it.route == "handle_travels" } == true,
                                 onClick = {
                                     navHostController.navigate("handle_travels") {
                                         popUpTo(navHostController.graph.startDestinationId) { saveState = true }
@@ -279,6 +281,17 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             ) {
                SearchScreen(navHostController = navHostController)
             }
+
+            composable(route="travel_detail/{id}"){
+                backStackEntry -> val id = UUID.fromString(backStackEntry.arguments?.getString("id").orEmpty())
+                TravelDetailScreen(navHostController=navHostController ,id = id)
+            }
+
+            composable(route="activity_detail/{id}"){
+                backStackEntry -> val id = UUID.fromString(backStackEntry.arguments?.getString("id").orEmpty())
+                ActivityDetailScreen(navHostController=navHostController ,id = id)
+            }
+
 
 
         }

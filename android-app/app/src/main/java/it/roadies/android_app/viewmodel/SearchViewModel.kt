@@ -20,7 +20,8 @@ data class SearchScreenUiState(
     val isLastPage: Boolean = false,
     val travels: List<TravelSummaryResponse>? = emptyList(),
     val activities: List<ActivitySummaryResponse>? = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val type: String? = "TRAVEL"
 )
 
 @HiltViewModel
@@ -41,6 +42,7 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
     private var currentPage = 0
 
     init {
+        _searchScreenUiState.value = _searchScreenUiState.value.copy(type = type)
         loadItems(continent,country,destination,minPrice,maxPrice,minDurationDays,maxDurationDays,type)
     }
 

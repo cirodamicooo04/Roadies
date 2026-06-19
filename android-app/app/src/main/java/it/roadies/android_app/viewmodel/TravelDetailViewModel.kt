@@ -20,23 +20,4 @@ data class TravelDetailState(
 @HiltViewModel
 class TravelDetailViewModel @Inject constructor(private val travelRepository: TravelRepository): ViewModel() {
 
-    private val _state = MutableStateFlow(TravelDetailState())
-    val state = _state.asStateFlow()
-
-    fun loadTravel(id: UUID){
-        viewModelScope.launch {
-            _state.value = TravelDetailState(isLoading = true)
-
-            val response = travelRepository.getTravelById(id)
-
-            if (response.success && response.data != null){
-                _state.value = TravelDetailState(travel = response.data)
-            }
-            else {
-                _state.value = TravelDetailState(
-                    errorMessage = response.errorMessage
-                )
-            }
-        }
-    }
 }

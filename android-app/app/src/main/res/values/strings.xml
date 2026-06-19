@@ -14,4 +14,7 @@
     <string name="insert_destination">Insert a destination</string>
     <string name="recommended">Recommended for you</string>
     <string name="discover_world">Discover the world</string>
+    <string name="no_activities_found">No activities found for your search</string>
+    <string name="no_travels_found">No travels found for your search</string>
+    <string name="days">Days</string>
 </resources>
