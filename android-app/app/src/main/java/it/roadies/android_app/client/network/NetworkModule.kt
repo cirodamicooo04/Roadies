@@ -13,6 +13,7 @@ import it.roadies.android_app.client.apis.booking.GestionePrenotazioniApi
 import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
 import it.roadies.android_app.client.apis.travel.MetadatiApi
+import it.roadies.android_app.client.apis.travel.PhotonApi
 import it.roadies.android_app.client.apis.travel.ViaggiApi
 import it.roadies.android_app.client.apis.user.DocumentManagementApi
 import it.roadies.android_app.client.apis.user.FriendshipManagementApi
@@ -35,6 +36,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     private const val API_BASE_URL = "http://10.0.2.2:8080/"
+    private const val PHOTON_BASE_URL = "https://photon.komoot.io"
 
     @Provides
     @Singleton
@@ -131,6 +133,31 @@ object NetworkModule {
     @Singleton
     fun provideUserManagementApi(retrofit: Retrofit): UserManagementApi =
         retrofit.create(UserManagementApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providePhotonApi(): PhotonApi {
+        val cleanClient = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .apply {
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(
+                        HttpLoggingInterceptor().apply {
+                            level = HttpLoggingInterceptor.Level.BASIC
+                        }
+                    )
+                }
+            }
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl("$PHOTON_BASE_URL/")
+            .client(cleanClient)
+            .addConverterFactory(GsonConverterFactory.create(Serializer.gson))
+            .build()
+            .create(PhotonApi::class.java)
+    }
 
     private val devConnectionBuilder = ConnectionBuilder { uri ->
         URL(uri.toString()).openConnection() as HttpURLConnection

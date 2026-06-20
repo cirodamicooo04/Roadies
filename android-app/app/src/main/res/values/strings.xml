@@ -17,4 +17,15 @@
     <string name="no_activities_found">No activities found for your search</string>
     <string name="no_travels_found">No travels found for your search</string>
     <string name="days">Days</string>
+    <string name="travels">Travels</string>
+    <string name="activities">Activities</string>
+    <string name="filter">Filter</string>
+    <string name="order_by">Order by</string>
+    <string name="filter_results">Filter results</string>
+    <string name="search_results">Search Results</string>
+    <string name="price_range">Price Range</string>
+    <string name="duration_days">Duration (Days)</string>
+    <string name="apply_filters">Apply Filters</string>
+    <string name="search_error">Error during search</string>
+    <string name="reset">Reset</string>
 </resources>
