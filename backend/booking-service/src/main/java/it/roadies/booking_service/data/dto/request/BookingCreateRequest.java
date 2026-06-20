@@ -13,6 +13,7 @@ public class BookingCreateRequest {
     private UUID activityId;
     @NotNull
     private UUID bookingId;
+    @NotNull
     @Min(1)
     private Integer peopleCount;
 

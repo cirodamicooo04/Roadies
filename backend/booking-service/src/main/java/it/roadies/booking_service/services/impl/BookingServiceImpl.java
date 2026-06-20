@@ -70,7 +70,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(requestDto.getBookingId())
                 .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 
-        if (!booking.getUserId().equals(userId)){
+        if (!booking.getUserId().equals(userId) || booking.getStatus().equals(BookingStatus.CONFIRMED)){
             throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
 
@@ -163,9 +163,9 @@ public class BookingServiceImpl implements BookingService {
                                 .memberId(m.getId())
                                 .firstName(m.getFirstName())
                                 .lastName(m.getLastName())
-                                .documentIds(m.getDocuments().stream()
+                                .documentIds(m.getDocuments() != null ? m.getDocuments().stream()
                                         .map(MemberDocument::getId)
-                                        .toList())
+                                        .toList() : java.util.Collections.emptyList())
                                 .build())
                         .toList())
                 .build();

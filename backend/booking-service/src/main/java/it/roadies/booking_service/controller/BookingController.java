@@ -99,6 +99,8 @@ public class BookingController {
 //        return ResponseEntity.noContent().build();
 //    }
 
+    //decidere se un utente può eliminare la proprio prenotazione e quindi sviluppare un rimborso tramite paymentService
+    //decidere se un admin può cancellare le pronotazioni dei traveler ed emettere un rimborso.
     @Operation(summary = "Elimina una prenotazione", description = "Permette l'eleminazione una prenotazione precedenetemente creata")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prenotazione eliminata con successo"),
@@ -108,7 +110,7 @@ public class BookingController {
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId, @AuthenticationPrincipal Jwt userJwt) {
         bookingService.deleteBooking(bookingId, userJwt.getSubject(), userJwt.getClaimAsString("email"));
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     //TRAVEL SERVICE RECOMMENDATION

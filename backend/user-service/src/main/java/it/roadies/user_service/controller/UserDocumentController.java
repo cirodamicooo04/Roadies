@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/documents")
+@RequestMapping("/api/v1/user-documents")
 @RequiredArgsConstructor
 @Tag(name = "Document Management", description = "API per l'upload e la verifica dei documenti degli utenti")
 public class UserDocumentController {
