@@ -17,12 +17,21 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Attractions
+import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -42,73 +51,145 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
+import it.roadies.android_app.client.models.travel.SearchSuggestion
+import it.roadies.android_app.client.models.travel.LocationType
 import it.roadies.android_app.viewmodel.HomeScreenViewModel
+
+enum class Type {
+    TRAVEL, ACTIVITY
+}
 
 @Composable
 fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeScreenViewModel = hiltViewModel()){
     val uiState by homeScreenViewModel.uiState.collectAsState()
+    val query by homeScreenViewModel.searchQuery.collectAsState()
+    val suggestions by homeScreenViewModel.searchSuggestions.collectAsState()
+    var type by remember { mutableStateOf(Type.TRAVEL) }
 
-    LazyColumn(modifier = Modifier.
-        fillMaxSize().
-        padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        item {
-            SearchBar()
-        }
-
-
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = stringResource(R.string.discover_world),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                )
-                ContinentDestinations(onContinentClick = {
-                    selectedContinent -> navHostController.navigate("search_screen?continent=$selectedContinent")
-                })
-            }
-        }
-
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = stringResource(R.string.recommended),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                )
-                if (uiState.isLoading || uiState.errorMessage != null) {
-                    //TODO: Cambiarlo con skeleton loading se riesco
-                    CircularProgressIndicator()
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SearchTypeToggle(selectedType = type, onTypeChanged = {
+                typeChanged -> type = typeChanged
+            })
+            SearchBar(
+                query = query,
+                suggestions = suggestions,
+                onQueryChange = { homeScreenViewModel.updateSearchQuery(it) },
+                onSuggestionClick = { suggestion ->
+                    val route = when (suggestion.type) {
+                        LocationType.CONTINENT -> "search_screen?continent=${suggestion.name}&type=$type"
+                        LocationType.COUNTRY -> "search_screen?country=${suggestion.name}&type=$type"
+                        LocationType.DESTINATION -> "search_screen?destination=${suggestion.name}&type=$type"
+                    }
+                    navHostController.navigate(route)
                 }
-                RecommendedTravel(uiState.recommendedTravels)
+            )
+        }
+
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = stringResource(R.string.discover_world),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                    )
+                    ContinentDestinations(onContinentClick = {
+                        selectedContinent -> navHostController.navigate("search_screen?continent=$selectedContinent&type=$type")
+                    })
+                }
+            }
+
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = stringResource(R.string.recommended),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                    )
+                    if (uiState.isLoading || uiState.errorMessage != null) {
+                        CircularProgressIndicator()
+                    }
+                    RecommendedTravel(uiState.recommendedTravels)
+                }
             }
         }
     }
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar() {
-    var query by remember { mutableStateOf("") }
+fun SearchBar(
+    query: String,
+    suggestions: List<SearchSuggestion>,
+    onQueryChange: (String) -> Unit,
+    onSuggestionClick: (SearchSuggestion) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        OutlinedTextField(
-            value = query,
-            onValueChange = { query = it },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(stringResource(R.string.insert_destination)) },
-            leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "search") },
-            trailingIcon = { Icon(imageVector =  Icons.Default.Tune, contentDescription = "filter") },
-            singleLine = true,
-            shape = RoundedCornerShape(20.dp)
-        )
-        //Riga filtri LazyRow
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = it }
+        ) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = {
+                    onQueryChange(it)
+                    expanded = it.isNotBlank()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
+                placeholder = { Text(stringResource(R.string.insert_destination)) },
+                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "search") },
+                singleLine = true,
+                shape = RoundedCornerShape(20.dp)
+            )
+
+            if (suggestions.isNotEmpty()) {
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    properties = androidx.compose.ui.window.PopupProperties(focusable = false)
+                ) {
+                    suggestions.forEach { suggestion ->
+                        DropdownMenuItem(
+                            text = { Text(suggestion.name, fontWeight = FontWeight.Bold) },
+                            leadingIcon = {
+                                val iconVector = when (suggestion.type) {
+                                    LocationType.CONTINENT -> Icons.Default.Public
+                                    LocationType.COUNTRY -> Icons.Default.Flag
+                                    LocationType.DESTINATION -> Icons.Default.LocationOn
+                                }
+                                Icon(
+                                    imageVector = iconVector, 
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
+                            onClick = {
+                                expanded = false
+                                onSuggestionClick(suggestion)
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -237,5 +318,29 @@ fun TravelCard(travel: TravelSummaryResponse) {
             }
         }
     }
+}
 
+@Composable
+fun SearchTypeToggle(selectedType: Type, onTypeChanged: (Type) -> Unit ){
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterChip(
+            selected = selectedType == Type.TRAVEL,
+            onClick = {onTypeChanged(Type.TRAVEL)},
+            label = { Text(text = stringResource(R.string.travels), fontWeight = FontWeight.SemiBold, fontSize = 16.sp) },
+            leadingIcon = { Icon (imageVector = Icons.Default.FlightTakeoff, contentDescription = stringResource(R.string.travels), modifier = Modifier.size(20.dp))},
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.height(35.dp)
+        )
+
+        FilterChip(
+            selected = selectedType == Type.ACTIVITY,
+            onClick = {onTypeChanged(Type.ACTIVITY)},
+            label = { Text(text = stringResource(R.string.activities), fontWeight = FontWeight.SemiBold, fontSize = 16.sp) },
+            leadingIcon = { Icon (imageVector = Icons.Default.Attractions, contentDescription = stringResource(R.string.activities), modifier = Modifier.size(20.dp))},
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.height(35.dp)
+        )
+    }
 }
