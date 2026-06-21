@@ -12,6 +12,7 @@ import it.roadies.android_app.repository.TravelRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import javax.inject.Inject
 
 data class SearchScreenUiState(
@@ -22,6 +23,13 @@ data class SearchScreenUiState(
     val activities: List<ActivitySummaryResponse>? = emptyList(),
     val errorMessage: String? = null,
     val type: String? = "TRAVEL"
+)
+
+data class SearchFiltersState(
+    val minPrice: BigDecimal? = null,
+    val maxPrice: BigDecimal? = null,
+    val minDurationDays: Int? = null,
+    val maxDurationDays: Int? = null
 )
 
 @HiltViewModel
@@ -39,19 +47,63 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
     private val _searchScreenUiState = MutableStateFlow(SearchScreenUiState())
     val searchScreenUiState = _searchScreenUiState.asStateFlow()
 
+    private val _searchFiltersState = MutableStateFlow(SearchFiltersState())
+    val searchFiltersState = _searchFiltersState.asStateFlow()
+
     private var currentPage = 0
 
     init {
         _searchScreenUiState.value = _searchScreenUiState.value.copy(type = type)
-        loadItems(continent,country,destination,minPrice,maxPrice,minDurationDays,maxDurationDays,type)
+        
+        _searchFiltersState.value = SearchFiltersState(
+            minPrice = minPrice?.toBigDecimalOrNull(),
+            maxPrice = maxPrice?.toBigDecimalOrNull(),
+            minDurationDays = minDurationDays?.toIntOrNull(),
+            maxDurationDays = maxDurationDays?.toIntOrNull()
+        )
+        
+        val filters = _searchFiltersState.value
+        loadItems(
+            continent, country, destination, 
+            filters.minPrice?.toString(), filters.maxPrice?.toString(), 
+            filters.minDurationDays?.toString(), filters.maxDurationDays?.toString(), 
+            type
+        )
     }
 
     fun loadNextPage() {
         val state = _searchScreenUiState.value
         if (!state.isLastPage && !state.isLoadingMore && !state.isLoading) {
             currentPage++
-            loadItems(continent, country, destination, minPrice, maxPrice, minDurationDays, maxDurationDays, type, isLoadMore = true)
+            val filters = _searchFiltersState.value
+            loadItems(
+                continent, country, destination, 
+                filters.minPrice?.toString(), filters.maxPrice?.toString(), 
+                filters.minDurationDays?.toString(), filters.maxDurationDays?.toString(), 
+                type, isLoadMore = true
+            )
         }
+    }
+
+    fun applyFilters(newMinPrice: Float, newMaxPrice: Float, newMinDuration: Float, newMaxDuration: Float) {
+        _searchFiltersState.value = SearchFiltersState(
+            minPrice = newMinPrice.toBigDecimal(),
+            maxPrice = newMaxPrice.toBigDecimal(),
+            minDurationDays = newMinDuration.toInt(),
+            maxDurationDays = newMaxDuration.toInt()
+        )
+
+        val state = _searchFiltersState.value
+        loadItems(
+            continentStr = continent, 
+            country = country, 
+            destination = destination, 
+            minPriceStr = state.minPrice.toString(), 
+            maxPriceStr = state.maxPrice.toString(), 
+            minDurationDaysStr = state.minDurationDays.toString(), 
+            maxDurationDaysStr = state.maxDurationDays.toString(), 
+            type = type
+        )
     }
 
     private fun loadItems(continentStr: String?, country: String?, destination: String?, minPriceStr: String?, maxPriceStr: String?, minDurationDaysStr: String?, maxDurationDaysStr: String?, type: String?, isLoadMore: Boolean = false){
@@ -63,7 +115,6 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                 currentPage = 0
             }
             
-            // Convertiamo le stringhe nei tipi previsti dall'API
             val minPrice = minPriceStr?.toBigDecimalOrNull()
             val maxPrice = maxPriceStr?.toBigDecimalOrNull()
             val minDurationDays = minDurationDaysStr?.toIntOrNull()

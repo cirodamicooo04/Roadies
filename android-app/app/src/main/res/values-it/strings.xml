@@ -16,6 +16,17 @@
     <string name="recommended">Consigliati per te</string>
     <string name="discover_world">Scopri il mondo</string>
     <string name="no_activities_found">Nessuna attività trovata per la tua ricerca</string>
-    <string name="no_travels_found">Nessuna attività trovata per la tua ricerca</string>
+    <string name="no_travels_found">Nessun viaggio trovato per la tua ricerca</string>
     <string name="days">Giorni</string>
+    <string name="travels">Viaggi</string>
+    <string name="activities">Attività</string>
+    <string name="filter">Filtri</string>
+    <string name="order_by">Ordina per</string>
+    <string name="filter_results">Filtra risultati</string>
+    <string name="search_results">Risultati Ricerca</string>
+    <string name="price_range">Fascia di prezzo</string>
+    <string name="duration_days">Durata (Giorni)</string>
+    <string name="apply_filters">Applica Filtri</string>
+    <string name="search_error">Errore durante la ricerca</string>
+    <string name="reset">Azzera</string>
 </resources>

@@ -267,7 +267,7 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             composable(route = "home") {
                 HomeScreen(navHostController)
             }
-            composable(route="search_screen?continent={continent}&country={country}&destination={destination}&minPrice={minPrice}&maxPrice={maxPrice}&minDurationDays={minDurationDays}&maxDurationDays={maxDurationDays}",
+            composable(route="search_screen?continent={continent}&country={country}&destination={destination}&minPrice={minPrice}&maxPrice={maxPrice}&minDurationDays={minDurationDays}&maxDurationDays={maxDurationDays}&type={type}",
                 arguments = listOf(
                     navArgument("continent") {type = NavType.StringType; nullable=true},
                     navArgument("country") {type = NavType.StringType; nullable=true},

@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/documents")
+@RequestMapping("/api/v1/booking-documents")
 @RequiredArgsConstructor
 @Tag(name = "Gestione documenti", description = "API per la gestione dei documenti per ogni membro all'interno di una prenotazione")
 public class BookingMemberController {

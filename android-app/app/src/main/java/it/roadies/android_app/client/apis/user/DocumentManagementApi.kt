@@ -13,7 +13,7 @@ import okhttp3.MultipartBody
 
 interface DocumentManagementApi {
     /**
-     * DELETE api/v1/documents/{docId}
+     * DELETE api/v1/user-documents/{docId}
      * Elimina documento
      * Elimina un documento. Solo il proprietario o l&#39;admin possono farlo.
      * Responses:
@@ -22,11 +22,11 @@ interface DocumentManagementApi {
      * @param docId 
      * @return [Call]<[Unit]>
      */
-    @DELETE("api/v1/documents/{docId}")
+    @DELETE("api/v1/user-documents/{docId}")
     suspend fun deleteDocument(@Path("docId") docId: java.util.UUID): Call<Unit>
 
     /**
-     * GET api/v1/documents/admin/document/{userId}
+     * GET api/v1/user-documents/admin/document/{userId}
      * Lista documenti utente
      * Recupera i documenti di un utente. Accessibile al proprietario, all&#39;organizzatore o all&#39;admin.
      * Responses:
@@ -35,11 +35,11 @@ interface DocumentManagementApi {
      * @param userId 
      * @return [Call]<[kotlin.collections.List<UserDocumentResponseDTO>]>
      */
-    @GET("api/v1/documents/admin/document/{userId}")
+    @GET("api/v1/user-documents/admin/document/{userId}")
     suspend fun getDocumentsByUser(@Path("userId") userId: kotlin.String): Call<kotlin.collections.List<UserDocumentResponseDTO>>
 
     /**
-     * GET api/v1/documents/user/{userId}
+     * GET api/v1/user-documents/user/{userId}
      * Lista documenti utente
      * Recupera i documenti di un utente. Accessibile al proprietario, all&#39;organizzatore o all&#39;admin.
      * Responses:
@@ -48,11 +48,11 @@ interface DocumentManagementApi {
      * @param userId 
      * @return [Call]<[kotlin.collections.List<UserDocumentResponseDTO>]>
      */
-    @GET("api/v1/documents/user/{userId}")
+    @GET("api/v1/user-documents/user/{userId}")
     suspend fun getMyDocumentsByUser(@Path("userId") userId: kotlin.String): Call<kotlin.collections.List<UserDocumentResponseDTO>>
 
     /**
-     * POST api/v1/documents/upload/{userId}
+     * POST api/v1/user-documents/upload/{userId}
      * Carica documento
      * Carica un documento. Solo l&#39;utente stesso può farlo.
      * Responses:
@@ -64,11 +64,11 @@ interface DocumentManagementApi {
      * @return [Call]<[UserDocumentResponseDTO]>
      */
     @Multipart
-    @POST("api/v1/documents/upload/{userId}")
+    @POST("api/v1/user-documents/upload/{userId}")
     suspend fun upload(@Path("userId") userId: kotlin.String, @Part("document") document: UserDocumentRequestDTO, @Part file: MultipartBody.Part): Call<UserDocumentResponseDTO>
 
     /**
-     * PATCH api/v1/documents/verify/{docId}
+     * PATCH api/v1/user-documents/verify/{docId}
      * Verifica documento
      * Approvazione o rifiuto. Solo per Organizzatori o Admin.
      * Responses:
@@ -79,7 +79,7 @@ interface DocumentManagementApi {
      * @param reason  (optional)
      * @return [Call]<[UserDocumentResponseDTO]>
      */
-    @PATCH("api/v1/documents/verify/{docId}")
+    @PATCH("api/v1/user-documents/verify/{docId}")
     suspend fun verifyDocument(@Path("docId") docId: java.util.UUID, @Query("approved") approved: kotlin.Boolean, @Query("reason") reason: kotlin.String? = null): Call<UserDocumentResponseDTO>
 
 }
