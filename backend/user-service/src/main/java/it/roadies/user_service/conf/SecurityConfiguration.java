@@ -24,16 +24,12 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. ROTTE PUBBLICHE: Swagger e Documentazione OpenAPI
+                        //ROTTE PUBBLICHE: Swagger e Documentazione OpenAPI
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
-
-                        // 2. ROTTE PUBBLICHE: Le tue API aperte
-                        .requestMatchers("/api/v1/travels/public/**").permitAll()
-                        .requestMatchers("/api/v1/users/sync").permitAll() // Se decidi che la sync non richiede token
 
                         // 3. TUTTO IL RESTO: Richiede un token Keycloak valido
                         .anyRequest().authenticated()

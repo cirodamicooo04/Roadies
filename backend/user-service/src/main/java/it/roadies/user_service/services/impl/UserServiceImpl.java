@@ -38,7 +38,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    //@PreAuthorize("isAuthenticated() and #requestDto.keycloakId == authentication.name")
     public UserSyncResult syncUser(UserSyncRequestDTO requestDto) {
         log.info("Iniziata sincronizzazione per l'utente con ID: {}", requestDto.getKeycloakId());
 
@@ -86,7 +85,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    //@PreAuthorize("isAuthenticated() and #keycloakId == authentication.name")
     public UserProfileResponseDTO getProfile(String keycloakId) {
         log.info("Recupero profilo per l'utente ID: {}", keycloakId);
         User user = userRepository.findById(keycloakId)
@@ -98,7 +96,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    //@PreAuthorize("isAuthenticated()")
     public UserProfileResponseDTO getProfileByUsername(String username) {
         log.info("Ricerca profilo tramite username: {}", username);
         User user = userRepository.findByUsername(username)
@@ -111,7 +108,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    //@PreAuthorize("isAuthenticated() and #keycloakId == authentication.name")
     public UserProfileResponseDTO updateProfile(String keycloakId, UserUpdateRequestDTO updateDto) {
         log.info("Iniziato aggiornamento profilo per l'utente");
         User user = userRepository.findById(keycloakId)
@@ -135,20 +131,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    //@PreAuthorize("isAuthenticated() and #keycloakId == authentication.name")
-    public void deleteProfile(String keycloakId) {
-        log.info("Richiesta di eliminazione profilo per l'utente");
-        if (!userRepository.existsById(keycloakId)) {
-            log.error("Impossibile eliminare il profilo: utente non trovato");
-            throw new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
-        }
-
-        userRepository.deleteById(keycloakId);
-        log.info("Profilo eliminato con successo per l'utente}");
-    }
-
-    @Override
-    @Transactional
     public void requestOrganizerRole(String keycloakId) {
         User user = userRepository.findById(keycloakId)
                 .orElseThrow(() -> new ResourceNotFoundException(messageLang.getMessage("error.user.notfound")));
@@ -165,50 +147,5 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    @Override
-    @Transactional
-    public void reviewOrganizerRequest(String targetKeycloakId, boolean approved, String reason) {
-        User user = userRepository.findById(targetKeycloakId)
-                .orElseThrow(() -> new ResourceNotFoundException(messageLang.getMessage("error.user.notfound")));
 
-        if (user.getOrganizerRequestStatus() != OrganizerRequestStatus.PENDING) {
-            throw new ConflictException(messageLang.getMessage("error.request.not.exist"));
-        }
-
-        if (approved) {
-            user.setOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);
-            user.setOrganizerRejectionReason(null);
-
-
-            //TODO: FARE IL CAMBIO RUOLO SU KEYCLOACK
-
-
-
-        } else {
-            if (reason == null || reason.isBlank()) {
-                throw new IllegalArgumentException(messageLang.getMessage("error.reason.blank"));
-            }
-            user.setOrganizerRequestStatus(OrganizerRequestStatus.REJECTED);
-            user.setOrganizerRejectionReason(reason);
-        }
-
-        user.setOrganizerReviewedAt(LocalDateTime.now());
-        userRepository.save(user);
-    }
-
-    @Override
-    public List<PendingOrganizerRequestResponseDTO> getPendingOrganizerRequests() {
-        log.info("Recupero lista utenti con richiesta organizzatore in sospeso");
-
-        List<User> pending = userRepository.findByOrganizerRequestStatus(OrganizerRequestStatus.PENDING);
-
-        if (pending.isEmpty()) {
-            log.info("Nessuna richiesta organizzatore in sospeso trovata");
-            return List.of();
-        }
-
-        return pending.stream()
-                .map(userMapper::toPendingDto)
-                .toList();
-    }
 }

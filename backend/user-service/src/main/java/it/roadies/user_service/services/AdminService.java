@@ -1,8 +1,14 @@
 package it.roadies.user_service.services;
 
+import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
+
+import java.util.List;
+
 public interface AdminService {
 
     void blockUser(String keycloakId);
     void unblockUser(String keycloakId);
     void demoteOrganizerToUser(String keycloakId);
+    void reviewOrganizerRequest(String targetKeycloakId, boolean approved, String reason);
+    List<PendingOrganizerRequestResponseDTO> getPendingOrganizerRequests();
 }

@@ -1,13 +1,14 @@
 package it.roadies.user_service.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.services.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -45,5 +46,23 @@ public class AdminController {
     public ResponseEntity<Void> demoteOrganizerToUser(String keycloakId) {
         adminService.demoteOrganizerToUser(keycloakId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/admin/review-organizer/{targetUserId}")
+    @Operation(summary = "Approva o rifiuta richiesta organizzatore")
+    public ResponseEntity<Void> reviewOrganizerRequest(
+            @PathVariable String targetUserId,
+            @RequestParam boolean approved,
+            @RequestParam(required = false) String reason) {
+        adminService.reviewOrganizerRequest(targetUserId, approved, reason);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/organizer-requests/pending")
+    @Operation(summary = "Lista richieste organizzatore in sospeso")
+    public ResponseEntity<List<PendingOrganizerRequestResponseDTO>> getPendingOrganizerRequests() {
+        return ResponseEntity.ok(adminService.getPendingOrganizerRequests());
     }
 }
