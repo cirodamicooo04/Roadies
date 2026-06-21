@@ -21,9 +21,12 @@ public class FriendshipEventListener {
     public void handleFriendshipAccepted(FriendshipEvent event) {
         log.info("Ricevuto evento accettazione amicizia tra {} e {}", event.getUserId(), event.getFriendId());
 
+        if (userFriendshipRepository.existsByUserIdAndFriendId(event.getUserId(), event.getFriendId())) {
+            return;
+        }
+
         if (event.getUserId() == null || event.getFriendId() == null) {
             log.error("Evento accettazione scartato: ID nulli nel payload.");
-            // Lanciare l'eccezione è meglio di un semplice return per segnalare il fallimento al broker
             throw new IllegalArgumentException("Payload evento non valido: ID nulli");
         }
 
