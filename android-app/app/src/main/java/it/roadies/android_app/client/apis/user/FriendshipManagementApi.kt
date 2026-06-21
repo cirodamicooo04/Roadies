@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName
 
 import it.roadies.android_app.client.models.user.FriendshipResponseDTO
 import it.roadies.android_app.client.models.user.UserProfileResponseDTO
+import retrofit2.Response
 
 interface FriendshipManagementApi {
     /**
@@ -17,10 +18,10 @@ interface FriendshipManagementApi {
      * Responses:
      *  - 200: OK
      *
-     * @return [Call]<[kotlin.collections.List<FriendshipResponseDTO>]>
+     * @return [Response]<[kotlin.collections.List<FriendshipResponseDTO>]>
      */
     @GET("api/v1/friends/detailed-list")
-    suspend fun getDetailedFriends(): Call<kotlin.collections.List<FriendshipResponseDTO>>
+    suspend fun getDetailedFriends(): Response<kotlin.collections.List<FriendshipResponseDTO>>
 
     /**
      * GET api/v1/friends/list
@@ -29,10 +30,10 @@ interface FriendshipManagementApi {
      * Responses:
      *  - 200: OK
      *
-     * @return [Call]<[kotlin.collections.List<UserProfileResponseDTO>]>
+     * @return [Response]<[kotlin.collections.List<UserProfileResponseDTO>]>
      */
     @GET("api/v1/friends/list")
-    suspend fun getFriends(): Call<kotlin.collections.List<UserProfileResponseDTO>>
+    suspend fun getFriends(): Response<kotlin.collections.List<UserProfileResponseDTO>>
 
     /**
      * GET api/v1/friends/requests/pending
@@ -41,10 +42,10 @@ interface FriendshipManagementApi {
      * Responses:
      *  - 200: OK
      *
-     * @return [Call]<[kotlin.collections.List<FriendshipResponseDTO>]>
+     * @return [Response]<[kotlin.collections.List<FriendshipResponseDTO>]>
      */
     @GET("api/v1/friends/requests/pending")
-    suspend fun getPendingRequests(): Call<kotlin.collections.List<FriendshipResponseDTO>>
+    suspend fun getPendingRequests(): Response<kotlin.collections.List<FriendshipResponseDTO>>
 
     /**
      * DELETE api/v1/friends/{friendshipId}
@@ -54,10 +55,10 @@ interface FriendshipManagementApi {
      *  - 204: Amicizia rimossa correttamente
      *
      * @param friendshipId 
-     * @return [Call]<[Unit]>
+     * @return [Response]<[Unit]>
      */
     @DELETE("api/v1/friends/{friendshipId}")
-    fun removeFriend(@Path("friendshipId") friendshipId: java.util.UUID): Call<Unit>
+    fun removeFriend(@Path("friendshipId") friendshipId: java.util.UUID): Response<Unit>
 
 
     /**
@@ -78,10 +79,10 @@ interface FriendshipManagementApi {
      *
      * @param friendshipId 
      * @param status 
-     * @return [Call]<[Unit]>
+     * @return [Response]<[Unit]>
      */
     @PATCH("api/v1/friends/respond/{friendshipId}")
-    suspend fun respond(@Path("friendshipId") friendshipId: java.util.UUID, @Query("status") status: StatusRespond): Call<Unit>
+    suspend fun respond(@Path("friendshipId") friendshipId: java.util.UUID, @Query("status") status: StatusRespond): Response<Unit>
 
     /**
      * POST api/v1/friends/request/{receiverUsername}
@@ -91,9 +92,9 @@ interface FriendshipManagementApi {
      *  - 200: Richiesta inviata con successo
      *
      * @param receiverUsername 
-     * @return [Call]<[Unit]>
+     * @return [Response]<[Unit]>
      */
     @POST("api/v1/friends/request/{receiverUsername}")
-    suspend fun send(@Path("receiverUsername") receiverUsername: kotlin.String): Call<Unit>
+    suspend fun send(@Path("receiverUsername") receiverUsername: kotlin.String): Response<Unit>
 
 }

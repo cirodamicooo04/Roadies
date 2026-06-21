@@ -10,6 +10,7 @@ import it.roadies.android_app.client.models.user.UserDocumentRequestDTO
 import it.roadies.android_app.client.models.user.UserDocumentResponseDTO
 
 import okhttp3.MultipartBody
+import retrofit2.Response
 
 interface DocumentManagementApi {
     /**
@@ -20,10 +21,10 @@ interface DocumentManagementApi {
      *  - 200: OK
      *
      * @param docId 
-     * @return [Call]<[Unit]>
+     * @return [Response]<[Unit]>
      */
     @DELETE("api/v1/user-documents/{docId}")
-    suspend fun deleteDocument(@Path("docId") docId: java.util.UUID): Call<Unit>
+    suspend fun deleteDocument(@Path("docId") docId: java.util.UUID): Response<Unit>
 
     /**
      * GET api/v1/user-documents/admin/document/{userId}
@@ -33,10 +34,10 @@ interface DocumentManagementApi {
      *  - 200: OK
      *
      * @param userId 
-     * @return [Call]<[kotlin.collections.List<UserDocumentResponseDTO>]>
+     * @return [Response]<[kotlin.collections.List<UserDocumentResponseDTO>]>
      */
     @GET("api/v1/user-documents/admin/document/{userId}")
-    suspend fun getDocumentsByUser(@Path("userId") userId: kotlin.String): Call<kotlin.collections.List<UserDocumentResponseDTO>>
+    suspend fun getDocumentsByUser(@Path("userId") userId: kotlin.String): Response<kotlin.collections.List<UserDocumentResponseDTO>>
 
     /**
      * GET api/v1/user-documents/user/{userId}
@@ -46,10 +47,10 @@ interface DocumentManagementApi {
      *  - 200: OK
      *
      * @param userId 
-     * @return [Call]<[kotlin.collections.List<UserDocumentResponseDTO>]>
+     * @return [Response]<[kotlin.collections.List<UserDocumentResponseDTO>]>
      */
     @GET("api/v1/user-documents/user/{userId}")
-    suspend fun getMyDocumentsByUser(@Path("userId") userId: kotlin.String): Call<kotlin.collections.List<UserDocumentResponseDTO>>
+    suspend fun getMyDocumentsByUser(@Path("userId") userId: kotlin.String):Response<kotlin.collections.List<UserDocumentResponseDTO>>
 
     /**
      * POST api/v1/user-documents/upload/{userId}
@@ -61,11 +62,11 @@ interface DocumentManagementApi {
      * @param userId 
      * @param document 
      * @param file 
-     * @return [Call]<[UserDocumentResponseDTO]>
+     * @return [Response]<[UserDocumentResponseDTO]>
      */
     @Multipart
     @POST("api/v1/user-documents/upload/{userId}")
-    suspend fun upload(@Path("userId") userId: kotlin.String, @Part("document") document: UserDocumentRequestDTO, @Part file: MultipartBody.Part): Call<UserDocumentResponseDTO>
+    suspend fun upload(@Path("userId") userId: kotlin.String, @Part("document") document: UserDocumentRequestDTO, @Part file: MultipartBody.Part): Response<UserDocumentResponseDTO>
 
     /**
      * PATCH api/v1/user-documents/verify/{docId}
@@ -77,9 +78,9 @@ interface DocumentManagementApi {
      * @param docId 
      * @param approved 
      * @param reason  (optional)
-     * @return [Call]<[UserDocumentResponseDTO]>
+     * @return [Response]<[UserDocumentResponseDTO]>
      */
     @PATCH("api/v1/user-documents/verify/{docId}")
-    suspend fun verifyDocument(@Path("docId") docId: java.util.UUID, @Query("approved") approved: kotlin.Boolean, @Query("reason") reason: kotlin.String? = null): Call<UserDocumentResponseDTO>
+    suspend fun verifyDocument(@Path("docId") docId: java.util.UUID, @Query("approved") approved: kotlin.Boolean, @Query("reason") reason: kotlin.String? = null): Response<UserDocumentResponseDTO>
 
 }
