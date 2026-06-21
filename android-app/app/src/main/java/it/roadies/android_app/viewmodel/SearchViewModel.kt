@@ -29,7 +29,8 @@ data class SearchFiltersState(
     val minPrice: BigDecimal? = null,
     val maxPrice: BigDecimal? = null,
     val minDurationDays: Int? = null,
-    val maxDurationDays: Int? = null
+    val maxDurationDays: Int? = null,
+    val sortCriteria: List<String>? = null
 )
 
 @HiltViewModel
@@ -80,7 +81,8 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                 continent, country, destination, 
                 filters.minPrice?.toString(), filters.maxPrice?.toString(), 
                 filters.minDurationDays?.toString(), filters.maxDurationDays?.toString(), 
-                type, isLoadMore = true
+                type, isLoadMore = true,
+                sort = filters.sortCriteria
             )
         }
     }
@@ -101,12 +103,30 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
             minPriceStr = state.minPrice.toString(), 
             maxPriceStr = state.maxPrice.toString(), 
             minDurationDaysStr = state.minDurationDays.toString(), 
-            maxDurationDaysStr = state.maxDurationDays.toString(), 
-            type = type
+            maxDurationDaysStr = state.maxDurationDays.toString(),
+            type = type,
+            sort = state.sortCriteria
         )
     }
 
-    private fun loadItems(continentStr: String?, country: String?, destination: String?, minPriceStr: String?, maxPriceStr: String?, minDurationDaysStr: String?, maxDurationDaysStr: String?, type: String?, isLoadMore: Boolean = false){
+    fun applySort(newSortCriteria: List<String>){
+        _searchFiltersState.value = _searchFiltersState.value.copy(sortCriteria = newSortCriteria)
+
+        val state = _searchFiltersState.value
+        loadItems(
+            continentStr = continent,
+            country = country,
+            destination = destination,
+            minPriceStr = state.minPrice.toString(),
+            maxPriceStr = state.maxPrice.toString(),
+            minDurationDaysStr = state.minDurationDays.toString(),
+            maxDurationDaysStr = state.maxDurationDays.toString(),
+            type = type,
+            sort = state.sortCriteria
+        )
+    }
+
+    private fun loadItems(continentStr: String?, country: String?, destination: String?, minPriceStr: String?, maxPriceStr: String?, minDurationDaysStr: String?, maxDurationDaysStr: String?, type: String?, isLoadMore: Boolean = false, size: Int = 20, sort: List<String>? = null){
         viewModelScope.launch {
             if (isLoadMore) {
                 _searchScreenUiState.value = _searchScreenUiState.value.copy(isLoadingMore = true)
@@ -136,7 +156,8 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                     maxDurationDays = maxDurationDays,
                     continent = continentEnum,
                     country = country,
-                    page = currentPage
+                    page = currentPage,
+                    sort = sort
                 )
 
                 if (response.success && response.data != null) {
@@ -153,8 +174,10 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                         errorMessage = null
                     )
                 } else {
+                    if (isLoadMore) currentPage--
                     _searchScreenUiState.value = _searchScreenUiState.value.copy(
                         isLoading = false,
+                        isLoadingMore = false,
                         errorMessage = response.errorMessage ?: "Errore nella ricerca attività"
                     )
                 }
@@ -167,7 +190,8 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                     maxDurationDays = maxDurationDays,
                     continent = continentEnum,
                     country = country,
-                    page = currentPage
+                    page = currentPage,
+                    sort = sort
                 )
 
                 if (response.success && response.data != null) {
@@ -184,6 +208,7 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                         errorMessage = null
                     )
                 } else {
+                    if (isLoadMore) currentPage--
                     _searchScreenUiState.value = _searchScreenUiState.value.copy(
                         isLoading = false,
                         isLoadingMore = false,

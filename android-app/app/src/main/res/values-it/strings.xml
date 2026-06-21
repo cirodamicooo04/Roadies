@@ -26,7 +26,12 @@
     <string name="search_results">Risultati Ricerca</string>
     <string name="price_range">Fascia di prezzo</string>
     <string name="duration_days">Durata (Giorni)</string>
-    <string name="apply_filters">Applica Filtri</string>
+    <string name="apply_filters">Applica filtri</string>
     <string name="search_error">Errore durante la ricerca</string>
     <string name="reset">Azzera</string>
+    <string name="apply_sorting">Applica ordinamento</string>
+    <string name="price_asc">Prezzo crescente</string>
+    <string name="price_desc">Prezzo decrescente</string>
+    <string name="duration_asc">Durata crescente</string>
+    <string name="duration_desc">Durata decrescente</string>
 </resources>

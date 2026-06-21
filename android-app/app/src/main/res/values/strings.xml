@@ -25,7 +25,12 @@
     <string name="search_results">Search Results</string>
     <string name="price_range">Price Range</string>
     <string name="duration_days">Duration (Days)</string>
-    <string name="apply_filters">Apply Filters</string>
+    <string name="apply_filters">Apply filters</string>
     <string name="search_error">Error during search</string>
     <string name="reset">Reset</string>
+    <string name="apply_sorting">Apply sorting</string>
+    <string name="price_asc">Prezzo crescente</string>
+    <string name="price_desc">Prezzo decrescente</string>
+    <string name="duration_asc">Durata crescente</string>
+    <string name="duration_desc">Durata decrescente</string>
 </resources>

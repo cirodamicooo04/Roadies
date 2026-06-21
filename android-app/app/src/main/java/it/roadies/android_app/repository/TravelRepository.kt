@@ -1,6 +1,7 @@
 package it.roadies.android_app.repository
 
 import it.roadies.android_app.client.apis.travel.ViaggiApi
+import it.roadies.android_app.client.models.travel.PageResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
 import it.roadies.android_app.repository.utils.ApiResponse
@@ -32,8 +33,9 @@ class TravelRepository @Inject constructor(
         maxDurationDays: Int? = null,
         continent: ViaggiApi.ContinentSearchTravels? = null,
         country: String? = null,
-        page: Int = 0
-    ): ApiResponse<it.roadies.android_app.client.models.travel.PageResponse<TravelSummaryResponse>> {
+        page: Int = 0,
+        sort: List<String>? = null
+    ): ApiResponse<PageResponse<TravelSummaryResponse>> {
         return safeApiCall {
             viaggiApi.searchTravelsTyped(
                 destination = destination,
@@ -44,6 +46,7 @@ class TravelRepository @Inject constructor(
                 continent = continent,
                 country = country,
                 page = page,
+                sort = sort,
                 type = "TRAVEL"
             )
         }

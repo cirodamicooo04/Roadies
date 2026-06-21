@@ -1,11 +1,16 @@
 package it.roadies.android_app.repository
 
 import it.roadies.android_app.client.apis.travel.AttivitApi
+import it.roadies.android_app.client.apis.travel.ViaggiApi
+import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
+import it.roadies.android_app.client.models.travel.PageResponse
+import it.roadies.android_app.repository.utils.ApiResponse
+import it.roadies.android_app.repository.utils.safeApiCall
 import javax.inject.Inject
 
 class ActivityRepository @Inject constructor(
     private val activityApi: AttivitApi,
-    private val viaggiApi: it.roadies.android_app.client.apis.travel.ViaggiApi
+    private val viaggiApi: ViaggiApi
 ) {
     suspend fun searchActivities(
         destination: String? = null,
@@ -13,11 +18,12 @@ class ActivityRepository @Inject constructor(
         maxPrice: java.math.BigDecimal? = null,
         minDurationDays: Int? = null,
         maxDurationDays: Int? = null,
-        continent: it.roadies.android_app.client.apis.travel.ViaggiApi.ContinentSearchTravels? = null,
+        continent: ViaggiApi.ContinentSearchTravels? = null,
         country: String? = null,
-        page: Int = 0
-    ): it.roadies.android_app.repository.utils.ApiResponse<it.roadies.android_app.client.models.travel.PageResponse<it.roadies.android_app.client.models.travel.ActivitySummaryResponse>> {
-        return it.roadies.android_app.repository.utils.safeApiCall {
+        page: Int = 0,
+        sort: List<String>? = null
+    ): ApiResponse<PageResponse<ActivitySummaryResponse>> {
+        return safeApiCall {
             viaggiApi.searchActivitiesTyped(
                 destination = destination,
                 minPrice = minPrice,
@@ -27,6 +33,7 @@ class ActivityRepository @Inject constructor(
                 continent = continent,
                 country = country,
                 page = page,
+                sort = sort,
                 type = "ACTIVITY"
             )
         }
