@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
@@ -27,6 +28,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -45,10 +47,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
+import com.utsman.osmandcompose.Marker
+import com.utsman.osmandcompose.OpenStreetMap
+import com.utsman.osmandcompose.rememberCameraState
+import com.utsman.osmandcompose.rememberMarkerState
 import it.roadies.android_app.client.models.travel.ImageResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
 import it.roadies.android_app.client.models.travel.TravelTagResponse
 import it.roadies.android_app.viewmodel.TravelDetailViewModel
+import org.osmdroid.util.GeoPoint
 
 @Composable
 fun TravelDetailScreen(navHostController: NavHostController, viewModel: TravelDetailViewModel = hiltViewModel()){
@@ -92,6 +99,7 @@ fun TravelDetail(travel: TravelResponse?){
                 TravelDescription(travel.description)
 
                 //mappa
+                TravelMap(lon = travel.latitude, lat = travel.longitude)
 
                 //travel activity con ogni attività collasabile
 
@@ -105,6 +113,9 @@ fun TravelDetail(travel: TravelResponse?){
         }
     }
 }
+
+
+
 @Composable
 fun DepartureButton(onClick: () -> Unit){
     Button(modifier = Modifier.fillMaxWidth().padding(12.dp), onClick = onClick) {
@@ -244,5 +255,36 @@ fun TravelDescription(description: String?) {
             )
         }
     }
+}
+
+@Composable
+fun TravelMap(lon: Double?, lat: Double?) {
+
+    if (lon == null || lat == null) return
+
+    val destinationPoint = GeoPoint(lat, lon)
+    val cameraState = rememberCameraState {
+        geoPoint = destinationPoint
+        zoom = 13.0
+    }
+    val markerState = rememberMarkerState(geoPoint = destinationPoint)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        OpenStreetMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraState = cameraState
+        ) {
+            Marker(
+                state = markerState,
+            )
+        }
+    }
+
 }
 
