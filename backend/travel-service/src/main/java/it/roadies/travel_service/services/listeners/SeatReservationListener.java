@@ -39,7 +39,7 @@ public class SeatReservationListener {
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
             rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.reserved", successEvent);
 
-        } catch (NotEnoughSeatsException e) {
+        } catch (Exception e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
             rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.failed", failedEvent);
         }
@@ -66,7 +66,7 @@ public class SeatReservationListener {
             SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
             rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.reserved", successEvent);
 
-        } catch (NotEnoughSeatsException e) {
+        } catch (Exception e) {
             SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
             rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.failed", failedEvent);
         }

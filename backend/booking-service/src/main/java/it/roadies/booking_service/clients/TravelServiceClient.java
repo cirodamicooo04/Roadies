@@ -1,11 +1,16 @@
 package it.roadies.booking_service.clients;
 
 import it.roadies.booking_service.config.FeignConfiguration;
+import it.roadies.booking_service.data.dto.response.TravelBatchResponse;
+import it.roadies.booking_service.data.dto.response.ActivityBatchResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @FeignClient(name = "travelService", url = "${travel-service.url}", configuration = FeignConfiguration.class)
@@ -23,5 +28,9 @@ public interface TravelServiceClient {
     @GetMapping("/api/v1/activities/{activityId}/price")
     BigDecimal getActivityPrice(@PathVariable UUID activityId);
 
+    @PostMapping("/api/v1/travels/batch")
+    List<TravelBatchResponse> getTravelsBatch(@RequestBody List<UUID> travelIds);
 
+    @PostMapping("/api/v1/activities/batch")
+    List<ActivityBatchResponse> getActivitiesBatch(@RequestBody List<UUID> activityIds);
 }
