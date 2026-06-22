@@ -1,6 +1,8 @@
 package it.roadies.travel_service.services;
 
+import it.roadies.travel_service.data.dto.response.TravelBatchResponse;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 public interface TravelDepartureService {
@@ -8,5 +10,5 @@ public interface TravelDepartureService {
     public void releaseSeats(UUID travelDepartureId, Integer spots);
     public boolean isValidTravel(UUID travelDepartureId);
     public BigDecimal getTravelPriceById(UUID travelId);
-
+    public List<TravelBatchResponse> getTravelsBatch(List<UUID> travelIds);
 }

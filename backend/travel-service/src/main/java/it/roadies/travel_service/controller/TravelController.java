@@ -169,6 +169,13 @@ public class TravelController {
 
     //BOOKING AREA
 
+    @Operation(summary = "Ottieni dettagli viaggi in batch", description = "Restituisce i dettagli di una lista di viaggi.")
+    @PostMapping("/batch")
+    public ResponseEntity<List<TravelBatchResponse>> getTravelsBatch(@RequestBody List<UUID> travelIds) {
+        List<TravelBatchResponse> response = travelDepartureService.getTravelsBatch(travelIds);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Verifica viaggio", description = "Verifica se un viaggio è valido per il processo di prenotazione.")
     @GetMapping("/{travelId}")
     public ResponseEntity<Void> isValidTravelDeparture(@PathVariable UUID travelId) {

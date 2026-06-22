@@ -28,4 +28,14 @@
     <string name="apply_filters">Apply Filters</string>
     <string name="search_error">Error during search</string>
     <string name="reset">Reset</string>
+
+    <!-- booking -->
+    <string name="booking_tab_active">Active</string>
+    <string name="booking_tab_past">Past</string>
+    <string name="booking_empty_active">No active bookings</string>
+    <string name="booking_empty_past">No past bookings</string>
+    <string name="booking_load_more">Load more</string>
+    <string name="booking_people_count">%1$d people</string>
+    <string name="booking_total_price">€%1$.2f</string>
+    <string name="booking_not_logged_in">Log in to see your bookings</string>
 </resources>

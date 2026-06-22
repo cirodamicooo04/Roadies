@@ -29,4 +29,15 @@
     <string name="apply_filters">Applica Filtri</string>
     <string name="search_error">Errore durante la ricerca</string>
     <string name="reset">Azzera</string>
+
+    <!-- booking -->
+    <string name="booking_tab_active">Attivi</string>
+    <string name="booking_tab_past">Passati</string>
+    <string name="booking_empty_active">Nessuna prenotazione attiva</string>
+    <string name="booking_empty_past">Nessuna prenotazione passata</string>
+    <string name="booking_load_more">Carica altre</string>
+    <string name="booking_people_count">%1$d persone</string>
+    <string name="booking_total_price">€%1$.2f</string>
+    <string name="booking_not_logged_in">Accedi per vedere le tue prenotazioni</string>
+
 </resources>
