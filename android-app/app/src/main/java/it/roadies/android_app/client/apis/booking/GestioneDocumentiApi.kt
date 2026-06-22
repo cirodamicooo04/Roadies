@@ -12,7 +12,7 @@ import okhttp3.MultipartBody
 
 interface GestioneDocumentiApi {
     /**
-     * PATCH api/v1/documents/accept
+     * PATCH api/v1/booking-documents/accept
      * Conferma la validazione di un documento
      * Permette di validare un documento relativo ad una prenotazione
      * Responses:
@@ -23,11 +23,11 @@ interface GestioneDocumentiApi {
      * @param memberDocumentUpdateRequest 
      * @return [Unit]
      */
-    @PATCH("api/v1/documents/accept")
+    @PATCH("api/v1/booking-documents/accept")
     suspend fun acceptDocument(@Body memberDocumentUpdateRequest: MemberDocumentUpdateRequest): Response<Unit>
 
     /**
-     * PATCH api/v1/documents/reject
+     * PATCH api/v1/booking-documents/reject
      * Rifiuta la validazione di un documento
      * Permette di rifiutare un documento relativo ad una prenotazione
      * Responses:
@@ -38,11 +38,11 @@ interface GestioneDocumentiApi {
      * @param memberDocumentUpdateRequest 
      * @return [Unit]
      */
-    @PATCH("api/v1/documents/reject")
+    @PATCH("api/v1/booking-documents/reject")
     suspend fun rejectDocument(@Body memberDocumentUpdateRequest: MemberDocumentUpdateRequest): Response<Unit>
 
     /**
-     * POST api/v1/documents/{documentId}/upload
+     * POST api/v1/booking-documents/{documentId}/upload
      * Invia documenti
      * Permette di inserire un documento relativo ad una prenotazione
      * Responses:
@@ -55,7 +55,7 @@ interface GestioneDocumentiApi {
      * @return [kotlin.String]
      */
     @Multipart
-    @POST("api/v1/documents/{documentId}/upload")
+    @POST("api/v1/booking-documents/{documentId}/upload")
     suspend fun uploadDocumentPhoto(@Path("documentId") documentId: java.util.UUID, @Part file: MultipartBody.Part): Response<kotlin.String>
 
 }

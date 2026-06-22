@@ -1,9 +1,11 @@
 package it.roadies.travel_service.services.impl;
 
+import it.roadies.travel_service.conf.i8n.MessageLang;
 import it.roadies.travel_service.data.dao.*;
 import it.roadies.travel_service.data.entity.*;
 import it.roadies.travel_service.data.entity.enumerations.Visibility;
 import it.roadies.travel_service.services.FavouriteListService;
+import jakarta.mail.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,10 +26,10 @@ public class FavouriteListServiceImpl implements FavouriteListService {
     private final TravelRepository travelRepository;
     private final FavouriteListItemRepository itemRepository;
     private final ActivityRepository activityRepository;
+    private final MessageLang messageLang;
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public FavouriteList createList(String name, Visibility visibility, String ownerId) {
         FavouriteList newList = new FavouriteList();
         newList.setName(name);
@@ -38,20 +40,18 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public List<FavouriteList> getMyLists(String ownerId) {
         return listRepository.findAllByOwnerId(ownerId);
     }
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void deleteList(UUID listId, String ownerId) {
         FavouriteList list = listRepository.findById(listId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lista non trovata"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("list.not.found")));
 
         if (!list.getOwnerId().equals(ownerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi cancellare una lista non tua");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.deleting.other.list"));
         }
         listRepository.delete(list);
     }
@@ -68,7 +68,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
     public FavouriteList getListWithPermissions(UUID listId, String requesterId) {
 
         FavouriteList list = listRepository.findById(listId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lista non trovata"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("list.not.found")));
 
         if (requesterId != null && requesterId.equals(list.getOwnerId())) {
             return list;
@@ -77,22 +77,22 @@ public class FavouriteListServiceImpl implements FavouriteListService {
         switch (list.getVisibility()) {
 
             case PRIVATE:
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Questa lista è privata");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.private"));
 
             case SHARED_SPECIFIC:
                 if (requesterId == null || !sharedRepository.existsByListIdAndUserId(listId, requesterId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non sei autorizzato a vedere questa lista condivisa");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.list"));
                 }
                 break;
 
             case PUBLIC:
                 if (requesterId == null || !friendshipRepository.existsByUserIdAndFriendId(list.getOwnerId(), requesterId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Devi essere amico dell'utente per vedere questa lista");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.require.friendship"));
                 }
                 break;
 
             default:
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Stato visibilità sconosciuto");
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, messageLang.getMessage("error.unknown.visibility"));
         }
 
         return list;
@@ -100,7 +100,6 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void addFriendToList(UUID listId, String friendId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
@@ -115,7 +114,6 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void removeFriendFromList(UUID listId, String friendId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
@@ -125,7 +123,6 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void addTravelToList(UUID listId, UUID travelId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
@@ -142,7 +139,6 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void addActivityToList(UUID listId, UUID activityId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
@@ -160,24 +156,22 @@ public class FavouriteListServiceImpl implements FavouriteListService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void removeTravelFromList(UUID listId, UUID travelId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.access"));
 
         itemRepository.deleteByListIdAndTravelId(listId, travelId);
     }
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('TRAVELER') and #ownerId == authentication.name")
     public void removeActivityFromList(UUID listId, UUID activityId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
 
-        itemRepository.deleteByListIdAndTravelId(listId, activityId);
+        itemRepository.deleteByListIdAndActivityId(listId, activityId);
     }
 
 

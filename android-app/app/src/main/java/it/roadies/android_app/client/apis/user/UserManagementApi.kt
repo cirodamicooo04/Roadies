@@ -10,6 +10,7 @@ import it.roadies.android_app.client.models.user.PendingOrganizerRequestResponse
 import it.roadies.android_app.client.models.user.UserProfileResponseDTO
 import it.roadies.android_app.client.models.user.UserSyncRequestDTO
 import it.roadies.android_app.client.models.user.UserUpdateRequestDTO
+import retrofit2.Response
 
 interface UserManagementApi {
     /**
@@ -19,10 +20,10 @@ interface UserManagementApi {
      * Responses:
      *  - 200: OK
      *
-     * @return [Call]<[Unit]>
+     * @return [Response]<[Unit]>
      */
     @DELETE("api/v1/users/delete")
-    suspend fun deleteProfile(): Call<Unit>
+    suspend fun deleteProfile(): Response<Unit>
 
     /**
      * GET api/v1/users/organizer-requests/pending
@@ -31,10 +32,10 @@ interface UserManagementApi {
      * Responses:
      *  - 200: OK
      *
-     * @return [Call]<[kotlin.collections.List<PendingOrganizerRequestResponseDTO>]>
+     * @return [Response]<[kotlin.collections.List<PendingOrganizerRequestResponseDTO>]>
      */
     @GET("api/v1/users/organizer-requests/pending")
-    suspend fun getPendingOrganizerRequests(): Call<kotlin.collections.List<PendingOrganizerRequestResponseDTO>>
+    suspend fun getPendingOrganizerRequests(): Response<kotlin.collections.List<PendingOrganizerRequestResponseDTO>>
 
     /**
      * GET api/v1/users/me
@@ -43,10 +44,10 @@ interface UserManagementApi {
      * Responses:
      *  - 200: OK
      *
-     * @return [Call]<[UserProfileResponseDTO]>
+     * @return [Response]<[UserProfileResponseDTO]>
      */
     @GET("api/v1/users/me")
-    suspend fun getProfile(): Call<UserProfileResponseDTO>
+    suspend fun getProfile(): Response<UserProfileResponseDTO>
 
     /**
      * POST api/v1/users/request-organizer
@@ -55,10 +56,10 @@ interface UserManagementApi {
      * Responses:
      *  - 200: OK
      *
-     * @return [Call]<[Unit]>
+     * @return [Response]<[Unit]>
      */
     @POST("api/v1/users/request-organizer")
-    suspend fun requestOrganizerRole(): Call<Unit>
+    suspend fun requestOrganizerRole(): Response<Unit>
 
     /**
      * PATCH api/v1/users/admin/review-organizer/{targetUserId}
@@ -70,10 +71,10 @@ interface UserManagementApi {
      * @param targetUserId 
      * @param approved 
      * @param reason  (optional)
-     * @return [Call]<[Unit]>
+     * @return [Response]<[Unit]>
      */
     @PATCH("api/v1/users/admin/review-organizer/{targetUserId}")
-    suspend fun reviewOrganizerRequest(@Path("targetUserId") targetUserId: kotlin.String, @Query("approved") approved: kotlin.Boolean, @Query("reason") reason: kotlin.String? = null): Call<Unit>
+    suspend fun reviewOrganizerRequest(@Path("targetUserId") targetUserId: kotlin.String, @Query("approved") approved: kotlin.Boolean, @Query("reason") reason: kotlin.String? = null): Response<Unit>
 
     /**
      * GET api/v1/users/search
@@ -83,10 +84,10 @@ interface UserManagementApi {
      *  - 200: OK
      *
      * @param username 
-     * @return [Call]<[UserProfileResponseDTO]>
+     * @return [Response]<[UserProfileResponseDTO]>
      */
     @GET("api/v1/users/search")
-    suspend fun searchUser(@Query("username") username: kotlin.String): Call<UserProfileResponseDTO>
+    suspend fun searchUser(@Query("username") username: kotlin.String): Response<UserProfileResponseDTO>
 
     /**
      * POST api/v1/users/sync
@@ -96,10 +97,10 @@ interface UserManagementApi {
      *  - 200: OK
      *
      * @param userSyncRequestDTO 
-     * @return [Call]<[UserProfileResponseDTO]>
+     * @return [Response]<[UserProfileResponseDTO]>
      */
     @POST("api/v1/users/sync")
-    suspend fun syncUser(@Body userSyncRequestDTO: UserSyncRequestDTO): Call<UserProfileResponseDTO>
+    suspend fun syncUser(@Body userSyncRequestDTO: UserSyncRequestDTO): Response<UserProfileResponseDTO>
 
     /**
      * PUT api/v1/users/update
@@ -109,9 +110,9 @@ interface UserManagementApi {
      *  - 200: OK
      *
      * @param userUpdateRequestDTO 
-     * @return [Call]<[UserProfileResponseDTO]>
+     * @return [Response]<[UserProfileResponseDTO]>
      */
     @PUT("api/v1/users/update")
-    suspend fun updateProfile(@Body userUpdateRequestDTO: UserUpdateRequestDTO): Call<UserProfileResponseDTO>
+    suspend fun updateProfile(@Body userUpdateRequestDTO: UserUpdateRequestDTO): Response<UserProfileResponseDTO>
 
 }

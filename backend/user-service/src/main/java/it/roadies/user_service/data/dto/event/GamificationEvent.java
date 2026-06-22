@@ -11,5 +11,5 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class GamificationEvent {
     public String userId;
-    public Long price;
+    public BigDecimal price;
 }

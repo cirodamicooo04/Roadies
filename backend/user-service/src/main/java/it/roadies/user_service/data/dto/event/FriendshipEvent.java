@@ -6,5 +6,5 @@ import lombok.Data;
 public class FriendshipEvent {
     private String userId1;
     private String userId2;
-    private Status status;
+    private String status;
 }

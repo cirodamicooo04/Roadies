@@ -52,7 +52,6 @@ public class UserDocumentServiceImpl implements UserDocumentService {
 
     @Override
     @Transactional
-    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     public UserDocumentResponseDTO uploadDocument(String userId, UserDocumentRequestDTO dto, MultipartFile file,String id) {
         log.info("Iniziato caricamento documento per l'utente");
 
@@ -62,6 +61,11 @@ public class UserDocumentServiceImpl implements UserDocumentService {
         }
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException(messageLang.getMessage("error.file.empty"));
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || (!contentType.startsWith("image/") && !contentType.equals("application/pdf"))) {
+            throw new IllegalArgumentException(messageLang.getMessage("error.type.not.supported"));
         }
 
         User user = userRepository.findById(userId)
@@ -83,13 +87,22 @@ public class UserDocumentServiceImpl implements UserDocumentService {
         doc.setUserId(user);
         doc.setFileUrl(fileUrl);
 
-        UserDocument saved = documentRepository.save(doc);
-        log.info("Documento salvato nel database");
-        return userDocumentMapper.toDto(saved);
+        try {
+            UserDocument saved = documentRepository.save(doc);
+            log.info("Documento salvato nel database");
+            return userDocumentMapper.toDto(saved);
+        } catch (Exception e) {
+            log.error("Errore salvataggio DB. Eseguo rollback: elimino il file da MinIO...", e);
+            try {
+                minioService.deleteFile(fileUrl, documentBucket);
+            } catch (Exception minioEx) {
+                log.error("Fallita rimozione file orfano su MinIO ({})", fileUrl, minioEx);
+            }
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, messageLang.getMessage("error.internal.server.error.message"));
+        }
     }
 
     @Override
-    //@PreAuthorize("(hasRole('TRAVELER') and #userId == authentication.name) or hasAnyRole('ORGANIZER', 'ADMIN')")
     public List<UserDocumentResponseDTO> getMyDocuments(String userId, String userJWT){
         log.info("Recupero documenti per l'utente ID: {}", userId);
 
@@ -112,7 +125,6 @@ public class UserDocumentServiceImpl implements UserDocumentService {
 
     @Override
     @Transactional
-    //@PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public UserDocumentResponseDTO verifyDocument(UUID docId, boolean approved, String reason){
         log.info("Iniziata verifica documento. Esito approvazione: {}", approved);
 
@@ -144,7 +156,6 @@ public class UserDocumentServiceImpl implements UserDocumentService {
 
     @Override
     @Transactional
-    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     public void deleteDocument(UUID docId, String userId) {
         log.info("Richiesta di eliminazione documento da parte dell'utente");
 
@@ -161,16 +172,14 @@ public class UserDocumentServiceImpl implements UserDocumentService {
 
         try {
             String fileUrl = doc.getFileUrl();
-            String filename = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
-
-            log.info("Cancellazione file {} dal bucket MinIO {}", filename, documentBucket);
-
-            minioService.deleteFile(doc.getFileUrl(), documentBucket);
-
-            log.info("File eliminato da MinIO con successo");
+            if (fileUrl != null && fileUrl.contains("/")) {
+                String filename = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
+                log.info("Cancellazione file {} dal bucket MinIO {}", filename, documentBucket);
+                minioService.deleteFile(fileUrl, documentBucket);
+                log.info("File eliminato da MinIO con successo");
+            }
         } catch (Exception e) {
-            log.error("Errore durante l'eliminazione del file da MinIO per il documento", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, messageLang.getMessage("error.image.minio.delete"));
+            log.warn("Fallita eliminazione fisica da MinIO. Il file potrebbe non esistere. URL: {}", doc.getFileUrl(), e);
         }
 
         documentRepository.deleteById(docId);

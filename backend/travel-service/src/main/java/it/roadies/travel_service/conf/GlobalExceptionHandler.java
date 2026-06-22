@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
                 timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Field validation failed")
-                .message(e.getBindingResult().getFieldError().getDefaultMessage())
+                .message("Campo '" + e.getBindingResult().getFieldError().getField() + "': " + e.getBindingResult().getFieldError().getDefaultMessage())
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

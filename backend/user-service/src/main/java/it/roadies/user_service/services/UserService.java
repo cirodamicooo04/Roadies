@@ -13,8 +13,6 @@ public interface UserService {
     UserProfileResponseDTO getProfile(String keycloakId);
     UserProfileResponseDTO getProfileByUsername(String username);
     UserProfileResponseDTO updateProfile(String keycloakId, UserUpdateRequestDTO updateDto);
-    void deleteProfile(String keycloakId);
     void requestOrganizerRole(String keycloakId);
-    void reviewOrganizerRequest(String targetKeycloakId, boolean approved, String reason);
-    List<PendingOrganizerRequestResponseDTO> getPendingOrganizerRequests();
+
 }

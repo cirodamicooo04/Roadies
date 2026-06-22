@@ -72,37 +72,10 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('TRAVELER')")
-    @DeleteMapping("/delete")
-    @Operation(summary = "Elimina profilo", description = "Rimozione definitiva dell'account")
-    public ResponseEntity<Void> deleteProfile(@AuthenticationPrincipal Jwt jwt) {
-        log.info("Ricevuta richiesta di eliminazione profilo dal subject JWT: {}", jwt.getSubject());
-        userService.deleteProfile(jwt.getSubject());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PreAuthorize("hasRole('TRAVELER')")
     @PostMapping("/request-organizer")
     @Operation(summary = "Richiedi ruolo organizzatore")
     public ResponseEntity<Void> requestOrganizerRole(@AuthenticationPrincipal Jwt jwt) {
         userService.requestOrganizerRole(jwt.getSubject());
         return ResponseEntity.ok().build();
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/admin/review-organizer/{targetUserId}")
-    @Operation(summary = "Approva o rifiuta richiesta organizzatore")
-    public ResponseEntity<Void> reviewOrganizerRequest(
-            @PathVariable String targetUserId,
-            @RequestParam boolean approved,
-            @RequestParam(required = false) String reason) {
-        userService.reviewOrganizerRequest(targetUserId, approved, reason);
-        return ResponseEntity.ok().build();
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/organizer-requests/pending")
-    @Operation(summary = "Lista richieste organizzatore in sospeso")
-    public ResponseEntity<List<PendingOrganizerRequestResponseDTO>> getPendingOrganizerRequests() {
-        return ResponseEntity.ok(userService.getPendingOrganizerRequests());
     }
 }

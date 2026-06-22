@@ -12,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,10 +29,10 @@ public class GamificationServiceImpl implements GamificationService {
     //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     @Transactional
-    public void addPointsBySpending(String userId, Long amountSpent) {
+    public void addPointsBySpending(String userId, BigDecimal amountSpent) {
         log.info("Iniziato calcolo punti gamification per l'utente ID: {} per una spesa di {}€", userId, amountSpent);
 
-        if (amountSpent <= 0) {
+        if (amountSpent.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException(messageLang.getMessage("error.points.negative.or.zero"));
         }
 
@@ -39,7 +42,11 @@ public class GamificationServiceImpl implements GamificationService {
                     return new ResourceNotFoundException(messageLang.getMessage("error.gamification.points"));
                 });
 
-        long pointsToAdd = Math.round(amountSpent * POINTS_PER_EURO);
+        long pointsToAdd = amountSpent
+                .multiply(BigDecimal.valueOf(POINTS_PER_EURO))
+                .setScale(0, RoundingMode.HALF_UP)
+                .longValue();
+
         gamification.setPoints(gamification.getPoints() + pointsToAdd);
         gamification.setBadge(calculateBadge(gamification.getPoints()));
 
