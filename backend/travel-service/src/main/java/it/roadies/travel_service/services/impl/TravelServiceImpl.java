@@ -116,6 +116,28 @@ public class TravelServiceImpl implements TravelService {
             savedTravel.setImages(images);
         }
 
+        if (travelCreateRequest.getActivities() != null && !travelCreateRequest.getActivities().isEmpty()) {
+            for (int j = 0; j < travelCreateRequest.getActivities().size(); j++) {
+                ActivityCreateRequest activityRequest = travelCreateRequest.getActivities().get(j);
+                if (activityRequest.getImageIds() != null && !activityRequest.getImageIds().isEmpty()) {
+                    Activity savedActivity = savedTravel.getActivities().get(j);
+                    List<Image> activityImages = imageRepository.findAllById(activityRequest.getImageIds());
+                    activityImages.forEach(img -> {
+                        if (!img.getOwnerId().equals(ownerId)) {
+                            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.image.not.owned"));
+                        }
+                        if (img.getTravel() != null || (img.getActivity() != null && !img.getActivity().getId().equals(savedActivity.getId()))) {
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.image.already.associated"));
+                        }
+                        img.setActivity(savedActivity);
+                        img.setStatus(ImageStatus.PERMANENT);
+                    });
+                    imageRepository.saveAll(activityImages);
+                    savedActivity.setImages(activityImages);
+                }
+            }
+        }
+
         return travelMapper.toResponse(travel);
     }
 
@@ -369,7 +391,24 @@ public class TravelServiceImpl implements TravelService {
 
         travel.getActivities().add(activity);
         validateTravelLogic(travel);
-        activityRepository.save(activity);
+        Activity savedActivity = activityRepository.save(activity);
+        
+        if (request.getImageIds() != null && !request.getImageIds().isEmpty()) {
+            List<Image> images = imageRepository.findAllById(request.getImageIds());
+            images.forEach(img -> {
+                if (!img.getOwnerId().equals(ownerId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.image.not.owned"));
+                }
+                if (img.getTravel() != null || (img.getActivity() != null && !img.getActivity().getId().equals(savedActivity.getId()))) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.image.already.associated"));
+                }
+                img.setActivity(savedActivity);
+                img.setStatus(ImageStatus.PERMANENT);
+            });
+            imageRepository.saveAll(images);
+            savedActivity.setImages(images);
+        }
+        
         return travelMapper.toResponse(travel);
     }
 
@@ -401,6 +440,33 @@ public class TravelServiceImpl implements TravelService {
 
         activityMapper.updateActivityFromDto(request, activity);
         validateTravelLogic(travel);
+
+        if (request.getImageIds() != null) {
+            List<Image> requestedImages = imageRepository.findAllById(request.getImageIds());
+            List<Image> currentImages = activity.getImages();
+
+            for (Image currentImage : currentImages) {
+                if (!request.getImageIds().contains(currentImage.getId())) {
+                    imageService.deleteImageFromMinio(currentImage.getPath());
+                    imageRepository.delete(currentImage);
+                }
+            }
+
+            for (Image img : requestedImages) {
+                if (!img.getOwnerId().equals(ownerId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.image.not.owned"));
+                }
+                if (img.getTravel() != null || (img.getActivity() != null && !img.getActivity().getId().equals(activity.getId()))) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.image.already.associated"));
+                }
+
+                if (img.getStatus() == ImageStatus.TEMPORARY) {
+                    img.setActivity(activity);
+                    img.setStatus(ImageStatus.PERMANENT);
+                }
+            }
+            activity.setImages(requestedImages);
+        }
 
         activityRepository.save(activity);
         return travelMapper.toResponse(travel);

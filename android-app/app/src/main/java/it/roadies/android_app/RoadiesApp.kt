@@ -283,13 +283,11 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             }
 
             composable(route="travel_detail/{id}"){
-                backStackEntry -> val id = UUID.fromString(backStackEntry.arguments?.getString("id").orEmpty())
-                TravelDetailScreen(navHostController=navHostController ,id = id)
+                TravelDetailScreen(navHostController=navHostController)
             }
 
             composable(route="activity_detail/{id}"){
-                backStackEntry -> val id = UUID.fromString(backStackEntry.arguments?.getString("id").orEmpty())
-                ActivityDetailScreen(navHostController=navHostController ,id = id)
+                ActivityDetailScreen(navHostController=navHostController)
             }
 
 

@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface TagService {
     List<TagResponse> getTags();
-    TagResponse addTag(@Size(min = 3, max = 25) @NotBlank String name);
+    TagResponse addTag(String name);
 }

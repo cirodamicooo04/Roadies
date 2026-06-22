@@ -33,4 +33,9 @@
     <string name="price_desc">Prezzo decrescente</string>
     <string name="duration_asc">Durata crescente</string>
     <string name="duration_desc">Durata decrescente</string>
+    <string name="travel_id_not_valid">Travel ID not valid</string>
+    <string name="error_loading_travel">Error while laoding travel</string>
+    <string name="check_availability">Check availability</string>
+    <string name="is_this_travel_for_me">Is this travel for me?</string>
+    <string name="description">Description</string>
 </resources>

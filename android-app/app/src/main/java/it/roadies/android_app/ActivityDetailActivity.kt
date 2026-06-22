@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import java.util.UUID
 
 @Composable
-fun ActivityDetailScreen(navHostController: NavHostController, id: UUID){
+fun ActivityDetailScreen(navHostController: NavHostController){
+
 
 }
