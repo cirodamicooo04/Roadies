@@ -1,4 +1,4 @@
-package it.roadies.android_app.viewmodel.booking
+package it.roadies.android_app.viewmodel.bookingFlow
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

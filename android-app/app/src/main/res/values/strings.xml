@@ -38,4 +38,16 @@
     <string name="booking_people_count">%1$d people</string>
     <string name="booking_total_price">€%1$.2f</string>
     <string name="booking_not_logged_in">Log in to see your bookings</string>
+
+    <string name="booking_without_seats">No seats avaible. Choose another trip</string>
+    <string name="booking_searching_seats">We\'re searching for available seats…</string>
+    <string name="booking_step_1_of_4">Step 1 of 4</string>
+    <string name="booking_people_title">How many people?</string>
+    <string name="booking_people_subtitle">Select the number of guests for the booking</string>
+    <string name="booking_decrease">Decrease</string>
+    <string name="booking_increase">Increase</string>
+    <string name="booking_continue">Continue</string>
+    <string name="booking_cancel">Cancel</string>
+    <string name="booking_person">person</string>
+    <string name="booking_people">people</string>
 </resources>
