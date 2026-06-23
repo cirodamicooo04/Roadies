@@ -33,8 +33,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
+import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
+import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
-import java.util.UUID
+import java.math.BigDecimal
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -290,13 +293,37 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 ActivityDetailScreen(navHostController=navHostController)
             }
 
+            composable(
+                route = "booking_people/{bookingId}/{travelId}",
+                arguments = listOf(
+                    navArgument("bookingId") { type = NavType.StringType },
+                    navArgument("travelId") { type = NavType.StringType },
+                )
+            ) {
+                TODO("devo aggiungere cosa succede sulla conferma dell'utente appena inizializzo la rotta nuova")
+                BookingStepPeopleScreen(navController = navHostController, onConfirmed = {})
+            }
+
 
 
         }
 
 
         composable(route ="bookings"){
-            //Creare un activity con all'interno la composable desiderata che accetta come parametro un NavHostController
+            BookingHomeScreen(navHostController = navHostController)
+        }
+        composable(
+            route = "booking_detail/{travelName}/{peopleCount}/{totalPrice}",
+            arguments = listOf(
+                navArgument("travelName") { type = NavType.StringType },
+                navArgument("peopleCount") { type = NavType.IntType },
+                navArgument("totalPrice") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val travelName = backStackEntry.arguments?.getString("travelName").orEmpty()
+            val peopleCount = backStackEntry.arguments?.getInt("peopleCount") ?: 0
+            val totalPrice = BigDecimal(backStackEntry.arguments?.getString("totalPrice") ?: "0")
+            BookingDetailScreen(travelName, peopleCount, totalPrice)
         }
         composable(route = "handle_users"){
 

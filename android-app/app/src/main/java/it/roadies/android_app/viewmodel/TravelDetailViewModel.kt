@@ -4,8 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import it.roadies.android_app.client.models.booking.BookingDraftRequest
 import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
+import it.roadies.android_app.repository.BookingRepository
 import it.roadies.android_app.repository.TravelRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +18,9 @@ import javax.inject.Inject
 data class TravelDetailState(
     val isLoading: Boolean = false,
     val travel: TravelResponse? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val createdBookingId: UUID? = null,
+    val selectedDepartureId: UUID? = null
 )
 
 data class TravelDepartureState(
@@ -26,7 +30,7 @@ data class TravelDepartureState(
 )
 
 @HiltViewModel
-class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository): ViewModel() {
+class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository,private val bookingRepository: BookingRepository): ViewModel() {
     val id: String? = savedStateHandle["id"]
     private val _uiState = MutableStateFlow(TravelDetailState())
     val uiState = _uiState.asStateFlow()
@@ -74,5 +78,25 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
         }
 
     }
+    fun createDraftBooking(departureId: UUID) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            val request = BookingDraftRequest(travelId = departureId, activityId = null)
+            val response = bookingRepository.createDraft(request)
+            if (response.success && response.data != null) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    createdBookingId = response.data.bookingId,
+                    selectedDepartureId = departureId
+                )
+            } else {
+                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = response.errorMessage ?: "Error with booking"
+                )
+            }
+        }
+    }
 
+    fun onBookingNavigated() {
+        _uiState.value = _uiState.value.copy(createdBookingId = null, selectedDepartureId = null)
+    }
 }

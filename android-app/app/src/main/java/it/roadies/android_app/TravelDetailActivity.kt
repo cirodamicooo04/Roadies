@@ -53,6 +53,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -100,6 +101,15 @@ fun TravelDetailScreen(navHostController: NavHostController, viewModel: TravelDe
         })
     }
 
+    LaunchedEffect(uiState.createdBookingId) {
+        uiState.createdBookingId?.let { bookingId ->
+            uiState.selectedDepartureId?.let { departureId ->
+                navHostController.navigate("booking_people/$bookingId/$departureId")
+                viewModel.onBookingNavigated()
+            }
+        }
+    }
+
     if (isDeparturesSheetOpen && !uiState.isLoading && uiState.errorMessage == null){
 
         ModalBottomSheet(sheetState = departuresSheetState, onDismissRequest = {isDeparturesSheetOpen = false }) {
@@ -129,8 +139,11 @@ fun TravelDetailScreen(navHostController: NavHostController, viewModel: TravelDe
                                 DepartureCard(
                                     departure = departure,
                                     onBookClick = { departureId ->
-                                        // TODO: LIPORACE :  cambiare checkout con la vera rotta di prenotazione
-                                        navHostController.navigate("checkout/$departureId")
+                                        val uuid = runCatching { java.util.UUID.fromString(departureId) }.getOrNull()
+                                        if (uuid != null) {
+                                            viewModel.createDraftBooking(uuid)
+                                            isDeparturesSheetOpen = false
+                                        }
                                     }
                                 )
                             }
