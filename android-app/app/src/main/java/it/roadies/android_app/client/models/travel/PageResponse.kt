@@ -3,12 +3,15 @@ package it.roadies.android_app.client.models.travel
 import com.google.gson.annotations.SerializedName
 
 data class PageResponse<T>(
-    @SerializedName("content") 
+    @SerializedName("content")
     val content: List<T> = emptyList(),
-    
-    @SerializedName("totalElements") 
+
+    @SerializedName("last")
+    val last: Boolean = false,
+
+    @SerializedName("totalElements")
     val totalElements: Long = 0,
-    
-    @SerializedName("totalPages") 
+
+    @SerializedName("totalPages")
     val totalPages: Int = 0
 )

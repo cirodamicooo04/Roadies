@@ -9,9 +9,11 @@ import com.google.gson.annotations.SerializedName
 import it.roadies.android_app.client.models.booking.BookingCreateRequest
 import it.roadies.android_app.client.models.booking.BookingDraftRequest
 import it.roadies.android_app.client.models.booking.BookingDraftResponse
+import it.roadies.android_app.client.models.booking.BookingHomeResponse
 import it.roadies.android_app.client.models.booking.BookingMemberRequest
 import it.roadies.android_app.client.models.booking.BookingStatusResponse
 import it.roadies.android_app.client.models.booking.BookingStep2Response
+import it.roadies.android_app.client.models.travel.PageResponse
 
 interface GestionePrenotazioniApi {
     /**
@@ -107,5 +109,41 @@ interface GestionePrenotazioniApi {
      */
     @POST("api/v1/bookings/members")
     suspend fun insertMembers(@Body bookingMemberRequest: BookingMemberRequest): Response<BookingStep2Response>
+
+    /**
+     * GET api/v1/bookings/active
+     * Ottieni le prenotazioni attive
+     * Permette di ottenere tutte le prenotazioni attive (non passate) dell'utente che ne fa richiesta
+     * Responses:
+     *  - 200: Prenotazioni attive restituite con successo
+     *  - 401: Utente non autenticato
+     *  - 403: Utente non autorizzato
+     *
+     * @return [PageResponse<BookingHomeResponse>]
+     */
+    @GET("api/v1/bookings/active")
+    suspend fun getActiveBookingsFromUser(
+        @Query("page") page: Int? = null,
+        @Query("size") size: Int? = null,
+        @Query("sort") sort: List<String>? = null
+    ): Response<PageResponse<BookingHomeResponse>>
+
+    /**
+     * GET api/v1/bookings/past
+     * Ottieni le prenotazioni passate
+     * Permette di ottenere tutte le prenotazioni passate dell'utente che ne fa richiesta
+     * Responses:
+     *  - 200: Prenotazioni passate restituite con successo
+     *  - 401: Utente non autenticato
+     *  - 403: Utente non autorizzato
+     *
+     * @return [PageResponse<BookingHomeResponse>]
+     */
+    @GET("api/v1/bookings/past")
+    suspend fun getPastBookingsFromUser(
+        @Query("page") page: Int? = null,
+        @Query("size") size: Int? = null,
+        @Query("sort") sort: List<String>? = null
+    ): Response<PageResponse<BookingHomeResponse>>
 
 }

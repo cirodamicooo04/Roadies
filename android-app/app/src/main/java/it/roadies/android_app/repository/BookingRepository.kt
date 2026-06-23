@@ -4,9 +4,11 @@ import it.roadies.android_app.client.apis.booking.GestioneDocumentiApi
 import it.roadies.android_app.client.apis.booking.GestionePrenotazioniApi
 import it.roadies.android_app.client.models.booking.BookingCreateRequest
 import it.roadies.android_app.client.models.booking.BookingDraftResponse
+import it.roadies.android_app.client.models.booking.BookingHomeResponse
 import it.roadies.android_app.client.models.booking.BookingMemberRequest
 import it.roadies.android_app.client.models.booking.BookingStatusResponse
 import it.roadies.android_app.client.models.booking.BookingStep2Response
+import it.roadies.android_app.client.models.travel.PageResponse
 import it.roadies.android_app.repository.utils.ApiResponse
 import it.roadies.android_app.repository.utils.safeApiCall
 import java.util.UUID
@@ -47,6 +49,14 @@ class BookingRepository @Inject constructor (private val prenotazioniApi: Gestio
 
     suspend fun getBookingsFromUser(): ApiResponse<List<UUID>> {
         return safeApiCall { prenotazioniApi.getBookingsFromUser() }
+    }
+
+    suspend fun getPastBookings(page: Int? = null, size: Int? = null): ApiResponse<PageResponse<BookingHomeResponse>> {
+        return safeApiCall { prenotazioniApi.getPastBookingsFromUser(page, size) }
+    }
+
+    suspend fun getActiveBookings(page: Int? = null, size: Int? = null): ApiResponse<PageResponse<BookingHomeResponse>> {
+        return safeApiCall { prenotazioniApi.getActiveBookingsFromUser(page, size) }
     }
 
     suspend fun uploadDocumentPhoto(documentId: UUID, uriString: String): ApiResponse<String> {

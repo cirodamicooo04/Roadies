@@ -38,4 +38,26 @@
     <string name="check_availability">Check availability</string>
     <string name="is_this_travel_for_me">Is this travel for me?</string>
     <string name="description">Description</string>
+
+    <!-- booking -->
+    <string name="booking_tab_active">Active</string>
+    <string name="booking_tab_past">Past</string>
+    <string name="booking_empty_active">No active bookings</string>
+    <string name="booking_empty_past">No past bookings</string>
+    <string name="booking_load_more">Load more</string>
+    <string name="booking_people_count">%1$d people</string>
+    <string name="booking_total_price">€%1$.2f</string>
+    <string name="booking_not_logged_in">Log in to see your bookings</string>
+
+    <string name="booking_without_seats">No seats avaible. Choose another trip</string>
+    <string name="booking_searching_seats">We\'re searching for available seats…</string>
+    <string name="booking_step_1_of_4">Step 1 of 4</string>
+    <string name="booking_people_title">How many people?</string>
+    <string name="booking_people_subtitle">Select the number of guests for the booking</string>
+    <string name="booking_decrease">Decrease</string>
+    <string name="booking_increase">Increase</string>
+    <string name="booking_continue">Continue</string>
+    <string name="booking_cancel">Cancel</string>
+    <string name="booking_person">person</string>
+    <string name="booking_people">people</string>
 </resources>

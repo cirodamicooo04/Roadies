@@ -4,12 +4,15 @@ import it.roadies.booking_service.data.dto.request.BookingCreateRequest;
 import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
 import it.roadies.booking_service.data.dto.request.BookingMemberRequest;
 import it.roadies.booking_service.data.dto.response.BookingDraftResponse;
+import it.roadies.booking_service.data.dto.response.BookingHomeResponse;
 import it.roadies.booking_service.data.dto.response.BookingStatusResponse;
 import it.roadies.booking_service.data.dto.response.BookingStep2Response;
 import it.roadies.booking_service.data.entities.Booking;
 
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public interface BookingService {
@@ -22,4 +25,7 @@ public interface BookingService {
     List<UUID> getUserBookings(String userId);
     void updateBookingIfAllDocumentsUploaded(UUID bookingId);
     void deleteMinioDocument(Booking booking);
+
+    Page<BookingHomeResponse> getPastBookingsFromUser(String userJwt, Pageable pageable);
+    Page<BookingHomeResponse> getActiveBookingsFromUser(String userJwt, Pageable pageable);
 }
