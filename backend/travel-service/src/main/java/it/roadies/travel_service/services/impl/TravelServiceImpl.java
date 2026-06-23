@@ -62,12 +62,12 @@ public class TravelServiceImpl implements TravelService {
                 if (activity.getDayNumber() > travel.getDurationDays() || activity.getDayNumber() < 1) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.daynumber.not.valid"));
                 }
-                if (activity.getContinent() != travel.getContinent()) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.activity.continent.not.valid"));
-                }
-                if (activity.getCountry() != null && !activity.getCountry().equals(travel.getCountry())) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.activity.country.not.valid"));
-                }
+//                if (activity.getContinent() != travel.getContinent()) {
+//                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.activity.continent.not.valid"));
+//                }
+//                if (activity.getCountry() != null && !activity.getCountry().equals(travel.getCountry())) {
+//                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.activity.country.not.valid"));
+//                }
             }
         }
     }

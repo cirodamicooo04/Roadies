@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
 import it.roadies.android_app.repository.TravelRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,11 +19,20 @@ data class TravelDetailState(
     val errorMessage: String? = null
 )
 
+data class TravelDepartureState(
+    val isLoading: Boolean = false,
+    val departures: List<TravelDepartureResponse>? = emptyList(),
+    val errorMessage: String? = null
+)
+
 @HiltViewModel
 class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository): ViewModel() {
     val id: String? = savedStateHandle["id"]
     private val _uiState = MutableStateFlow(TravelDetailState())
     val uiState = _uiState.asStateFlow()
+
+    private val _departuresState = MutableStateFlow(TravelDepartureState())
+    val departuresState = _departuresState.asStateFlow()
 
     init {
         val uuid = runCatching { UUID.fromString(id) }.getOrNull()
@@ -42,6 +52,27 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
                 _uiState.value = TravelDetailState(isLoading = false, errorMessage = response.errorMessage)
             }
         }
+    }
+
+    fun loadDepartures(){
+        viewModelScope.launch {
+            val uuid = runCatching { UUID.fromString(id) }.getOrNull()
+            if (uuid != null){
+                _departuresState.value = _departuresState.value.copy(isLoading = true)
+
+                val response = travelRepository.getTravelDepartures(uuid)
+                if (response.success ){
+                    _departuresState.value = TravelDepartureState(isLoading = false, departures = response.data)
+                } else {
+                    _departuresState.value = TravelDepartureState(isLoading = false, errorMessage = response.errorMessage)
+                }
+
+
+            } else {
+                _departuresState.value = TravelDepartureState(isLoading = false, errorMessage = "Travel id not valid")
+            }
+        }
+
     }
 
 }

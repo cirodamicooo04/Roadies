@@ -38,6 +38,12 @@
     <string name="check_availability">Check availability</string>
     <string name="is_this_travel_for_me">Is this travel for me?</string>
     <string name="description">Description</string>
+    <string name="day">Day</string>
+    <string name="no_description_available">No description available</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+    <string name="available_departures">Available departures</string>
+    <string name="no_available_departures">No available departures</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Active</string>
@@ -60,4 +66,14 @@
     <string name="booking_cancel">Cancel</string>
     <string name="booking_person">person</string>
     <string name="booking_people">people</string>
+    <string name="departure_outbound">Outbound: </string>
+    <string name="departure_return">Return: </string>
+    <string name="not_available_abbr">N/A</string>
+    <string name="to_be_decided_abbr">TBD</string>
+    <string name="sold_out">SOLD OUT</string>
+    <string name="available_seats">Available seats: %1$d</string>
+    <string name="book_now">Book</string>
+    <string name="in_planning">In planning</string>
+    <string name="activity_photo">Activity photo</string>
+    <string name="expand">Expand</string>
 </resources>
