@@ -7,10 +7,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import it.roadies.android_app.client.models.booking.BookingDraftRequest
 import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
+import it.roadies.android_app.repository.AuthRepository
 import it.roadies.android_app.repository.BookingRepository
 import it.roadies.android_app.repository.TravelRepository
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -20,7 +23,8 @@ data class TravelDetailState(
     val travel: TravelResponse? = null,
     val errorMessage: String? = null,
     val createdBookingId: UUID? = null,
-    val selectedDepartureId: UUID? = null
+    val selectedDepartureId: UUID? = null,
+    val requireLogin: Boolean = false
 )
 
 data class TravelDepartureState(
@@ -30,7 +34,7 @@ data class TravelDepartureState(
 )
 
 @HiltViewModel
-class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository,private val bookingRepository: BookingRepository): ViewModel() {
+class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository,private val bookingRepository: BookingRepository, private val authRepository: AuthRepository): ViewModel() {
     val id: String? = savedStateHandle["id"]
     private val _uiState = MutableStateFlow(TravelDetailState())
     val uiState = _uiState.asStateFlow()
@@ -79,6 +83,12 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
 
     }
     fun createDraftBooking(departureId: UUID) {
+        val isLogged = authRepository.authState.value.isLogged
+        if (!isLogged) {
+            _uiState.value =_uiState.value.copy(requireLogin = true)
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             val request = BookingDraftRequest(travelId = departureId, activityId = null)
@@ -98,5 +108,9 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
 
     fun onBookingNavigated() {
         _uiState.value = _uiState.value.copy(createdBookingId = null, selectedDepartureId = null)
+    }
+
+    fun onLoginHandled() {
+        _uiState.value = _uiState.value.copy(requireLogin = false)
     }
 }

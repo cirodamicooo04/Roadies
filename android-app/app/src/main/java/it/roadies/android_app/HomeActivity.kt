@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,10 +54,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
 import it.roadies.android_app.client.models.travel.SearchSuggestion
 import it.roadies.android_app.client.models.travel.LocationType
@@ -119,9 +121,13 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
                         fontSize = 28.sp,
                     )
                     if (uiState.isLoading || uiState.errorMessage != null) {
-                        CircularProgressIndicator()
+                        Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center){
+                            CircularProgressIndicator()
+                        }
                     }
-                    RecommendedTravel(uiState.recommendedTravels)
+                    RecommendedTravel(uiState.recommendedTravels, onTravelClick = {
+                        travel -> navHostController.navigate("travel_detail/${travel.id}")
+                    })
                 }
             }
         }
@@ -198,7 +204,8 @@ fun ContinentDestinations(onContinentClick: (String) -> Unit){
     val continents: List<String> = listOf<String>("EUROPE", "ASIA", "OCEANIA", "AFRICA", "AMERICA" )
 
     LazyRow(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        contentPadding = PaddingValues(vertical = 8.dp)
     ) {
         items(continents){
             continent -> ContinentCard(continent, onContinentClick)
@@ -261,15 +268,16 @@ fun ContinentCard(continent: String, onCardClick: (String) -> Unit ) {
 }
 
 @Composable
-fun RecommendedTravel(travels: List<TravelSummaryResponse>?) {
+fun RecommendedTravel(travels: List<TravelSummaryResponse>?, onTravelClick: (TravelSummaryResponse) -> Unit) {
     val safeTravels = travels.orEmpty()
 
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         LazyRow(modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             items(safeTravels) {
-                travel -> TravelCard(travel)
+                travel -> RecommendedTravelCard(travel, onTravelClick = onTravelClick )
             }
     }
 }
@@ -278,20 +286,31 @@ fun RecommendedTravel(travels: List<TravelSummaryResponse>?) {
 }
 
 @Composable
-fun TravelCard(travel: TravelSummaryResponse) {
+fun RecommendedTravelCard(travel: TravelSummaryResponse, onTravelClick: (TravelSummaryResponse) -> Unit) {
     Card(modifier = Modifier.width(200.dp).
     height(250.dp),
         shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(6.dp)
+        //elevation = CardDefaults.cardElevation(6.dp),
+        onClick = {onTravelClick(travel)}
     ){
         Column() {
-            AsyncImage(
+            SubcomposeAsyncImage(
                 //Non funziona localhost, quindi immagine momentanea
                 //model = travel.images?.firstOrNull()?.url,
                 model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
                 modifier = Modifier.fillMaxWidth().height(140.dp),
                 contentDescription = travel.title,
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                loading = {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    }
+                },
+                error = {
+                    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.Warning, contentDescription = "Errore immagine", tint = MaterialTheme.colorScheme.error)
+                    }
+                }
             )
         }
         Column(
@@ -299,7 +318,7 @@ fun TravelCard(travel: TravelSummaryResponse) {
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(text = travel.destination ?: "Viaggio", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(text = stringResource(R.string.starting_from, travel.startingFromPrice ?: "0", "€"))
+            Text(text = "${stringResource(R.string.starting_from)} ${travel.startingFromPrice ?: "0"} € ")
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)

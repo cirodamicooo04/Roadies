@@ -527,7 +527,7 @@ fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryRespons
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp), // Niente padding orizzontale qui, ci pensa la LazyColumn
+            .height(200.dp),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         onClick = { onCardClick(travel) }

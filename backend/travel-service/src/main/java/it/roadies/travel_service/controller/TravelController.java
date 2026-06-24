@@ -162,7 +162,15 @@ public class TravelController {
     @PreAuthorize("hasRole('TRAVELER')")
     @GetMapping("/recommendations")
     public ResponseEntity<List<TravelSummaryResponse>> getRecommendations(@AuthenticationPrincipal Jwt jwt){
-        List<TravelSummaryResponse> responses = travelService.getRecommendedTravels();
+        List<TravelSummaryResponse> responses = travelService.getRecommendedTravels(jwt.getClaim("sub"));
+        return ResponseEntity.ok(responses);
+    }
+
+
+    @Operation(summary = "Viaggi consigliati per non autenticati", description = "Recupera i viaggi consigliati per il viaggiatore non autenticato.")
+    @GetMapping("/public/recommendations")
+    public ResponseEntity<List<TravelSummaryResponse>> getPublicRecommendations(){
+        List<TravelSummaryResponse> responses = travelService.getRecommendedTravels(null);
         return ResponseEntity.ok(responses);
     }
 

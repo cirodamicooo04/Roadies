@@ -81,7 +81,7 @@ import org.osmdroid.util.GeoPoint
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TravelDetailScreen(navHostController: NavHostController, viewModel: TravelDetailViewModel = hiltViewModel()){
+fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () -> Unit, viewModel: TravelDetailViewModel = hiltViewModel()){
     val uiState by viewModel.uiState.collectAsState()
     val departuresState by viewModel.departuresState.collectAsState()
 
@@ -99,6 +99,13 @@ fun TravelDetailScreen(navHostController: NavHostController, viewModel: TravelDe
             viewModel.loadDepartures()
             isDeparturesSheetOpen = true
         })
+    }
+
+    LaunchedEffect(uiState.requireLogin) {
+        if (uiState.requireLogin){
+            onLoginRequest()
+            viewModel.onLoginHandled()
+        }
     }
 
     LaunchedEffect(uiState.createdBookingId) {

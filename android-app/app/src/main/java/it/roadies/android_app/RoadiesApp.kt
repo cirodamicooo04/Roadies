@@ -34,7 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
-import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
+//import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
 import java.math.BigDecimal
@@ -254,14 +254,15 @@ fun RoadiesApp(
             NavigationView(
                 navHostController = navHostController,
                 modifier = Modifier.padding(paddingValues),
-                isAdmin = "ADMIN" in authState.roles
+                isAdmin = "ADMIN" in authState.roles,
+                onLoginClick = onLoginClick
             )
         }
     }
 }
 
 @Composable
-fun NavigationView(navHostController: NavHostController, modifier: Modifier = Modifier, isAdmin: Boolean) {
+fun NavigationView(navHostController: NavHostController, modifier: Modifier = Modifier, isAdmin: Boolean, onLoginClick: () -> Unit) {
     val startDestination: String = if (isAdmin) "handle_users" else "home_graph"
 
 
@@ -286,7 +287,7 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             }
 
             composable(route="travel_detail/{id}"){
-                TravelDetailScreen(navHostController=navHostController)
+                TravelDetailScreen(navHostController=navHostController, onLoginClick)
             }
 
             composable(route="activity_detail/{id}"){
@@ -323,7 +324,7 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             val travelName = backStackEntry.arguments?.getString("travelName").orEmpty()
             val peopleCount = backStackEntry.arguments?.getInt("peopleCount") ?: 0
             val totalPrice = BigDecimal(backStackEntry.arguments?.getString("totalPrice") ?: "0")
-            BookingDetailScreen(travelName, peopleCount, totalPrice)
+            //BookingDetailScreen(travelName, peopleCount, totalPrice)
         }
         composable(route = "handle_users"){
 

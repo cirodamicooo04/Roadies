@@ -250,7 +250,10 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Transactional
-    public List<TravelSummaryResponse> getRecommendedTravels() {
+    public List<TravelSummaryResponse> getRecommendedTravels(String userId) {
+        if (userId == null) {
+            return travelRepository.findTop10ByOrderByCreatedAtDesc().stream().map(travelMapper::toSummaryResponse).toList();
+        }
         List<UUID> pastTravelsIds = bookingClient.getUserBookings();
         log.info("User past bookings: {}", pastTravelsIds);
         //Se non ha mai effettuato alcun viaggio, restituisco gli ultimi 10 viaggi creati

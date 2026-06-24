@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import it.roadies.android_app.R
 import it.roadies.android_app.client.models.booking.BookingHomeResponse
 import it.roadies.android_app.viewmodel.bookingHome.BookingHomeState
@@ -45,7 +46,7 @@ import java.math.BigDecimal
 
 
 @Composable
-fun BookingHomeScreen(viewModel: BookingHomeViewModel = hiltViewModel()) {
+fun BookingHomeScreen(navHostController: NavHostController, viewModel: BookingHomeViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     BookingHomeScreenContent(state = state, onLoadMoreActive = {viewModel.loadMoreActive()}, onLoadMorePast = {viewModel.loadMorePast()})

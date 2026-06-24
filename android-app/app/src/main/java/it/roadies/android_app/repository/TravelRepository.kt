@@ -56,4 +56,8 @@ class TravelRepository @Inject constructor(
     suspend fun getTravelDepartures(travelId: UUID): ApiResponse<List<TravelDepartureResponse>>{
         return safeApiCall { viaggiApi.getDepartures(travelId) }
     }
+
+    suspend fun getPublicRecommendations(): ApiResponse<List<TravelSummaryResponse>>{
+        return safeApiCall { viaggiApi.getPublicRecommendations() }
+    }
 }

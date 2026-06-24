@@ -156,6 +156,9 @@ interface ViaggiApi {
     @GET("api/v1/travels/recommendations")
     suspend fun getRecommendations(): Response<List<TravelSummaryResponse>>
 
+    @GET("api/v1/travels/public/recommendations")
+    suspend fun getPublicRecommendations(): Response<List<TravelSummaryResponse>>
+
     /**
      * GET api/v1/travels/public/{id}
      * Dettaglio viaggio
