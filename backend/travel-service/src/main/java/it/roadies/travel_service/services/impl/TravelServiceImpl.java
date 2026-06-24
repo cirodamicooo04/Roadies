@@ -187,15 +187,23 @@ public class TravelServiceImpl implements TravelService {
 
         Map<UUID, Tag> tagsMap = tagRepository.findAll().stream().collect(Collectors.toMap(Tag::getId, t -> t));
 
-        if (!tagsMap.isEmpty() && (travelUpdateRequest.getTagScores() == null || travelUpdateRequest.getTagScores().size() < tagsMap.size())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.number.not.valid"));
-        }
-
         if (travelUpdateRequest.getTagScores() != null){
-            travel.getTagScores().clear();
-            for (TravelTagRequest ts : travelUpdateRequest.getTagScores().stream().distinct().toList()) {
-                Tag tag =  tagsMap.get(ts.getTagId());
-                if (tag == null) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.not.found"));}
+            Map<UUID, TravelTagRequest> incomingTags = travelUpdateRequest.getTagScores().stream()
+                    .collect(Collectors.toMap(TravelTagRequest::getTagId, ts -> ts, (existing, replacement) -> existing));
+
+            for (TravelTag existingTag : travel.getTagScores()) {
+                TravelTagRequest incoming = incomingTags.get(existingTag.getTag().getId());
+                if (incoming != null) {
+                    existingTag.setScore(incoming.getScore());
+                    incomingTags.remove(existingTag.getTag().getId());
+                }
+            }
+
+            for (TravelTagRequest ts : incomingTags.values()) {
+                Tag tag = tagsMap.get(ts.getTagId());
+                if (tag == null) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.not.found"));
+                }
                 TravelTag travelTag = new TravelTag();
                 travelTag.setTravel(travel);
                 travelTag.setTag(tag);
