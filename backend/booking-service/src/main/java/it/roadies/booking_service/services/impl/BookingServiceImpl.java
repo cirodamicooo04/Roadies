@@ -33,6 +33,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -270,7 +271,7 @@ public class BookingServiceImpl implements BookingService {
             List<TravelBatchResponse> travels = travelService.getTravelsBatch(travelIds);
             if (travels != null) {
                 for (TravelBatchResponse t : travels) {
-                    travelMap.put(t.getId(), t);
+                    travelMap.put(t.getDepartureId(), t);
                 }
             }
         }
@@ -280,7 +281,7 @@ public class BookingServiceImpl implements BookingService {
             List<ActivityBatchResponse> activities = travelService.getActivitiesBatch(activityIds);
             if (activities != null) {
                 for (ActivityBatchResponse a : activities) {
-                    activityMap.put(a.getId(), a);
+                    activityMap.put(a.getDepartureId(), a);
                 }
             }
         }
@@ -289,22 +290,33 @@ public class BookingServiceImpl implements BookingService {
         List<BookingHomeResponse> filteredBookings = new ArrayList<>();
 
         for (Booking booking : bookings) {
+            UUID principalId = null;
             String title = null;
             boolean includeBooking = false;
+            LocalDateTime startDate = null;
+            LocalDateTime endDate = null;
+            DepartureType departureType = DepartureType.TRAVEL;
 
             if (booking.getTravelId() != null) {
                 TravelBatchResponse travel = travelMap.get(booking.getTravelId());
                 if (travel != null) {
                     title = travel.getTitle();
+                    principalId = travel.getPricipalTravelId();
+                    startDate = travel.getStartDate().atStartOfDay();
+                    endDate = travel.getEndDate().atStartOfDay();
                     if (travel.getEndDate() != null) {
-                        boolean isBeforeNow = travel.getEndDate().isBefore(now);
+                        boolean isBeforeNow = travel.getEndDate().isBefore(now.toLocalDate());
                         includeBooking = (fetchPast && isBeforeNow) || (!fetchPast && !isBeforeNow);
                     }
                 }
             } else if (booking.getActivityId() != null) {
                 ActivityBatchResponse activity = activityMap.get(booking.getActivityId());
                 if (activity != null) {
+                    departureType = DepartureType.ACTIVITY;
                     title = activity.getTitle();
+                    principalId = activity.getPricipalActivityId();
+                    startDate = activity.getStartDate();
+                    endDate = activity.getEndDate();
                     if (activity.getEndDate() != null) {
                         boolean isBeforeNow = activity.getEndDate().isBefore(now);
                         includeBooking = (fetchPast && isBeforeNow) || (!fetchPast && !isBeforeNow);
@@ -314,9 +326,13 @@ public class BookingServiceImpl implements BookingService {
 
             if (includeBooking) {
                 BookingHomeResponse dto = new BookingHomeResponse();
+                dto.setPrincipalId(principalId);
                 dto.setTravelName(title);
                 dto.setPeopleCount(booking.getPeopleCount());
                 dto.setTotalPrice(booking.getTotalPrice());
+                dto.setStartDate(startDate);
+                dto.setEndDate(endDate);
+                dto.setDepartureType(departureType);
                 filteredBookings.add(dto);
             }
         }

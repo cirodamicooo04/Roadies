@@ -63,9 +63,11 @@ public class TravelDepartureServiceImpl implements TravelDepartureService {
         List<TravelDeparture> departures = travelDepartureRepository.findAllById(travelIds);
         return departures.stream()
                 .map(d -> new TravelBatchResponse(
+                        d.getTravel().getId(),
                         d.getId(),
                         d.getTravel() != null ? d.getTravel().getTitle() : null,
-                        d.getEndDate() != null ? d.getEndDate().atTime(23, 59, 59) : null
+                        d.getStartDate(),
+                        d.getEndDate()
                 ))
                 .toList();
     }

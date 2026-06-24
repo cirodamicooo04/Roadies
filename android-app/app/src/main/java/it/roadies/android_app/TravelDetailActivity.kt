@@ -105,7 +105,7 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
     LaunchedEffect(uiState.createdBookingId) {
         uiState.createdBookingId?.let { bookingId ->
             uiState.selectedDepartureId?.let { departureId ->
-                navHostController.navigate("booking_people/$bookingId/$departureId")
+                navHostController.navigate("booking_people/$bookingId?travelId=$departureId")
                 viewModel.onBookingNavigated()
             }
         }

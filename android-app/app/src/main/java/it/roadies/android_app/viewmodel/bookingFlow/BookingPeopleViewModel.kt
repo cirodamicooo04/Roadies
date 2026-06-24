@@ -34,8 +34,8 @@ class BookingViewModel @Inject constructor (private val repository: BookingRepos
     private val _state = MutableStateFlow(BookingState())
     val state: StateFlow<BookingState> = _state.asStateFlow()
     private val bookingId: UUID = UUID.fromString(savedStateHandle["bookingId"])
-    private val travelId: UUID? = savedStateHandle.get<String>("travelId")?.takeIf { it.isNotBlank() }?.let { UUID.fromString(it) }
-    private val activityId: UUID? = savedStateHandle.get<String>("activityId")?.takeIf { it.isNotBlank() }?.let { UUID.fromString(it) }
+    private val travelId: UUID? = savedStateHandle.get<String>("travelId")?.takeIf { it.isNotBlank() && it != "null" && !it.startsWith("{") }?.let { UUID.fromString(it) }
+    private val activityId: UUID? = savedStateHandle.get<String>("activityId")?.takeIf { it.isNotBlank() && it != "null" && !it.startsWith("{") }?.let { UUID.fromString(it) }
 
     fun increasePeopleCount() {
         _state.value = _state.value.copy(peopleCount = _state.value.peopleCount + 1, error = null)

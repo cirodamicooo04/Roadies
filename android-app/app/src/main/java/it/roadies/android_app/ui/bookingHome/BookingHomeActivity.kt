@@ -1,5 +1,6 @@
 package it.roadies.android_app.ui.bookingHome
 
+import android.net.Uri.encode
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -34,11 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.FilterChip
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import it.roadies.android_app.R
 import it.roadies.android_app.client.models.booking.BookingHomeResponse
+import it.roadies.android_app.viewmodel.bookingHome.BookingFilterType
 import it.roadies.android_app.viewmodel.bookingHome.BookingHomeState
 import it.roadies.android_app.viewmodel.bookingHome.BookingHomeViewModel
 import it.roadies.android_app.viewmodel.bookingHome.BookingPagingState
@@ -49,14 +53,24 @@ import java.math.BigDecimal
 fun BookingHomeScreen(navHostController: NavHostController, viewModel: BookingHomeViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    BookingHomeScreenContent(state = state, onLoadMoreActive = {viewModel.loadMoreActive()}, onLoadMorePast = {viewModel.loadMorePast()})
+    BookingHomeScreenContent(
+        state = state, 
+        onLoadMoreActive = {viewModel.loadMoreActive()},
+        onLoadMorePast = {viewModel.loadMorePast()},
+        onFilterChanged = { viewModel.setFilterType(it) },
+        onBookingClick = { booking ->
+            //uso l'encode per evitare visione di caraterri speciali
+            val travelNameEncoded = encode(booking.travelName ?: "")
+            navHostController.navigate("booking_detail/${booking.principalId}/$travelNameEncoded/${booking.peopleCount ?: 1}/${booking.totalPrice}/${booking.startDate}/${booking.endDate}/${booking.departureType?.name ?: "TRAVEL"}")
+        }
+    )
 }
 
 @Composable
-fun BookingHomeScreenContent(state: BookingHomeState, onLoadMoreActive: () -> Unit = {}, onLoadMorePast: () -> Unit = {}) {
+fun BookingHomeScreenContent(state: BookingHomeState, onLoadMoreActive: () -> Unit = {}, onLoadMorePast: () -> Unit = {}, onFilterChanged: (BookingFilterType) -> Unit = {}, onBookingClick: (BookingHomeResponse) -> Unit = {}) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoggedIn) {
-            BookingHomeContent(state, onLoadMoreActive, onLoadMorePast)
+            BookingHomeContent(state, onLoadMoreActive, onLoadMorePast, onFilterChanged, onBookingClick)
         } else {
             BookingHomeNotLogged()
         }
@@ -67,7 +81,9 @@ fun BookingHomeScreenContent(state: BookingHomeState, onLoadMoreActive: () -> Un
 fun BookingHomeContent(
     state: BookingHomeState,
     onLoadMoreActive: () -> Unit,
-    onLoadMorePast: () -> Unit
+    onLoadMorePast: () -> Unit,
+    onFilterChanged: (BookingFilterType) -> Unit,
+    onBookingClick: (BookingHomeResponse) -> Unit
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val tabs = listOf(stringResource(R.string.booking_tab_active), stringResource(R.string.booking_tab_past))
@@ -82,9 +98,35 @@ fun BookingHomeContent(
                 )
             }
         }
+        
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                selected = state.filterType == BookingFilterType.ALL,
+                onClick = { onFilterChanged(BookingFilterType.ALL) },
+                label = { Text("Tutti") }
+            )
+            FilterChip(
+                selected = state.filterType == BookingFilterType.TRAVEL,
+                onClick = { onFilterChanged(BookingFilterType.TRAVEL) },
+                label = { Text("Viaggi") }
+            )
+            FilterChip(
+                selected = state.filterType == BookingFilterType.ACTIVITY,
+                onClick = { onFilterChanged(BookingFilterType.ACTIVITY) },
+                label = { Text("Attività") }
+            )
+        }
+        
+        val filteredActiveItems = state.active.items.filter { 
+            state.filterType == BookingFilterType.ALL || it.departureType?.name == state.filterType.name 
+        }
+        val filteredPastItems = state.past.items.filter { 
+            state.filterType == BookingFilterType.ALL || it.departureType?.name == state.filterType.name 
+        }
+
         when (selectedTab) {
-            0 -> BookingListSection(state.active, R.string.booking_empty_active, onLoadMoreActive)
-            1 -> BookingListSection(state.past, R.string.booking_empty_past, onLoadMorePast)
+            0 -> BookingListSection(state.active.copy(items = filteredActiveItems), R.string.booking_empty_active, onLoadMoreActive, onBookingClick)
+            1 -> BookingListSection(state.past.copy(items = filteredPastItems), R.string.booking_empty_past, onLoadMorePast, onBookingClick)
         }
     }
 }
@@ -103,7 +145,8 @@ private fun CenteredBox(content: @Composable () -> Unit) {
 fun BookingListSection(
     paging: BookingPagingState,
     emptyMessageRes: Int,
-    onLoadMore: () -> Unit
+    onLoadMore: () -> Unit,
+    onBookingClick: (BookingHomeResponse) -> Unit
 ) {
     when {
         paging.isLoading && paging.items.isEmpty() -> CenteredBox { CircularProgressIndicator() }
@@ -119,7 +162,7 @@ fun BookingListSection(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             itemsIndexed(paging.items) { _, booking ->
-                BookingCard(booking)
+                BookingCard(booking, onClick = { onBookingClick(booking) })
             }
             if (!paging.isLast) {
                 item {
@@ -142,9 +185,9 @@ fun BookingListSection(
 }
 
 @Composable
-fun BookingCard(booking: BookingHomeResponse) {
+fun BookingCard(booking: BookingHomeResponse, onClick: () -> Unit = {}) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

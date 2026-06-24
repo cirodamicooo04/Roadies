@@ -57,6 +57,16 @@
     <string name="booking_total_price">€%1$.2f</string>
     <string name="booking_not_logged_in">Accedi per vedere le tue prenotazioni</string>
 
+    <!-- booking detail -->
+    <string name="booking_detail_title">Dettaglio Prenotazione</string>
+    <string name="booking_detail_back">Indietro</string>
+    <string name="booking_detail_info_title">Informazioni Prenotazione</string>
+    <string name="booking_detail_people_label">Partecipanti</string>
+    <string name="booking_detail_price_label">Prezzo Totale</string>
+    <string name="booking_detail_start_date">Data d\'inizio</string>
+    <string name="booking_detail_end_date">Data di fine</string>
+    <string name="booking_detail_view_travel">Dettagli viaggio</string>
+
     <string name="booking_without_seats">Posti non disponibili. Scegli un altro viaggio</string>
     <string name="booking_searching_seats">Stiamo cercando posti disponibili…</string>
     <string name="booking_step_1_of_4">Passo 1 di 4</string>

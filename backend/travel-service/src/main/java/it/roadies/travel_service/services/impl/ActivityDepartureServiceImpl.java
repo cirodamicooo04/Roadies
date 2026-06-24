@@ -62,8 +62,10 @@ public class ActivityDepartureServiceImpl implements ActivityDepartureService {
         List<ActivityDeparture> departures = activitySessionRepository.findAllById(activityIds);
         return departures.stream()
                 .map(d -> new ActivityBatchResponse(
+                        d.getActivity().getId(),
                         d.getId(),
                         d.getActivity() != null ? d.getActivity().getName() : null,
+                        d.getStartTimestamp(),
                         d.getEndTimestamp()
                 ))
                 .toList();

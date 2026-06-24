@@ -55,6 +55,16 @@
     <string name="booking_total_price">€%1$.2f</string>
     <string name="booking_not_logged_in">Log in to see your bookings</string>
 
+    <!-- booking detail -->
+    <string name="booking_detail_title">Booking Detail</string>
+    <string name="booking_detail_back">Back</string>
+    <string name="booking_detail_info_title">Booking Information</string>
+    <string name="booking_detail_people_label">Participants</string>
+    <string name="booking_detail_price_label">Total Price</string>
+    <string name="booking_detail_start_date">Start Date</string>
+    <string name="booking_detail_end_date">End Date</string>
+    <string name="booking_detail_view_travel">View travel details</string>
+
     <string name="booking_without_seats">No seats avaible. Choose another trip</string>
     <string name="booking_searching_seats">We\'re searching for available seats…</string>
     <string name="booking_step_1_of_4">Step 1 of 4</string>

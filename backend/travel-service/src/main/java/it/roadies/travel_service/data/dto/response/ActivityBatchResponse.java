@@ -10,7 +10,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ActivityBatchResponse {
-    private UUID id;
+    private UUID pricipalActivityId;
+    private UUID departureId;
     private String title;
+    private LocalDateTime startDate;
     private LocalDateTime endDate;
 }

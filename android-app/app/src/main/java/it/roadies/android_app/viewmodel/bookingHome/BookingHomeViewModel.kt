@@ -15,6 +15,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+enum class BookingFilterType {
+    ALL, TRAVEL, ACTIVITY
+}
+
 data class BookingPagingState(
     val items: List<BookingHomeResponse> = emptyList(),
     val nextPage: Int = 0,
@@ -26,6 +30,7 @@ data class BookingHomeState(
     val isLoggedIn: Boolean = false,
     val active: BookingPagingState = BookingPagingState(),
     val past: BookingPagingState = BookingPagingState(),
+    val filterType: BookingFilterType = BookingFilterType.ALL,
     val errorMessage: String? = null
 )
 
@@ -39,6 +44,11 @@ class BookingHomeViewModel @Inject constructor(private val repository: BookingRe
     init {
         observeAuthState()
     }
+    
+    fun setFilterType(type: BookingFilterType) {
+        _state.update { it.copy(filterType = type) }
+    }
+    
     private fun observeAuthState() {
         viewModelScope.launch {
             authRepository.authState.collectLatest { auth ->

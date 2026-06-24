@@ -3,14 +3,17 @@ package it.roadies.travel_service.data.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class TravelBatchResponse {
-    private UUID id;
+    private UUID pricipalTravelId;
+    private UUID departureId;
     private String title;
-    private LocalDateTime endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
 }
