@@ -38,6 +38,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,7 +53,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.Color
@@ -62,24 +63,17 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
+import it.roadies.android_app.ui.travel.components.BoxCentered
 import it.roadies.android_app.viewmodel.SearchScreenViewModel
 
-@Composable
-fun BoxCentered(text: String? = null)
-{
-    Box(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = text?: "", fontSize = 16.sp, fontStyle = FontStyle.Italic)
-    }
 
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: SearchScreenViewModel = hiltViewModel()){
     val uiState by searchScreenViewModel.searchScreenUiState.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val filterSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isFilterSheetOpen by remember { mutableStateOf(false) }
@@ -167,21 +161,23 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                     )
                 }
 
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(stringResource(R.string.duration_days), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                        Text("${durationRange.start.toInt()} - ${durationRange.endInclusive.toInt()} ${stringResource(R.string.days)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                if (uiState.type != "ACTIVITY") {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(stringResource(R.string.duration_days), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                            Text("${durationRange.start.toInt()} - ${durationRange.endInclusive.toInt()} ${stringResource(R.string.days)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        RangeSlider(
+                            value = durationRange,
+                            onValueChange = { durationRange = it },
+                            valueRange = 1f..30f,
+                            steps = 28
+                        )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    RangeSlider(
-                        value = durationRange,
-                        onValueChange = { durationRange = it },
-                        valueRange = 1f..30f,
-                        steps = 28
-                    )
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -239,12 +235,22 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                     }
                 }
 
-                val sortOptions = listOf(
-                    "startingFromPrice,asc" to stringResource(R.string.price_asc),
-                    "startingFromPrice,desc" to stringResource(R.string.price_desc),
-                    "durationDays,asc" to stringResource(R.string.duration_asc),
-                    "durationDays,desc" to stringResource(R.string.duration_desc)
-                )
+                var sortOptions: List<Pair<String,String>>
+
+                if (uiState.type == "ACTIVITY"){
+                    sortOptions = listOf(
+                        "startingFromPrice,asc" to stringResource(R.string.price_asc),
+                        "startingFromPrice,desc" to stringResource(R.string.price_desc),
+                    )
+                } else {
+
+                    sortOptions = listOf(
+                        "startingFromPrice,asc" to stringResource(R.string.price_asc),
+                        "startingFromPrice,desc" to stringResource(R.string.price_desc),
+                        "durationDays,asc" to stringResource(R.string.duration_asc),
+                        "durationDays,desc" to stringResource(R.string.duration_desc)
+                    )
+                }
 
                 sortOptions.forEach { (sortKey, label) ->
                     Row(
@@ -337,8 +343,20 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                     }, lazyListState, uiState.isLoadingMore || (uiState.isLoading && uiState.travels?.isNotEmpty() == true))
                 }
                 
-                // TODO: Se c'è un errore ma abbiamo i dati vecchi a schermo, mostro snackbar o tast con l'error message
+                LaunchedEffect(uiState.errorMessage) {
+                    uiState.errorMessage?.let { errorMsg ->
+                        snackbarHostState.showSnackbar(errorMsg)
+                        searchScreenViewModel.clearError()
+                    }
+                }
             }
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            )
         }
     }
 }
@@ -408,6 +426,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
                         text = activity.name ?: "Senza Nome",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
+                        lineHeight = 22.sp,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -425,19 +444,9 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
                         Text(
                             text = "${activity.destination ?: ""}, ${activity.country ?: ""}",
                             color = Color.Gray,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    if (!activity.type.isNullOrEmpty()) {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = activity.type.uppercase(),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 10.sp
                         )
                     }
                 }
@@ -450,7 +459,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
                         Text(
                             text = "👤 @owner_fittizio",
                             color = Color.Gray,
-                            fontSize = 11.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -555,6 +564,7 @@ fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryRespons
                         text = travel.title ?: "Senza Titolo",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
+                        lineHeight = 22.sp,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -572,7 +582,7 @@ fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryRespons
                         Text(
                             text = "${travel.destination ?: ""}, ${travel.country ?: ""}",
                             color = Color.Gray,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

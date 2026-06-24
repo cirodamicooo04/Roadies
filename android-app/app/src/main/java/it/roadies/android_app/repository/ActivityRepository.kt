@@ -2,6 +2,7 @@ package it.roadies.android_app.repository
 
 import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.ViaggiApi
+import it.roadies.android_app.client.models.travel.ActivityResponse
 import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
 import it.roadies.android_app.client.models.travel.PageResponse
 import it.roadies.android_app.repository.utils.ApiResponse
@@ -36,6 +37,18 @@ class ActivityRepository @Inject constructor(
                 sort = sort,
                 type = "ACTIVITY"
             )
+        }
+    }
+
+    suspend fun getActivityById(id: java.util.UUID): ApiResponse<ActivityResponse> {
+        return safeApiCall {
+            activityApi.getActivity(id)
+        }
+    }
+
+    suspend fun getActivityDepartures(activityId: java.util.UUID): ApiResponse<List<it.roadies.android_app.client.models.travel.ActivityDepartureResponse>> {
+        return safeApiCall {
+            activityApi.getDepartures1(activityId)
         }
     }
 }

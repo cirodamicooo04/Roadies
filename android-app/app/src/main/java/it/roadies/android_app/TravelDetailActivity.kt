@@ -2,22 +2,18 @@ package it.roadies.android_app
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,8 +29,8 @@ import androidx.compose.material3.Card
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Warning
@@ -58,26 +54,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.SubcomposeAsyncImage
-import com.utsman.osmandcompose.Marker
-import com.utsman.osmandcompose.OpenStreetMap
-import com.utsman.osmandcompose.rememberCameraState
-import com.utsman.osmandcompose.rememberMarkerState
 import it.roadies.android_app.client.models.travel.ActivityResponse
-import it.roadies.android_app.client.models.travel.ImageResponse
 import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
 import it.roadies.android_app.client.models.travel.TravelTagResponse
+import it.roadies.android_app.ui.travel.components.BoxCentered
+import it.roadies.android_app.ui.travel.components.CheckAvailabilityButton
+import it.roadies.android_app.ui.travel.components.DetailHeader
+import it.roadies.android_app.ui.travel.components.DetailImageCarousel
+import it.roadies.android_app.ui.travel.components.ExpandableDescription
+import it.roadies.android_app.ui.travel.components.LocationMap
 import it.roadies.android_app.viewmodel.TravelDetailViewModel
-import org.osmdroid.util.GeoPoint
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,7 +87,7 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
             CircularProgressIndicator()
         }
     } else if (uiState.errorMessage != null){
-            BoxCentered(text = uiState.errorMessage)
+        BoxCentered(text = uiState.errorMessage)
         } else {
         TravelDetail(uiState.travel, onCheckAvailability = {
             viewModel.loadDepartures()
@@ -145,8 +139,8 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
                             items(departuresList) { departure ->
                                 DepartureCard(
                                     departure = departure,
-                                    onBookClick = { departureId ->
-                                        val uuid = runCatching { java.util.UUID.fromString(departureId) }.getOrNull()
+                                    onBookClick = {
+                                        val uuid = runCatching { java.util.UUID.fromString(departure.id.toString()) }.getOrNull()
                                         if (uuid != null) {
                                             viewModel.createDraftBooking(uuid)
                                             isDeparturesSheetOpen = false
@@ -175,10 +169,27 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
                     .padding(12.dp)
             ) {
                 //Header (Nome + sottotitolo: Luogo e durata)
-                TravelHeader(travel.title, travel.destination, travel.country, travel.durationDays)
+                DetailHeader(
+                    title = travel.title,
+                    destination = travel.destination,
+                    country = travel.country
+                ) {
+                    Row() {
+                        Icon(
+                            imageVector = Icons.Filled.AccessTime,
+                            contentDescription = "Duration",
+                            modifier = Modifier.padding(end = 5.dp)
+                        )
+                        Text(
+                            text = "${travel.durationDays ?: ""} ${stringResource(R.string.days)}",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
 
                 //Immagini (LazyRow)
-                TravelImages(travel.images)
+                DetailImageCarousel(travel.images)
 
                 //Separatore
 
@@ -186,10 +197,10 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
                 TravelTags(travel.tagScores)
 
                 //travel description
-                TravelDescription(travel.description)
+                ExpandableDescription(travel.description)
 
                 //mappa
-                TravelMap(lon = travel.longitude, lat = travel.latitude)
+                LocationMap(lon = travel.longitude, lat = travel.latitude)
 
                 //travel activity con ogni attività collasabile
                 Activities(travel.activities)
@@ -197,8 +208,8 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
                 // recensioni
 
             }
-            
-            DepartureButton(onClick = {
+
+            CheckAvailabilityButton(onClick = {
                 onCheckAvailability()
             })
         }
@@ -206,89 +217,6 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
 }
 
 
-
-@Composable
-fun DepartureButton(onClick: () -> Unit){
-    Button(modifier = Modifier.fillMaxWidth().padding(12.dp), onClick = onClick) {
-        Text(text = stringResource(R.string.check_availability), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-    }
-}
-
-@Composable
-fun TravelHeader(travelTitle: String?, travelDestination: String?, travelCountry: String?, duration: Int?){
-    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 23.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = travelTitle ?: "Travel", fontSize = 35.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "${travelDestination?: ""}, ${travelCountry?: ""}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-            Row() {
-                Icon(imageVector = Icons.Filled.AccessTime, contentDescription = "Duration", modifier = Modifier.padding(end = 5.dp))
-                Text(text = "${duration ?: ""} ${stringResource(R.string.days)}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-            }
-        }
-    }
-}
-
-@Composable
-fun TravelImages(travelImages: List<ImageResponse>?){
-    if (travelImages.isNullOrEmpty()) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp)
-                .padding(bottom = 18.dp)
-                .height(220.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.travel_placeholder),
-                contentDescription = stringResource(R.string.activity_photo),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        return
-    }
-
-    val pagerState = rememberPagerState(pageCount = { travelImages.size })
-
-    HorizontalPager(
-        state = pagerState,
-        contentPadding = PaddingValues(horizontal = 32.dp),
-        pageSpacing = 16.dp,
-        modifier = Modifier.padding(bottom = 18.dp)
-    ) { page ->
-        val imageUrl = travelImages[page].url
-
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-        ) {
-            SubcomposeAsyncImage(
-                // TODO: Da risolvere problema url
-                //model = imageUrl,
-                model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
-                contentDescription = "Foto del viaggio",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-                loading = {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                    }
-                },
-                error = {
-                    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-                        Icon(imageVector = Icons.Default.Warning, contentDescription = "Errore immagine", tint = MaterialTheme.colorScheme.error)
-                    }
-                }
-            )
-        }
-    }
-}
 
 @Composable
 fun TravelTags(tags: List<TravelTagResponse>?) {
@@ -327,82 +255,7 @@ fun TravelTags(tags: List<TravelTagResponse>?) {
     }
 }
 
-@Composable
-fun TravelDescription(description: String?) {
-    if (description.isNullOrEmpty()) return
 
-    var isExpanded by remember { mutableStateOf(false) }
-    var showReadMore by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp,)
-            .animateContentSize()
-    ) {
-        Text(
-            text = stringResource(R.string.description),
-            fontSize = 24.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        
-        Text(
-            text = description,
-            fontSize = 16.sp,
-            color = Color.DarkGray,
-            maxLines = if (isExpanded) Int.MAX_VALUE else 4,
-            overflow = TextOverflow.Ellipsis,
-            onTextLayout = { textLayoutResult ->
-                if (!isExpanded && textLayoutResult.hasVisualOverflow) {
-                    showReadMore = true
-                }
-            }
-        )
-        
-        if (showReadMore) {
-            Text(
-                text = if (isExpanded) stringResource(R.string.show_less) else stringResource(R.string.show_more),
-                color = Color.Blue,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .clickable { isExpanded = !isExpanded },
-                textDecoration = TextDecoration.Underline
-            )
-        }
-    }
-}
-
-@Composable
-fun TravelMap(lon: Double?, lat: Double?) {
-
-    if (lon == null || lat == null) return
-
-    val destinationPoint = GeoPoint(lat, lon)
-    val cameraState = rememberCameraState {
-        geoPoint = destinationPoint
-        zoom = 13.0
-    }
-    val markerState = rememberMarkerState(geoPoint = destinationPoint)
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(220.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        OpenStreetMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraState = cameraState
-        ) {
-            Marker(
-                state = markerState,
-            )
-        }
-    }
-}
 
 @Composable
 fun Activities(activities: List<ActivityResponse>?){
@@ -503,7 +356,7 @@ fun CollasableActivityCard(activity: ActivityResponse?){
 }
 
 @Composable
-fun DepartureCard(departure: TravelDepartureResponse, onBookClick: (String) -> Unit) {
+fun DepartureCard(departure: TravelDepartureResponse, onBookClick: () -> Unit) {
     val isAvailable = (departure.availableSlots ?: 0) > 0
     val isConfirmed = departure.status == TravelDepartureResponse.Status.CONFIRMED
     val isBookable = isAvailable && isConfirmed
@@ -535,7 +388,7 @@ fun DepartureCard(departure: TravelDepartureResponse, onBookClick: (String) -> U
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Icon(
-                    imageVector = Icons.Default.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -586,7 +439,7 @@ fun DepartureCard(departure: TravelDepartureResponse, onBookClick: (String) -> U
 
                 // Pulsante prenota a destra
                 Button(
-                    onClick = { departure.id?.let { onBookClick(it.toString()) } },
+                    onClick = onBookClick,
                     enabled = isBookable,
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -596,4 +449,3 @@ fun DepartureCard(departure: TravelDepartureResponse, onBookClick: (String) -> U
         }
     }
 }
-

@@ -291,7 +291,7 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             }
 
             composable(route="activity_detail/{id}"){
-                ActivityDetailScreen(navHostController=navHostController)
+                ActivityDetailScreen(navHostController=navHostController, onLoginClick)
             }
 
             composable(

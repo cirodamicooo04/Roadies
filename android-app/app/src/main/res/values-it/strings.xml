@@ -45,6 +45,7 @@
     <string name="show_less">Mostra meno </string>
     <string name="available_departures">Partenze disponibili</string>
     <string name="no_available_departures">Nessuna partenza disponibile</string>
+    <string name="hours">Ore</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Attivi</string>

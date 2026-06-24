@@ -126,6 +126,10 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
         )
     }
 
+    fun clearError() {
+        _searchScreenUiState.value = _searchScreenUiState.value.copy(errorMessage = null)
+    }
+
     private fun loadItems(continentStr: String?, country: String?, destination: String?, minPriceStr: String?, maxPriceStr: String?, minDurationDaysStr: String?, maxDurationDaysStr: String?, type: String?, isLoadMore: Boolean = false, size: Int = 20, sort: List<String>? = null){
         viewModelScope.launch {
             if (isLoadMore) {
