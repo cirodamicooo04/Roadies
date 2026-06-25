@@ -54,7 +54,7 @@ fun RoadiesApp(
     val currentDestination = navBackStackEntry?.destination
     val currentRoute = currentDestination?.route
 
-    val bottomRoutes = listOf("home", "home_graph", "travel", "bookings", "chat", "handle_users", "statistics", "handle_travels")
+    val bottomRoutes = listOf("home", "travel", "bookings", "chat", "handle_users", "statistics", "handle_travels")
     val showBackButton = currentRoute !in bottomRoutes
 
     val authState by authViewModel.authState.collectAsState()
@@ -225,9 +225,9 @@ fun RoadiesApp(
                         }
                         if ("ORGANIZER" in authState.roles) {
                             NavigationBarItem(
-                                selected = currentDestination?.hierarchy?.any { it.route == "handle_travels" } == true,
+                                selected = currentDestination?.hierarchy?.any { it.route == "organizer_graph" } == true,
                                 onClick = {
-                                    navHostController.navigate("handle_travels") {
+                                    navHostController.navigate("organizer_graph") {
                                         popUpTo(navHostController.graph.startDestinationId) { saveState = true }
                                         launchSingleTop = true
                                         restoreState = true
@@ -364,8 +364,12 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
         composable(route = "chat"){
 
         }
-        composable(route = "handle_travels"){
 
+        navigation(route = "organizer_graph", startDestination = "handle_travels"){
+            composable(route = "handle_travels"){
+                OrganizerDashboard(navHostController = navHostController)
+            }
         }
+
     }
 }

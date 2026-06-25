@@ -158,9 +158,9 @@ public class TravelServiceImpl implements TravelService {
         if (!ownerId.equals(travel.getOwnerId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.travel.not.owned"));
         }
-        if (travelDepartureRepository.existsByTravel(travel)){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.travel.has.confirmed.departures"));
-        }
+
+        boolean hasConfirmedDepartures = travel.getDepartures().stream().anyMatch(d -> d.getStatus() == Status.CONFIRMED);
+        if (hasConfirmedDepartures) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.travel.has.confirmed.departures"));}
 
         if (travel.getImages() != null){
             for (Image image : travel.getImages()) {

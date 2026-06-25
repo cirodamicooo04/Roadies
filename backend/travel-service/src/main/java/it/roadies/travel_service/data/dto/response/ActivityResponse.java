@@ -23,7 +23,9 @@ public class ActivityResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String type;
+    private Boolean editable;
     private List<ActivityDepartureResponse> departures;
     private List<ImageResponse> images;
+
 
 }

@@ -21,4 +21,5 @@ public class TravelSummaryResponse {
     private String type;
     private List<ImageResponse> images;
     private Double averageRating;
+    private Boolean editable;
 }

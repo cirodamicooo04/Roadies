@@ -22,9 +22,11 @@ public class TravelResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String type;
+    private Boolean editable;
 
     private List<TravelDepartureResponse> departures;
     private List<ActivityResponse> activities;
     private List<TravelTagResponse> tagScores;
     private List<ImageResponse> images;
+
 }

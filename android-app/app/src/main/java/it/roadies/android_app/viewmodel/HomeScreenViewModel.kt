@@ -3,6 +3,7 @@ package it.roadies.android_app.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import it.roadies.android_app.Type
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
 import it.roadies.android_app.repository.AuthRepository
 import it.roadies.android_app.repository.TravelRepository
@@ -25,6 +26,7 @@ data class HomeScreenUiState(
     val isLoading: Boolean = false,
     val recommendedTravels: List<TravelSummaryResponse>? = emptyList(),
     val errorMessage: String? = null,
+    val typeSelected: Type = Type.TRAVEL
 )
 
 @HiltViewModel
@@ -98,6 +100,10 @@ class HomeScreenViewModel @Inject constructor(
                 loadRecommendedTravel(authState.isLogged)
             }
         }
+    }
+
+    fun changeType(type: Type){
+        _uiState.value = _uiState.value.copy(typeSelected = type)
     }
 
     private suspend fun loadRecommendedTravel(isLogged: Boolean) {

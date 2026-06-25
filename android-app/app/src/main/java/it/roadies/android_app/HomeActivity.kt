@@ -71,7 +71,7 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
     val uiState by homeScreenViewModel.uiState.collectAsState()
     val query by homeScreenViewModel.searchQuery.collectAsState()
     val suggestions by homeScreenViewModel.searchSuggestions.collectAsState()
-    var type by remember { mutableStateOf(Type.TRAVEL) }
+    val type = uiState.typeSelected
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Column(
@@ -79,7 +79,7 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             SearchTypeToggle(selectedType = type, onTypeChanged = {
-                typeChanged -> type = typeChanged
+                typeChanged ->  homeScreenViewModel.changeType(typeChanged)
             })
             SearchBar(
                 query = query,

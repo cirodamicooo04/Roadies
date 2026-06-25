@@ -46,6 +46,18 @@
     <string name="available_departures">Partenze disponibili</string>
     <string name="no_available_departures">Nessuna partenza disponibile</string>
     <string name="hours">Ore</string>
+    <string name="create_new_travel">Nuovo viaggio</string>
+    <string name="create_new_activity">Nuova attività</string>
+    <string name="your_travels_and_activities">Le tue attività e viaggi</string>
+    <string name="edit">Modifica</string>
+    <string name="delete">Elimina</string>
+    <string name="no_activities">Non hai ancora attività</string>
+    <string name="no_travels">Non hai ancora viaggi</string>
+    <string name="confirm_deleting">Conferma eliminazione</string>
+    <string name="confirm_deleting_body">Vuoi davvero eliminare %1$s? L\'azione è irreversibile</string>
+    <string name="this_activity">questa attività</string>
+    <string name="this_travel">questo viaggio</string>
+    <string name="cancel">Annulla</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Attivi</string>
