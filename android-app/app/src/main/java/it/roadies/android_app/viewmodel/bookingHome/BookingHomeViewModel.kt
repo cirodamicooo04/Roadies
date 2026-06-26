@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import it.roadies.android_app.client.models.booking.BookingHomeResponse
+import it.roadies.android_app.model.mappers.toHomeResponse
 import it.roadies.android_app.repository.AuthRepository
 import it.roadies.android_app.repository.BookingRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,12 +44,30 @@ class BookingHomeViewModel @Inject constructor(private val repository: BookingRe
 
     init {
         observeAuthState()
+        observeLocalBookings()
     }
-    
+
     fun setFilterType(type: BookingFilterType) {
         _state.update { it.copy(filterType = type) }
     }
-    
+
+    private fun observeLocalBookings() {
+        viewModelScope.launch {
+            repository.activeBookingsFlow().collect { bookings ->
+                _state.update {
+                    it.copy(active = it.active.copy(items = bookings.map { b -> b.toHomeResponse() }))
+                }
+            }
+        }
+        viewModelScope.launch {
+            repository.pastBookingsFlow().collect { bookings ->
+                _state.update {
+                    it.copy(past = it.past.copy(items = bookings.map { b -> b.toHomeResponse() }))
+                }
+            }
+        }
+    }
+
     private fun observeAuthState() {
         viewModelScope.launch {
             authRepository.authState.collectLatest { auth ->
@@ -69,14 +88,15 @@ class BookingHomeViewModel @Inject constructor(private val repository: BookingRe
         if (cur.isLoading || cur.isLast) return
         viewModelScope.launch {
             _state.update { it.copy(active = it.active.copy(isLoading = true)) }
+            // La fetch fa write-through nel DB: la lista si aggiorna via il Flow, non qui.
             val res = repository.getActiveBookings(cur.nextPage, PAGE_SIZE)
             val page = res.data
             _state.update {
                 it.copy(
                     active = it.active.copy(
-                        items = it.active.items + (page?.content ?: emptyList()),
-                        nextPage = it.active.nextPage + 1,
-                        isLast = page?.last ?: true,
+                        // se c'è errore non avanzo la pagina così l'utente può ritentare come quando è offline.
+                        nextPage = if (page != null) it.active.nextPage + 1 else it.active.nextPage,
+                        isLast = if (page != null) page.last else it.active.isLast,
                         isLoading = false
                     ),
                     errorMessage = res.errorMessage
@@ -95,9 +115,8 @@ class BookingHomeViewModel @Inject constructor(private val repository: BookingRe
             _state.update {
                 it.copy(
                     past = it.past.copy(
-                        items = it.past.items + (page?.content ?: emptyList()),
-                        nextPage = it.past.nextPage + 1,
-                        isLast = page?.last ?: true,
+                        nextPage = if (page != null) it.past.nextPage + 1 else it.past.nextPage,
+                        isLast = if (page != null) page.last else it.past.isLast,
                         isLoading = false
                     ),
                     errorMessage = res.errorMessage
