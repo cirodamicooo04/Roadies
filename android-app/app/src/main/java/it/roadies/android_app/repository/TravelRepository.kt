@@ -69,4 +69,8 @@ class TravelRepository @Inject constructor(
     suspend fun deleteTravel(travelId: UUID): ApiResponse<Any> {
         return safeApiCall { viaggiApi.deleteTravel(travelId) }
     }
+
+    suspend fun uploadImage(file: okhttp3.MultipartBody.Part): ApiResponse<it.roadies.android_app.client.models.travel.ImageResponse> {
+        return safeApiCall { viaggiApi.uploadImage(file) }
+    }
 }

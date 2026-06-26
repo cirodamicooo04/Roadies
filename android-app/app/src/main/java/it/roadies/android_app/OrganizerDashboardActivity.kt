@@ -123,7 +123,7 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
             BoxCentered(text = uiState.value.errorMessage)
         } else {
             TravelsActivitiesSection(items = uiState.value.organizerResponse, onTravelCreationClick = {
-
+                navHostController.navigate("create_travel")
             }, onActivityCreationClick = {
 
             }, onTravelOpen = {

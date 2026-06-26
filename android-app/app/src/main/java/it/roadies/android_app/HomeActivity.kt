@@ -90,6 +90,7 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
                         LocationType.CONTINENT -> "search_screen?continent=${suggestion.name}&type=$type"
                         LocationType.COUNTRY -> "search_screen?country=${suggestion.name}&type=$type"
                         LocationType.DESTINATION -> "search_screen?destination=${suggestion.name}&type=$type"
+                        LocationType.ADDRESS -> "search_screen?destination=${suggestion.name}&type=$type"
                     }
                     navHostController.navigate(route)
                 }
@@ -180,6 +181,7 @@ fun SearchBar(
                                     LocationType.CONTINENT -> Icons.Default.Public
                                     LocationType.COUNTRY -> Icons.Default.Flag
                                     LocationType.DESTINATION -> Icons.Default.LocationOn
+                                    LocationType.ADDRESS -> Icons.Default.LocationOn
                                 }
                                 Icon(
                                     imageVector = iconVector, 

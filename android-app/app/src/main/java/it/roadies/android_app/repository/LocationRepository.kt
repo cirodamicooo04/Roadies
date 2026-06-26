@@ -12,7 +12,7 @@ class LocationRepository @Inject constructor(
             val response = photonApi.getSuggestions(query = query)
             if (response.isSuccessful) {
                 val apiResults = response.body()?.features
-                    ?.mapNotNull { it.properties.toSearchSuggestion() } 
+                    ?.mapNotNull { it.toSearchSuggestion() } 
                     ?: emptyList()
                 
                 // Rimuoviamo i cloni
@@ -22,6 +22,24 @@ class LocationRepository @Inject constructor(
             }
         } catch (e: Exception) {
             android.util.Log.e("LocationRepository", "Error fetching from Photon", e)
+            emptyList()
+        }
+    }
+
+    suspend fun getAddressSuggestions(query: String, lat: Double?, lon: Double?): List<SearchSuggestion> {
+        return try {
+            val response = photonApi.getSuggestions(query = query, lat = lat, lon = lon)
+            if (response.isSuccessful) {
+                val apiResults = response.body()?.features
+                    ?.mapNotNull { it.toAddressSuggestion() } 
+                    ?: emptyList()
+                
+                apiResults.distinctBy { it.name }
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LocationRepository", "Error fetching addresses from Photon", e)
             emptyList()
         }
     }

@@ -58,6 +58,25 @@
     <string name="this_activity">questa attività</string>
     <string name="this_travel">questo viaggio</string>
     <string name="cancel">Annulla</string>
+    <string name="next">Avanti</string>
+    <string name="back">Indietro</string>
+    <string name="create_travel_btn">Crea Viaggio</string>
+    <string name="title_label">Titolo</string>
+    <string name="title_placeholder">Es: Avventura in Patagonia</string>
+    <string name="description_placeholder">Descrivi il viaggio...</string>
+    <string name="duration_placeholder">Es: 14</string>
+    <string name="destination_placeholder">Es: Parigi, Francia</string>
+    <string name="search">Cerca</string>
+    <string name="travel_photos_label">Foto del Viaggio</string>
+    <string name="add_photo">Aggiungi Foto</string>>
+    <string name="photo_upload_failed">Fallito</string>
+    <string name="rate_trip_type">Valuta il tipo di viaggio</string>
+    <string name="error_title_invalid">Il titolo deve essere compreso tra 3 e 150 caratteri</string>
+    <string name="error_description_invalid">La descrizione deve essere compresa tra 20 e 1000 caratteri</string>
+    <string name="error_destination_invalid">Seleziona una destinazione valida dalla lista</string>
+    <string name="error_duration_invalid">Inserisci una durata valida (minimo 1 giorno)</string>
+    <string name="itinerary_empty">Il tuo itinerario è vuoto</string>
+    <string name="new_activity">Nuova attività</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Attivi</string>

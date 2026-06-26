@@ -56,6 +56,25 @@
     <string name="this_activity">this activity</string>
     <string name="this_travel">this travel</string>
     <string name="cancel">Cancel</string>
+    <string name="next">Next</string>
+    <string name="back">Back</string>
+    <string name="create_travel_btn">Create Travel</string>
+    <string name="title_label">Title</string>
+    <string name="title_placeholder">Ex: Adventure in Patagonia</string>
+    <string name="description_placeholder">Describe the travel...</string>
+    <string name="duration_placeholder">Ex: 14</string>
+    <string name="destination_placeholder">Ex: Paris, France</string>
+    <string name="search">Search</string>
+    <string name="travel_photos_label">Travel Photos</string>
+    <string name="add_photo">Add Photo</string>>
+    <string name="photo_upload_failed">Failed</string>
+    <string name="rate_trip_type">Rate tripe type</string>
+    <string name="error_title_invalid">Title must be between 3 and 150 characters</string>
+    <string name="error_description_invalid">Description must be between 20 and 1000 characters</string>
+    <string name="error_destination_invalid">Please select a valid destination</string>
+    <string name="error_duration_invalid">Please enter a valid duration</string>
+    <string name="itinerary_empty">Your itinerary is empty</string>
+    <string name="new_activity">New acctivity</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Active</string>

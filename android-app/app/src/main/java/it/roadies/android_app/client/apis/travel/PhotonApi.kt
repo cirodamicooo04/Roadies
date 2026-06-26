@@ -9,8 +9,9 @@ interface PhotonApi {
     @GET("api/")
     suspend fun getSuggestions(
         @Query("q") query: String,
+        @Query("lat") lat: Double? = null,
+        @Query("lon") lon: Double? = null,
         @Query("limit") limit: Int = 10,
         @Query("lang") lang: String = "en"
     ) : Response<PhotonResponse>
-
 }

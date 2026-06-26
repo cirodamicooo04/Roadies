@@ -369,6 +369,9 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             composable(route = "handle_travels"){
                 OrganizerDashboard(navHostController = navHostController)
             }
+            composable(route="create_travel"){
+                TravelCreationScreen(navHostController = navHostController, onNavigateBack = {navHostController.popBackStack()})
+            }
         }
 
     }

@@ -11,9 +11,9 @@ import java.util.UUID;
 
 @Data
 public class TravelCreateRequest {
-    @NotBlank @Size(max = 150)
+    @NotBlank @Size(min = 3,max = 150)
     private String title;
-    @NotBlank @Size(max = 10000)
+    @NotBlank @Size(min = 20,max = 1000)
     private String description;
     @NotNull
     private Continent continent;
