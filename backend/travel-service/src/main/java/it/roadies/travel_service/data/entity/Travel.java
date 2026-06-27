@@ -7,12 +7,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +80,9 @@ public class Travel {
 
     @Column(name = "number_of_ratings", nullable = false)
     private Integer numberOfRatings = 0;
+
+    @Formula("(SELECT MIN(td.price) FROM TRAVEL_DEPARTURE td WHERE td.travel_id = id)")
+    private BigDecimal startingFromPrice = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelDeparture> departures = new ArrayList<>();

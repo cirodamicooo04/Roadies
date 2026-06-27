@@ -24,13 +24,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.navigation
+import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
+import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
+import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
-import java.util.UUID
+import java.math.BigDecimal
+import java.time.LocalDateTime
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,9 +51,10 @@ fun RoadiesApp(
 
     //Per il parametro selected dei NavigationBarItem
     val navBackStackEntry by navHostController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentDestination = navBackStackEntry?.destination
+    val currentRoute = currentDestination?.route
 
-    val bottomRoutes = listOf("home", "travel", "bookings", "chat", "handle_users", "statistics")
+    val bottomRoutes = listOf("home", "home_graph", "travel", "bookings", "chat", "handle_users", "statistics", "handle_travels")
     val showBackButton = currentRoute !in bottomRoutes
 
     val authState by authViewModel.authState.collectAsState()
@@ -99,9 +108,13 @@ fun RoadiesApp(
                 NavigationBar() {
                     if ("ADMIN" in authState.roles) {
                         NavigationBarItem(
-                            selected = currentRoute == "handle_users",
+                            selected = currentDestination?.hierarchy?.any { it.route == "handle_users" } == true,
                             onClick = {
-                                navHostController.navigate("handle_users")
+                                navHostController.navigate("handle_users") {
+                                    popUpTo(navHostController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             },
                             icon = {
                                 Icon(
@@ -115,9 +128,13 @@ fun RoadiesApp(
                         )
 
                         NavigationBarItem(
-                            selected = currentRoute == "statistics",
+                            selected = currentDestination?.hierarchy?.any { it.route == "statistics" } == true,
                             onClick = {
-                                navHostController.navigate("statistics")
+                                navHostController.navigate("statistics") {
+                                    popUpTo(navHostController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             },
                             icon = {
                                 Icon(
@@ -133,9 +150,13 @@ fun RoadiesApp(
                     } else {
 
                         NavigationBarItem(
-                            selected = currentRoute == "home",
+                            selected = currentDestination?.hierarchy?.any { it.route == "home_graph" } == true,
                             onClick = {
-                                navHostController.navigate("home")
+                                navHostController.navigate("home_graph") {
+                                    popUpTo(navHostController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             },
                             icon = {
                                 Icon(
@@ -163,9 +184,13 @@ fun RoadiesApp(
 //                        }
 //                    )
                         NavigationBarItem(
-                            selected = currentRoute == "bookings",
+                            selected = currentDestination?.hierarchy?.any { it.route == "bookings" } == true,
                             onClick = {
-                                navHostController.navigate("bookings")
+                                navHostController.navigate("bookings") {
+                                    popUpTo(navHostController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             },
                             icon = {
                                 Icon(
@@ -179,9 +204,13 @@ fun RoadiesApp(
                         )
                         if (authState.isLogged) {
                             NavigationBarItem(
-                                selected = currentRoute == "chat",
+                                selected = currentDestination?.hierarchy?.any { it.route == "chat" } == true,
                                 onClick = {
-                                    navHostController.navigate(("chat"))
+                                    navHostController.navigate("chat") {
+                                        popUpTo(navHostController.graph.startDestinationId) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 },
                                 icon = {
                                     Icon(
@@ -196,9 +225,13 @@ fun RoadiesApp(
                         }
                         if ("ORGANIZER" in authState.roles) {
                             NavigationBarItem(
-                                selected = currentRoute == "handle_travels",
+                                selected = currentDestination?.hierarchy?.any { it.route == "handle_travels" } == true,
                                 onClick = {
-                                    navHostController.navigate(("handle_travels"))
+                                    navHostController.navigate("handle_travels") {
+                                        popUpTo(navHostController.graph.startDestinationId) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 },
                                 icon = {
                                     Icon(
@@ -222,25 +255,105 @@ fun RoadiesApp(
             NavigationView(
                 navHostController = navHostController,
                 modifier = Modifier.padding(paddingValues),
-                isAdmin = "ADMIN" in authState.roles
+                isAdmin = "ADMIN" in authState.roles,
+                onLoginClick = onLoginClick
             )
         }
     }
 }
 
 @Composable
-fun NavigationView(navHostController: NavHostController, modifier: Modifier = Modifier, isAdmin: Boolean) {
-    val startDestination: String = if (isAdmin) "handle_users" else "home"
+fun NavigationView(navHostController: NavHostController, modifier: Modifier = Modifier, isAdmin: Boolean, onLoginClick: () -> Unit) {
+    val startDestination: String = if (isAdmin) "handle_users" else "home_graph"
 
-    //id di prova
-    val travelId: UUID = UUID.fromString("3e58e89d-81ee-4b7a-a90d-0f6e2b588384")
 
     NavHost(navController = navHostController, startDestination = startDestination, modifier = modifier) {
-        composable(route = "home") {
-            HomeScreen(navHostController)
+        navigation(route="home_graph", startDestination="home"){
+            composable(route = "home") {
+                HomeScreen(navHostController)
+            }
+            composable(route="search_screen?continent={continent}&country={country}&destination={destination}&minPrice={minPrice}&maxPrice={maxPrice}&minDurationDays={minDurationDays}&maxDurationDays={maxDurationDays}&type={type}",
+                arguments = listOf(
+                    navArgument("continent") {type = NavType.StringType; nullable=true},
+                    navArgument("country") {type = NavType.StringType; nullable=true},
+                    navArgument("destination") {type = NavType.StringType; nullable=true},
+                    navArgument("minPrice") {type = NavType.StringType; nullable=true},
+                    navArgument("maxPrice") {type = NavType.StringType; nullable=true},
+                    navArgument("minDurationDays") {type = NavType.StringType; nullable=true},
+                    navArgument("maxDurationDays") {type = NavType.StringType; nullable=true},
+                    navArgument("type") {type = NavType.StringType; nullable=true}
+                )
+            ) {
+               SearchScreen(navHostController = navHostController)
+            }
+
+            composable(route="travel_detail/{id}"){
+                TravelDetailScreen(navHostController=navHostController, onLoginRequest = onLoginClick)
+            }
+
+            composable(route="activity_detail/{id}"){
+                ActivityDetailScreen(navHostController=navHostController, onLoginRequest = onLoginClick)
+            }
+
+            composable(
+                route = "booking_people/{bookingId}?travelId={travelId}&activityId={activityId}",
+                arguments = listOf(
+                    navArgument("bookingId") { type = NavType.StringType },
+                    navArgument("travelId") { type = NavType.StringType; nullable = true; defaultValue = null },
+                    navArgument("activityId") { type = NavType.StringType; nullable = true; defaultValue = null },
+                )
+            ) { backStackEntry ->
+                val bookingId = backStackEntry.arguments?.getString("bookingId").orEmpty()
+                val travelId = backStackEntry.arguments?.getString("travelId")
+                val activityId = backStackEntry.arguments?.getString("activityId")
+
+                BookingStepPeopleScreen(
+                    navController = navHostController,
+                    onConfirmed = { peopleCount ->
+                    }
+                )
+            }
+
+
+
         }
+
+
         composable(route ="bookings"){
-            //Creare un activity con all'interno la composable desiderata che accetta come parametro un NavHostController
+            BookingHomeScreen(navHostController = navHostController)
+        }
+        composable(
+            route = "booking_detail/{principalId}/{travelName}/{peopleCount}/{totalPrice}/{startDate}/{endDate}/{departureType}",
+            arguments = listOf(
+                navArgument("principalId") {type = NavType.StringType},
+                navArgument("travelName") { type = NavType.StringType },
+                navArgument("peopleCount") { type = NavType.IntType },
+                navArgument("totalPrice") { type = NavType.StringType },
+                navArgument("startDate") { type = NavType.StringType },
+                navArgument("endDate") { type = NavType.StringType },
+                navArgument("departureType") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val principalId = backStackEntry.arguments?.getString("principalId").orEmpty()
+            val travelName = backStackEntry.arguments?.getString("travelName").orEmpty()
+            val peopleCount = backStackEntry.arguments?.getInt("peopleCount") ?: 0
+            val totalPrice = BigDecimal(backStackEntry.arguments?.getString("totalPrice") ?: "0")
+
+            val startDateStr = backStackEntry.arguments?.getString("startDate")
+            val endDateStr = backStackEntry.arguments?.getString("endDate")
+            val startDate = startDateStr?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() } ?: LocalDateTime.now()
+            val endDate = endDateStr?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() } ?: LocalDateTime.now()
+            val departureType = backStackEntry.arguments?.getString("departureType").orEmpty()
+
+            BookingDetailScreen(travelName = travelName, peopleCount = peopleCount, startDate = startDate, endDate = endDate, totalPrice = totalPrice,
+                onNavigateToTravel = {
+                    if (departureType == "ACTIVITY") {
+                        navHostController.navigate("activity_detail/$principalId")
+                    } else {
+                        navHostController.navigate("travel_detail/$principalId")
+                    }
+                }
+            )
         }
         composable(route = "handle_users"){
 

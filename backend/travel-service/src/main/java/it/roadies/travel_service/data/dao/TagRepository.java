@@ -15,6 +15,6 @@ import java.util.UUID;
 public interface TagRepository extends JpaRepository<Tag, UUID> {
     Optional<Tag> findByNameIgnoreCase(String name);
     @Modifying
-    @Query(value = "INSERT INTO TRAVEL_TAG (travel_id, tag_id, score) SELECT id, :tagId, :defaultScore FROM travel", nativeQuery = true)
+    @Query(value = "INSERT INTO TRAVEL_TAG (travel_id, tag_id, score) SELECT id, :tagId, :defaultScore FROM TRAVELS", nativeQuery = true)
     void addDefaultTagToAllTravels(@Param("tagId") UUID tagId, @Param("defaultScore") Integer defaultScore);
 }

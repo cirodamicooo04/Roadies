@@ -8,11 +8,14 @@ import it.roadies.booking_service.data.dto.request.BookingCreateRequest;
 import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
 import it.roadies.booking_service.data.dto.request.BookingMemberRequest;
 import it.roadies.booking_service.data.dto.response.BookingDraftResponse;
+import it.roadies.booking_service.data.dto.response.BookingHomeResponse;
 import it.roadies.booking_service.data.dto.response.BookingStatusResponse;
 import it.roadies.booking_service.data.dto.response.BookingStep2Response;
 import it.roadies.booking_service.services.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -99,6 +102,8 @@ public class BookingController {
 //        return ResponseEntity.noContent().build();
 //    }
 
+    //decidere se un utente può eliminare la proprio prenotazione e quindi sviluppare un rimborso tramite paymentService
+    //decidere se un admin può cancellare le pronotazioni dei traveler ed emettere un rimborso.
     @Operation(summary = "Elimina una prenotazione", description = "Permette l'eleminazione una prenotazione precedenetemente creata")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prenotazione eliminata con successo"),
@@ -108,7 +113,34 @@ public class BookingController {
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<Void> deleteBooking(@PathVariable UUID bookingId, @AuthenticationPrincipal Jwt userJwt) {
         bookingService.deleteBooking(bookingId, userJwt.getSubject(), userJwt.getClaimAsString("email"));
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
+    }
+
+
+    @Operation(summary = "Ottieni le prenotazioni passate", description = "Permette di ottenere tutte le prenotazioni passate dell'utente che ne fa richiesta")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Prenotazioni passate restituite con successo"),
+            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
+            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
+    })
+    @PreAuthorize("hasRole('TRAVELER')")
+    @GetMapping("/past")
+    public ResponseEntity<Page<BookingHomeResponse>> getPastBookingsFromUser(@AuthenticationPrincipal Jwt jwt, Pageable pageable){
+        Page<BookingHomeResponse> response = bookingService.getPastBookingsFromUser(jwt.getSubject(), pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Ottieni le prenotazioni attive", description = "Permette di ottenere tutte le prenotazioni attive (non passate) dell'utente che ne fa richiesta")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Prenotazioni attive restituite con successo"),
+            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
+            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
+    })
+    @PreAuthorize("hasRole('TRAVELER')")
+    @GetMapping("/active")
+    public ResponseEntity<Page<BookingHomeResponse>> getActiveBookingsFromUser(@AuthenticationPrincipal Jwt jwt, Pageable pageable){
+        Page<BookingHomeResponse> response = bookingService.getActiveBookingsFromUser(jwt.getSubject(), pageable);
+        return ResponseEntity.ok(response);
     }
 
     //TRAVEL SERVICE RECOMMENDATION

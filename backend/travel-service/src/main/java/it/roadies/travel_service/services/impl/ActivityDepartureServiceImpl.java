@@ -2,6 +2,7 @@ package it.roadies.travel_service.services.impl;
 
 import it.roadies.travel_service.conf.i8n.MessageLang;
 import it.roadies.travel_service.data.dao.ActivityDepartureRepository;
+import it.roadies.travel_service.data.dto.response.ActivityBatchResponse;
 import it.roadies.travel_service.data.entity.ActivityDeparture;
 import it.roadies.travel_service.exceptions.NotEnoughSeatsException;
 import it.roadies.travel_service.exceptions.StatusException;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -55,5 +57,17 @@ public class ActivityDepartureServiceImpl implements ActivityDepartureService {
         return activitySessionRepository.findPriceById(activityDepartureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.departure.not.found")));
     }
 
-
+    @Override
+    public List<ActivityBatchResponse> getActivitiesBatch(List<UUID> activityIds) {
+        List<ActivityDeparture> departures = activitySessionRepository.findAllById(activityIds);
+        return departures.stream()
+                .map(d -> new ActivityBatchResponse(
+                        d.getActivity().getId(),
+                        d.getId(),
+                        d.getActivity() != null ? d.getActivity().getName() : null,
+                        d.getStartTimestamp(),
+                        d.getEndTimestamp()
+                ))
+                .toList();
+    }
 }

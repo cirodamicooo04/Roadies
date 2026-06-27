@@ -5,9 +5,11 @@ import retrofit2.Response
 import com.google.gson.annotations.SerializedName
 
 import it.roadies.android_app.client.models.travel.ActivityCreateRequest
+import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
 import it.roadies.android_app.client.models.travel.ActivityUpdateRequest
 import it.roadies.android_app.client.models.travel.ImageResponse
 import it.roadies.android_app.client.models.travel.OrganizerTravelsActivityResponse
+import it.roadies.android_app.client.models.travel.PageResponse
 import it.roadies.android_app.client.models.travel.TravelCreateRequest
 import it.roadies.android_app.client.models.travel.TravelDepartureCreateRequest
 import it.roadies.android_app.client.models.travel.TravelDepartureResponse
@@ -154,6 +156,9 @@ interface ViaggiApi {
     @GET("api/v1/travels/recommendations")
     suspend fun getRecommendations(): Response<List<TravelSummaryResponse>>
 
+    @GET("api/v1/travels/public/recommendations")
+    suspend fun getPublicRecommendations(): Response<List<TravelSummaryResponse>>
+
     /**
      * GET api/v1/travels/public/{id}
      * Dettaglio viaggio
@@ -241,6 +246,35 @@ interface ViaggiApi {
     @GET("api/v1/travels/public/search")
     suspend fun searchTravels(@Query("page") page: Int? = null, @Query("size") size: Int? = null, @Query("sort") sort: List<String>? = null, @Query("destination") destination: String? = null, @Query("minPrice") minPrice: BigDecimal? = null, @Query("maxPrice") maxPrice: BigDecimal? = null, @Query("minDurationDays") minDurationDays: Int? = null, @Query("maxDurationDays") maxDurationDays: Int? = null, @Query("type") type: String? = "TRAVEL", @Query("continent") continent: ContinentSearchTravels? = null, @Query("country") country: String? = null): Response<Any>
 
+    @GET("api/v1/travels/public/search")
+    suspend fun searchTravelsTyped(
+        @Query("destination") destination: String? = null,
+        @Query("minPrice") minPrice: BigDecimal? = null,
+        @Query("maxPrice") maxPrice: BigDecimal? = null,
+        @Query("minDurationDays") minDurationDays: Int? = null,
+        @Query("maxDurationDays") maxDurationDays: Int? = null,
+        @Query("continent") continent: ContinentSearchTravels? = null,
+        @Query("country") country: String? = null,
+        @Query("page") page: Int? = null,
+        @Query("size") size: Int? = null,
+        @Query("sort") sort: List<String>? = null,
+        @Query("type") type: String = "TRAVEL"
+    ): Response<PageResponse<TravelSummaryResponse>>
+
+    @GET("api/v1/travels/public/search")
+    suspend fun searchActivitiesTyped(
+        @Query("destination") destination: String? = null,
+        @Query("minPrice") minPrice: BigDecimal? = null,
+        @Query("maxPrice") maxPrice: BigDecimal? = null,
+        @Query("minDurationDays") minDurationDays: Int? = null,
+        @Query("maxDurationDays") maxDurationDays: Int? = null,
+        @Query("continent") continent: ContinentSearchTravels? = null,
+        @Query("country") country: String? = null,
+        @Query("page") page: Int? = null,
+        @Query("size") size: Int? = null,
+        @Query("sort") sort: List<String>? = null,
+        @Query("type") type: String = "ACTIVITY"
+    ): Response<PageResponse<ActivitySummaryResponse>>
     /**
      * PUT api/v1/travels/{travelId}/activities/{activityId}
      * Aggiorna attività del viaggio

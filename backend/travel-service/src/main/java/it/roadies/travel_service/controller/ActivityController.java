@@ -8,6 +8,7 @@ import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest
 import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
+import it.roadies.travel_service.data.dto.response.ActivityBatchResponse;
 import it.roadies.travel_service.services.ActivityDepartureService;
 import it.roadies.travel_service.services.ActivityService;
 import jakarta.validation.Valid;
@@ -101,6 +102,13 @@ public class ActivityController {
     }
 
     //BOOKING AREA
+
+    @Operation(summary = "Ottieni dettagli attività in batch", description = "Restituisce i dettagli di una lista di attività.")
+    @PostMapping("/batch")
+    public ResponseEntity<List<ActivityBatchResponse>> getActivitiesBatch(@RequestBody List<UUID> activityIds) {
+        List<ActivityBatchResponse> response = activityDepartureService.getActivitiesBatch(activityIds);
+        return ResponseEntity.ok(response);
+    }
 
     @Operation(summary = "Verifica attività", description = "Verifica se un'attività è valida per il processo di prenotazione.")
     @GetMapping("/{activityId}")

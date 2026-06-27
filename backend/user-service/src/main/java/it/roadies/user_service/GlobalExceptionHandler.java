@@ -28,13 +28,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+
+        String errorMessage = e.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .collect(java.util.stream.Collectors.joining(", "));
+
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Field validation failed")
-                .message(e.getBindingResult().getFieldError() != null
-                        ? e.getBindingResult().getFieldError().getDefaultMessage()
-                        : "Errore di validazione")
+                .message(errorMessage.isEmpty() ? "Errore di validazione" : errorMessage)
                 .path(request.getRequestURI())
                 .build();
 
@@ -158,5 +161,20 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(org.springframework.dao.DataIntegrityViolationException ex, HttpServletRequest request) {
+        log.warn("Violazione di integrità dei dati (es. unicità username/email): {}", ex.getMostSpecificCause().getMessage());
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error(messageLang.getMessage("data.integrity.violation"))
+                .message(messageLang.getMessage("error.conflict"))
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 }

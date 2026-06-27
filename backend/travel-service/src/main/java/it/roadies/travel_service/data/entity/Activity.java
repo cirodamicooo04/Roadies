@@ -4,12 +4,14 @@ import it.roadies.travel_service.data.entity.enumerations.Continent;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +81,9 @@ public class Activity {
 
     @Column(name = "number_of_ratings")
     private Integer numberOfRatings = 0;
+
+    @Formula("(SELECT MIN(ad.price) FROM ACTIVITY_SESSIONS ad WHERE ad.activity_id = id)")
+    private BigDecimal startingFromPrice = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ActivityDeparture> departures;

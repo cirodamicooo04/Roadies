@@ -39,7 +39,6 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     private final RabbitTemplate rabbitTemplate;
 
-    //@PreAuthorize("hasRole('TRAVELER') and #senderId == authentication.name")
     @Override
     @Transactional
     public void sendRequest(String senderId, String receiverUsername) {
@@ -74,7 +73,6 @@ public class FriendshipServiceImpl implements FriendshipService {
         log.info("Richiesta di amicizia inviata con successo");
     }
 
-    //@PreAuthorize("hasRole('TRAVELER') and #currentUserId == authentication.name")
     @Override
     @Transactional
     public void respondToRequest(UUID friendshipId, Status newStatus, String currentUserId) {
@@ -107,14 +105,13 @@ public class FriendshipServiceImpl implements FriendshipService {
             FriendshipEvent event = new FriendshipEvent();
             event.setUserId1(friendship.getRequesterId().getKeycloakId());
             event.setUserId2(friendship.getReceiverId().getKeycloakId());
-            event.setStatus(Status.ACCEPTED);
+            event.setStatus("ACCEPTED");
 
             log.info("Invio evento RabbitMQ 'travel-service.friendship.accepted.queue' per l'amicizia}");
             rabbitTemplate.convertAndSend("user.exchange", "user.friendship.accepted", event);
         }
     }
 
-    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     public List<UserProfileResponseDTO> getFriendsList(String userId) {
         log.info("Recupero lista amici base per l'utente");
@@ -125,7 +122,6 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .collect(Collectors.toList());
     }
 
-    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     public List<FriendshipResponseDTO> getDetailedFriendsList(String userId) {
         log.info("Recupero lista amici dettagliata per l'utente}");
@@ -143,7 +139,6 @@ public class FriendshipServiceImpl implements FriendshipService {
         }).collect(Collectors.toList());
     }
 
-    //@PreAuthorize("hasRole('TRAVELER') and #userId == authentication.name")
     @Override
     public List<FriendshipResponseDTO> getPendingRequests(String userId) {
         log.info("Recupero richieste di amicizia in sospeso per l'utente ID: {}", userId);
@@ -158,7 +153,6 @@ public class FriendshipServiceImpl implements FriendshipService {
         }).collect(Collectors.toList());
     }
 
-    //@PreAuthorize("hasRole('TRAVELER') and #currentUserId == authentication.name")
     @Override
     @Transactional
     public void removeFriend(UUID friendshipId, String currentUserId) {
@@ -184,7 +178,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         FriendshipEvent event = new FriendshipEvent();
         event.setUserId1(friendship.getRequesterId().getKeycloakId());
         event.setUserId2(friendship.getReceiverId().getKeycloakId());
-        event.setStatus(Status.REJECTED);
+        event.setStatus("DELETED");
 
         log.info("Invio evento RabbitMQ 'user.exchange' per l'amicizia rimossa");
         rabbitTemplate.convertAndSend("user.exchange", "user.friendship.deleted", event);

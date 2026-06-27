@@ -19,7 +19,7 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/api/v1/users/**
+            - Path=/api/v1/users/**, /api/v1/user-documents/**
           filters:
             - name: CircuitBreaker
               args:
@@ -46,7 +46,7 @@ spring:
         - id: booking-service
           uri: lb://BOOKING-SERVICE
           predicates:
-            - Path=/api/v1/bookings/**
+            - Path=/api/v1/bookings/**, /api/v1/payments/**, /api/v1/booking-documents/**
           filters:
             - name: CircuitBreaker
               args:
