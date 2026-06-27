@@ -77,6 +77,9 @@
     <string name="error_duration_invalid">Inserisci una durata valida (minimo 1 giorno)</string>
     <string name="itinerary_empty">Il tuo itinerario è vuoto</string>
     <string name="new_activity">Nuova attività</string>
+    <string name="departures">Partenze</string>
+    <string name="new_departure">Nuova partenza</string>
+    <string name="no_departures_added">Nessuna partenza aggiunta</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Attivi</string>
@@ -127,4 +130,14 @@
     <string name="activity_photo">Foto dell\'attività</string>
     <string name="expand">Espandi</string>
 
+    <string name="departure_start_date">Data Inizio</string>
+    <string name="departure_end_date">Data Fine</string>
+    <string name="departure_price">Prezzo (€)</string>
+    <string name="departure_max_slots">Posti Massimi</string>
+    <string name="error_start_date_invalid">Seleziona una data di inizio valida</string>
+    <string name="error_end_date_invalid">La data di fine deve essere successiva all\'inizio</string>
+    <string name="error_price_invalid">Inserisci un prezzo valido maggiore di 0</string>
+    <string name="error_max_slots_invalid">Inserisci un numero di posti valido</string>
+    <string name="error_departure_duration">La durata deve essere esattamente di %1$d giorni</string>
+    <string name="departures_empty">Ancora nessuna partenza aggiunta. Inserisci la prima!</string>
 </resources>

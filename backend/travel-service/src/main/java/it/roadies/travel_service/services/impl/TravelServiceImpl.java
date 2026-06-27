@@ -86,13 +86,26 @@ public class TravelServiceImpl implements TravelService {
 
         Map<UUID, Tag> tagsMap = tagRepository.findAll().stream().collect(Collectors.toMap(Tag::getId, t -> t));
 
-        if (!tagsMap.isEmpty() && (travelCreateRequest.getTagScores() == null || travelCreateRequest.getTagScores().size() < tagsMap.size())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.number.not.valid"));
+        if (!tagsMap.isEmpty()) {
+            if (travelCreateRequest.getTagScores() == null) {
+                log.info("No tag scores provided first");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.number.not.valid"));
+            }
+            Set<UUID> providedTagIds = travelCreateRequest.getTagScores().stream()
+                    .map(TravelTagRequest::getTagId)
+                    .collect(Collectors.toSet());
+            
+            if (!providedTagIds.containsAll(tagsMap.keySet())) {
+                log.info("Provided tag ids {}, tags in db: {}", providedTagIds, tagsMap.keySet());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.number.not.valid"));
+            }
         }
 
         if(travelCreateRequest.getTagScores() != null){
-            List<TravelTagRequest> tagScores = travelCreateRequest.getTagScores();
-            for (TravelTagRequest ts : tagScores.stream().distinct().toList()) {
+            Map<UUID, TravelTagRequest> uniqueTags = travelCreateRequest.getTagScores().stream()
+                    .collect(Collectors.toMap(TravelTagRequest::getTagId, ts -> ts, (existing, replacement) -> existing));
+
+            for (TravelTagRequest ts : uniqueTags.values()) {
                 Tag tag = tagsMap.get(ts.getTagId());
                 if (tag == null) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.not.found"));}
                 TravelTag travelTag = new TravelTag();

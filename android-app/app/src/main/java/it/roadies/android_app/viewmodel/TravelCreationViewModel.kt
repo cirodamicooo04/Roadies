@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import it.roadies.android_app.R
+import it.roadies.android_app.client.models.travel.ActivityCreateRequest
 import it.roadies.android_app.client.models.travel.TravelCreateRequest
 import it.roadies.android_app.repository.TravelRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,11 @@ import it.roadies.android_app.repository.LocationRepository
 import it.roadies.android_app.client.models.travel.LocationType
 import it.roadies.android_app.client.models.travel.SearchSuggestion
 import it.roadies.android_app.client.models.travel.TagResponse
+import it.roadies.android_app.client.models.travel.TravelDepartureCreateRequest
+import it.roadies.android_app.client.models.travel.TravelTagRequest
 import it.roadies.android_app.repository.MetadataRepository
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.UUID
 import javax.inject.Inject
 
@@ -53,12 +58,23 @@ data class TravelActivityState(
     val fieldErrors: Map<String, Int> = emptyMap()
 )
 
+data class TravelCreationDepartureState(
+    val id: UUID = UUID.randomUUID(),
+    val startDate: LocalDate? = null,
+    val endDate: LocalDate? = null,
+    val price: BigDecimal? = null,
+    val maxSlots: Int? = null
+)
+
 data class CreateTravelUiState(
     val currentStep: CreateTravelStep = CreateTravelStep.BASIC_INFO,
     val isLoading: Boolean = false,
     val fieldErrors: Map<String, Int> = emptyMap(),
     val tags: List<TagResponse> = emptyList(),
     val errorMessage: String? = null,
+    val isCreationLoading: Boolean = false,
+    val creationErrorMessage: String? = null,
+    val isCreationSuccess: Boolean = false,
 
 
     //STEP 1:
@@ -77,9 +93,10 @@ data class CreateTravelUiState(
 
     //STEP 2: Activities
     val activities: List<TravelActivityState> = emptyList(),
-    val currentEditingActivity: TravelActivityState? = null
+    val currentEditingActivity: TravelActivityState? = null,
 
     //STEP 3: DEPARTURES
+    val departures: List<TravelCreationDepartureState> = emptyList()
 )
 
 @HiltViewModel
@@ -214,6 +231,23 @@ class TravelCreationViewModel @Inject constructor(
         }
     }
 
+    fun saveDeparture(departure: TravelCreationDepartureState) {
+        _uiState.update { state ->
+            val exists = state.departures.any { it.id == departure.id }
+            val newDepartures = if (exists) {
+                state.departures.map { if (it.id == departure.id) departure else it }
+            } else {
+                state.departures + departure
+            }
+            state.copy(departures = newDepartures)
+        }
+    }
+
+    fun removeDeparture(departureId: UUID) {
+        _uiState.update { state ->
+            state.copy(departures = state.departures.filter { it.id != departureId })
+        }
+    }
 
     fun updateTitle(newTitle: String) {
         _uiState.update { it.copy(title = newTitle, fieldErrors = it.fieldErrors - "title") }
@@ -328,14 +362,74 @@ class TravelCreationViewModel @Inject constructor(
     }
 
     private fun createTravel() {
-        TODO("Not yet implemented")
+        val state = uiState.value
+        val travelImgIds: List<UUID> = state.images.mapNotNull { it.imageUUID }
+
+        val mappedActivities = state.activities.map { act ->
+            ActivityCreateRequest(
+                name = act.name,
+                description = act.description,
+                destination = act.destination,
+                continent = ActivityCreateRequest.Continent.valueOf(act.continent.name),
+                address = act.address,
+                country = act.country,
+                latitude = act.latitude,
+                longitude = act.longitude,
+                dayNumber = act.dayNumber,
+                imageIds = act.images.mapNotNull { it.imageUUID },
+                departures = null
+            )
+        }
+
+        val mappedDepartures = state.departures.map { dep ->
+            TravelDepartureCreateRequest(
+                startDate = dep.startDate!!,
+                endDate = dep.endDate!!,
+                price = dep.price!!,
+                maxSlots = dep.maxSlots!!
+            )
+        }
+
+        val mappedTags = state.tags.mapNotNull { tag ->
+            tag.id?.let { uuid ->
+                TravelTagRequest(
+                    tagId = uuid,
+                    score = state.tagScores[uuid] ?: 3
+                )
+            }
+        }
+
+        val travelCreationDto = TravelCreateRequest(
+            title = state.title,
+            description = state.description,
+            continent = state.continent,
+            durationDays = state.durationDays ?: 1,
+            country = state.country.ifBlank { null },
+            destination = state.destination.ifBlank { null },
+            latitude = state.latitude,
+            longitude = state.longitude,
+            imageIds = travelImgIds,
+            departures = mappedDepartures,
+            activities = mappedActivities,
+            tagScores = mappedTags
+        )
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isCreationLoading = true, creationErrorMessage = null) }
+            val response = travelRepository.createTravel(travelCreationDto)
+            if (response.success && response.data != null) {
+                _uiState.update { it.copy(isCreationLoading = false, isCreationSuccess = true) }
+            } else {
+                _uiState.update { it.copy(isCreationLoading = false, creationErrorMessage = response.errorMessage ?: "Errore sconosciuto durante la creazione") }
+            }
+        }
     }
 
     fun updateTagScore(tagId: UUID, score: Int) {
-        val newTagScores = _uiState.value.tagScores.toMutableMap()
-        newTagScores[tagId] = score
-        _uiState.value = _uiState.value.copy(
-            tagScores = newTagScores
-        )
+        _uiState.update { state ->
+            val newTagScores = state.tagScores.toMutableMap()
+            newTagScores[tagId] = score
+            state.copy(tagScores = newTagScores)
+        }
     }
 }

@@ -73,4 +73,8 @@ class TravelRepository @Inject constructor(
     suspend fun uploadImage(file: okhttp3.MultipartBody.Part): ApiResponse<it.roadies.android_app.client.models.travel.ImageResponse> {
         return safeApiCall { viaggiApi.uploadImage(file) }
     }
+
+    suspend fun createTravel(request: it.roadies.android_app.client.models.travel.TravelCreateRequest): ApiResponse<TravelResponse> {
+        return safeApiCall { viaggiApi.createTravel(request) }
+    }
 }

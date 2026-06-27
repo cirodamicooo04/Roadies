@@ -75,13 +75,16 @@
     <string name="error_duration_invalid">Please enter a valid duration</string>
     <string name="duration_less_than_activties">Duration can\'t be less than activities added</string>
     <string name="itinerary_empty">Your itinerary is empty</string>
-    <string name="new_activity">New acctivity</string>
+    <string name="new_activity">New activity</string>
+    <string name="new_departure">New departure</string>
     <string name="save">Save</string>
     <string name="activity_name_label">Activity Name</string>
     <string name="activity_description_label">Description (optional)</string>
     <string name="insert_address">Search Address</string>
     <string name="day_number_label">Day of the trip (e.g., 1, 2, 3)</string>
     <string name="address_error">You have to select a valid address</string>
+    <string name="departures">Departures</string>
+    <string name="no_departures_added">No departures added yet</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Active</string>
@@ -125,4 +128,14 @@
     <string name="activity_photo">Activity photo</string>
     <string name="expand">Expand</string>
     <string name="hours">Hours</string>
+    <string name="departure_start_date">Start Date</string>
+    <string name="departure_end_date">End Date</string>
+    <string name="departure_price">Price (€)</string>
+    <string name="departure_max_slots">Max Slots</string>
+    <string name="error_start_date_invalid">Please select a valid start date</string>
+    <string name="error_end_date_invalid">End date must be after start date</string>
+    <string name="error_price_invalid">Please enter a valid price greater than 0</string>
+    <string name="error_max_slots_invalid">Please enter a valid number of slots</string>
+    <string name="error_departure_duration">The duration must be exactly %1$d days</string>
+    <string name="departures_empty">No departures added yet. Add your first one!</string>
 </resources>

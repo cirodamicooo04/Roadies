@@ -25,8 +25,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
@@ -35,6 +37,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,12 +48,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -80,8 +87,15 @@ import it.roadies.android_app.utils.ContinentMapper
 import it.roadies.android_app.viewmodel.CreateTravelStep
 import it.roadies.android_app.viewmodel.CreateTravelUiState
 import it.roadies.android_app.viewmodel.TravelActivityState
+import it.roadies.android_app.viewmodel.TravelCreationDepartureState
 import it.roadies.android_app.viewmodel.TravelCreationViewModel
 import it.roadies.android_app.viewmodel.UploadableImage
+import java.math.BigDecimal
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
@@ -92,6 +106,15 @@ fun TravelCreationScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.isCreationSuccess) {
+        if (uiState.isCreationSuccess) {
+            navHostController.navigate("handle_travels") {
+                //distruggo il wizard
+                popUpTo("create_travel") { inclusive = true }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -135,7 +158,13 @@ fun TravelCreationScreen(
                         }
 
                         CreateTravelStep.DEPARTURES -> {
-
+                            val durationDays = uiState.durationDays ?: 1
+                            DeparturesSummaryForm(
+                                departures = uiState.departures,
+                                travelDurationDays = durationDays,
+                                onSaveDeparture = { viewModel.saveDeparture(it) },
+                                onDeleteDeparture = { viewModel.removeDeparture(it) }
+                            )
                         }
                     }
                 }
@@ -145,40 +174,55 @@ fun TravelCreationScreen(
                 tonalElevation = 8.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(
-                        onClick = {
-                            if (uiState.currentStep == CreateTravelStep.BASIC_INFO) {
-                                onNavigateBack()
-                            } else {
-                                viewModel.previousStep()
-                            }
-                        },
-                        enabled = !uiState.images.any {it.isUploading}
-                    ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    if (uiState.creationErrorMessage != null) {
                         Text(
-                            if (uiState.currentStep == CreateTravelStep.BASIC_INFO) stringResource(
-                                R.string.cancel
-                            ) else stringResource(R.string.back)
+                            text = uiState.creationErrorMessage!!,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Button(
-                        onClick = { viewModel.nextStep() },
-                        enabled = !uiState.images.any {it.isUploading}
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            if (uiState.currentStep == CreateTravelStep.DEPARTURES) stringResource(
-                                R.string.create_travel_btn
-                            ) else stringResource(R.string.next)
-                        )
+                        TextButton(
+                            onClick = {
+                                if (uiState.currentStep == CreateTravelStep.BASIC_INFO) {
+                                    onNavigateBack()
+                                } else {
+                                    viewModel.previousStep()
+                                }
+                            },
+                            enabled = !uiState.images.any {it.isUploading} && !uiState.isCreationLoading
+                        ) {
+                            Text(
+                                if (uiState.currentStep == CreateTravelStep.BASIC_INFO) stringResource(
+                                    R.string.cancel
+                                ) else stringResource(R.string.back)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Button(
+                            onClick = { viewModel.nextStep() },
+                            enabled = !uiState.images.any {it.isUploading} && !uiState.isCreationLoading
+                        ) {
+                            if (uiState.isCreationLoading) {
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                            } else {
+                                Text(
+                                    if (uiState.currentStep == CreateTravelStep.DEPARTURES) stringResource(
+                                        R.string.create_travel_btn
+                                    ) else stringResource(R.string.next)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -778,6 +822,309 @@ fun TravelActivityCreationForm(
             ) {
                 Text(stringResource(R.string.save))
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DeparturesSummaryForm(
+    departures: List<TravelCreationDepartureState>,
+    travelDurationDays: Int,
+    onSaveDeparture: (TravelCreationDepartureState) -> Unit,
+    onDeleteDeparture: (UUID) -> Unit
+) {
+    var isModalSheetOpen by remember { mutableStateOf(false) }
+    var departureToEdit by remember { mutableStateOf<TravelCreationDepartureState?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    if (isModalSheetOpen) {
+        ModalBottomSheet(sheetState = sheetState, onDismissRequest = { isModalSheetOpen = false }) {
+            DepartureCreateForm(
+                initialDeparture = departureToEdit,
+                travelDurationDays = travelDurationDays,
+                onSaveClick = { departureState ->
+                    onSaveDeparture(departureState)
+                    isModalSheetOpen = false
+                },
+                onCancelClick = {
+                    isModalSheetOpen = false
+                }
+            )
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(text = stringResource(R.string.departures), fontWeight = FontWeight.Bold, fontSize = 35.sp)
+            Button(onClick = {
+                departureToEdit = null
+                isModalSheetOpen = true
+            }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.new_departure))
+            }
+        }
+
+        if (departures.isEmpty()) {
+            BoxCentered(text = stringResource(R.string.departures_empty))
+        } else {
+            Column(modifier = Modifier.fillMaxWidth().fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                departures.sortedBy { it.startDate }.forEach { departure ->
+                    DepartureSummaryCard(
+                        departure = departure,
+                        onEditClick = {
+                            departureToEdit = departure
+                            isModalSheetOpen = true
+                        },
+                        onDeleteClick = {
+                            onDeleteDeparture(departure.id)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DepartureSummaryCard(
+    departure: TravelCreationDepartureState,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Column {
+                    Text(
+                        text = "${departure.startDate?.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))} - ${departure.endDate?.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "${stringResource(R.string.departure_price)}: ${departure.price} €", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "${stringResource(R.string.departure_max_slots)}: ${departure.maxSlots}", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                IconButton(onClick = onEditClick) {
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Modifica", tint = MaterialTheme.colorScheme.primary)
+                }
+                IconButton(onClick = onDeleteClick) {
+                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Elimina", tint = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DepartureCreateForm(
+    initialDeparture: TravelCreationDepartureState? = null,
+    travelDurationDays: Int,
+    onSaveClick: (TravelCreationDepartureState) -> Unit,
+    onCancelClick: () -> Unit
+) {
+    var startDate by remember(initialDeparture?.id) { mutableStateOf<LocalDate?>(initialDeparture?.startDate) }
+    var endDate by remember(initialDeparture?.id) { mutableStateOf<LocalDate?>(initialDeparture?.endDate) }
+    var priceText by remember(initialDeparture?.id) { mutableStateOf(initialDeparture?.price?.toString() ?: "") }
+    var maxSlotsText by remember(initialDeparture?.id) { mutableStateOf(initialDeparture?.maxSlots?.toString() ?: "") }
+
+    var startDateError by remember { mutableStateOf<String?>(null) }
+    var endDateError by remember { mutableStateOf<String?>(null) }
+    var priceError by remember { mutableStateOf<String?>(null) }
+    var maxSlotsError by remember { mutableStateOf<String?>(null) }
+
+    val errorStartDateStr = stringResource(R.string.error_start_date_invalid)
+    val errorEndDateStr = stringResource(R.string.error_end_date_invalid)
+    val errorDurationStr = stringResource(R.string.error_departure_duration, travelDurationDays)
+    val errorPriceStr = stringResource(R.string.error_price_invalid)
+    val errorMaxSlotsStr = stringResource(R.string.error_max_slots_invalid)
+
+    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(if(initialDeparture == null) R.string.new_departure else R.string.edit), 
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = onCancelClick) {
+                Icon(imageVector = Icons.Default.Close, contentDescription = "Chiudi")
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Box(modifier = Modifier.weight(1f)) {
+                DatePickerField(
+                    label = stringResource(R.string.departure_start_date),
+                    selectedDate = startDate,
+                    onDateSelected = { startDate = it; startDateError = null; endDateError = null },
+                    isError = startDateError != null,
+                    errorMessage = startDateError
+                )
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                DatePickerField(
+                    label = stringResource(R.string.departure_end_date),
+                    selectedDate = endDate,
+                    onDateSelected = { endDate = it; endDateError = null; startDateError = null },
+                    isError = endDateError != null,
+                    errorMessage = endDateError
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            OutlinedTextField(
+                value = priceText,
+                onValueChange = { priceText = it; priceError = null },
+                label = { Text(stringResource(R.string.departure_price)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = priceError != null,
+                supportingText = priceError?.let { { Text(it) } },
+                modifier = Modifier.weight(1f)
+            )
+
+            OutlinedTextField(
+                value = maxSlotsText,
+                onValueChange = { 
+                    if (it.all { char -> char.isDigit() }) {
+                        maxSlotsText = it
+                        maxSlotsError = null 
+                    }
+                },
+                label = { Text(stringResource(R.string.departure_max_slots)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = maxSlotsError != null,
+                supportingText = maxSlotsError?.let { { Text(it) } },
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                var isValid = true
+                
+                if (startDate == null) {
+                    startDateError = errorStartDateStr
+                    isValid = false
+                }
+                if (endDate == null || (startDate != null && endDate!!.isBefore(startDate))) {
+                    endDateError = errorEndDateStr
+                    isValid = false
+                }
+                
+                if (startDate != null && endDate != null && !endDate!!.isBefore(startDate)) {
+                    val daysBetween = ChronoUnit.DAYS.between(startDate, endDate).toInt() + 1
+                    if (daysBetween != travelDurationDays) {
+                        endDateError = errorDurationStr
+                        isValid = false
+                    }
+                }
+
+                val parsedPrice = priceText.toBigDecimalOrNull()
+                if (parsedPrice == null || parsedPrice <= BigDecimal.ZERO) {
+                    priceError = errorPriceStr
+                    isValid = false
+                }
+                val parsedSlots = maxSlotsText.toIntOrNull()
+                if (parsedSlots == null || parsedSlots <= 0) {
+                    maxSlotsError = errorMaxSlotsStr
+                    isValid = false
+                }
+
+                if (isValid) {
+                    val newDeparture = TravelCreationDepartureState(
+                        id = initialDeparture?.id ?: UUID.randomUUID(),
+                        startDate = startDate,
+                        endDate = endDate,
+                        price = parsedPrice,
+                        maxSlots = parsedSlots
+                    )
+                    onSaveClick(newDeparture)
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.save))
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerField(
+    label: String,
+    selectedDate: LocalDate?,
+    onDateSelected: (LocalDate) -> Unit,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+    modifier: Modifier = Modifier
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+    )
+
+    Column(modifier = modifier) {
+        Box {
+            OutlinedTextField(
+                value = selectedDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: "",
+                onValueChange = {},
+                label = { Text(label) },
+                readOnly = true,
+                isError = isError,
+                trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = false,
+                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = if(isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+            // Invisible box over the text field to capture clicks while disabled
+            Box(modifier = Modifier.matchParentSize().clickable { showDialog = true })
+        }
+        if (isError && errorMessage != null) {
+            Text(text = errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 16.dp, top = 4.dp))
+        }
+    }
+
+    if (showDialog) {
+        DatePickerDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val date = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+                        onDateSelected(date)
+                    }
+                    showDialog = false
+                }) {
+                    Text(stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }
