@@ -28,7 +28,12 @@ class LocationRepository @Inject constructor(
 
     suspend fun getAddressSuggestions(query: String, lat: Double?, lon: Double?): List<SearchSuggestion> {
         return try {
-            val response = photonApi.getSuggestions(query = query, lat = lat, lon = lon)
+            val response = photonApi.getSuggestions(
+                query = query, 
+                lat = lat, 
+                lon = lon,
+                osmTag = listOf("!place", "!boundary")
+            )
             if (response.isSuccessful) {
                 val apiResults = response.body()?.features
                     ?.mapNotNull { it.toAddressSuggestion() } 

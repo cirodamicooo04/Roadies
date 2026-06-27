@@ -11,7 +11,8 @@ interface PhotonApi {
         @Query("q") query: String,
         @Query("lat") lat: Double? = null,
         @Query("lon") lon: Double? = null,
-        @Query("limit") limit: Int = 10,
-        @Query("lang") lang: String = "en"
+        @Query("limit") limit: Int = 15,
+        @Query("lang") lang: String = "en",
+        @Query("osm_tag") osmTag: List<String>? = null
     ) : Response<PhotonResponse>
 }

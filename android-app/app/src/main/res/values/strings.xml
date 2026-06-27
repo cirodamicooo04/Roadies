@@ -73,8 +73,15 @@
     <string name="error_description_invalid">Description must be between 20 and 1000 characters</string>
     <string name="error_destination_invalid">Please select a valid destination</string>
     <string name="error_duration_invalid">Please enter a valid duration</string>
+    <string name="duration_less_than_activties">Duration can\'t be less than activities added</string>
     <string name="itinerary_empty">Your itinerary is empty</string>
     <string name="new_activity">New acctivity</string>
+    <string name="save">Save</string>
+    <string name="activity_name_label">Activity Name</string>
+    <string name="activity_description_label">Description (optional)</string>
+    <string name="insert_address">Search Address</string>
+    <string name="day_number_label">Day of the trip (e.g., 1, 2, 3)</string>
+    <string name="address_error">You have to select a valid address</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Active</string>

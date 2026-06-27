@@ -87,6 +87,13 @@
     <string name="booking_people_count">%1$d persone</string>
     <string name="booking_total_price">€%1$.2f</string>
     <string name="booking_not_logged_in">Accedi per vedere le tue prenotazioni</string>
+    <string name="save">Salva</string>
+    <string name="activity_name_label">Nome attività</string>
+    <string name="duration_less_than_activties">La durata non può essere minore delle attività aggiunte</string>
+    <string name="activity_description_label">Descrizione</string>
+    <string name="insert_address">Cerca indirizzo</string>
+    <string name="day_number_label">Giorno del viaggio (es. 1, 2, 3)</string>
+    <string name="address_error">Devi selezionare un indirizzo valido</string>
 
     <!-- booking detail -->
     <string name="booking_detail_title">Dettaglio Prenotazione</string>
@@ -119,4 +126,5 @@
     <string name="in_planning">In programmazione</string>
     <string name="activity_photo">Foto dell\'attività</string>
     <string name="expand">Espandi</string>
+
 </resources>

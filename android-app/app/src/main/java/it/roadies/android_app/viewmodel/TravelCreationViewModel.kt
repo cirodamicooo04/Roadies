@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import it.roadies.android_app.R
 import it.roadies.android_app.client.models.travel.TravelCreateRequest
 import it.roadies.android_app.repository.TravelRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +45,10 @@ data class TravelActivityState(
     val addressSearchQuery: String = "", 
     val latitude: Double? = null, 
     val longitude: Double? = null,
-    val dayNumber: String = "",
+    val dayNumber: Int = 1,
+    val continent: TravelCreateRequest.Continent = TravelCreateRequest.Continent.EUROPE,
+    val country: String = "",
+    val destination: String = "",
     val images: List<UploadableImage> = emptyList(),
     val fieldErrors: Map<String, Int> = emptyMap()
 )
@@ -63,7 +67,7 @@ data class CreateTravelUiState(
     val continent: TravelCreateRequest.Continent = TravelCreateRequest.Continent.EUROPE,
     val country: String = "",
     val destination: String = "",
-    val durationDays: String = "",
+    val durationDays: Int? = null,
 
     val latitude: Double? = null,
     val longitude: Double? = null,
@@ -90,6 +94,9 @@ class TravelCreationViewModel @Inject constructor(
 
     private val _locationSuggestions = MutableStateFlow<List<SearchSuggestion>>(emptyList())
     val locationSuggestions = _locationSuggestions.asStateFlow()
+
+    private val _addressSuggestions = MutableStateFlow<List<SearchSuggestion>>(emptyList())
+    val addressSuggestions = _addressSuggestions.asStateFlow()
 
     init {
         loadTags()
@@ -123,6 +130,25 @@ class TravelCreationViewModel @Inject constructor(
 
     fun clearLocationSuggestions() {
         _locationSuggestions.value = emptyList()
+    }
+
+    fun searchAddresses(query: String) {
+        if (query.length > 2) {
+            viewModelScope.launch {
+                val results = locationRepository.getAddressSuggestions(
+                    query = query,
+                    lat = _uiState.value.latitude,
+                    lon = _uiState.value.longitude
+                )
+                _addressSuggestions.value = results
+            }
+        } else {
+            _addressSuggestions.value = emptyList()
+        }
+    }
+
+    fun clearAddressSuggestions() {
+        _addressSuggestions.value = emptyList()
     }
 
     fun uploadImagesFromGallery(uris: List<Uri>){
@@ -170,6 +196,25 @@ class TravelCreationViewModel @Inject constructor(
         }
     }
 
+    fun saveActivity(activity: TravelActivityState) {
+        _uiState.update { state ->
+            val exists = state.activities.any { it.id == activity.id }
+            val newActivities = if (exists) {
+                state.activities.map { if (it.id == activity.id) activity else it }
+            } else {
+                state.activities + activity
+            }
+            state.copy(activities = newActivities)
+        }
+    }
+
+    fun removeActivity(activityId: UUID) {
+        _uiState.update { state ->
+            state.copy(activities = state.activities.filter { it.id != activityId })
+        }
+    }
+
+
     fun updateTitle(newTitle: String) {
         _uiState.update { it.copy(title = newTitle, fieldErrors = it.fieldErrors - "title") }
     }
@@ -179,8 +224,10 @@ class TravelCreationViewModel @Inject constructor(
     }
 
     fun updateDurationDays(newDuration: String) {
-        if (newDuration.all { it.isDigit() }) {
-            _uiState.update { it.copy(durationDays = newDuration, fieldErrors = it.fieldErrors - "durationDays") }
+        if (newDuration.isBlank()) {
+            _uiState.update { it.copy(durationDays = null, fieldErrors = it.fieldErrors - "durationDays") }
+        } else if (newDuration.all { it.isDigit() }) {
+            _uiState.update { it.copy(durationDays = newDuration.toIntOrNull(), fieldErrors = it.fieldErrors - "durationDays") }
         }
     }
 
@@ -219,25 +266,28 @@ class TravelCreationViewModel @Inject constructor(
                 val errors = mutableMapOf<String, Int>()
 
                 if (currentState.title.isBlank() || currentState.title.length < 3 || currentState.title.length > 150) {
-                    errors["title"] = it.roadies.android_app.R.string.error_title_invalid
+                    errors["title"] = R.string.error_title_invalid
                 }
 
                 if (currentState.description.isBlank() || currentState.description.length > 10000 || currentState.description.length < 20) {
-                    errors["description"] = it.roadies.android_app.R.string.error_description_invalid
+                    errors["description"] = R.string.error_description_invalid
                 }
 
                 if (currentState.latitude == null || currentState.longitude == null || 
                     currentState.country.isBlank() || currentState.destination.isBlank()) {
-                    errors["destination"] = it.roadies.android_app.R.string.error_destination_invalid
+                    errors["destination"] = R.string.error_destination_invalid
                 } else {
                     if (currentState.latitude !in -90.0..90.0 || currentState.longitude !in -180.0..180.0) {
-                        errors["destination"] = it.roadies.android_app.R.string.error_destination_invalid
+                        errors["destination"] = R.string.error_destination_invalid
                     }
                 }
 
-                val duration = currentState.durationDays.toIntOrNull()
+                val duration = currentState.durationDays
                 if (duration == null || duration < 1) {
-                    errors["durationDays"] = it.roadies.android_app.R.string.error_duration_invalid
+                    errors["durationDays"] = R.string.error_duration_invalid
+                }
+                if (duration != null && duration < _uiState.value.activities.size){
+                    errors["durationDays"] = R.string.duration_less_than_activties
                 }
 
                 if (errors.isNotEmpty()) {

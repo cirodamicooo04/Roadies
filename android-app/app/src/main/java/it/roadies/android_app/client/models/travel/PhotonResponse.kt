@@ -37,7 +37,14 @@ data class PhotonFeature(
 
     fun toAddressSuggestion(): SearchSuggestion? {
         val props = properties
-        if (props.osmValue in listOf("city", "town", "village", "municipality", "state", "country", "continent")) {
+        // Escludiamo tutto ciò che è palesemente una zona generica, città, regione o nazione
+        val excludedKeys = listOf("boundary", "place")
+        val excludedValues = listOf(
+            "city", "town", "village", "municipality", "state", "country", "continent",
+            "county", "region", "province", "administrative", "hamlet", "suburb", "quarter", "neighbourhood", "island"
+        )
+        
+        if (props.osmKey in excludedKeys || props.osmValue in excludedValues) {
             return null
         }
 
@@ -45,11 +52,14 @@ data class PhotonFeature(
         val lon = geometry?.coordinates?.getOrNull(0)
 
         val addressParts = mutableListOf<String>()
-        if (!props.street.isNullOrBlank()) {
+        
+        if (!props.name.isNullOrBlank()) {
+            addressParts.add(props.name)
+        }
+        
+        if (!props.street.isNullOrBlank() && props.street != props.name) {
             val streetWithNumber = if (!props.housenumber.isNullOrBlank()) "${props.street} ${props.housenumber}" else props.street
             addressParts.add(streetWithNumber)
-        } else if (!props.name.isNullOrBlank()) {
-            addressParts.add(props.name)
         }
 
         if (addressParts.isEmpty()) return null
