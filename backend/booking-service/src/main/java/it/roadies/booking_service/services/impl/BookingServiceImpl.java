@@ -326,6 +326,7 @@ public class BookingServiceImpl implements BookingService {
 
             if (includeBooking) {
                 BookingHomeResponse dto = new BookingHomeResponse();
+                dto.setBookingId(booking.getId());
                 dto.setPrincipalId(principalId);
                 dto.setTravelName(title);
                 dto.setPeopleCount(booking.getPeopleCount());

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 @Data
 public class BookingHomeResponse {
+    private UUID bookingId;
     private UUID principalId;
     private String travelName;
     private Integer peopleCount;

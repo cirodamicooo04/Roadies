@@ -6,6 +6,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class BookingHomeResponse(
+    @SerializedName("bookingId")
+    val bookingId: UUID? = null,
     @SerializedName("principalId")
     val principalId: UUID? = null,
     @SerializedName("travelName")
