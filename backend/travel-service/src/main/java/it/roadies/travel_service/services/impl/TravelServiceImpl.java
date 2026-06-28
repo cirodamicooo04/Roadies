@@ -29,6 +29,7 @@ import org.springframework.web.servlet.View;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,9 +53,20 @@ public class TravelServiceImpl implements TravelService {
             if (!departure.getStartDate().isBefore(departure.getEndDate())){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departures.dates.not.valid"));
             }
+
+            long departureDuration = ChronoUnit.DAYS.between(departure.getStartDate(), departure.getEndDate());
+            if (departureDuration != travel.getDurationDays()){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departures.duration.not.equal.travel.duration"));
+            }
         }
 
         if (travel.getActivities() != null) {
+            List<Integer> dayNumbers = travel.getActivities().stream().map(Activity::getDayNumber).toList();
+
+            if (dayNumbers.size() != new HashSet<>(dayNumbers).size()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.activities.daynumber.not.unique"));
+            }
+
             for (Activity activity : travel.getActivities()) {
                 if (activity.getDayNumber() == null) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "error.daynumber.not.present");
