@@ -19,5 +19,5 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     List<User> findAllByEnabledFalse();
 
-    List<User> findAllByEnabledTrueAndOrganizerRequestStatus(OrganizerRequestStatus organizerRequestStatus);
+    List<User> findAllByEnabledTrueAndOrganizerRequestStatus(OrganizerRequestStatus status);
 }

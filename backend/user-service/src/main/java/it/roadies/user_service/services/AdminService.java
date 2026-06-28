@@ -12,4 +12,5 @@ public interface AdminService {
     void demoteOrganizerToUser(String keycloakId);
     void reviewOrganizerRequest(String targetKeycloakId, boolean approved, String reason);
     List<PendingOrganizerRequestResponseDTO> getPendingOrganizerRequests();
+    List<UserResponseDTO> getUsersByFilter(String filter);
 }
