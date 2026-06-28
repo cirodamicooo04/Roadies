@@ -5,14 +5,11 @@ import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.BookingMemberDTO;
 import it.roadies.booking_service.data.dto.event.GamificationEvent;
 import it.roadies.booking_service.data.dto.event.NotificationEvent;
-import it.roadies.booking_service.data.dto.response.MemberIdResponse;
+import it.roadies.booking_service.data.dto.response.*;
 import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.booking_service.data.dto.request.BookingCreateRequest;
 import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
 import it.roadies.booking_service.data.dto.request.BookingMemberRequest;
-import it.roadies.booking_service.data.dto.response.BookingDraftResponse;
-import it.roadies.booking_service.data.dto.response.BookingStatusResponse;
-import it.roadies.booking_service.data.dto.response.BookingStep2Response;
 import it.roadies.booking_service.data.entities.Booking;
 import it.roadies.booking_service.data.entities.BookingMember;
 import it.roadies.booking_service.data.entities.MemberDocument;
@@ -30,13 +27,19 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -235,6 +238,115 @@ public class BookingServiceImpl implements BookingService {
                 }
             }
         }
+    }
+
+    @Override
+    public Page<BookingHomeResponse> getPastBookingsFromUser(String userJwt, Pageable pageable) {
+        return getBookingsByTimeStatus(userJwt, true, pageable);
+    }
+
+    @Override
+    public Page<BookingHomeResponse> getActiveBookingsFromUser(String userJwt, Pageable pageable) {
+        return getBookingsByTimeStatus(userJwt, false, pageable);
+    }
+
+    private Page<BookingHomeResponse> getBookingsByTimeStatus(String userJwt, boolean fetchPast, Pageable pageable) {
+        // Fetch di tutte le prenotazioni confermate dell'utente
+        List<Booking> bookings = bookingRepository.findAllByUserIdAndStatus(userJwt, BookingStatus.CONFIRMED, Pageable.unpaged());
+
+        List<UUID> travelIds = bookings.stream()
+                .map(Booking::getTravelId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        List<UUID> activityIds = bookings.stream()
+                .map(Booking::getActivityId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        Map<UUID, TravelBatchResponse> travelMap = new HashMap<>();
+        if (!travelIds.isEmpty()) {
+            List<TravelBatchResponse> travels = travelService.getTravelsBatch(travelIds);
+            if (travels != null) {
+                for (TravelBatchResponse t : travels) {
+                    travelMap.put(t.getDepartureId(), t);
+                }
+            }
+        }
+
+        Map<UUID, ActivityBatchResponse> activityMap = new HashMap<>();
+        if (!activityIds.isEmpty()) {
+            List<ActivityBatchResponse> activities = travelService.getActivitiesBatch(activityIds);
+            if (activities != null) {
+                for (ActivityBatchResponse a : activities) {
+                    activityMap.put(a.getDepartureId(), a);
+                }
+            }
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        List<BookingHomeResponse> filteredBookings = new ArrayList<>();
+
+        for (Booking booking : bookings) {
+            UUID principalId = null;
+            String title = null;
+            boolean includeBooking = false;
+            LocalDateTime startDate = null;
+            LocalDateTime endDate = null;
+            DepartureType departureType = DepartureType.TRAVEL;
+
+            if (booking.getTravelId() != null) {
+                TravelBatchResponse travel = travelMap.get(booking.getTravelId());
+                if (travel != null) {
+                    title = travel.getTitle();
+                    principalId = travel.getPricipalTravelId();
+                    startDate = travel.getStartDate().atStartOfDay();
+                    endDate = travel.getEndDate().atStartOfDay();
+                    if (travel.getEndDate() != null) {
+                        boolean isBeforeNow = travel.getEndDate().isBefore(now.toLocalDate());
+                        includeBooking = (fetchPast && isBeforeNow) || (!fetchPast && !isBeforeNow);
+                    }
+                }
+            } else if (booking.getActivityId() != null) {
+                ActivityBatchResponse activity = activityMap.get(booking.getActivityId());
+                if (activity != null) {
+                    departureType = DepartureType.ACTIVITY;
+                    title = activity.getTitle();
+                    principalId = activity.getPricipalActivityId();
+                    startDate = activity.getStartDate();
+                    endDate = activity.getEndDate();
+                    if (activity.getEndDate() != null) {
+                        boolean isBeforeNow = activity.getEndDate().isBefore(now);
+                        includeBooking = (fetchPast && isBeforeNow) || (!fetchPast && !isBeforeNow);
+                    }
+                }
+            }
+
+            if (includeBooking) {
+                BookingHomeResponse dto = new BookingHomeResponse();
+                dto.setBookingId(booking.getId());
+                dto.setPrincipalId(principalId);
+                dto.setTravelName(title);
+                dto.setPeopleCount(booking.getPeopleCount());
+                dto.setTotalPrice(booking.getTotalPrice());
+                dto.setStartDate(startDate);
+                dto.setEndDate(endDate);
+                dto.setDepartureType(departureType);
+                filteredBookings.add(dto);
+            }
+        }
+
+        // paginazione
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), filteredBookings.size());
+        List<BookingHomeResponse> pagedList = new ArrayList<>();
+        if (start <= filteredBookings.size()) {
+            pagedList = filteredBookings.subList(start, end);
+        }
+
+        return new PageImpl<>(pagedList, pageable, filteredBookings.size());
     }
 
     @Transactional

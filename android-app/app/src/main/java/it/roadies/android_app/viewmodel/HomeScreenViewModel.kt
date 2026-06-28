@@ -104,9 +104,14 @@ class HomeScreenViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
         if (!isLogged) {
-            // TODO: chiamare endpoint pubblico per 10 viaggi casuali
-            val travels = emptyList<TravelSummaryResponse>()
-            _uiState.value = HomeScreenUiState(isLoading = false, recommendedTravels = travels)
+            val response  = travelRepository.getPublicRecommendations()
+
+            if (response.success && response.data != null){
+                _uiState.value = HomeScreenUiState(isLoading = false, recommendedTravels = response.data)
+            } else {
+                _uiState.value = HomeScreenUiState(isLoading = false, errorMessage = response.errorMessage)
+            }
+
         } else {
             val response = travelRepository.getRecommendations()
 

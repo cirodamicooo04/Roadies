@@ -26,7 +26,66 @@
     <string name="search_results">Risultati Ricerca</string>
     <string name="price_range">Fascia di prezzo</string>
     <string name="duration_days">Durata (Giorni)</string>
-    <string name="apply_filters">Applica Filtri</string>
+    <string name="apply_filters">Applica filtri</string>
     <string name="search_error">Errore durante la ricerca</string>
     <string name="reset">Azzera</string>
+    <string name="apply_sorting">Applica ordinamento</string>
+    <string name="price_asc">Prezzo crescente</string>
+    <string name="price_desc">Prezzo decrescente</string>
+    <string name="duration_asc">Durata crescente</string>
+    <string name="duration_desc">Durata decrescente</string>
+    <string name="travel_id_not_valid">ID del viaggio non valido</string>
+    <string name="error_loading_travel">Errore durante il caricamento del viaggio</string>
+    <string name="check_availability">Controlla disponibilità</string>
+    <string name="is_this_travel_for_me">Questo viaggio fa per me?</string>
+    <string name="description">Descrizione</string>
+    <string name="day">Giorno</string>
+    <string name="no_description_available">Nessuna descrizione disponibile</string>
+    <string name="show_more">Leggi di più</string>
+    <string name="show_less">Mostra meno </string>
+    <string name="available_departures">Partenze disponibili</string>
+    <string name="no_available_departures">Nessuna partenza disponibile</string>
+    <string name="hours">Ore</string>
+
+    <!-- booking -->
+    <string name="booking_tab_active">Attivi</string>
+    <string name="booking_tab_past">Passati</string>
+    <string name="booking_empty_active">Nessuna prenotazione attiva</string>
+    <string name="booking_empty_past">Nessuna prenotazione passata</string>
+    <string name="booking_load_more">Carica altre</string>
+    <string name="booking_people_count">%1$d persone</string>
+    <string name="booking_total_price">€%1$.2f</string>
+    <string name="booking_not_logged_in">Accedi per vedere le tue prenotazioni</string>
+
+    <!-- booking detail -->
+    <string name="booking_detail_title">Dettaglio Prenotazione</string>
+    <string name="booking_detail_back">Indietro</string>
+    <string name="booking_detail_info_title">Informazioni Prenotazione</string>
+    <string name="booking_detail_people_label">Partecipanti</string>
+    <string name="booking_detail_price_label">Prezzo Totale</string>
+    <string name="booking_detail_start_date">Data d\'inizio</string>
+    <string name="booking_detail_end_date">Data di fine</string>
+    <string name="booking_detail_view_travel">Dettagli viaggio</string>
+
+    <string name="booking_without_seats">Posti non disponibili. Scegli un altro viaggio</string>
+    <string name="booking_searching_seats">Stiamo cercando posti disponibili…</string>
+    <string name="booking_step_1_of_4">Passo 1 di 4</string>
+    <string name="booking_people_title">Quante persone?</string>
+    <string name="booking_people_subtitle">Seleziona il numero di ospiti per la prenotazione</string>
+    <string name="booking_decrease">Diminuisci</string>
+    <string name="booking_increase">Aumenta</string>
+    <string name="booking_continue">Continua</string>
+    <string name="booking_cancel">Annulla</string>
+    <string name="booking_person">persona</string>
+    <string name="booking_people">persone</string>
+    <string name="departure_outbound">Andata: </string>
+    <string name="departure_return">Ritorno: </string>
+    <string name="not_available_abbr">N/D</string>
+    <string name="to_be_decided_abbr">TBD</string>
+    <string name="sold_out">SOLD OUT</string>
+    <string name="available_seats">Posti disponibili: %1$d</string>
+    <string name="book_now">Prenota</string>
+    <string name="in_planning">In programmazione</string>
+    <string name="activity_photo">Foto dell\'attività</string>
+    <string name="expand">Espandi</string>
 </resources>

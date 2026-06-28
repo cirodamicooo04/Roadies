@@ -1,4 +1,4 @@
-package it.roadies.android_app.ui.booking
+package it.roadies.android_app.ui.bookingFlow
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
@@ -11,23 +11,24 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import it.roadies.android_app.ui.booking.components.BookingErrorText
-import it.roadies.android_app.ui.booking.components.BookingStepBottomBar
-import it.roadies.android_app.ui.booking.components.BookingStepHeader
-import it.roadies.android_app.ui.booking.components.BookingStepProgressBar
-import it.roadies.android_app.ui.booking.components.LoadingOverlay
-import it.roadies.android_app.ui.theme.AndroidappTheme
-import it.roadies.android_app.viewmodel.booking.BookingStatus
-import it.roadies.android_app.viewmodel.booking.BookingViewModel
+import androidx.navigation.NavHostController
+import it.roadies.android_app.ui.bookingFlow.components.BookingErrorText
+import it.roadies.android_app.ui.bookingFlow.components.BookingStepBottomBar
+import it.roadies.android_app.ui.bookingFlow.components.BookingStepHeader
+import it.roadies.android_app.ui.bookingFlow.components.BookingStepProgressBar
+import it.roadies.android_app.ui.bookingFlow.components.LoadingOverlay
+import it.roadies.android_app.viewmodel.bookingFlow.BookingStatus
+import it.roadies.android_app.viewmodel.bookingFlow.BookingViewModel
+import it.roadies.android_app.R
 
 @Composable
-fun BookingStepPeopleScreen(onConfirmed: (peopleCount: Int) -> Unit, viewModel: BookingViewModel = hiltViewModel()) {
+fun BookingStepPeopleScreen(navController: NavHostController, onConfirmed: (peopleCount: Int) -> Unit, viewModel: BookingViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.status) {
@@ -35,7 +36,7 @@ fun BookingStepPeopleScreen(onConfirmed: (peopleCount: Int) -> Unit, viewModel: 
     }
 
     val errorMessage = when {
-        state.status == BookingStatus.RESERVE_REJECTED -> "Posti non disponibili. Scegli un altro viaggio."
+        state.status == BookingStatus.RESERVE_REJECTED -> stringResource(R.string.booking_without_seats)
         else -> state.error
     }
 
@@ -47,11 +48,11 @@ fun BookingStepPeopleScreen(onConfirmed: (peopleCount: Int) -> Unit, viewModel: 
             onIncrease = { viewModel.increasePeopleCount() },
             onDecrease = { viewModel.decreasePeopleCount() },
             onNext = { viewModel.onNext() },
-            onBack = { viewModel.onBack() }
+            onBack = {navController.popBackStack()}
         )
 
         if (state.isLoading) {
-            LoadingOverlay(message = "Stiamo cercando posti disponibili...")
+            LoadingOverlay(message = stringResource(R.string.booking_searching_seats))
         }
     }
 }
@@ -76,14 +77,14 @@ fun BookingStepPeopleContent(
 
         // progress bar
         Spacer(modifier = Modifier.height(40.dp))
-        BookingStepProgressBar(stepLabel = "Passo 1 di 4", progress = 0.25f)
+        BookingStepProgressBar(stepLabel = stringResource(R.string.booking_step_1_of_4), progress = 0.25f)
 
         Spacer(modifier = Modifier.weight(1f))
 
         // icona + titolo
         BookingStepHeader(
-            title = "Quante persone?",
-            subtitle = "Seleziona il numero di ospiti per la prenotazione",
+            title = stringResource(R.string.booking_people_title),
+            subtitle = stringResource(R.string.booking_people_subtitle),
             icon = Icons.Default.Person
         )
 
@@ -117,7 +118,7 @@ fun BookingStepPeopleContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Remove,
-                        contentDescription = "Diminuisci",
+                        contentDescription = stringResource(R.string.booking_decrease),
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -146,7 +147,7 @@ fun BookingStepPeopleContent(
                         )
                     }
                     Text(
-                        text = if (peopleCount == 1) "persona" else "persone",
+                        text = if (peopleCount == 1) stringResource(R.string.booking_person) else stringResource(R.string.booking_people),
                         style = MaterialTheme.typography.labelLarge,
                         color = colorScheme.onSurfaceVariant
                     )
@@ -164,7 +165,7 @@ fun BookingStepPeopleContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Aumenta",
+                        contentDescription = stringResource(R.string.booking_increase),
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -208,57 +209,13 @@ fun BookingStepPeopleContent(
 
         // navigazione
         BookingStepBottomBar(
-            primaryLabel = "Continua",
+            primaryLabel = stringResource(R.string.booking_continue),
             onPrimary = onNext,
             primaryEnabled = !isLoading,
-            secondaryLabel = "Annulla",
+            secondaryLabel = stringResource(R.string.booking_cancel),
             onSecondary = onBack,
             secondaryEnabled = !isLoading,
             modifier = Modifier.padding(bottom = 32.dp)
-        )
-    }
-}
-
-
-@Preview(showBackground = true, name = "Booking People Screen - 1 persona")
-@Composable
-fun BookingStepPeoplePreview() {
-    AndroidappTheme {
-        BookingStepPeopleContent(
-            peopleCount = 1,
-            onIncrease = {},
-            onDecrease = {},
-            onNext = {},
-            onBack = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Booking People Screen - 9 persone")
-@Composable
-fun BookingStepPeoplePreviewSingle() {
-    AndroidappTheme {
-        BookingStepPeopleContent(
-            peopleCount = 9,
-            onIncrease = {},
-            onDecrease = {},
-            onNext = {},
-            onBack = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Booking People Screen - errore")
-@Composable
-fun BookingStepPeoplePreviewError() {
-    AndroidappTheme {
-        BookingStepPeopleContent(
-            peopleCount = 3,
-            error = "Posti non disponibili. Scegli un altro viaggio.",
-            onIncrease = {},
-            onDecrease = {},
-            onNext = {},
-            onBack = {}
         )
     }
 }

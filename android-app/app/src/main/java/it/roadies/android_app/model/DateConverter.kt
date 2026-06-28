@@ -1,8 +1,11 @@
-package it.roadies.android_app.model // Mettilo nel package appropriato
+package it.roadies.android_app.model
 
 import androidx.room.TypeConverter
+import it.roadies.android_app.client.models.booking.DepartureType
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 
 class DateConverter {
     @TypeConverter
@@ -23,5 +26,33 @@ class DateConverter {
     @TypeConverter
     fun toLocalDateTime(dateTimeString: String): LocalDateTime {
         return LocalDateTime.parse(dateTimeString)
+    }
+
+    @TypeConverter
+    fun fromBigDecimal(bigDecimal: BigDecimal?): String? {
+        return bigDecimal?.toString()
+    }
+
+    @TypeConverter
+    fun toBigDecimal(value: String?): BigDecimal? {
+        return value?.let { BigDecimal(it) }
+    }
+
+    @TypeConverter
+    fun fromUUID(uuid: UUID?): String? {
+        return uuid?.toString()
+    }
+    @TypeConverter
+    fun toUUID(uuidString: String?): UUID? {
+        return uuidString?.let { UUID.fromString(it) }
+    }
+
+    @TypeConverter
+    fun fromDepartureType(departureType: DepartureType?): String? {
+        return departureType?.name
+    }
+    @TypeConverter
+    fun toDepartureType(value: String?): DepartureType? {
+        return value?.let { DepartureType.valueOf(it) }
     }
 }

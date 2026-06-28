@@ -25,7 +25,66 @@
     <string name="search_results">Search Results</string>
     <string name="price_range">Price Range</string>
     <string name="duration_days">Duration (Days)</string>
-    <string name="apply_filters">Apply Filters</string>
+    <string name="apply_filters">Apply filters</string>
     <string name="search_error">Error during search</string>
     <string name="reset">Reset</string>
+    <string name="apply_sorting">Apply sorting</string>
+    <string name="price_asc">Prezzo crescente</string>
+    <string name="price_desc">Prezzo decrescente</string>
+    <string name="duration_asc">Durata crescente</string>
+    <string name="duration_desc">Durata decrescente</string>
+    <string name="travel_id_not_valid">Travel ID not valid</string>
+    <string name="error_loading_travel">Error while laoding travel</string>
+    <string name="check_availability">Check availability</string>
+    <string name="is_this_travel_for_me">Is this travel for me?</string>
+    <string name="description">Description</string>
+    <string name="day">Day</string>
+    <string name="no_description_available">No description available</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+    <string name="available_departures">Available departures</string>
+    <string name="no_available_departures">No available departures</string>
+
+    <!-- booking -->
+    <string name="booking_tab_active">Active</string>
+    <string name="booking_tab_past">Past</string>
+    <string name="booking_empty_active">No active bookings</string>
+    <string name="booking_empty_past">No past bookings</string>
+    <string name="booking_load_more">Load more</string>
+    <string name="booking_people_count">%1$d people</string>
+    <string name="booking_total_price">€%1$.2f</string>
+    <string name="booking_not_logged_in">Log in to see your bookings</string>
+
+    <!-- booking detail -->
+    <string name="booking_detail_title">Booking Detail</string>
+    <string name="booking_detail_back">Back</string>
+    <string name="booking_detail_info_title">Booking Information</string>
+    <string name="booking_detail_people_label">Participants</string>
+    <string name="booking_detail_price_label">Total Price</string>
+    <string name="booking_detail_start_date">Start Date</string>
+    <string name="booking_detail_end_date">End Date</string>
+    <string name="booking_detail_view_travel">View travel details</string>
+
+    <string name="booking_without_seats">No seats avaible. Choose another trip</string>
+    <string name="booking_searching_seats">We\'re searching for available seats…</string>
+    <string name="booking_step_1_of_4">Step 1 of 4</string>
+    <string name="booking_people_title">How many people?</string>
+    <string name="booking_people_subtitle">Select the number of guests for the booking</string>
+    <string name="booking_decrease">Decrease</string>
+    <string name="booking_increase">Increase</string>
+    <string name="booking_continue">Continue</string>
+    <string name="booking_cancel">Cancel</string>
+    <string name="booking_person">person</string>
+    <string name="booking_people">people</string>
+    <string name="departure_outbound">Outbound: </string>
+    <string name="departure_return">Return: </string>
+    <string name="not_available_abbr">N/A</string>
+    <string name="to_be_decided_abbr">TBD</string>
+    <string name="sold_out">SOLD OUT</string>
+    <string name="available_seats">Available seats: %1$d</string>
+    <string name="book_now">Book</string>
+    <string name="in_planning">In planning</string>
+    <string name="activity_photo">Activity photo</string>
+    <string name="expand">Expand</string>
+    <string name="hours">Hours</string>
 </resources>

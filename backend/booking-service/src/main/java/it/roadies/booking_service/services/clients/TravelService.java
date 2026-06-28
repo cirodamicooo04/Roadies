@@ -6,6 +6,8 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import it.roadies.booking_service.clients.TravelServiceClient;
 import it.roadies.booking_service.config.i8n.MessageLang;
+import it.roadies.booking_service.data.dto.response.TravelBatchResponse;
+import it.roadies.booking_service.data.dto.response.ActivityBatchResponse;
 import it.roadies.booking_service.exceptions.ServiceUnavailableException;
 import it.roadies.booking_service.exceptions.TravelNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -87,4 +90,35 @@ public class TravelService {
             throw new ServiceUnavailableException(messageLang.getMessage("error.any.travel"));
         }
     }
+
+    @CircuitBreaker(name = "travelService")
+    @Retry(name = "travelService")
+    public List<TravelBatchResponse> getTravelsBatch(List<UUID> travelIds) {
+        log.info("Recupero batch viaggi per {} id", travelIds.size());
+        try {
+            return travelServiceClient.getTravelsBatch(travelIds);
+        } catch (FeignException.Unauthorized | FeignException.Forbidden e) {
+            log.warn("Accesso non autorizzato al travel-service durante batch viaggi. Status: {}", e.status());
+            throw new ServiceUnavailableException(messageLang.getMessage("error.service.authorization"));
+        } catch (Exception e) {
+            log.error("Errore imprevisto durante il recupero batch viaggi", e);
+            throw new ServiceUnavailableException(messageLang.getMessage("error.any.travel"));
+        }
+    }
+
+    @CircuitBreaker(name = "travelService")
+    @Retry(name = "travelService")
+    public List<ActivityBatchResponse> getActivitiesBatch(List<UUID> activityIds) {
+        log.info("Recupero batch attività per {} id", activityIds.size());
+        try {
+            return travelServiceClient.getActivitiesBatch(activityIds);
+        } catch (FeignException.Unauthorized | FeignException.Forbidden e) {
+            log.warn("Accesso non autorizzato al travel-service durante batch attività. Status: {}", e.status());
+            throw new ServiceUnavailableException(messageLang.getMessage("error.service.authorization"));
+        } catch (Exception e) {
+            log.error("Errore imprevisto durante il recupero batch attività", e);
+            throw new ServiceUnavailableException(messageLang.getMessage("error.any.travel"));
+        }
+    }
 }
+

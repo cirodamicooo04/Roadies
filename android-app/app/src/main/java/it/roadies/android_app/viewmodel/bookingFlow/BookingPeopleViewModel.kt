@@ -1,4 +1,4 @@
-package it.roadies.android_app.viewmodel.booking
+package it.roadies.android_app.viewmodel.bookingFlow
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
 
 enum class BookingStatus { DRAFT, PENDING, RESERVE_CONFIRMED, RESERVE_REJECTED, READY_FOR_PAYMENT, CONFIRMED, CANCELLED, EXPIRED }
@@ -33,8 +34,8 @@ class BookingViewModel @Inject constructor (private val repository: BookingRepos
     private val _state = MutableStateFlow(BookingState())
     val state: StateFlow<BookingState> = _state.asStateFlow()
     private val bookingId: UUID = UUID.fromString(savedStateHandle["bookingId"])
-    private val travelId: UUID? = savedStateHandle.get<String>("travelId")?.takeIf { it.isNotBlank() }?.let { UUID.fromString(it) }
-    private val activityId: UUID? = savedStateHandle.get<String>("activityId")?.takeIf { it.isNotBlank() }?.let { UUID.fromString(it) }
+    private val travelId: UUID? = savedStateHandle.get<String>("travelId")?.takeIf { it.isNotBlank() && it != "null" && !it.startsWith("{") }?.let { UUID.fromString(it) }
+    private val activityId: UUID? = savedStateHandle.get<String>("activityId")?.takeIf { it.isNotBlank() && it != "null" && !it.startsWith("{") }?.let { UUID.fromString(it) }
 
     fun increasePeopleCount() {
         _state.value = _state.value.copy(peopleCount = _state.value.peopleCount + 1, error = null)
@@ -42,7 +43,7 @@ class BookingViewModel @Inject constructor (private val repository: BookingRepos
 
     fun decreasePeopleCount() {
         if (_state.value.peopleCount <= 1) return
-        _state.value = _state.value.copy(peopleCount = _state.value.peopleCount - 1, error = null)
+        _state.update { current -> current.copy(peopleCount = current.peopleCount - 1, error = null) }
     }
 
     fun onNext() {
@@ -70,18 +71,13 @@ class BookingViewModel @Inject constructor (private val repository: BookingRepos
                 }
             } catch (e: TimeoutCancellationException) {
                 _state.update { current -> current.copy(error = "Timeout: nessuna risposta dal server. Riprova.") }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                _state.update { current -> current.copy(error = e.message) }
+                _state.update { it.copy(error = "Errore di connessione: ${e.message}") }
             } finally {
                 _state.update { current -> current.copy(isLoading = false) }
             }
-        }
-    }
-
-    fun onBack() {
-        viewModelScope.launch {
-            //al momento chiamo il delete ma in realtà lo devo rimettere in draft e non in stato cancelled
-            repository.deleteBooking(bookingId)
         }
     }
 }

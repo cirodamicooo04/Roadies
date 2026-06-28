@@ -33,8 +33,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
+import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
+import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
-import java.util.UUID
+import java.math.BigDecimal
+import java.time.LocalDateTime
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -255,14 +259,15 @@ fun RoadiesApp(
             NavigationView(
                 navHostController = navHostController,
                 modifier = Modifier.padding(paddingValues),
-                isAdmin = "ADMIN" in authState.roles
+                isAdmin = "ADMIN" in authState.roles,
+                onLoginClick = onLoginClick
             )
         }
     }
 }
 
 @Composable
-fun NavigationView(navHostController: NavHostController, modifier: Modifier = Modifier, isAdmin: Boolean) {
+fun NavigationView(navHostController: NavHostController, modifier: Modifier = Modifier, isAdmin: Boolean, onLoginClick: () -> Unit) {
     val startDestination: String = if (isAdmin) "handle_users" else "home_graph"
 
 
@@ -287,13 +292,30 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             }
 
             composable(route="travel_detail/{id}"){
-                backStackEntry -> val id = UUID.fromString(backStackEntry.arguments?.getString("id").orEmpty())
-                TravelDetailScreen(navHostController=navHostController ,id = id)
+                TravelDetailScreen(navHostController=navHostController, onLoginRequest = onLoginClick)
             }
 
             composable(route="activity_detail/{id}"){
-                backStackEntry -> val id = UUID.fromString(backStackEntry.arguments?.getString("id").orEmpty())
-                ActivityDetailScreen(navHostController=navHostController ,id = id)
+                ActivityDetailScreen(navHostController=navHostController, onLoginRequest = onLoginClick)
+            }
+
+            composable(
+                route = "booking_people/{bookingId}?travelId={travelId}&activityId={activityId}",
+                arguments = listOf(
+                    navArgument("bookingId") { type = NavType.StringType },
+                    navArgument("travelId") { type = NavType.StringType; nullable = true; defaultValue = null },
+                    navArgument("activityId") { type = NavType.StringType; nullable = true; defaultValue = null },
+                )
+            ) { backStackEntry ->
+                val bookingId = backStackEntry.arguments?.getString("bookingId").orEmpty()
+                val travelId = backStackEntry.arguments?.getString("travelId")
+                val activityId = backStackEntry.arguments?.getString("activityId")
+
+                BookingStepPeopleScreen(
+                    navController = navHostController,
+                    onConfirmed = { peopleCount ->
+                    }
+                )
             }
 
 
@@ -302,7 +324,40 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
 
 
         composable(route ="bookings"){
-            //Creare un activity con all'interno la composable desiderata che accetta come parametro un NavHostController
+            BookingHomeScreen(navHostController = navHostController)
+        }
+        composable(
+            route = "booking_detail/{principalId}/{travelName}/{peopleCount}/{totalPrice}/{startDate}/{endDate}/{departureType}",
+            arguments = listOf(
+                navArgument("principalId") {type = NavType.StringType},
+                navArgument("travelName") { type = NavType.StringType },
+                navArgument("peopleCount") { type = NavType.IntType },
+                navArgument("totalPrice") { type = NavType.StringType },
+                navArgument("startDate") { type = NavType.StringType },
+                navArgument("endDate") { type = NavType.StringType },
+                navArgument("departureType") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val principalId = backStackEntry.arguments?.getString("principalId").orEmpty()
+            val travelName = backStackEntry.arguments?.getString("travelName").orEmpty()
+            val peopleCount = backStackEntry.arguments?.getInt("peopleCount") ?: 0
+            val totalPrice = BigDecimal(backStackEntry.arguments?.getString("totalPrice") ?: "0")
+
+            val startDateStr = backStackEntry.arguments?.getString("startDate")
+            val endDateStr = backStackEntry.arguments?.getString("endDate")
+            val startDate = startDateStr?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() } ?: LocalDateTime.now()
+            val endDate = endDateStr?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() } ?: LocalDateTime.now()
+            val departureType = backStackEntry.arguments?.getString("departureType").orEmpty()
+
+            BookingDetailScreen(travelName = travelName, peopleCount = peopleCount, startDate = startDate, endDate = endDate, totalPrice = totalPrice,
+                onNavigateToTravel = {
+                    if (departureType == "ACTIVITY") {
+                        navHostController.navigate("activity_detail/$principalId")
+                    } else {
+                        navHostController.navigate("travel_detail/$principalId")
+                    }
+                }
+            )
         }
         composable(route = "handle_users"){
 

@@ -14,13 +14,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.RadioButton
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
@@ -34,9 +38,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +53,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.Color
@@ -56,30 +63,45 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
+import it.roadies.android_app.ui.travel.components.BoxCentered
 import it.roadies.android_app.viewmodel.SearchScreenViewModel
 
-@Composable
-fun BoxCentered(text: String)
-{
-    Box(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = text, fontSize = 16.sp, fontStyle = FontStyle.Italic)
-    }
 
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: SearchScreenViewModel = hiltViewModel()){
     val uiState by searchScreenViewModel.searchScreenUiState.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
     val filterSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isFilterSheetOpen by remember { mutableStateOf(false) }
 
+    val sortSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var isSortSheetOpen by remember { mutableStateOf(false) }
+
     val searchFilterState by searchScreenViewModel.searchFiltersState.collectAsState()
 
-    if (isFilterSheetOpen && !uiState.isLoading && uiState.errorMessage == null){
+    val lazyListState = rememberLazyListState()
+
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val totalItemsCount = lazyListState.layoutInfo.totalItemsCount
+            val lastVisibleItemIndex = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index?: 0
+            val threshold = 3 //Quando mancano 3 elementi alla fine iniziamo a caricare
+
+            totalItemsCount > 0 && lastVisibleItemIndex >= (totalItemsCount - threshold) //true se l'ultimo elemento visibile è dal terzultimo in poi
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore && !uiState.isLoadingMore && !uiState.isLastPage) {
+            searchScreenViewModel.loadNextPage()
+        }
+    }
+
+    if (isFilterSheetOpen && !uiState.isLoading){
         ModalBottomSheet(
             onDismissRequest = { isFilterSheetOpen = false },
             sheetState = filterSheetState
@@ -139,21 +161,23 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                     )
                 }
 
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(stringResource(R.string.duration_days), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                        Text("${durationRange.start.toInt()} - ${durationRange.endInclusive.toInt()} ${stringResource(R.string.days)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                if (uiState.type != "ACTIVITY") {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(stringResource(R.string.duration_days), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                            Text("${durationRange.start.toInt()} - ${durationRange.endInclusive.toInt()} ${stringResource(R.string.days)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        RangeSlider(
+                            value = durationRange,
+                            onValueChange = { durationRange = it },
+                            valueRange = 1f..30f,
+                            steps = 28
+                        )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    RangeSlider(
-                        value = durationRange,
-                        onValueChange = { durationRange = it },
-                        valueRange = 1f..30f,
-                        steps = 28
-                    )
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -174,6 +198,92 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                     Text(stringResource(R.string.apply_filters), fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
                 
+                Spacer(modifier = Modifier.height(32.dp)) // Spazio per la navigation bar
+            }
+        }
+    }
+
+    if (isSortSheetOpen && !uiState.isLoading ) {
+        ModalBottomSheet(
+            onDismissRequest = { isSortSheetOpen = false },
+            sheetState = sortSheetState
+        ) {
+            var selectedSort by remember(searchFilterState) { 
+                mutableStateOf(searchFilterState.sortCriteria?.firstOrNull()) 
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.order_by),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp
+                    )
+                    TextButton(
+                        onClick = { selectedSort = null }
+                    ) {
+                        Text(stringResource(R.string.reset), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                var sortOptions: List<Pair<String,String>>
+
+                if (uiState.type == "ACTIVITY"){
+                    sortOptions = listOf(
+                        "startingFromPrice,asc" to stringResource(R.string.price_asc),
+                        "startingFromPrice,desc" to stringResource(R.string.price_desc),
+                    )
+                } else {
+
+                    sortOptions = listOf(
+                        "startingFromPrice,asc" to stringResource(R.string.price_asc),
+                        "startingFromPrice,desc" to stringResource(R.string.price_desc),
+                        "durationDays,asc" to stringResource(R.string.duration_asc),
+                        "durationDays,desc" to stringResource(R.string.duration_desc)
+                    )
+                }
+
+                sortOptions.forEach { (sortKey, label) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedSort = sortKey }
+                            .padding(vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = selectedSort == sortKey,
+                            onClick = { selectedSort = sortKey }
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(text = label, fontSize = 16.sp)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        searchScreenViewModel.applySort(
+                            if (selectedSort != null) listOf(selectedSort!!) else emptyList()
+                        )
+                        isSortSheetOpen = false
+                    },
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(stringResource(R.string.apply_sorting), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
+
                 Spacer(modifier = Modifier.height(32.dp)) // Spazio per la navigation bar
             }
         }
@@ -207,7 +317,7 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                 FilterChip(
                     modifier = Modifier.weight(1f),
                     selected = false,
-                    onClick = { /* TODO: Aprire ordinamento*/ },
+                    onClick = { isSortSheetOpen = true },
                     label = { Text(stringResource(R.string.order_by), fontWeight = FontWeight.SemiBold) },
                     trailingIcon = { Icon(Icons.Default.KeyboardArrowDown, contentDescription = stringResource(R.string.order_by), modifier = Modifier.size(18.dp)) },
                     shape = RoundedCornerShape(16.dp)
@@ -216,36 +326,43 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
         }
 
         Box(modifier = Modifier.fillMaxSize().weight(1f)) {
-            if (uiState.isLoading || uiState.errorMessage != null) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (uiState.isLoading) CircularProgressIndicator()
-                    if (uiState.errorMessage != null) Text(
-                        text = uiState.errorMessage ?: stringResource(R.string.search_error),
-                        fontSize = 16.sp,
-                        fontStyle = FontStyle.Italic,
-                        color = Color.Gray
-                    )
+            if (uiState.isLoading && uiState.travels?.isEmpty() == true && uiState.activities?.isEmpty() == true) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
+            } else if (uiState.errorMessage != null && uiState.travels?.isEmpty() == true && uiState.activities?.isEmpty() == true) {
+                BoxCentered(text = uiState.errorMessage ?: stringResource(R.string.search_error))
             } else {
                 if (uiState.type == "ACTIVITY") {
                     ActivitiesResult(uiState.activities ?: emptyList(), onActivityClick = { activity ->
                         navHostController.navigate("activity_detail/${activity.id}")
-                    })
+                    }, lazyListState, uiState.isLoadingMore || (uiState.isLoading && uiState.activities?.isNotEmpty() == true))
                 } else {
                     TravelsResult(uiState.travels ?: emptyList(), onTravelClick = { travel ->
                         navHostController.navigate("travel_detail/${travel.id}")
-                    })
+                    }, lazyListState, uiState.isLoadingMore || (uiState.isLoading && uiState.travels?.isNotEmpty() == true))
+                }
+                
+                LaunchedEffect(uiState.errorMessage) {
+                    uiState.errorMessage?.let { errorMsg ->
+                        snackbarHostState.showSnackbar(errorMsg)
+                        searchScreenViewModel.clearError()
+                    }
                 }
             }
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            )
         }
     }
 }
 
 @Composable
-fun ActivitiesResult(activities: List<ActivitySummaryResponse>, onActivityClick: (ActivitySummaryResponse) -> Unit){
+fun ActivitiesResult(activities: List<ActivitySummaryResponse>, onActivityClick: (ActivitySummaryResponse) -> Unit, lazyListState: LazyListState, isLoadingMore: Boolean){
     if (activities.isEmpty()){
         BoxCentered(text = stringResource(R.string.no_activities_found))
     } else {
@@ -257,10 +374,19 @@ fun ActivitiesResult(activities: List<ActivitySummaryResponse>, onActivityClick:
                 top = 8.dp, 
                 bottom = 24.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            state = lazyListState
         ) {
             items(activities) { activity -> 
                 ActivityCard(activity, onCardClick = { onActivityClick(activity) })
+            }
+
+            if (isLoadingMore){
+                item {
+                    Box (modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center){
+                        CircularProgressIndicator()
+                    }
+                }
             }
         }
     }
@@ -300,6 +426,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
                         text = activity.name ?: "Senza Nome",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
+                        lineHeight = 22.sp,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -317,19 +444,9 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
                         Text(
                             text = "${activity.destination ?: ""}, ${activity.country ?: ""}",
                             color = Color.Gray,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    if (!activity.type.isNullOrEmpty()) {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = activity.type.uppercase(),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 10.sp
                         )
                     }
                 }
@@ -342,7 +459,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
                         Text(
                             text = "👤 @owner_fittizio",
                             color = Color.Gray,
-                            fontSize = 11.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -385,13 +502,13 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
 }
 
 @Composable
-fun TravelsResult(travels: List<TravelSummaryResponse>, onTravelClick: (TravelSummaryResponse) -> Unit){
+fun TravelsResult(travels: List<TravelSummaryResponse>, onTravelClick: (TravelSummaryResponse) -> Unit, lazyListState: LazyListState, isLoadingMore: Boolean){
     if (travels.isEmpty()){
         BoxCentered(text = stringResource(R.string.no_travels_found))
     } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            contentPadding = PaddingValues(
                 start = 16.dp, 
                 end = 16.dp, 
                 top = 8.dp, 
@@ -402,6 +519,14 @@ fun TravelsResult(travels: List<TravelSummaryResponse>, onTravelClick: (TravelSu
             items (travels){ travel -> 
                 TravelCard(travel, onCardClick = { onTravelClick(travel)})
             }
+
+            if (isLoadingMore){
+                item {
+                    Box (modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center){
+                        CircularProgressIndicator()
+                    }
+                }
+            }
         }
     }
 }
@@ -411,7 +536,7 @@ fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryRespons
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp), // Niente padding orizzontale qui, ci pensa la LazyColumn
+            .height(200.dp),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         onClick = { onCardClick(travel) }
@@ -439,6 +564,7 @@ fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryRespons
                         text = travel.title ?: "Senza Titolo",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
+                        lineHeight = 22.sp,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -456,7 +582,7 @@ fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryRespons
                         Text(
                             text = "${travel.destination ?: ""}, ${travel.country ?: ""}",
                             color = Color.Gray,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

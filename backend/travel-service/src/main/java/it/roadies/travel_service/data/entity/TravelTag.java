@@ -14,13 +14,15 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.domain.Persistable;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @Table(name = "TRAVEL_TAG")
 @EntityListeners(value = {AuditingEntityListener.class})
-public class TravelTag {
+public class TravelTag implements Persistable<TravelTagId> {
     @EmbeddedId
     private TravelTagId travelTagId = new TravelTagId();
 
@@ -48,4 +50,14 @@ public class TravelTag {
 
     @Column(name = "score")
     private Integer score;
+
+    @Override
+    public TravelTagId getId() {
+        return travelTagId;
+    }
+
+    @Override
+    public boolean isNew() {
+        return this.createdAt == null;
+    }
 }

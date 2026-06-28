@@ -4,11 +4,14 @@ import it.roadies.android_app.client.apis.booking.GestioneDocumentiApi
 import it.roadies.android_app.client.apis.booking.GestionePrenotazioniApi
 import it.roadies.android_app.client.models.booking.BookingCreateRequest
 import it.roadies.android_app.client.models.booking.BookingDraftResponse
+import it.roadies.android_app.client.models.booking.BookingHomeResponse
 import it.roadies.android_app.client.models.booking.BookingMemberRequest
 import it.roadies.android_app.client.models.booking.BookingStatusResponse
 import it.roadies.android_app.client.models.booking.BookingStep2Response
+import it.roadies.android_app.client.models.travel.PageResponse
 import it.roadies.android_app.repository.utils.ApiResponse
 import it.roadies.android_app.repository.utils.safeApiCall
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,9 +25,14 @@ import it.roadies.android_app.client.models.booking.PaymentResponse
 import okhttp3.MultipartBody
 import androidx.core.net.toUri
 import it.roadies.android_app.client.models.booking.BookingDraftRequest
+import it.roadies.android_app.model.dao.BookingDao
+import it.roadies.android_app.model.mappers.toEntity
 
 @Singleton
-class BookingRepository @Inject constructor (private val prenotazioniApi: GestionePrenotazioniApi, private val documentiApi: GestioneDocumentiApi, private val pagamentoApi: GestionePagamentoApi, @ApplicationContext private val context: Context) {
+class BookingRepository @Inject constructor (private val prenotazioniApi: GestionePrenotazioniApi, private val documentiApi: GestioneDocumentiApi, private val pagamentoApi: GestionePagamentoApi, private val bookingDao: BookingDao, @ApplicationContext private val context: Context) {
+    fun activeBookingsFlow(now:LocalDateTime= LocalDateTime.now()) = bookingDao.getActiveBookingsFlow(now)
+    fun pastBookingsFlow(now:LocalDateTime= LocalDateTime.now()) = bookingDao.getPastBookingsFlow(now)
+
     suspend fun createDraft(request: BookingDraftRequest): ApiResponse<BookingDraftResponse> {
         return safeApiCall { prenotazioniApi.createDraft(request) }
     }
@@ -42,11 +50,28 @@ class BookingRepository @Inject constructor (private val prenotazioniApi: Gestio
     }
 
     suspend fun deleteBooking(bookingId: UUID): ApiResponse<Unit> {
-        return safeApiCall { prenotazioniApi.deleteBooking(bookingId) }
+        val response = safeApiCall { prenotazioniApi.deleteBooking(bookingId) }
+
+        if (response.success) {
+            bookingDao.deleteBookingById(bookingId)
+        }
+        return response
     }
 
     suspend fun getBookingsFromUser(): ApiResponse<List<UUID>> {
         return safeApiCall { prenotazioniApi.getBookingsFromUser() }
+    }
+
+    suspend fun getPastBookings(page: Int? = null, size: Int? = null): ApiResponse<PageResponse<BookingHomeResponse>> {
+        val response = safeApiCall { prenotazioniApi.getPastBookingsFromUser(page, size) }
+
+        if (response.success) {
+            response.data?.content?.let { networkList ->
+                val entities = networkList.map { it.toEntity() }
+                bookingDao.insertAllBookings(entities)
+            }
+        }
+        return response
     }
 
     suspend fun uploadDocumentPhoto(documentId: UUID, uriString: String): ApiResponse<String> {
@@ -62,5 +87,17 @@ class BookingRepository @Inject constructor (private val prenotazioniApi: Gestio
 
     suspend fun createPaymentIntent(request: PaymentRequest): ApiResponse<PaymentResponse> {
         return safeApiCall { pagamentoApi.createPaymentIntent(request) }
+    }
+
+    suspend fun getActiveBookings(page: Int? = null, size: Int? = null): ApiResponse<PageResponse<BookingHomeResponse>> {
+        val response = safeApiCall { prenotazioniApi.getActiveBookingsFromUser(page, size) }
+
+        if (response.success) {
+            response.data?.content?.let { networkList ->
+                val entities = networkList.map { it.toEntity() }
+                bookingDao.insertAllBookings(entities)
+            }
+        }
+        return response
     }
 }
