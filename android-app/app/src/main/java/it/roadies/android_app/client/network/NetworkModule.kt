@@ -162,4 +162,8 @@ object NetworkModule {
     private val devConnectionBuilder = ConnectionBuilder { uri ->
         URL(uri.toString()).openConnection() as HttpURLConnection
     }
+
+    fun provideAdminApi(retrofit: Retrofit): AdminManagementApi {
+        return retrofit.create(AdminManagementApi::class.java)
+    }
 }
