@@ -2,6 +2,7 @@ package it.roadies.user_service.services.impl;
 
 import it.roadies.user_service.conf.i8n.MessageLang;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
+import it.roadies.user_service.data.dto.response.UserResponseDTO;
 import it.roadies.user_service.data.entities.User;
 import it.roadies.user_service.data.entities.enumeration.OrganizerRequestStatus;
 import it.roadies.user_service.data.repositories.UserRepository;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 
