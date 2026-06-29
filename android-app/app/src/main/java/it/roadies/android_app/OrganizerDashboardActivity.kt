@@ -79,6 +79,7 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
 
     // mi prendo lo stato che gli ho passato dopo la creazione
     val travelCreated by savedStateHandle?.getStateFlow("travel_created",false)?.collectAsState() ?: remember { mutableStateOf(false) }
+    val activityCreated by savedStateHandle?.getStateFlow("activity_created",false)?.collectAsState() ?: remember { mutableStateOf(false) }
 
     val successMessage = stringResource(R.string.travel_created)
     LaunchedEffect(travelCreated) {
@@ -88,6 +89,16 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
             snackbarHostState.showSnackbar(message = successMessage)
         }
     }
+
+    val activitySuccessMessage = stringResource(R.string.activity_created)
+    LaunchedEffect(activityCreated) {
+        if (activityCreated){
+            savedStateHandle?.remove<Boolean>("activity_created")
+            viewModel.loadData()
+            snackbarHostState.showSnackbar(message = activitySuccessMessage)
+        }
+    }
+
 
     
     LaunchedEffect(uiState.value.deletingErrorMessage) {
@@ -138,9 +149,11 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
         } else if (uiState.value.errorMessage != null){
             BoxCentered(text = uiState.value.errorMessage)
         } else {
-            TravelsActivitiesSection(items = uiState.value.organizerResponse, onTravelCreationClick = {
-                navHostController.navigate("create_travel")
+            TravelsActivitiesSection(items = uiState.value.organizerResponse,
+                onTravelCreationClick = {
+                    navHostController.navigate("create_travel")
             }, onActivityCreationClick = {
+                navHostController.navigate("create_activity")
 
             }, onTravelOpen = {
 

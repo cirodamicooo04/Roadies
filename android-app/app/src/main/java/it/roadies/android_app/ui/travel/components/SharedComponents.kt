@@ -1,5 +1,6 @@
 package it.roadies.android_app.ui.travel.components
 
+import android.net.Uri
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -52,6 +53,7 @@ import com.utsman.osmandcompose.rememberMarkerState
 import it.roadies.android_app.R
 import it.roadies.android_app.client.models.travel.ImageResponse
 import org.osmdroid.util.GeoPoint
+import java.util.UUID
 
 @Composable
 fun BoxCentered(text: String? = null) {
@@ -222,5 +224,12 @@ fun CheckAvailabilityButton(onClick: () -> Unit){
         Text(text = stringResource(R.string.check_availability), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
     }
 }
+
+data class UploadableImage(
+    val localUri: Uri,
+    val imageUUID: UUID? = null,
+    val isUploading: Boolean = true,
+    val isFailed: Boolean = false
+)
 
 

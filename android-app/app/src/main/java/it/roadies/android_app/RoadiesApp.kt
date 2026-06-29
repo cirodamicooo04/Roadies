@@ -399,6 +399,9 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                     navHostController = navHostController,
                     onNavigateBack = { navHostController.popBackStack() })
             }
+            composable(route = "create_activity"){
+                ActivityCreationScreen(navHostController = navHostController)
+            }
         }
 
         composable(route = "profile") {

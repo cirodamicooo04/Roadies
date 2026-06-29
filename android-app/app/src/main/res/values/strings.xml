@@ -67,7 +67,7 @@
     <string name="duration_placeholder">Ex: 14</string>
     <string name="destination_placeholder">Ex: Paris, France</string>
     <string name="search">Search</string>
-    <string name="travel_photos_label">Travel Photos</string>
+    <string name="travel_photos_label">Photos</string>
     <string name="add_photo">Add Photo</string>>
     <string name="photo_upload_failed">Failed</string>
     <string name="rate_trip_type">Rate tripe type</string>
@@ -91,6 +91,17 @@
     <string name="cancel_creation_confirm_body">All your changes will be discarded</string>
     <string name="create_travel_confirm">Do you want to create the travel?</string>
     <string name="create_travel_confirm_body">Are you sure you want to proceed with the creation?</string>
+    <string name="create_activity_confirm">Do you want to create the activity?</string>
+    <string name="create_activity_confirm_body">Are you sure you want to proceed with the creation?</string>
+    <string name="cancel_activity_creation_confirm">Do you want to cancel creation?</string>
+    <string name="cancel_activity_creation_confirm_body">All your changes will be discarded</string>
+    <string name="create_activity_btn">Create Activity</string>
+    <string name="activity_date_label">Activity date</string>
+    <string name="start_time_label">Start time</string>
+    <string name="end_time_label">End time</string>
+    <string name="error_time_invalid">Invalid time</string>
+    <string name="select_time_title">Select time</string>
+    <string name="activity_created">Activity created with success</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Active</string>

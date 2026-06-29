@@ -2,11 +2,14 @@ package it.roadies.android_app.repository
 
 import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.ViaggiApi
+import it.roadies.android_app.client.models.travel.ActivityDepartureResponse
 import it.roadies.android_app.client.models.travel.ActivityResponse
 import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
+import it.roadies.android_app.client.models.travel.ImageResponse
 import it.roadies.android_app.client.models.travel.PageResponse
 import it.roadies.android_app.repository.utils.ApiResponse
 import it.roadies.android_app.repository.utils.safeApiCall
+import okhttp3.MultipartBody
 import java.util.UUID
 import javax.inject.Inject
 
@@ -41,13 +44,13 @@ class ActivityRepository @Inject constructor(
         }
     }
 
-    suspend fun getActivityById(id: java.util.UUID): ApiResponse<ActivityResponse> {
+    suspend fun getActivityById(id: UUID): ApiResponse<ActivityResponse> {
         return safeApiCall {
             activityApi.getActivity(id)
         }
     }
 
-    suspend fun getActivityDepartures(activityId: UUID): ApiResponse<List<it.roadies.android_app.client.models.travel.ActivityDepartureResponse>> {
+    suspend fun getActivityDepartures(activityId: UUID): ApiResponse<List<ActivityDepartureResponse>> {
         return safeApiCall {
             activityApi.getDepartures1(activityId)
         }
@@ -55,5 +58,17 @@ class ActivityRepository @Inject constructor(
 
     suspend fun deleteActivity(activityId: UUID): ApiResponse<Any> {
         return safeApiCall { activityApi.deleteActivity1(id = activityId) }
+    }
+
+    suspend fun uploadImage(file: MultipartBody.Part): ApiResponse<ImageResponse> {
+        return safeApiCall {
+            viaggiApi.uploadImage(file)
+        }
+    }
+
+    suspend fun createActivity(activityCreateRequest: it.roadies.android_app.client.models.travel.ActivityCreateRequest): ApiResponse<ActivityResponse> {
+        return safeApiCall {
+            activityApi.createActivity(activityCreateRequest)
+        }
     }
 }

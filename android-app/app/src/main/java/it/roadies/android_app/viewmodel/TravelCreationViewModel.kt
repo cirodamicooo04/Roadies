@@ -24,6 +24,7 @@ import it.roadies.android_app.client.models.travel.TagResponse
 import it.roadies.android_app.client.models.travel.TravelDepartureCreateRequest
 import it.roadies.android_app.client.models.travel.TravelTagRequest
 import it.roadies.android_app.repository.MetadataRepository
+import it.roadies.android_app.ui.travel.components.UploadableImage
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
@@ -35,20 +36,14 @@ enum class CreateTravelStep {
     DEPARTURES
 }
 
-data class UploadableImage(
-    val localUri: Uri,
-    val imageUUID: UUID? = null,
-    val isUploading: Boolean = true,
-    val isFailed: Boolean = false
-)
 
 data class TravelActivityState(
     val id: UUID = UUID.randomUUID(),
     val name: String = "",
     val description: String = "",
     val address: String = "",
-    val addressSearchQuery: String = "", 
-    val latitude: Double? = null, 
+    val addressSearchQuery: String = "",
+    val latitude: Double? = null,
     val longitude: Double? = null,
     val dayNumber: Int = 1,
     val continent: TravelCreateRequest.Continent = TravelCreateRequest.Continent.EUROPE,

@@ -57,6 +57,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -83,14 +84,13 @@ import it.roadies.android_app.client.models.travel.TravelCreateRequest
 import it.roadies.android_app.ui.travel.components.ActivityAddressPicker
 import it.roadies.android_app.ui.travel.components.ActivityTitleDescriptionInput
 import it.roadies.android_app.ui.travel.components.BoxCentered
+import it.roadies.android_app.ui.travel.components.UploadableImage
 import it.roadies.android_app.utils.ContinentMapper
 import it.roadies.android_app.viewmodel.CreateTravelStep
 import it.roadies.android_app.viewmodel.CreateTravelUiState
 import it.roadies.android_app.viewmodel.TravelActivityState
 import it.roadies.android_app.viewmodel.TravelCreationDepartureState
 import it.roadies.android_app.viewmodel.TravelCreationViewModel
-import it.roadies.android_app.viewmodel.UploadableImage
-import org.w3c.dom.Text
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -115,6 +115,14 @@ fun TravelCreationScreen(
         if (uiState.isCreationSuccess) {
             navHostController.previousBackStackEntry?.savedStateHandle?.set("travel_created", true)
             navHostController.popBackStack()
+        }
+    }
+
+    BackHandler {
+        if (uiState.currentStep == CreateTravelStep.BASIC_INFO) {
+            showModalOfCancelCreation = true
+        } else {
+            viewModel.previousStep()
         }
     }
 

@@ -68,7 +68,7 @@
     <string name="duration_placeholder">Es: 14</string>
     <string name="destination_placeholder">Es: Parigi, Francia</string>
     <string name="search">Cerca</string>
-    <string name="travel_photos_label">Foto del Viaggio</string>
+    <string name="travel_photos_label">Foto</string>
     <string name="add_photo">Aggiungi Foto</string>>
     <string name="photo_upload_failed">Fallito</string>
     <string name="rate_trip_type">Valuta il tipo di viaggio</string>
@@ -85,7 +85,18 @@
     <string name="cancel_creation_confirm_body">Tutte le tue modifiche andranno perse</string>
     <string name="create_travel_confirm">Vuoi creare il viaggio?</string>
     <string name="create_travel_confirm_body">Sei sicuro di voler procedere con la creazione?</string>
+    <string name="create_activity_confirm">Vuoi creare l\'attività?</string>
+    <string name="create_activity_confirm_body">Sei sicuro di voler procedere con la creazione?</string>
+    <string name="cancel_activity_creation_confirm">Vuoi annullare la creazione dell\'attività?</string>
+    <string name="cancel_activity_creation_confirm_body">Tutte le tue modifiche andranno perse</string>
+    <string name="create_activity_btn">Crea Attività</string>
+    <string name="activity_date_label">Data dell\'attività</string>
+    <string name="start_time_label">Ora di inizio</string>
+    <string name="end_time_label">Ora di fine</string>
+    <string name="error_time_invalid">Orario non valido</string>
+    <string name="select_time_title">Seleziona orario</string>
     <string name="confirm">Conferma</string>
+    <string name="activity_created">Attività creata con successo</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Attivi</string>
