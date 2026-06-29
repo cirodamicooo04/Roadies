@@ -33,10 +33,14 @@ import org.keycloak.representations.idm.UserRepresentation;
 public class AdminServiceImpl implements AdminService {
 
     private final UserMapper userMapper;
-    private final AdminUserMapper userMapper1;
+    private final AdminUserMapper adminUserMapper;
     private final MessageLang messageLang;
     private final UserRepository userRepository;
     private final Keycloak keycloak;
+
+    private boolean isUserEnabledInKeycloak(String keycloakId) {
+        return keycloak.realm(realmName).users().get(keycloakId).toRepresentation().isEnabled();
+    }
 
     @Value("${keycloak.realm:roadies-app}")
     private String realmName;
@@ -44,27 +48,27 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public void blockUser(String keycloakId) {
-        log.info("Admin operation: Request to block user with Keycloak ID: {}", keycloakId);
+        log.info("Admin: Blocking user: {}", keycloakId);
 
-        User user = userRepository.findById(keycloakId)
-                .orElseThrow(() -> new RuntimeException("User not found with Keycloak ID: " + keycloakId));
+        var userResource = keycloak.realm(realmName).users().get(keycloakId);
+        UserRepresentation userRep = userResource.toRepresentation();
+        userRep.setEnabled(false);
+        userResource.update(userRep);
 
-        //user.setEnabled(false);
-        userRepository.save(user);
-        log.info("User with Keycloak ID: {} has been blocked.", keycloakId);
+        log.info("User {} blocked in Keycloak", keycloakId);
     }
 
     @Override
     @Transactional
     public void unblockUser(String keycloakId) {
-        log.info("Admin operation: Request to unblock user with Keycloak ID: {}", keycloakId);
+        log.info("Admin: Unblocking user: {}", keycloakId);
 
-        User user = userRepository.findById(keycloakId)
-                .orElseThrow(() -> new RuntimeException("User not found with Keycloak ID: " + keycloakId));
+        var userResource = keycloak.realm(realmName).users().get(keycloakId);
+        UserRepresentation userRep = userResource.toRepresentation();
+        userRep.setEnabled(true);
+        userResource.update(userRep);
 
-        //user.setEnabled(true);
-        userRepository.save(user);
-        log.info("User with Keycloak ID: {} has been unblocked.", keycloakId);
+        log.info("User {} unblocked in Keycloak", keycloakId);
     }
 
     @Override
@@ -138,30 +142,23 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public List<UserResponseDTO> getUsersByFilter(String filter) {
-        log.info("Admin operation: Fetching users with filter: {}", filter);
+        log.info("Admin: Fetching users with filter: {}", filter);
 
-        List<User> users;
+        List<User> users = switch (filter.toUpperCase()) {
 
-        switch (filter.toUpperCase()) {
-            case "ORGANIZERS":
-                users = userRepository.findAllByEnabledTrueAndOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);
-                break;
-            case "BANNED":
-                users = userRepository.findAllByEnabledFalse();
-                break;
-            case "ACTIVE":
-                users = userRepository.findAllByEnabledTrue();
-                break;
-            default:
-                log.error("Invalid filter parameter provided: {}", filter);
-                throw new IllegalArgumentException("Invalid filter. Use 'ORGANIZERS', 'BANNED', or 'ACTIVE'");
-        }
+            case "ORGANIZERS" -> userRepository.findAllByEnabledTrueAndOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);
 
-        log.info("Admin operation: Found {} users matching the filter '{}'", users.size(), filter);
+            case "BANNED" -> userRepository.findAllByEnabledFalse();
 
-        // Convert the fetched User entities to safe UserResponseDTOs using your mapper
-        return users.stream()
-                .map(userMapper1::toDto)
-                .collect(Collectors.toList());
+            case "ACTIVE" -> userRepository.findAllByEnabledTrue();
+
+            default -> throw new IllegalArgumentException("Invalid filter: " + filter);
+        };
+
+        return users.stream().map(user -> {
+            UserResponseDTO dto = adminUserMapper.toDto(user);
+            dto.setEnabled(isUserEnabledInKeycloak(user.getKeycloakId()));
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

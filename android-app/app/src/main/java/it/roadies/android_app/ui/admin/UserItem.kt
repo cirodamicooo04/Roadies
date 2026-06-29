@@ -10,12 +10,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import it.roadies.android_app.client.models.user.UserProfileResponseDTO
+import it.roadies.android_app.client.models.user.UserResponseDTO
 
 @Composable
 fun UserItem(
-    user: UserProfileResponseDTO,
+    user: UserResponseDTO,
     onBlockClick: (String) -> Unit,
     onUnblockClick: (String) -> Unit
 ) {
@@ -23,7 +24,6 @@ fun UserItem(
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = "${user.firstName} ${user.lastName}", style = MaterialTheme.typography.titleMedium)
-                Text(text = user.email, style = MaterialTheme.typography.bodyMedium)
             }
             if (user.enabled) {
                 Button(onClick = { onBlockClick(user.keycloakId) }) { Text("Block") }

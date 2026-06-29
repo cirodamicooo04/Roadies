@@ -2,9 +2,9 @@ package it.roadies.android_app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import it.roadies.android_app.client.apis.user.AdminManagementApi
+import it.roadies.android_app.client.apis.admin.AdminManagementApi
 import it.roadies.android_app.client.models.user.PendingOrganizerRequestResponseDTO
-import it.roadies.android_app.client.models.user.UserProfileResponseDTO
+import it.roadies.android_app.client.models.user.UserResponseDTO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -12,10 +12,9 @@ import kotlinx.coroutines.launch
 class AdminViewModel(private val adminApi: AdminManagementApi) : ViewModel() {
 
     // User state
-    private val _users = MutableStateFlow<List<UserProfileResponseDTO>>(emptyList())
-    val users: StateFlow<List<UserProfileResponseDTO>> = _users
+    private val _users = MutableStateFlow<List<UserResponseDTO>>(emptyList())
+    val users: StateFlow<List<UserResponseDTO>> = _users
 
-    // حالة طلبات المنسقين المعلقة
     private val _pendingRequests = MutableStateFlow<List<PendingOrganizerRequestResponseDTO>>(emptyList())
     val pendingRequests: StateFlow<List<PendingOrganizerRequestResponseDTO>> = _pendingRequests
 
@@ -23,7 +22,7 @@ class AdminViewModel(private val adminApi: AdminManagementApi) : ViewModel() {
     fun fetchUsers(filter: String) {
         viewModelScope.launch {
             try {
-                _users.value = adminApi.getFilteredUsers(filter)
+                _users.value = adminApi.getUsersByFilter(filter)
             } catch (e: Exception) {
                 // Error processing logic
             }

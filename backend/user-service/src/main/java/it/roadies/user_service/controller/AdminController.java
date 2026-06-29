@@ -50,7 +50,7 @@ public class AdminController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/admin/review-organizer/{targetUserId}")
+    @PatchMapping("/review-organizer/{targetUserId}")
     @Operation(summary = "Approva o rifiuta richiesta organizzatore")
     public ResponseEntity<Void> reviewOrganizerRequest(
             @PathVariable String targetUserId,
@@ -68,7 +68,7 @@ public class AdminController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/users")
+    @GetMapping("users")
     public ResponseEntity<List<UserResponseDTO>> getFilteredUsers(
             @RequestParam(defaultValue = "ACTIVE") String filter) { // Default is ACTIVE if no filter is provided
 

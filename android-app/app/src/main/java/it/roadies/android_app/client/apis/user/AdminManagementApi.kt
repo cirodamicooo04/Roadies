@@ -1,32 +1,37 @@
-package it.roadies.android_app.client.apis.user
+package it.roadies.android_app.client.apis.admin // يفضل وضعها في حزمة admin
 
-import it.roadies.android_app.client.models.user.UserProfileResponseDTO
 import it.roadies.android_app.client.models.user.PendingOrganizerRequestResponseDTO
+import it.roadies.android_app.client.models.user.UserResponseDTO
+import retrofit2.Response
 import retrofit2.http.*
 
 interface AdminManagementApi {
 
-    // Block user
-    @PUT("/api/v1/admin/users/{keycloakId}/block")
-    suspend fun blockUser(@Path("keycloakId") keycloakId: String)
+    // (PUT /api/v1/admin/users/{id}/block)
+    @PUT("/api/v1/admin/users/{id}/block")
+    suspend fun blockUser(@Path("id") keycloakId: String): Response<Void>
 
-    // Unblock user
-    @PUT("/api/v1/admin/users/{keycloakId}/unblock")
-    suspend fun unblockUser(@Path("keycloakId") keycloakId: String)
+    // (PUT /api/v1/admin/users/{id}/unblock)
+    @PUT("/api/v1/admin/users/{id}/unblock")
+    suspend fun unblockUser(@Path("id") keycloakId: String): Response<Void>
 
-    // Demote organizer
-    @PUT("/api/v1/admin/organizers/{keycloakId}/demote")
-    suspend fun demoteOrganizer(@Path("keycloakId") keycloakId: String)
+    // (PUT /api/v1/admin/users/{id}/demote)
+    @PUT("/api/v1/admin/users/{id}/demote")
+    suspend fun demoteOrganizerToUser(@Path("id") keycloakId: String): Response<Void>
 
-    // Accept/Reject organizer request
-    @PUT("/api/v1/admin/organizers/{keycloakId}/review")
+    // (PATCH /api/v1/admin/review-organizer/{targetUserId})
+    @PATCH("/api/v1/admin/review-organizer/{targetUserId}")
     suspend fun reviewOrganizerRequest(
-        @Path("keycloakId") keycloakId: String,
+        @Path("targetUserId") targetKeycloakId: String,
         @Query("approved") approved: Boolean,
         @Query("reason") reason: String?
-    )
+    ): Response<Void>
 
-    // Get organizer requests
-    @GET("/api/v1/admin/organizers/pending")
+    // (GET /api/v1/admin/organizer-requests/pending)
+    @GET("/api/v1/admin/organizer-requests/pending")
     suspend fun getPendingOrganizerRequests(): List<PendingOrganizerRequestResponseDTO>
+
+    // (GET /api/v1/admin/users)
+    @GET("/api/v1/admin/users")
+    suspend fun getUsersByFilter(@Query("filter") filter: String): List<UserResponseDTO>
 }

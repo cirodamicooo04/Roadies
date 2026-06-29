@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import it.roadies.android_app.client.models.user.UserResponseDTO
 import it.roadies.android_app.viewmodel.AdminViewModel
 
 @Composable
@@ -18,7 +19,7 @@ fun AdminUsersScreen(viewModel: AdminViewModel) {
     }
 
     LazyColumn {
-        items(users) { user ->
+        items(users) { user: UserResponseDTO ->
             UserItem(
                 user = user,
                 onBlockClick = { id -> viewModel.blockUser(id) },

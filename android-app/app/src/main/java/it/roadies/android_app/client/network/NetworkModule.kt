@@ -6,7 +6,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import it.roadies.android_app.BuildConfig
 import it.roadies.android_app.client.apis.booking.GestioneDocumentiApi
 import it.roadies.android_app.client.apis.booking.GestionePagamentoApi
 import it.roadies.android_app.client.apis.booking.GestionePrenotazioniApi
@@ -15,12 +14,14 @@ import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
 import it.roadies.android_app.client.apis.travel.MetadatiApi
 import it.roadies.android_app.client.apis.travel.PhotonApi
 import it.roadies.android_app.client.apis.travel.ViaggiApi
+import it.roadies.android_app.client.apis.user.AdminManagementApi
 import it.roadies.android_app.client.apis.user.DocumentManagementApi
 import it.roadies.android_app.client.apis.user.FriendshipManagementApi
 import it.roadies.android_app.client.apis.user.UserManagementApi
 import it.roadies.android_app.client.infrastructure.Serializer
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationService
+import net.openid.appauth.BuildConfig
 import net.openid.appauth.connectivity.ConnectionBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
