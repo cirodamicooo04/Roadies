@@ -37,6 +37,7 @@ import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
 import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
 import it.roadies.android_app.ui.user.FriendScreen
+import it.roadies.android_app.ui.user.UserProfileScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -91,7 +92,7 @@ fun RoadiesApp(
                         } else {
                             IconButton(
                                 onClick = {
-                                    navHostController.navigate("profile") {
+                                    navHostController.navigate("profile_graph") {
                                         popUpTo(navHostController.graph.startDestinationId) { saveState = true }
                                         launchSingleTop = true
                                         restoreState = true
@@ -414,7 +415,10 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 //EditProfileScreen(onBack = { navHostController.popBackStack() })
             }
             composable(route = "friend") {
-                FriendScreen(onBack = { navHostController.popBackStack() })
+                FriendScreen(
+                    navController = navHostController,
+                    onBack = { navHostController.popBackStack() }
+                )
             }
 
             composable(
@@ -422,10 +426,10 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 arguments = listOf(navArgument("username") { type = NavType.StringType })
             ) { backStackEntry ->
                 val username = backStackEntry.arguments?.getString("username").orEmpty()
-                //UserProfileScreen(
-                //    username = username,
-                //    onBack = { navHostController.popBackStack() }
-                //)
+                UserProfileScreen(
+                    username = username,
+                    onBack = { navHostController.popBackStack() }
+                )
             }
         }
     }

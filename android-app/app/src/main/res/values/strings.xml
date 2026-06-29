@@ -144,4 +144,20 @@
     <string name="error_max_slots_invalid">Please enter a valid number of slots</string>
     <string name="error_departure_duration">The duration must be exactly %1$d days</string>
     <string name="departures_empty">No departures added yet. Add your first one!</string>
+
+    <!-- User -->
+    <string name="edit_profile"> Edit Profile</string>
+    <string name="friends"> Friends</string>
+    <string name="logout"> Logout</string>
+    <string name="search_friend"> Search for new friends…</string>
+    <string name="pending_request"> Pending friend request</string>
+    <string name="no_user"> No user find</string>
+    <string name="no_friends"> You haven\'t friend yet</string>
+    <string name="your_friends"> Your friends</string>
+    <string name="close"> Close</string>
+    <string name="reject"> Reject</string>
+    <string name="accept"> Accept</string>
+    <string name="add_friend"> Add friend</string>
+    <string name="request_sent"> Request sent</string>
+
 </resources>

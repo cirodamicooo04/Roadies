@@ -141,7 +141,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(),
                     MenuItem(text = stringResource(R.string.edit_profile),
                         onClick = {onNavigateTo("edit_profile")})
 
-                    MenuItem(text = stringResource(R.string.friend),
+                    MenuItem(text = stringResource(R.string.friends),
                         onClick = {onNavigateTo("friend")})
 
                     MenuItem(text = stringResource(R.string.logout),

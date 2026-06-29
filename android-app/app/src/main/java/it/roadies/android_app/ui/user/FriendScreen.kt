@@ -1,6 +1,7 @@
 package it.roadies.android_app.ui.user
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,12 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import it.roadies.android_app.R
 import it.roadies.android_app.client.models.user.FriendshipResponseDTO
 import it.roadies.android_app.client.models.user.UserProfileResponseDTO
@@ -41,6 +44,7 @@ private val TextDark = Color(0xFF1A2B4C)
 @Composable
 fun FriendScreen(
     viewModel: FriendViewModel = hiltViewModel(),
+    navController: NavController,
     onBack: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -57,11 +61,13 @@ fun FriendScreen(
         ) {
             PendingRequestsSheet(
                 requests = state.pendingRequests,
-                onAccept = { id ->
-                    viewModel.respondToRequest(id, accept = true)
-                },
-                onReject = { id ->
-                    viewModel.respondToRequest(id, accept = false)
+                onAccept = { id -> viewModel.respondToRequest(id, accept = true) },
+                onReject = { id -> viewModel.respondToRequest(id, accept = false) },
+                onUserClick = { username ->
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        showBottomSheet = false
+                        navController.navigate("user_profile/$username")
+                    }
                 },
                 onClose = {
                     scope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -78,17 +84,16 @@ fun FriendScreen(
             .background(BackgroundGray)
             .padding(16.dp)
     ) {
-        // Search bar
         OutlinedTextField(
             value = state.searchQuery,
             onValueChange = { viewModel.onSearchQueryChange(it) },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Cerca nuovi amici...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Cerca") },
+            placeholder = { Text(stringResource(R.string.search_friend)) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search)) },
             trailingIcon = {
                 if (state.searchQuery.isNotBlank()) {
                     IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                        Icon(Icons.Default.Close, contentDescription = "Cancella")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.delete))
                     }
                 }
             },
@@ -106,7 +111,6 @@ fun FriendScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Chip richieste in attesa — visibile solo se ce ne sono
         if (state.pendingRequests.isNotEmpty()) {
             Button(
                 onClick = { showBottomSheet = true },
@@ -124,7 +128,7 @@ fun FriendScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Richieste di amicizia in attesa (${state.pendingRequests.size})",
+                    text = stringResource(R.string.pending_request) +"(${state.pendingRequests.size})",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -150,20 +154,23 @@ fun FriendScreen(
                 isShowingSearchResults -> {
                     if (state.searchResults.isEmpty() && !state.isSearching) {
                         Text(
-                            text = "Nessun utente trovato.",
+                            text = stringResource(R.string.no_user),
                             color = Color.Gray,
                             fontSize = 16.sp,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     } else {
                         UsersList(
-                            title = "Risultati della ricerca",
+                            title = stringResource(R.string.search_results),
                             users = state.searchResults,
                             isSearchMode = true,
                             friendsList = state.friends,
                             requestSentTo = state.requestSentTo,
                             onAddFriendClick = { username ->
                                 viewModel.sendFriendRequest(username)
+                            },
+                            onUserClick = { username ->
+                                navController.navigate("user_profile/$username")
                             }
                         )
                     }
@@ -171,19 +178,22 @@ fun FriendScreen(
                 else -> {
                     if (state.friends.isEmpty()) {
                         Text(
-                            text = "Non hai ancora aggiunto nessun amico.",
+                            text = stringResource(R.string.no_friends),
                             color = Color.Gray,
                             fontSize = 16.sp,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     } else {
                         UsersList(
-                            title = "I tuoi amici",
+                            title = stringResource(R.string.your_friends),
                             users = state.friends,
                             isSearchMode = false,
                             friendsList = state.friends,
                             requestSentTo = state.requestSentTo,
-                            onAddFriendClick = {}
+                            onAddFriendClick = {},
+                            onUserClick = { username ->
+                                navController.navigate("user_profile/$username")
+                            }
                         )
                     }
                 }
@@ -197,6 +207,7 @@ fun PendingRequestsSheet(
     requests: List<FriendshipResponseDTO>,
     onAccept: (UUID) -> Unit,
     onReject: (UUID) -> Unit,
+    onUserClick: (String) -> Unit,
     onClose: () -> Unit
 ) {
     Column(
@@ -211,13 +222,13 @@ fun PendingRequestsSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Richieste ricevute",
+                text =  stringResource(R.string.no_friends),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextDark
             )
             IconButton(onClick = onClose) {
-                Icon(Icons.Default.Close, contentDescription = "Chiudi")
+                Icon(Icons.Default.Close, contentDescription =  stringResource(R.string.close))
             }
         }
 
@@ -228,7 +239,8 @@ fun PendingRequestsSheet(
                 PendingRequestCard(
                     request = request,
                     onAccept = { request.id?.let { onAccept(it) } },
-                    onReject = { request.id?.let { onReject(it) } }
+                    onReject = { request.id?.let { onReject(it) } },
+                    onUserClick = { onUserClick(request.friendProfile?.username ?: "") }
                 )
             }
         }
@@ -239,11 +251,14 @@ fun PendingRequestsSheet(
 fun PendingRequestCard(
     request: FriendshipResponseDTO,
     onAccept: () -> Unit,
-    onReject: () -> Unit
+    onReject: () -> Unit,
+    onUserClick: () -> Unit = {}
 ) {
     val user = request.friendProfile
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onUserClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -265,7 +280,12 @@ fun PendingRequestCard(
                     user?.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
                     user?.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
                 }.ifBlank { "?" }
-                Text(text = initials, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    text = initials,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -284,20 +304,18 @@ fun PendingRequestCard(
                 )
             }
 
-            // Rifiuta
             IconButton(
                 onClick = onReject,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFFE53935))
             ) {
-                Icon(Icons.Default.Close, contentDescription = "Rifiuta", modifier = Modifier.size(24.dp))
+                Icon(Icons.Default.Close, contentDescription =  stringResource(R.string.reject), modifier = Modifier.size(24.dp))
             }
 
-            // Accetta
             IconButton(
                 onClick = onAccept,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF43A047))
             ) {
-                Icon(Icons.Default.Check, contentDescription = "Accetta", modifier = Modifier.size(24.dp))
+                Icon(Icons.Default.Check, contentDescription =  stringResource(R.string.accept), modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -310,7 +328,8 @@ fun UsersList(
     isSearchMode: Boolean,
     friendsList: List<UserProfileResponseDTO>,
     requestSentTo: Set<String>,
-    onAddFriendClick: (String) -> Unit
+    onAddFriendClick: (String) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -333,7 +352,8 @@ fun UsersList(
                 isSearchMode = isSearchMode,
                 showAddButton = !isAlreadyFriend && !requestAlreadySent,
                 requestAlreadySent = requestAlreadySent,
-                onAddFriendClick = { onAddFriendClick(user.username ?: "") }
+                onAddFriendClick = { onAddFriendClick(user.username ?: "") },
+                onUserClick = { onUserClick(user.username ?: "") }
             )
         }
     }
@@ -345,10 +365,13 @@ fun FriendCard(
     isSearchMode: Boolean = false,
     showAddButton: Boolean = true,
     requestAlreadySent: Boolean = false,
-    onAddFriendClick: () -> Unit = {}
+    onAddFriendClick: () -> Unit = {},
+    onUserClick: () -> Unit = {}
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onUserClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -369,7 +392,12 @@ fun FriendCard(
                 val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
                 val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
                 val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
-                Text(text = initials, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    text = initials,
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -397,7 +425,7 @@ fun FriendCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PersonAdd,
-                                contentDescription = "Aggiungi amico",
+                                contentDescription =  stringResource(R.string.add_friend),
                                 modifier = Modifier.size(28.dp)
                             )
                         }
@@ -405,7 +433,7 @@ fun FriendCard(
                     requestAlreadySent -> {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Richiesta inviata",
+                            contentDescription =  stringResource(R.string.request_sent),
                             tint = Color(0xFF4CAF50),
                             modifier = Modifier
                                 .size(28.dp)
