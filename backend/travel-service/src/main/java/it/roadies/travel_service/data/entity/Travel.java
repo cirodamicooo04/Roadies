@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static it.roadies.travel_service.data.entity.enumerations.Status.CONFIRMED;
+
 @Entity
 @Getter
 @Setter
@@ -96,6 +98,10 @@ public class Travel {
     @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL)
     private List<Image> images = new ArrayList<>();
 
+    public Boolean isEditable() {
+        if (this.departures == null) return true;
+        return this.departures.stream().noneMatch(d -> d.getStatus() == CONFIRMED);
+    }
 }
 
 

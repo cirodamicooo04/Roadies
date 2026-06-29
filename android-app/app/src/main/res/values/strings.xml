@@ -44,6 +44,53 @@
     <string name="show_less">Show less</string>
     <string name="available_departures">Available departures</string>
     <string name="no_available_departures">No available departures</string>
+    <string name="create_new_travel">Create new travel</string>
+    <string name="create_new_activity">Create new activity</string>
+    <string name="your_travels_and_activities">Your travels and activities</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="no_activities">You do not have activities yet</string>
+    <string name="no_travels">You do not have travels yet</string>
+    <string name="confirm_deleting">Confirm deleting</string>
+    <string name="confirm">Confirm</string>
+    <string name="travel_created">Travel created with success</string>
+    <string name="confirm_deleting_body">Do you really want to delete %1$s? The action is irreversible</string>
+    <string name="this_activity">this activity</string>
+    <string name="this_travel">this travel</string>
+    <string name="cancel">Cancel</string>
+    <string name="next">Next</string>
+    <string name="back">Back</string>
+    <string name="create_travel_btn">Create Travel</string>
+    <string name="title_label">Title</string>
+    <string name="title_placeholder">Ex: Adventure in Patagonia</string>
+    <string name="description_placeholder">Describe the travel...</string>
+    <string name="duration_placeholder">Ex: 14</string>
+    <string name="destination_placeholder">Ex: Paris, France</string>
+    <string name="search">Search</string>
+    <string name="travel_photos_label">Travel Photos</string>
+    <string name="add_photo">Add Photo</string>>
+    <string name="photo_upload_failed">Failed</string>
+    <string name="rate_trip_type">Rate tripe type</string>
+    <string name="error_title_invalid">Title must be between 3 and 150 characters</string>
+    <string name="error_description_invalid">Description must be between 20 and 1000 characters</string>
+    <string name="error_destination_invalid">Please select a valid destination</string>
+    <string name="error_duration_invalid">Please enter a valid duration</string>
+    <string name="duration_less_than_activties">Duration can\'t be less than activities added</string>
+    <string name="itinerary_empty">Your itinerary is empty</string>
+    <string name="new_activity">New activity</string>
+    <string name="new_departure">New departure</string>
+    <string name="save">Save</string>
+    <string name="activity_name_label">Activity Name</string>
+    <string name="activity_description_label">Description (optional)</string>
+    <string name="insert_address">Search Address</string>
+    <string name="day_number_label">Day of the trip (e.g., 1, 2, 3)</string>
+    <string name="address_error">You have to select a valid address</string>
+    <string name="departures">Departures</string>
+    <string name="no_departures_added">No departures added yet</string>
+    <string name="cancel_creation_confirm">Do you want to cancel creation?</string>
+    <string name="cancel_creation_confirm_body">All your changes will be discarded</string>
+    <string name="create_travel_confirm">Do you want to create the travel?</string>
+    <string name="create_travel_confirm_body">Are you sure you want to proceed with the creation?</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Active</string>
@@ -87,9 +134,14 @@
     <string name="activity_photo">Activity photo</string>
     <string name="expand">Expand</string>
     <string name="hours">Hours</string>
-
-    <!-- User Profile -->
-    <string name="edit_profile">Edit Profile</string>
-    <string name="friend">Friend</string>
-    <string name="logout">Logout</string>
+    <string name="departure_start_date">Start Date</string>
+    <string name="departure_end_date">End Date</string>
+    <string name="departure_price">Price (€)</string>
+    <string name="departure_max_slots">Max Slots</string>
+    <string name="error_start_date_invalid">Please select a valid start date</string>
+    <string name="error_end_date_invalid">End date must be after start date</string>
+    <string name="error_price_invalid">Please enter a valid price greater than 0</string>
+    <string name="error_max_slots_invalid">Please enter a valid number of slots</string>
+    <string name="error_departure_duration">The duration must be exactly %1$d days</string>
+    <string name="departures_empty">No departures added yet. Add your first one!</string>
 </resources>

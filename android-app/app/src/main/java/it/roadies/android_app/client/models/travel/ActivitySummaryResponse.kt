@@ -72,6 +72,9 @@ data class ActivitySummaryResponse (
     @SerializedName("averageRating")
     val averageRating: Double? = null,
 
+    @SerializedName("editable")
+    val editable: Boolean? = null,
+
     @SerializedName("images")
     val images: List<ImageResponse>? = null
 

@@ -52,6 +52,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -71,7 +72,7 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
     val uiState by homeScreenViewModel.uiState.collectAsState()
     val query by homeScreenViewModel.searchQuery.collectAsState()
     val suggestions by homeScreenViewModel.searchSuggestions.collectAsState()
-    var type by remember { mutableStateOf(Type.TRAVEL) }
+    val type = uiState.typeSelected
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Column(
@@ -79,7 +80,7 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             SearchTypeToggle(selectedType = type, onTypeChanged = {
-                typeChanged -> type = typeChanged
+                typeChanged ->  homeScreenViewModel.changeType(typeChanged)
             })
             SearchBar(
                 query = query,
@@ -90,6 +91,7 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
                         LocationType.CONTINENT -> "search_screen?continent=${suggestion.name}&type=$type"
                         LocationType.COUNTRY -> "search_screen?country=${suggestion.name}&type=$type"
                         LocationType.DESTINATION -> "search_screen?destination=${suggestion.name}&type=$type"
+                        LocationType.ADDRESS -> "search_screen?destination=${suggestion.name}&type=$type"
                     }
                     navHostController.navigate(route)
                 }
@@ -180,6 +182,7 @@ fun SearchBar(
                                     LocationType.CONTINENT -> Icons.Default.Public
                                     LocationType.COUNTRY -> Icons.Default.Flag
                                     LocationType.DESTINATION -> Icons.Default.LocationOn
+                                    LocationType.ADDRESS -> Icons.Default.LocationOn
                                 }
                                 Icon(
                                     imageVector = iconVector, 
@@ -317,7 +320,7 @@ fun RecommendedTravelCard(travel: TravelSummaryResponse, onTravelClick: (TravelS
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Text(text = travel.destination ?: "Viaggio", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(text = travel.destination ?: "Viaggio", fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(text = "${stringResource(R.string.starting_from)} ${travel.startingFromPrice ?: "0"} € ")
             Row(
                 verticalAlignment = Alignment.CenterVertically,

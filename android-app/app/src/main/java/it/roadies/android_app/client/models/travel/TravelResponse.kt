@@ -91,6 +91,9 @@ data class TravelResponse (
     @SerializedName("type")
     val type: String? = null,
 
+    @SerializedName("editable")
+    val editable: Boolean? = null,
+
     @SerializedName("departures")
     val departures: List<TravelDepartureResponse>? = null,
 

@@ -1,6 +1,7 @@
 package it.roadies.android_app.repository
 
 import it.roadies.android_app.client.apis.travel.ViaggiApi
+import it.roadies.android_app.client.models.travel.OrganizerTravelsActivityResponse
 import it.roadies.android_app.client.models.travel.PageResponse
 import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
@@ -59,5 +60,21 @@ class TravelRepository @Inject constructor(
 
     suspend fun getPublicRecommendations(): ApiResponse<List<TravelSummaryResponse>>{
         return safeApiCall { viaggiApi.getPublicRecommendations() }
+    }
+
+    suspend fun getOrganizerTravelsActivities(): ApiResponse<OrganizerTravelsActivityResponse>{
+        return safeApiCall { viaggiApi.getMyTravels() }
+    }
+
+    suspend fun deleteTravel(travelId: UUID): ApiResponse<Any> {
+        return safeApiCall { viaggiApi.deleteTravel(travelId) }
+    }
+
+    suspend fun uploadImage(file: okhttp3.MultipartBody.Part): ApiResponse<it.roadies.android_app.client.models.travel.ImageResponse> {
+        return safeApiCall { viaggiApi.uploadImage(file) }
+    }
+
+    suspend fun createTravel(request: it.roadies.android_app.client.models.travel.TravelCreateRequest): ApiResponse<TravelResponse> {
+        return safeApiCall { viaggiApi.createTravel(request) }
     }
 }

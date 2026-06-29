@@ -7,6 +7,7 @@ import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
 import it.roadies.android_app.client.models.travel.PageResponse
 import it.roadies.android_app.repository.utils.ApiResponse
 import it.roadies.android_app.repository.utils.safeApiCall
+import java.util.UUID
 import javax.inject.Inject
 
 class ActivityRepository @Inject constructor(
@@ -46,9 +47,13 @@ class ActivityRepository @Inject constructor(
         }
     }
 
-    suspend fun getActivityDepartures(activityId: java.util.UUID): ApiResponse<List<it.roadies.android_app.client.models.travel.ActivityDepartureResponse>> {
+    suspend fun getActivityDepartures(activityId: UUID): ApiResponse<List<it.roadies.android_app.client.models.travel.ActivityDepartureResponse>> {
         return safeApiCall {
             activityApi.getDepartures1(activityId)
         }
+    }
+
+    suspend fun deleteActivity(activityId: UUID): ApiResponse<Any> {
+        return safeApiCall { activityApi.deleteActivity1(id = activityId) }
     }
 }

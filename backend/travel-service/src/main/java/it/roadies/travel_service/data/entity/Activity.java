@@ -1,6 +1,7 @@
 package it.roadies.travel_service.data.entity;
 
 import it.roadies.travel_service.data.entity.enumerations.Continent;
+import it.roadies.travel_service.data.entity.enumerations.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
@@ -91,5 +92,9 @@ public class Activity {
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL)
     private List<Image> images = new ArrayList<>();
 
+    public Boolean isEditable() {
+        if (this.departures == null) return true;
+        return this.departures.stream().noneMatch(d -> d.getStatus() == Status.CONFIRMED);
+    }
 
 }

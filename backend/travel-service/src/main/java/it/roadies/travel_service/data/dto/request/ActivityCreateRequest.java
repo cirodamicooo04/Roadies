@@ -10,9 +10,9 @@ import java.util.UUID;
 
 @Data
 public class ActivityCreateRequest {
-    @NotBlank @Size(max = 100)
+    @NotBlank @Size(min = 3, max = 150)
     private String name;
-    @NotBlank @Size(max = 1000)
+    @NotBlank @Size(min = 20, max = 1000)
     private String description;
     @NotBlank @Size(max = 200)
     private String destination;

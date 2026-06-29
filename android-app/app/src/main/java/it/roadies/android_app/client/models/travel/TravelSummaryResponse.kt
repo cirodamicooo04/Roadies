@@ -73,6 +73,9 @@ data class TravelSummaryResponse (
     @SerializedName("type")
     val type: String? = null,
 
+    @SerializedName("editable")
+    val editable: Boolean? = null,
+
     @SerializedName("images")
     val images: List<ImageResponse>? = null,
 

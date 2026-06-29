@@ -16,8 +16,6 @@ public class TravelUpdateRequest {
     @Size(min = 1, max = 10000)
     @Pattern(regexp = ".*\\S.*")
     private String description;
-    @Size(min = 1, max = 150)
-    @NotNull
     private Continent continent;
     @Pattern(regexp = ".*\\S.*")
     private String country;
