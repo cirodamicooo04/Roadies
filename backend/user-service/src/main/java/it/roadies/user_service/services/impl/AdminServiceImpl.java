@@ -2,11 +2,13 @@ package it.roadies.user_service.services.impl;
 
 import it.roadies.user_service.conf.i8n.MessageLang;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
+import it.roadies.user_service.data.dto.response.UserResponseDTO;
 import it.roadies.user_service.data.entities.User;
 import it.roadies.user_service.data.entities.enumeration.OrganizerRequestStatus;
 import it.roadies.user_service.data.repositories.UserRepository;
 import it.roadies.user_service.exception.ConflictException;
 import it.roadies.user_service.exception.ResourceNotFoundException;
+import it.roadies.user_service.mappers.AdminUserMapper;
 import it.roadies.user_service.mappers.UserMapper;
 import it.roadies.user_service.services.AdminService;
 import jakarta.transaction.Transactional;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 
@@ -29,6 +33,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 public class AdminServiceImpl implements AdminService {
 
     private final UserMapper userMapper;
+    private final AdminUserMapper userMapper1;
     private final MessageLang messageLang;
     private final UserRepository userRepository;
     private final Keycloak keycloak;
@@ -128,5 +133,35 @@ public class AdminServiceImpl implements AdminService {
         return pending.stream()
                 .map(userMapper::toPendingDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<UserResponseDTO> getUsersByFilter(String filter) {
+        log.info("Admin operation: Fetching users with filter: {}", filter);
+
+        List<User> users;
+
+        switch (filter.toUpperCase()) {
+            case "ORGANIZERS":
+                users = userRepository.findAllByEnabledTrueAndOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);
+                break;
+            case "BANNED":
+                users = userRepository.findAllByEnabledFalse();
+                break;
+            case "ACTIVE":
+                users = userRepository.findAllByEnabledTrue();
+                break;
+            default:
+                log.error("Invalid filter parameter provided: {}", filter);
+                throw new IllegalArgumentException("Invalid filter. Use 'ORGANIZERS', 'BANNED', or 'ACTIVE'");
+        }
+
+        log.info("Admin operation: Found {} users matching the filter '{}'", users.size(), filter);
+
+        // Convert the fetched User entities to safe UserResponseDTOs using your mapper
+        return users.stream()
+                .map(userMapper1::toDto)
+                .collect(Collectors.toList());
     }
 }

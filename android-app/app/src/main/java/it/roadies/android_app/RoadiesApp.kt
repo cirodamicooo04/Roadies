@@ -90,7 +90,11 @@ fun RoadiesApp(
                         } else {
                             IconButton(
                                 onClick = {
-                                    // Decidere se aprire una nuova schermata o menu a tendina.
+                                    navHostController.navigate("profile") {
+                                        popUpTo(navHostController.graph.startDestinationId) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 }
                             ) {
                                 Icon(
@@ -372,6 +376,11 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             composable(route="create_travel"){
                 TravelCreationScreen(navHostController = navHostController, onNavigateBack = {navHostController.popBackStack()})
             }
+        composable(route = "handle_travels"){
+
+        }
+        composable(route = "profile") {
+            ProfileScreen()
         }
 
     }

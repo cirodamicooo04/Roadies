@@ -2,6 +2,7 @@ package it.roadies.user_service.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
+import it.roadies.user_service.data.dto.response.UserResponseDTO;
 import it.roadies.user_service.services.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -64,5 +65,14 @@ public class AdminController {
     @Operation(summary = "Lista richieste organizzatore in sospeso")
     public ResponseEntity<List<PendingOrganizerRequestResponseDTO>> getPendingOrganizerRequests() {
         return ResponseEntity.ok(adminService.getPendingOrganizerRequests());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/users")
+    public ResponseEntity<List<UserResponseDTO>> getFilteredUsers(
+            @RequestParam(defaultValue = "ACTIVE") String filter) { // Default is ACTIVE if no filter is provided
+
+        List<UserResponseDTO> users = adminService.getUsersByFilter(filter);
+        return ResponseEntity.ok(users);
     }
 }
