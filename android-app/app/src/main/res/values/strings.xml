@@ -52,6 +52,8 @@
     <string name="no_activities">You do not have activities yet</string>
     <string name="no_travels">You do not have travels yet</string>
     <string name="confirm_deleting">Confirm deleting</string>
+    <string name="confirm">Confirm</string>
+    <string name="travel_created">Travel created with success</string>
     <string name="confirm_deleting_body">Do you really want to delete %1$s? The action is irreversible</string>
     <string name="this_activity">this activity</string>
     <string name="this_travel">this travel</string>
@@ -85,6 +87,10 @@
     <string name="address_error">You have to select a valid address</string>
     <string name="departures">Departures</string>
     <string name="no_departures_added">No departures added yet</string>
+    <string name="cancel_creation_confirm">Do you want to cancel creation?</string>
+    <string name="cancel_creation_confirm_body">All your changes will be discarded</string>
+    <string name="create_travel_confirm">Do you want to create the travel?</string>
+    <string name="create_travel_confirm_body">Are you sure you want to proceed with the creation?</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Active</string>

@@ -141,7 +141,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                     MenuItem(text = "Esci",
                         textColor = Color(0xFFD32F2F),
                         onClick = {
-                            viewModel.logout()
+                            //viewModel.logout()
                         })
 
                     Spacer(modifier = Modifier.height(40.dp))

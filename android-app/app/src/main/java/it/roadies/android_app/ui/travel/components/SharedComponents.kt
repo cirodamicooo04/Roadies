@@ -74,7 +74,7 @@ fun DetailHeader(
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(text = title ?: "", fontSize = 35.sp, lineHeight = 40.sp, fontWeight = FontWeight.ExtraBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(text = "${destination ?: ""}, ${country ?: ""}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             trailingContent()
         }

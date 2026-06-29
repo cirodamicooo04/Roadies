@@ -73,6 +73,22 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
     var travelToDelete by remember { mutableStateOf<TravelSummaryResponse?>(null) }
     var activityToDelete by remember { mutableStateOf<ActivitySummaryResponse?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+
+
+    val savedStateHandle = navHostController.currentBackStackEntry?.savedStateHandle
+
+    // mi prendo lo stato che gli ho passato dopo la creazione
+    val travelCreated by savedStateHandle?.getStateFlow("travel_created",false)?.collectAsState() ?: remember { mutableStateOf(false) }
+
+    val successMessage = stringResource(R.string.travel_created)
+    LaunchedEffect(travelCreated) {
+        if (travelCreated){
+            savedStateHandle?.remove<Boolean>("travel_created")
+            viewModel.loadData()
+            snackbarHostState.showSnackbar(message = successMessage)
+        }
+    }
+
     
     LaunchedEffect(uiState.value.deletingErrorMessage) {
         uiState.value.deletingErrorMessage?.let { error ->

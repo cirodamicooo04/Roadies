@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,7 +49,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -90,6 +90,7 @@ import it.roadies.android_app.viewmodel.TravelActivityState
 import it.roadies.android_app.viewmodel.TravelCreationDepartureState
 import it.roadies.android_app.viewmodel.TravelCreationViewModel
 import it.roadies.android_app.viewmodel.UploadableImage
+import org.w3c.dom.Text
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -107,12 +108,13 @@ fun TravelCreationScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    var showModalOfCancelCreation by remember { mutableStateOf(false) }
+    var showModalOfCreation by remember { mutableStateOf(false) }
+
     LaunchedEffect(uiState.isCreationSuccess) {
         if (uiState.isCreationSuccess) {
-            navHostController.navigate("handle_travels") {
-                //distruggo il wizard
-                popUpTo("create_travel") { inclusive = true }
-            }
+            navHostController.previousBackStackEntry?.savedStateHandle?.set("travel_created", true)
+            navHostController.popBackStack()
         }
     }
 
@@ -193,7 +195,7 @@ fun TravelCreationScreen(
                         TextButton(
                             onClick = {
                                 if (uiState.currentStep == CreateTravelStep.BASIC_INFO) {
-                                    onNavigateBack()
+                                    showModalOfCancelCreation = true
                                 } else {
                                     viewModel.previousStep()
                                 }
@@ -210,7 +212,13 @@ fun TravelCreationScreen(
                         Spacer(modifier = Modifier.width(8.dp))
 
                         Button(
-                            onClick = { viewModel.nextStep() },
+                            onClick = {
+                                if (uiState.currentStep == CreateTravelStep.DEPARTURES) {
+                                    showModalOfCreation = true
+                                } else {
+                                    viewModel.nextStep()
+                                }
+                            },
                             enabled = !uiState.images.any {it.isUploading} && !uiState.isCreationLoading
                         ) {
                             if (uiState.isCreationLoading) {
@@ -227,6 +235,53 @@ fun TravelCreationScreen(
                 }
             }
         }
+    }
+
+    if (showModalOfCancelCreation){
+        AlertDialog(
+            onDismissRequest = {showModalOfCancelCreation = false},
+            title = {Text(text = stringResource(R.string.cancel_creation_confirm))},
+            text = {Text(text = stringResource(R.string.cancel_creation_confirm_body))},
+            confirmButton = {
+                Button(onClick = {
+                    onNavigateBack()
+                    showModalOfCancelCreation = false
+                }) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showModalOfCancelCreation = false
+                }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+
+            }
+        )
+    }
+
+    if (showModalOfCreation) {
+        AlertDialog(
+            onDismissRequest = { showModalOfCreation = false },
+            title = { Text(text = stringResource(R.string.create_travel_confirm)) },
+            text = { Text(text = stringResource(R.string.create_travel_confirm_body)) },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.nextStep()
+                    showModalOfCreation = false
+                }) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showModalOfCreation = false
+                }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }
 
@@ -760,14 +815,14 @@ fun TravelActivityCreationForm(
                 modifier = Modifier.fillMaxWidth(0.9f)
             ) {
                 for (i in 1..travelDurationDays) {
-                    if (i !in alreadySelectedDays)
-                    DropdownMenuItem(
+                    if (i !in alreadySelectedDays){
+                        DropdownMenuItem(
                         text = { Text(stringResource(R.string.day) + " $i") },
                         onClick = {
                             dayNumber = i
                             expandedDayDropdown = false
-                        }
-                    )
+                        })
+                    }
                 }
             }
         }

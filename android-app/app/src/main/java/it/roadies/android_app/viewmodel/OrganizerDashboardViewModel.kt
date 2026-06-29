@@ -30,7 +30,7 @@ class OrganizerDashboardViewModel @Inject constructor(private val travelReposito
         loadData()
     }
 
-    private fun loadData() {
+    fun loadData() {
         viewModelScope.launch {
             _uiState.value = OrganizerDashboardUiState(isLoading = true)
 

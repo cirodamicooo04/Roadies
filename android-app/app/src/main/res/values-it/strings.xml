@@ -46,6 +46,7 @@
     <string name="available_departures">Partenze disponibili</string>
     <string name="no_available_departures">Nessuna partenza disponibile</string>
     <string name="hours">Ore</string>
+    <string name="travel_created">Viaggio creato con successo</string>
     <string name="create_new_travel">Nuovo viaggio</string>
     <string name="create_new_activity">Nuova attività</string>
     <string name="your_travels_and_activities">Le tue attività e viaggi</string>
@@ -80,6 +81,11 @@
     <string name="departures">Partenze</string>
     <string name="new_departure">Nuova partenza</string>
     <string name="no_departures_added">Nessuna partenza aggiunta</string>
+    <string name="cancel_creation_confirm">Vuoi annullare la creazione del viaggio?</string>
+    <string name="cancel_creation_confirm_body">Tutte le tue modifiche andranno perse</string>
+    <string name="create_travel_confirm">Vuoi creare il viaggio?</string>
+    <string name="create_travel_confirm_body">Sei sicuro di voler procedere con la creazione?</string>
+    <string name="confirm">Conferma</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Attivi</string>

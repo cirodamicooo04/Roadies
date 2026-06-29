@@ -174,7 +174,7 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
                     destination = travel.destination,
                     country = travel.country
                 ) {
-                    Row() {
+                    Row(modifier = Modifier.weight(1f)) {
                         Icon(
                             imageVector = Icons.Filled.AccessTime,
                             contentDescription = "Duration",
