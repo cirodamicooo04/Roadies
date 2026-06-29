@@ -57,9 +57,11 @@ public class UserController {
 
     @GetMapping("/search")
     @Operation(summary = "Cerca utente", description = "Ricerca pubblica di un profilo")
-    public ResponseEntity<UserProfileResponseDTO> searchUser(@RequestParam String username) {
-        log.info("Ricevuta richiesta REST di ricerca utente per username: {}", username);
-        return ResponseEntity.ok(userService.getProfileByUsername(username));
+    public ResponseEntity<List<UserProfileResponseDTO>> searchUsers(
+            @RequestParam("username") String username
+    ) {
+        List<UserProfileResponseDTO> results = userService.getProfileByUsername(username);
+        return ResponseEntity.ok(results);
     }
 
     @PutMapping("/update")

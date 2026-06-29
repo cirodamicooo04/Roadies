@@ -66,7 +66,7 @@ public class AdminController {
     public ResponseEntity<List<PendingOrganizerRequestResponseDTO>> getPendingOrganizerRequests() {
         return ResponseEntity.ok(adminService.getPendingOrganizerRequests());
     }
-
+    /*
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/users")
     public ResponseEntity<List<UserResponseDTO>> getFilteredUsers(
@@ -75,4 +75,6 @@ public class AdminController {
         List<UserResponseDTO> users = adminService.getUsersByFilter(filter);
         return ResponseEntity.ok(users);
     }
+
+     */
 }

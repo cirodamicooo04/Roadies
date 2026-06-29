@@ -45,4 +45,5 @@ public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
             @Param("status") Status status
     );
 
+    List<Friendship> findByRequesterIdAndStatus(User requesterId, Status status);
 }

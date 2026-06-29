@@ -135,6 +135,7 @@ public class AdminServiceImpl implements AdminService {
                 .toList();
     }
 
+    /*
     @Override
     @Transactional
     public List<UserResponseDTO> getUsersByFilter(String filter) {
@@ -164,4 +165,5 @@ public class AdminServiceImpl implements AdminService {
                 .map(userMapper1::toDto)
                 .collect(Collectors.toList());
     }
+     */
 }

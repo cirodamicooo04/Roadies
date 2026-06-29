@@ -11,7 +11,7 @@ import java.util.List;
 public interface UserService {
     UserSyncResult syncUser(UserSyncRequestDTO requestDto);
     UserProfileResponseDTO getProfile(String keycloakId);
-    UserProfileResponseDTO getProfileByUsername(String username);
+    List<UserProfileResponseDTO> getProfileByUsername(String username);
     UserProfileResponseDTO updateProfile(String keycloakId, UserUpdateRequestDTO updateDto);
     void requestOrganizerRole(String keycloakId);
 

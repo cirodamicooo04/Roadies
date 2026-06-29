@@ -86,4 +86,11 @@ public class FriendshipController {
         friendshipService.removeFriend(friendshipId, jwt.getSubject());
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/requests/sent")
+    public ResponseEntity<List<FriendshipResponseDTO>> getSentRequests(
+            @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        return ResponseEntity.ok(friendshipService.getSentRequests(userId));
+    }
 }

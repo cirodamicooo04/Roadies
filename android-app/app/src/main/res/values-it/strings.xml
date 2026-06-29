@@ -157,4 +157,21 @@
     <string name="error_max_slots_invalid">Inserisci un numero di posti valido</string>
     <string name="error_departure_duration">La durata deve essere esattamente di %1$d giorni</string>
     <string name="departures_empty">Ancora nessuna partenza aggiunta. Inserisci la prima!</string>
+
+
+    <!-- User -->
+    <string name="edit_profile"> Modifica Profilo</string>
+    <string name="friends"> Amici</string>
+    <string name="logout"> Esci</string>
+    <string name="search_friend"> Cerca nuovi amici...</string>
+    <string name="pending_request"> Richieste di amicizia in attesa</string>
+    <string name="no_user"> Nessun utente trovato</string>
+    <string name="no_friends"> Non hai ancora aggiunto nessun amico</string>
+    <string name="your_friends"> I tuoi amici</string>
+    <string name="close"> Chiudi</string>
+    <string name="reject"> Rifiuta</string>
+    <string name="accept"> Accetta</string>
+    <string name="add_friend"> Aggiungi amico</string>
+    <string name="request_sent"> Richiesta inviata</string>
+
 </resources>

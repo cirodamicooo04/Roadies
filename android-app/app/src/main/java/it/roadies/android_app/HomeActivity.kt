@@ -220,9 +220,9 @@ fun ContinentDestinations(onContinentClick: (String) -> Unit){
 fun ContinentCard(continent: String, onCardClick: (String) -> Unit ) {
     val imageResId = when (continent.lowercase()) {
         "europe" -> R.drawable.europe_wallpaper
-        "asia" -> R.drawable.asia_wallpaper
-        "africa" -> R.drawable.africa_wallpaper
-        "america" -> R.drawable.america_wallpaper
+        "asia" -> R.drawable.europe_wallpaper// cambiare con quelle giuste, cambiate momentaneamente per errori
+        "africa" -> R.drawable.europe_wallpaper// cambiare con quelle giuste, cambiate momentaneamente per errori
+        "america" -> R.drawable.europe_wallpaper // cambiare con quelle giuste, cambiate momentaneamente per errori
         "oceania" -> R.drawable.oceania_wallpaper
         else -> R.drawable.fallback
     }
