@@ -115,10 +115,16 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Override
     public List<UserProfileResponseDTO> getFriendsList(String userId) {
         log.info("Recupero lista amici base per l'utente");
-        List<User> friends = friendshipRepository.findAcceptedFriendsByUser(userId);
 
-        return friends.stream()
-                .map(userMapper::toDto)
+        List<Friendship> friendships = friendshipRepository.findAllAcceptedFriendshipsByUser(userId);
+        return friendships.stream()
+                .map(friendship -> {
+                    User friend = friendship.getRequesterId().getKeycloakId().equals(userId)
+                            ? friendship.getReceiverId()
+                            : friendship.getRequesterId();
+
+                    return userMapper.toDto(friend);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -183,4 +189,20 @@ public class FriendshipServiceImpl implements FriendshipService {
         log.info("Invio evento RabbitMQ 'user.exchange' per l'amicizia rimossa");
         rabbitTemplate.convertAndSend("user.exchange", "user.friendship.deleted", event);
     }
+
+    @Override
+    public List<FriendshipResponseDTO> getSentRequests(String userId) {
+        log.info("Recupero richieste di amicizia inviate in sospeso per l'utente ID: {}", userId);
+        User requester = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(messageLang.getMessage("error.user.notfound")));
+
+        List<Friendship> sent = friendshipRepository.findByRequesterIdAndStatus(requester, Status.PENDING);
+
+        return sent.stream().map(f -> {
+            FriendshipResponseDTO dto = friendshipMapper.toDto(f);
+            dto.setFriendProfile(userMapper.toDto(f.getReceiverId()));
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
 }

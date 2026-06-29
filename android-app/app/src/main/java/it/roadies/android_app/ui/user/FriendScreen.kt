@@ -1,0 +1,438 @@
+package it.roadies.android_app.ui.user
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import it.roadies.android_app.R
+import it.roadies.android_app.client.models.user.FriendshipResponseDTO
+import it.roadies.android_app.client.models.user.UserProfileResponseDTO
+import it.roadies.android_app.viewmodel.user.FriendViewModel
+import kotlinx.coroutines.launch
+import java.util.UUID
+
+private val BackgroundGray = Color(0xFFF5F5F5)
+private val OrangeAvatar = Color(0xFFE26D38)
+private val TextDark = Color(0xFF1A2B4C)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FriendScreen(
+    viewModel: FriendViewModel = hiltViewModel(),
+    onBack: () -> Unit = {}
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val isShowingSearchResults = state.searchQuery.isNotBlank()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            containerColor = Color.White
+        ) {
+            PendingRequestsSheet(
+                requests = state.pendingRequests,
+                onAccept = { id ->
+                    viewModel.respondToRequest(id, accept = true)
+                },
+                onReject = { id ->
+                    viewModel.respondToRequest(id, accept = false)
+                },
+                onClose = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        showBottomSheet = false
+                    }
+                }
+            )
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundGray)
+            .padding(16.dp)
+    ) {
+        // Search bar
+        OutlinedTextField(
+            value = state.searchQuery,
+            onValueChange = { viewModel.onSearchQueryChange(it) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Cerca nuovi amici...") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Cerca") },
+            trailingIcon = {
+                if (state.searchQuery.isNotBlank()) {
+                    IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                        Icon(Icons.Default.Close, contentDescription = "Cancella")
+                    }
+                }
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { viewModel.searchUser() }),
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedBorderColor = OrangeAvatar,
+                unfocusedBorderColor = Color.LightGray
+            )
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Chip richieste in attesa — visibile solo se ce ne sono
+        if (state.pendingRequests.isNotEmpty()) {
+            Button(
+                onClick = { showBottomSheet = true },
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = OrangeAvatar,
+                    contentColor = Color.White
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PersonAdd,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Richieste di amicizia in attesa (${state.pendingRequests.size})",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                state.isLoading || state.isSearching -> {
+                    CircularProgressIndicator(
+                        color = OrangeAvatar,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                state.error != null -> {
+                    Text(
+                        text = state.error!!,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                isShowingSearchResults -> {
+                    if (state.searchResults.isEmpty() && !state.isSearching) {
+                        Text(
+                            text = "Nessun utente trovato.",
+                            color = Color.Gray,
+                            fontSize = 16.sp,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    } else {
+                        UsersList(
+                            title = "Risultati della ricerca",
+                            users = state.searchResults,
+                            isSearchMode = true,
+                            friendsList = state.friends,
+                            requestSentTo = state.requestSentTo,
+                            onAddFriendClick = { username ->
+                                viewModel.sendFriendRequest(username)
+                            }
+                        )
+                    }
+                }
+                else -> {
+                    if (state.friends.isEmpty()) {
+                        Text(
+                            text = "Non hai ancora aggiunto nessun amico.",
+                            color = Color.Gray,
+                            fontSize = 16.sp,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    } else {
+                        UsersList(
+                            title = "I tuoi amici",
+                            users = state.friends,
+                            isSearchMode = false,
+                            friendsList = state.friends,
+                            requestSentTo = state.requestSentTo,
+                            onAddFriendClick = {}
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PendingRequestsSheet(
+    requests: List<FriendshipResponseDTO>,
+    onAccept: (UUID) -> Unit,
+    onReject: (UUID) -> Unit,
+    onClose: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 32.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Richieste ricevute",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextDark
+            )
+            IconButton(onClick = onClose) {
+                Icon(Icons.Default.Close, contentDescription = "Chiudi")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(requests, key = { it.id.toString() }) { request ->
+                PendingRequestCard(
+                    request = request,
+                    onAccept = { request.id?.let { onAccept(it) } },
+                    onReject = { request.id?.let { onReject(it) } }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PendingRequestCard(
+    request: FriendshipResponseDTO,
+    onAccept: () -> Unit,
+    onReject: () -> Unit
+) {
+    val user = request.friendProfile
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(OrangeAvatar),
+                contentAlignment = Alignment.Center
+            ) {
+                val initials = buildString {
+                    user?.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
+                    user?.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
+                }.ifBlank { "?" }
+                Text(text = initials, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${user?.firstName} ${user?.lastName}",
+                    color = TextDark,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "@${user?.username ?: "utente"}",
+                    color = Color.Gray,
+                    fontSize = 13.sp
+                )
+            }
+
+            // Rifiuta
+            IconButton(
+                onClick = onReject,
+                colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFFE53935))
+            ) {
+                Icon(Icons.Default.Close, contentDescription = "Rifiuta", modifier = Modifier.size(24.dp))
+            }
+
+            // Accetta
+            IconButton(
+                onClick = onAccept,
+                colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF43A047))
+            ) {
+                Icon(Icons.Default.Check, contentDescription = "Accetta", modifier = Modifier.size(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun UsersList(
+    title: String,
+    users: List<UserProfileResponseDTO>,
+    isSearchMode: Boolean,
+    friendsList: List<UserProfileResponseDTO>,
+    requestSentTo: Set<String>,
+    onAddFriendClick: (String) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            Text(
+                text = title,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextDark,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        items(users) { user ->
+            val isAlreadyFriend = friendsList.any { it.username == user.username }
+            val requestAlreadySent = requestSentTo.contains(user.username)
+            FriendCard(
+                user = user,
+                isSearchMode = isSearchMode,
+                showAddButton = !isAlreadyFriend && !requestAlreadySent,
+                requestAlreadySent = requestAlreadySent,
+                onAddFriendClick = { onAddFriendClick(user.username ?: "") }
+            )
+        }
+    }
+}
+
+@Composable
+fun FriendCard(
+    user: UserProfileResponseDTO,
+    isSearchMode: Boolean = false,
+    showAddButton: Boolean = true,
+    requestAlreadySent: Boolean = false,
+    onAddFriendClick: () -> Unit = {}
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(CircleShape)
+                    .background(OrangeAvatar),
+                contentAlignment = Alignment.Center
+            ) {
+                val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
+                val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
+                val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
+                Text(text = initials, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Medium)
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${user.firstName} ${user.lastName}",
+                    color = TextDark,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "@${user.username ?: "utente"}",
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+            }
+
+            if (isSearchMode) {
+                when {
+                    showAddButton -> {
+                        IconButton(
+                            onClick = onAddFriendClick,
+                            colors = IconButtonDefaults.iconButtonColors(contentColor = OrangeAvatar)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PersonAdd,
+                                contentDescription = "Aggiungi amico",
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                    requestAlreadySent -> {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Richiesta inviata",
+                            tint = Color(0xFF4CAF50),
+                            modifier = Modifier
+                                .size(28.dp)
+                                .padding(horizontal = 12.dp)
+                        )
+                    }
+                }
+            } else {
+                val badgeName = user.badge?.toString() ?: "NONE"
+                val imageRes = when (badgeName.uppercase()) {
+                    "BRONZE"   -> R.drawable.badge_bronze
+                    "SILVER"   -> R.drawable.badge_silver
+                    "GOLD"     -> R.drawable.badge_gold
+                    "PLATINUM" -> R.drawable.badge_platinum
+                    "DIAMOND"  -> R.drawable.badge_diamond
+                    "EMERALD"  -> R.drawable.badge_emerald
+                    else       -> R.drawable.badge_bronze
+                }
+                Icon(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = "Badge $badgeName",
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape),
+                    tint = Color.Unspecified
+                )
+            }
+        }
+    }
+}

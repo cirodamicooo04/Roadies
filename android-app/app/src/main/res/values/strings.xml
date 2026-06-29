@@ -87,4 +87,9 @@
     <string name="activity_photo">Activity photo</string>
     <string name="expand">Expand</string>
     <string name="hours">Hours</string>
+
+    <!-- User Profile -->
+    <string name="edit_profile">Edit Profile</string>
+    <string name="friend">Friend</string>
+    <string name="logout">Logout</string>
 </resources>

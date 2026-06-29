@@ -14,4 +14,5 @@ public interface FriendshipService {
     List<FriendshipResponseDTO> getDetailedFriendsList(String userId);
     List<FriendshipResponseDTO> getPendingRequests(String userId);
     void removeFriend(UUID friendshipId, String currentUserId);
+    List<FriendshipResponseDTO> getSentRequests(String userId);
 }

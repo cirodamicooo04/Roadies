@@ -87,7 +87,7 @@ interface UserManagementApi {
      * @return [Response]<[UserProfileResponseDTO]>
      */
     @GET("api/v1/users/search")
-    suspend fun searchUser(@Query("username") username: kotlin.String): Response<UserProfileResponseDTO>
+    suspend fun searchUser(@Query("username") username: kotlin.String): Response<List<UserProfileResponseDTO>>
 
     /**
      * POST api/v1/users/sync

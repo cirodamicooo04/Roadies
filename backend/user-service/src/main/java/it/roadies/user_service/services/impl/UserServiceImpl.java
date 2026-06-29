@@ -23,8 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -96,14 +98,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileResponseDTO getProfileByUsername(String username) {
+    public List<UserProfileResponseDTO> getProfileByUsername(String username) {
         log.info("Ricerca profilo tramite username: {}", username);
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> {
-                    log.error("Impossibile recuperare il profilo: username non trovato ({})", username);
-                    return new ResourceNotFoundException(messageLang.getMessage("error.username.notfound"));
-                });
-        return userMapper.toDto(user);
+        log.info("Ricerca utenti in corso per la keyword: {}", username);
+
+        if (username == null || username.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<User> foundUsers = userRepository.searchUsersByKeyword(username.trim());
+
+        return foundUsers.stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override

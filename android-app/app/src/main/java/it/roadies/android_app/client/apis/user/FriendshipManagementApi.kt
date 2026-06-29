@@ -97,4 +97,6 @@ interface FriendshipManagementApi {
     @POST("api/v1/friends/request/{receiverUsername}")
     suspend fun send(@Path("receiverUsername") receiverUsername: kotlin.String): Response<Unit>
 
+    @GET("api/v1/friends/requests/sent")
+    suspend fun getSentRequests(): Response<List<FriendshipResponseDTO>>
 }

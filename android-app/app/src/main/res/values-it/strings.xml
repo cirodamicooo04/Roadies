@@ -88,4 +88,9 @@
     <string name="in_planning">In programmazione</string>
     <string name="activity_photo">Foto dell\'attività</string>
     <string name="expand">Espandi</string>
+
+    <!-- User Profile -->
+    <string name="edit_profile">Modifica Profilo</string>
+    <string name="friend">Amici</string>
+    <string name="logout">Esci</string>
 </resources>
