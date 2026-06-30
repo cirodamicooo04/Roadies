@@ -17,12 +17,6 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     List<User> findByOrganizerRequestStatus(OrganizerRequestStatus status);
 
-    //List<User> findAllByEnabledTrue();
-
-    //List<User> findAllByEnabledFalse();
-
-    //List<User> findAllByEnabledTrueAndOrganizerRequestStatus(OrganizerRequestStatus status);
-
     //Ricerca Parziale
     @Query("SELECT u FROM User u WHERE " +
             "LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR " +

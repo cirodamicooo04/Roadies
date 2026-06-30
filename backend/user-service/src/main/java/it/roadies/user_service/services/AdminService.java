@@ -9,8 +9,7 @@ public interface AdminService {
 
     void blockUser(String keycloakId);
     void unblockUser(String keycloakId);
-    void demoteOrganizerToUser(String keycloakId);
     void reviewOrganizerRequest(String targetKeycloakId, boolean approved, String reason);
     List<PendingOrganizerRequestResponseDTO> getPendingOrganizerRequests();
-    //List<UserResponseDTO> getUsersByFilter(String filter);
+    List<UserResponseDTO> getUsersByFilter(String filter);
 }
