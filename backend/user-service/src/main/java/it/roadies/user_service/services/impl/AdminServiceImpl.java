@@ -72,19 +72,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    @Transactional
-    public void demoteOrganizerToUser(String keycloakId) {
-        log.info("Admin operation: Request to demote organizer to user with Keycloak ID: {}", keycloakId);
-
-        User user = userRepository.findById(keycloakId)
-                .orElseThrow(() -> new RuntimeException("User not found with Keycloak ID: " + keycloakId));
-
-        //user.setRole(User.Role.USER);
-        userRepository.save(user);
-        log.info("User with Keycloak ID: {} has been demoted from organizer to user.", keycloakId);
-    }
-
-    @Override
     @org.springframework.transaction.annotation.Transactional
     public void reviewOrganizerRequest(String targetKeycloakId, boolean approved, String reason) {
         User user = userRepository.findById(targetKeycloakId)
@@ -142,23 +129,25 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public List<UserResponseDTO> getUsersByFilter(String filter) {
-        log.info("Admin: Fetching users with filter: {}", filter);
+        List<User> users;
 
-        List<User> users = switch (filter.toUpperCase()) {
+        switch (filter.toUpperCase()) {
+            case "ORGANIZERS" -> users = userRepository.findByOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);
+            case "BANNED", "ACTIVE" -> users = userRepository.findAll();
+            default -> users = userRepository.findAll();
+        }
 
-            case "ORGANIZERS" -> userRepository.findAllByEnabledTrueAndOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);
-
-            case "BANNED" -> userRepository.findAllByEnabledFalse();
-
-            case "ACTIVE" -> userRepository.findAllByEnabledTrue();
-
-            default -> throw new IllegalArgumentException("Invalid filter: " + filter);
-        };
-
-        return users.stream().map(user -> {
-            UserResponseDTO dto = adminUserMapper.toDto(user);
-            dto.setEnabled(isUserEnabledInKeycloak(user.getKeycloakId()));
-            return dto;
-        }).collect(Collectors.toList());
+        return users.stream()
+                .map(u -> {
+                    UserResponseDTO dto = adminUserMapper.toDto(u);
+                    dto.setEnabled(isUserEnabledInKeycloak(u.getKeycloakId()));
+                    return dto;
+                })
+                .filter(dto -> {
+                    if ("BANNED".equals(filter.toUpperCase())) return !dto.isEnabled();
+                    if ("ACTIVE".equals(filter.toUpperCase())) return dto.isEnabled();
+                    return true;
+                })
+                .collect(Collectors.toList());
     }
 }

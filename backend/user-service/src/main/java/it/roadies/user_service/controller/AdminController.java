@@ -39,16 +39,6 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(
-            summary = "Degrada un organizzatore a utente",
-            description = "Permette ad un admin di degradare un organizzatore a utente normale specificato tramite il suo ID Keycloak. Un organizzatore degradato perderà i privilegi di organizzatore e tornerà ad essere un utente standard."
-    )
-    @PutMapping("users/{id}/demote")
-    public ResponseEntity<Void> demoteOrganizerToUser(String keycloakId) {
-        adminService.demoteOrganizerToUser(keycloakId);
-        return ResponseEntity.noContent().build();
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/review-organizer/{targetUserId}")
     @Operation(summary = "Approva o rifiuta richiesta organizzatore")
