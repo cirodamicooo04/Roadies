@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -20,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +57,65 @@ fun BookingStepProgressBar(
                 .clip(RoundedCornerShape(2.dp))
         )
     }
+}
+
+// barra che mostra il tempo residuo prima della scadenza
+@Composable
+fun BookingTimerBar(
+    remainingSeconds: Int,
+    modifier: Modifier = Modifier
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val isLow = remainingSeconds <= 60
+    val contentColor = if (isLow) colorScheme.error else colorScheme.onSurfaceVariant
+    val containerColor = if (isLow) colorScheme.errorContainer else colorScheme.surfaceVariant
+
+    val minutes = remainingSeconds / 60
+    val seconds = remainingSeconds % 60
+    val timeText = "%02d:%02d".format(minutes, seconds)
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = containerColor
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.AccessTime,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = "Tempo rimanente $timeText",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = contentColor
+            )
+        }
+    }
+}
+
+// dialog mostrato quando il timer arriva a 0 e la prenotazione non è più valida
+@Composable
+fun BookingExpiredDialog(onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onConfirm,
+        title = { Text("Tempo scaduto") },
+        text = {
+            Text("Il tempo per completare la prenotazione è scaduto e i posti sono stati liberati. Riprova dall'inizio.")
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Ho capito")
+            }
+        }
+    )
 }
 
 @Composable

@@ -125,14 +125,19 @@
     <string name="booking_detail_end_date">Data di fine</string>
     <string name="booking_detail_view_travel">Dettagli viaggio</string>
 
-    <string name="booking_without_seats">Posti non disponibili. Scegli un altro viaggio</string>
+    <string name="booking_without_seats">Posti non disponibili. Scegli un altra partenza</string>
     <string name="booking_searching_seats">Stiamo cercando posti disponibili…</string>
     <string name="booking_step_1_of_4">Passo 1 di 4</string>
+    <string name="booking_step_2_of_4">Passo 2 di 4</string>
+    <string name="booking_step_3_of_4">Passo 3 di 4</string>
+    <string name="booking_step_4_of_4">Passo 4 di 4</string>
     <string name="booking_people_title">Quante persone?</string>
     <string name="booking_people_subtitle">Seleziona il numero di ospiti per la prenotazione</string>
     <string name="booking_decrease">Diminuisci</string>
     <string name="booking_increase">Aumenta</string>
     <string name="booking_continue">Continua</string>
+    <string name="booking_confirm">Conferma</string>
+    <string name="booking_back">Indietro</string>
     <string name="booking_cancel">Annulla</string>
     <string name="booking_person">persona</string>
     <string name="booking_people">persone</string>
@@ -174,4 +179,35 @@
     <string name="add_friend"> Aggiungi amico</string>
     <string name="request_sent"> Richiesta inviata</string>
 
+
+    <string name="participant_details"> Dati dei partecipanti</string>
+    <string name="insert_participant_details">Inserisci le informazioni di ogni partecipante al viaggio</string>
+    <string name="saving_partecipants">Salvataggio partecipanti…</string>
+    <string name="partecipants">Partecipante %1$d</string>
+    <string name="first_name">Nome</string>
+    <string name="last_name">Cognome</string>
+    <string name="tel">Telefono</string>
+    <string name="booking_members_invalid_fields">Alcuni campi non sono validi:\n- Nome e cognome obbligatori (massimo 100 caratteri)\n- Numero di telefono obbligatorio\n-Data di nascita precedente a oggi</string>
+    <string name="date">Data di nascita</string>
+    <string name="type_documents">Tipo di documento</string>
+    <string name="id_card">Carta d\'identità</string>
+    <string name="dr_license">Patente</string>
+    <string name="passport">Passaporto</string>
+    <string name="upload_documents">Carica i documenti</string>
+    <string name="add_ph">Aggiungi una foto del documento per ogni partecipante</string>
+    <string name="upload_and_complete">Carica e completa</string>
+    <string name="uploading_documents">Caricamento documenti…</string>
+    <string name="uploaded">Caricato</string>
+    <string name="document_preview">Anteprima documento</string>
+    <string name="choose_photo">Scegli foto</string>
+    <string name="change_photo">Cambia foto</string>
+
+    <!-- booking payment -->
+    <string name="booking_payment_step_label">Pagamento</string>
+    <string name="booking_payment_title">Completa la prenotazione</string>
+    <string name="booking_payment_subtitle">Paga in modo sicuro tramite Stripe per confermare il tuo viaggio</string>
+    <string name="booking_payment_pay_now">Paga ora</string>
+    <string name="booking_payment_confirming">Conferma del pagamento in corso…</string>
+    <string name="booking_payment_preparing">Preparazione del pagamento…</string>
+    <string name="booking_payment_confirmed">Prenotazione confermata!</string>
 </resources>

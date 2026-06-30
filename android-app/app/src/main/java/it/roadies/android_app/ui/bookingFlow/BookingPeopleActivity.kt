@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import it.roadies.android_app.ui.bookingFlow.components.BookingErrorText
 import it.roadies.android_app.ui.bookingFlow.components.BookingStepBottomBar
 import it.roadies.android_app.ui.bookingFlow.components.BookingStepHeader
@@ -28,11 +27,14 @@ import it.roadies.android_app.viewmodel.bookingFlow.BookingViewModel
 import it.roadies.android_app.R
 
 @Composable
-fun BookingStepPeopleScreen(navController: NavHostController, onConfirmed: (peopleCount: Int) -> Unit, viewModel: BookingViewModel = hiltViewModel()) {
+fun BookingStepPeopleScreen(onBack: () -> Unit, onConfirmed: (Int) -> Unit, viewModel: BookingViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.status) {
-        if (state.status == BookingStatus.RESERVE_CONFIRMED) onConfirmed(state.peopleCount)
+        if (state.status == BookingStatus.RESERVE_CONFIRMED) {
+            onConfirmed(state.peopleCount)
+            viewModel.onConfirmedNavigated()
+        }
     }
 
     val errorMessage = when {
@@ -48,7 +50,7 @@ fun BookingStepPeopleScreen(navController: NavHostController, onConfirmed: (peop
             onIncrease = { viewModel.increasePeopleCount() },
             onDecrease = { viewModel.decreasePeopleCount() },
             onNext = { viewModel.onNext() },
-            onBack = {navController.popBackStack()}
+            onBack = onBack
         )
 
         if (state.isLoading) {

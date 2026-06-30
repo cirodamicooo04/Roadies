@@ -45,6 +45,15 @@ public class RabbitConfiguration {
     }
 
     @Bean
+    public Queue bookingDelayPaymentQueue() {
+        return QueueBuilder.durable("booking-delay-payment-queue")
+                .withArgument("x-message-ttl", 300000)
+                .withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", "booking-expiration-queue")
+                .build();
+    }
+
+    @Bean
     public Queue bookingDelayQueue() {
         return QueueBuilder.durable("booking-delay-queue")
                 .withArgument("x-message-ttl", 900000)

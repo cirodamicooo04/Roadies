@@ -37,6 +37,12 @@ class BookingViewModel @Inject constructor (private val repository: BookingRepos
     private val travelId: UUID? = savedStateHandle.get<String>("travelId")?.takeIf { it.isNotBlank() && it != "null" && !it.startsWith("{") }?.let { UUID.fromString(it) }
     private val activityId: UUID? = savedStateHandle.get<String>("activityId")?.takeIf { it.isNotBlank() && it != "null" && !it.startsWith("{") }?.let { UUID.fromString(it) }
 
+    // segnala che la navigazione verso lo step successivo è stata gestita,
+    // così tornando indietro a questo step il LaunchedEffect non ri-naviga in avanti
+    fun onConfirmedNavigated() {
+        _state.update { current -> current.copy(status = BookingStatus.DRAFT) }
+    }
+
     fun increasePeopleCount() {
         _state.value = _state.value.copy(peopleCount = _state.value.peopleCount + 1, error = null)
     }
@@ -54,7 +60,7 @@ class BookingViewModel @Inject constructor (private val repository: BookingRepos
 
                 val reserveResponse = repository.createPendingAndReserveSeats(request)
                 if (!reserveResponse.success) {
-                    _state.update { current -> current.copy(isLoading = false, error = reserveResponse.errorMessage ?: "Errore nella prenotazione")
+                    _state.update { current -> current.copy(isLoading = false, error = reserveResponse.errorMessage ?: "")
                     }
                 } else {
                     withTimeout(30_000L.milliseconds) {
@@ -70,11 +76,11 @@ class BookingViewModel @Inject constructor (private val repository: BookingRepos
                     }
                 }
             } catch (e: TimeoutCancellationException) {
-                _state.update { current -> current.copy(error = "Timeout: nessuna risposta dal server. Riprova.") }
+                _state.update { current -> current.copy(error = "Timeout: no response from the server. Please try again") }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.update { it.copy(error = "Errore di connessione: ${e.message}") }
+                _state.update { current-> current.copy(error = "Connection Error: ${e.message}") }
             } finally {
                 _state.update { current -> current.copy(isLoading = false) }
             }
