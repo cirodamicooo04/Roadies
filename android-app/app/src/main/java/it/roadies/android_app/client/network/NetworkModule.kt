@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import it.roadies.android_app.client.apis.admin.AdminManagementApi
 import it.roadies.android_app.client.apis.booking.GestioneDocumentiApi
 import it.roadies.android_app.client.apis.booking.GestionePagamentoApi
 import it.roadies.android_app.client.apis.booking.GestionePrenotazioniApi
@@ -13,8 +14,6 @@ import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
 import it.roadies.android_app.client.apis.travel.MetadatiApi
 import it.roadies.android_app.client.apis.travel.PhotonApi
-import it.roadies.android_app.client.apis.travel.ViaggiApi
-import it.roadies.android_app.client.apis.user.AdminManagementApi
 import it.roadies.android_app.client.apis.user.DocumentManagementApi
 import it.roadies.android_app.client.apis.user.FriendshipManagementApi
 import it.roadies.android_app.client.apis.user.UserManagementApi
@@ -32,6 +31,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import it.roadies.android_app.client.apis.travel.ViaggiApi as ViaggiApi1
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -85,8 +85,8 @@ object NetworkModule {
     // travel service apis
     @Provides
     @Singleton
-    fun provideViaggiApi(retrofit: Retrofit): ViaggiApi =
-        retrofit.create(ViaggiApi::class.java)
+    fun provideViaggiApi(retrofit: Retrofit): ViaggiApi1 =
+        retrofit.create(ViaggiApi1::class.java)
 
     @Provides
     @Singleton

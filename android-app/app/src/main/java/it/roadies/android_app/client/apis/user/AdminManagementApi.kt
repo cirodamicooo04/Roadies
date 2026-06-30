@@ -1,4 +1,4 @@
-package it.roadies.android_app.client.apis.admin // يفضل وضعها في حزمة admin
+package it.roadies.android_app.client.apis.admin
 
 import it.roadies.android_app.client.models.user.PendingOrganizerRequestResponseDTO
 import it.roadies.android_app.client.models.user.UserResponseDTO
@@ -14,10 +14,6 @@ interface AdminManagementApi {
     // (PUT /api/v1/admin/users/{id}/unblock)
     @PUT("/api/v1/admin/users/{id}/unblock")
     suspend fun unblockUser(@Path("id") keycloakId: String): Response<Void>
-
-    // (PUT /api/v1/admin/users/{id}/demote)
-    @PUT("/api/v1/admin/users/{id}/demote")
-    suspend fun demoteOrganizerToUser(@Path("id") keycloakId: String): Response<Void>
 
     // (PATCH /api/v1/admin/review-organizer/{targetUserId})
     @PATCH("/api/v1/admin/review-organizer/{targetUserId}")

@@ -11,5 +11,5 @@ data class UserResponseDTO(
     @SerializedName("avatarUrl") val avatarUrl: String?,
     @SerializedName("points") val points: Long?,
     @SerializedName("badge") val badge: String?,
-    @SerializedName("enabled") val enabled: String?
+    @SerializedName("enabled") val enabled: Boolean?
 )
