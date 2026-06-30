@@ -39,16 +39,6 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(
-            summary = "Degrada un organizzatore a utente",
-            description = "Permette ad un admin di degradare un organizzatore a utente normale specificato tramite il suo ID Keycloak. Un organizzatore degradato perderà i privilegi di organizzatore e tornerà ad essere un utente standard."
-    )
-    @PutMapping("users/{id}/demote")
-    public ResponseEntity<Void> demoteOrganizerToUser(String keycloakId) {
-        adminService.demoteOrganizerToUser(keycloakId);
-        return ResponseEntity.noContent().build();
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/admin/review-organizer/{targetUserId}")
     @Operation(summary = "Approva o rifiuta richiesta organizzatore")
@@ -66,15 +56,16 @@ public class AdminController {
     public ResponseEntity<List<PendingOrganizerRequestResponseDTO>> getPendingOrganizerRequests() {
         return ResponseEntity.ok(adminService.getPendingOrganizerRequests());
     }
-    /*
+
+
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("admin/users")
+    @GetMapping("users")
+    @Operation(summary = "Recupera utenti filtrati", description = "Recupera una lista di utenti filtrati in base allo stato specificato. " +
+            "Se non viene fornito alcun filtro, il valore predefinito è 'ACTIVE'.")
     public ResponseEntity<List<UserResponseDTO>> getFilteredUsers(
             @RequestParam(defaultValue = "ACTIVE") String filter) { // Default is ACTIVE if no filter is provided
 
         List<UserResponseDTO> users = adminService.getUsersByFilter(filter);
         return ResponseEntity.ok(users);
     }
-
-     */
 }

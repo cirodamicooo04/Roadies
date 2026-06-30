@@ -11,5 +11,6 @@ public interface AdminUserMapper {
 
     @Mapping(source = "gamification.points", target = "points")
     @Mapping(source = "gamification.badge", target = "badge")
+    @Mapping(target = "enabled", ignore = true)
     UserResponseDTO toDto(User user);
 }

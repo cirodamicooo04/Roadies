@@ -9,8 +9,11 @@ public class UserResponseDTO {
     private String username;
     private String firstName;
     private String lastName;
+    private String email;
     private String avatarUrl;
 
     private Long points;
     private Badge badge;
+
+    private boolean enabled;
 }
