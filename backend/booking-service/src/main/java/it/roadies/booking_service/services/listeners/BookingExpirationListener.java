@@ -29,8 +29,15 @@ public class BookingExpirationListener {
         log.info("Timer scaduto! Controllo lo stato del booking ID: {}", bookingId);
 
         bookingRepository.findById(bookingId).ifPresent(booking -> {
+            
+            if (booking.getStatus() == BookingStatus.READY_FOR_PAYMENT && LocalDateTime.now().isBefore(booking.getExpiresAt().plusMinutes(5))) {
+                log.info("Il booking {} è in fase di pagamento (scaduto da meno di 5 minuti). Concedo altri 5 minuti", bookingId);
+                rabbitTemplate.convertAndSend("booking-delay-payment-queue", booking.getId().toString());
+                return;
+            }
+
             if ((booking.getStatus() == BookingStatus.RESERVE_CONFIRMED || booking.getStatus() == BookingStatus.READY_FOR_PAYMENT) && booking.getExpiresAt().isBefore(LocalDateTime.now())) {
-                log.warn("Il booking {} è ancora RESERVE_CONFIRMED. Lo annullo e libero i posti.", bookingId);
+                log.warn("Il booking {} è definitivamente scaduto. Lo annullo e libero i posti", bookingId);
 
                 booking.setStatus(BookingStatus.EXPIRED);
                 bookingService.deleteMinioDocument(booking);

@@ -22,8 +22,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -33,7 +35,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import it.roadies.android_app.ui.bookingFlow.BookingDocumentsScreen
+import it.roadies.android_app.ui.bookingFlow.BookingPaymentScreen
+import it.roadies.android_app.ui.bookingFlow.BookingStepMembersScreen
 import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
+import it.roadies.android_app.viewmodel.bookingFlow.BookingFlowViewModel
 import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
@@ -308,9 +314,89 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 val activityId = backStackEntry.arguments?.getString("activityId")
 
                 BookingStepPeopleScreen(
-                    navController = navHostController,
+                    onBack = { navHostController.popBackStack() },
                     onConfirmed = { peopleCount ->
+                        navHostController.navigate("booking_members/$bookingId?peopleCount=$peopleCount")
                     }
+                )
+            }
+
+            composable(
+                route = "booking_members/{bookingId}?peopleCount={peopleCount}",
+                arguments = listOf(
+                    navArgument("bookingId") { type = NavType.StringType },
+                    navArgument("peopleCount") { type = NavType.IntType; defaultValue = 1 },
+                )
+            ) { backStackEntry ->
+                val bookingId = backStackEntry.arguments?.getString("bookingId").orEmpty()
+                val parentEntry = remember(backStackEntry) {
+                    navHostController.getBackStackEntry("home_graph")
+                }
+                val flowViewModel: BookingFlowViewModel = hiltViewModel(parentEntry)
+
+                BookingStepMembersScreen(
+                    onBack = { navHostController.popBackStack() },
+                    onMembersInserted = { uploadItems ->
+                        flowViewModel.setItems(uploadItems)
+                        navHostController.navigate("booking_documents/$bookingId")
+                    },
+                    onExpired = {
+                        navHostController.navigate("bookings") {
+                            popUpTo("home_graph") { inclusive = true }
+                        }
+                    },
+                    flowViewModel = flowViewModel
+                )
+            }
+
+            composable(
+                route = "booking_documents/{bookingId}",
+                arguments = listOf(
+                    navArgument("bookingId") { type = NavType.StringType },
+                )
+            ) { backStackEntry ->
+                val bookingId = backStackEntry.arguments?.getString("bookingId").orEmpty()
+                val parentEntry = remember(backStackEntry) {
+                    navHostController.getBackStackEntry("home_graph")
+                }
+                val flowViewModel: BookingFlowViewModel = hiltViewModel(parentEntry)
+
+                BookingDocumentsScreen(
+                    flowViewModel = flowViewModel,
+                    onCompleted = {
+                        navHostController.navigate("booking_payment/$bookingId")
+                    },
+                    onExpired = {
+                        navHostController.navigate("home") {
+                            popUpTo("home_graph") { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = "booking_payment/{bookingId}",
+                arguments = listOf(
+                    navArgument("bookingId") { type = NavType.StringType },
+                )
+            ) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navHostController.getBackStackEntry("home_graph")
+                }
+                val flowViewModel: BookingFlowViewModel = hiltViewModel(parentEntry)
+
+                BookingPaymentScreen(
+                    onCompleted = {
+                        navHostController.navigate("home") {
+                            popUpTo("home_graph")
+                        }
+                    },
+                    onExpired = {
+                        navHostController.navigate("home") {
+                            popUpTo("home_graph") { inclusive = true }
+                        }
+                    },
+                    flowViewModel = flowViewModel
                 )
             }
 

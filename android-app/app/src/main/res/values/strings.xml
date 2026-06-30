@@ -65,15 +65,20 @@
     <string name="booking_detail_end_date">End Date</string>
     <string name="booking_detail_view_travel">View travel details</string>
 
-    <string name="booking_without_seats">No seats avaible. Choose another trip</string>
+    <string name="booking_without_seats">No seats available. Choose another departure</string>
     <string name="booking_searching_seats">We\'re searching for available seats…</string>
     <string name="booking_step_1_of_4">Step 1 of 4</string>
+    <string name="booking_step_2_of_4">Step 2 of 4</string>
+    <string name="booking_step_3_of_4">Step 3 of 4</string>
+    <string name="booking_step_4_of_4">Step 4 of 4</string>
     <string name="booking_people_title">How many people?</string>
     <string name="booking_people_subtitle">Select the number of guests for the booking</string>
     <string name="booking_decrease">Decrease</string>
     <string name="booking_increase">Increase</string>
     <string name="booking_continue">Continue</string>
+    <string name="booking_confirm">Confirm</string>
     <string name="booking_cancel">Cancel</string>
+    <string name="booking_back">Back</string>
     <string name="booking_person">person</string>
     <string name="booking_people">people</string>
     <string name="departure_outbound">Outbound: </string>
@@ -87,4 +92,36 @@
     <string name="activity_photo">Activity photo</string>
     <string name="expand">Expand</string>
     <string name="hours">Hours</string>
+    
+    <string name="participant_details">Participant details</string>
+    <string name="insert_participant_details">Enter the details for each trip participant</string>
+    <string name="saving_partecipants">Saving participants…</string>
+    <string name="partecipants">Participants %1$d</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="tel">Phone number</string>
+    <string name="booking_members_invalid_fields">Some fields are not valid:\n- First and last name are required (max 100 characters)\n- Phone number is required\n- Date ofbirth must be before today</string>
+
+    <string name="date">Date of birth</string>
+    <string name="type_documents">Document type</string>
+    <string name="id_card">Identity Card</string>
+    <string name="dr_license">Driver License</string>
+    <string name="passport">Passport</string>
+    <string name="upload_documents">Upload the documents</string>
+    <string name="add_ph">Add a photo of the participant</string>
+    <string name="upload_and_complete">Upload and complete</string>
+    <string name="uploading_documents">Uploading documents…</string>
+    <string name="uploaded">Uploaded</string>
+    <string name="document_preview">Document preview</string>
+    <string name="choose_photo">Choose photo</string>
+    <string name="change_photo">Change photo</string>
+
+    <string name="booking_payment_step_label">Payment</string>
+    <string name="booking_payment_title">Complete your booking</string>
+    <string name="booking_payment_subtitle">Pay securely via Stripe to confirm your trip</string>
+    <string name="booking_payment_pay_now">Pay now</string>
+    <string name="booking_payment_confirming">Confirming payment…</string>
+    <string name="booking_payment_preparing">Preparing payment…</string>
+    <string name="booking_payment_confirmed">Booking confirmed!</string>
+
 </resources>

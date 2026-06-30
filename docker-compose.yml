@@ -51,6 +51,13 @@ services:
     volumes:
       - minio_data:/data
 
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    container_name: stripe-cli
+    command: listen --forward-to host.docker.internal:8080/api/v1/payments/public/webhook
+    environment:
+      STRIPE_API_KEY: ${STRIPE_sk}
+
 volumes:
   postgres_data:
   minio_data:
