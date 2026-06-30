@@ -8,11 +8,15 @@ import it.roadies.booking_service.exceptions.StorageException;
 import it.roadies.booking_service.services.MinioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,6 +26,9 @@ public class MinioServiceImpl implements MinioService {
 
     private final MinioClient minioClient;
     private final MessageLang messageLang;
+    private final Tika tika = new Tika();
+
+    private final List<String> allowedImageTypes = List.of("image/jpeg", "image/png", "image/webp");
 
     @Value("${minio.bookingBucket}")
     private String bucketName;
@@ -30,23 +37,31 @@ public class MinioServiceImpl implements MinioService {
     private String minioUrl;
 
     public String uploadFile(MultipartFile file) {
-        try {
+        try (InputStream is = file.getInputStream()) {
+            String mimeType = tika.detect(is);
+            log.info("Detected file type: {}", mimeType);
+
+            if (!allowedImageTypes.contains(mimeType)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.image.type.not.allowed"));
+            }
             String extension = getFileExtension(file.getOriginalFilename());
             String fileName = UUID.randomUUID() + extension;
 
-            InputStream inputStream = file.getInputStream();
-
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(fileName)
-                            .stream(inputStream, file.getSize(), (long) -1)
-                            .contentType(file.getContentType())
-                            .build()
-            );
+            try (InputStream inputStream = file.getInputStream()) {
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(fileName)
+                                .stream(inputStream, file.getSize(), (long) -1)
+                                .contentType(file.getContentType())
+                                .build()
+                );
+            }
 
             return minioUrl + "/" + bucketName + "/" + fileName;
 
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
             throw new StorageException(messageLang.getMessage("error.minio"));
         }
