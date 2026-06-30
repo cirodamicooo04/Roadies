@@ -40,7 +40,7 @@ public class AdminController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/review-organizer/{targetUserId}")
+    @PatchMapping("/admin/review-organizer/{targetUserId}")
     @Operation(summary = "Approva o rifiuta richiesta organizzatore")
     public ResponseEntity<Void> reviewOrganizerRequest(
             @PathVariable String targetUserId,
@@ -57,8 +57,11 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getPendingOrganizerRequests());
     }
 
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("users")
+    @Operation(summary = "Recupera utenti filtrati", description = "Recupera una lista di utenti filtrati in base allo stato specificato. " +
+            "Se non viene fornito alcun filtro, il valore predefinito è 'ACTIVE'.")
     public ResponseEntity<List<UserResponseDTO>> getFilteredUsers(
             @RequestParam(defaultValue = "ACTIVE") String filter) { // Default is ACTIVE if no filter is provided
 

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +33,8 @@ val TextDark = Color(0xFF1A2B4C)
 val BorderGray = Color(0xFFE0E0E0)
 
 @Composable
-fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
+fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(),
+                  onNavigateTo:(String) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Box(
@@ -69,7 +71,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                     val imageUrl: String? = null
 
                     if (imageUrl != null) {
-                        // TODO: Implementazione per l'immagine profilo (es. Coil)
+                        // TODO: Implementazione per l'immagine profilo
                     } else {
                         val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
                         val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
@@ -94,7 +96,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = user.username ?: "Viaggiatore appassionato",
+                    text = "@"+ user.username,
                     color = Color.White.copy(alpha = 0.8f),
                     fontSize = 16.sp
                 )
@@ -125,7 +127,6 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                             color = BorderGray
                         )
 
-                        // Convertito in modo sicuro in stringa per evitare la ClassCastException
                         BadgeStatItem(badgeName = user.badge?.toString() ?: "NONE")
                     }
                 }
@@ -137,11 +138,16 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
                 ) {
-                    MenuItem(text = "Modifica profilo")
-                    MenuItem(text = "Esci",
+                    MenuItem(text = stringResource(R.string.edit_profile),
+                        onClick = {onNavigateTo("edit_profile")})
+
+                    MenuItem(text = stringResource(R.string.friends),
+                        onClick = {onNavigateTo("friend")})
+
+                    MenuItem(text = stringResource(R.string.logout),
                         textColor = Color(0xFFD32F2F),
                         onClick = {
-                            viewModel.logout()
+                            //viewModel.logout()
                         })
 
                     Spacer(modifier = Modifier.height(40.dp))

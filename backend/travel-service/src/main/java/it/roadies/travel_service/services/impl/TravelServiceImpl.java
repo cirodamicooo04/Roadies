@@ -29,6 +29,7 @@ import org.springframework.web.servlet.View;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,9 +53,20 @@ public class TravelServiceImpl implements TravelService {
             if (!departure.getStartDate().isBefore(departure.getEndDate())){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departures.dates.not.valid"));
             }
+
+            long departureDuration = ChronoUnit.DAYS.between(departure.getStartDate(), departure.getEndDate());
+            if (departureDuration != travel.getDurationDays()){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departures.duration.not.equal.travel.duration"));
+            }
         }
 
         if (travel.getActivities() != null) {
+            List<Integer> dayNumbers = travel.getActivities().stream().map(Activity::getDayNumber).toList();
+
+            if (dayNumbers.size() != new HashSet<>(dayNumbers).size()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.activities.daynumber.not.unique"));
+            }
+
             for (Activity activity : travel.getActivities()) {
                 if (activity.getDayNumber() == null) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "error.daynumber.not.present");
@@ -86,13 +98,26 @@ public class TravelServiceImpl implements TravelService {
 
         Map<UUID, Tag> tagsMap = tagRepository.findAll().stream().collect(Collectors.toMap(Tag::getId, t -> t));
 
-        if (!tagsMap.isEmpty() && (travelCreateRequest.getTagScores() == null || travelCreateRequest.getTagScores().size() < tagsMap.size())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.number.not.valid"));
+        if (!tagsMap.isEmpty()) {
+            if (travelCreateRequest.getTagScores() == null) {
+                log.info("No tag scores provided first");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.number.not.valid"));
+            }
+            Set<UUID> providedTagIds = travelCreateRequest.getTagScores().stream()
+                    .map(TravelTagRequest::getTagId)
+                    .collect(Collectors.toSet());
+            
+            if (!providedTagIds.containsAll(tagsMap.keySet())) {
+                log.info("Provided tag ids {}, tags in db: {}", providedTagIds, tagsMap.keySet());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.number.not.valid"));
+            }
         }
 
         if(travelCreateRequest.getTagScores() != null){
-            List<TravelTagRequest> tagScores = travelCreateRequest.getTagScores();
-            for (TravelTagRequest ts : tagScores.stream().distinct().toList()) {
+            Map<UUID, TravelTagRequest> uniqueTags = travelCreateRequest.getTagScores().stream()
+                    .collect(Collectors.toMap(TravelTagRequest::getTagId, ts -> ts, (existing, replacement) -> existing));
+
+            for (TravelTagRequest ts : uniqueTags.values()) {
                 Tag tag = tagsMap.get(ts.getTagId());
                 if (tag == null) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.not.found"));}
                 TravelTag travelTag = new TravelTag();
@@ -158,9 +183,9 @@ public class TravelServiceImpl implements TravelService {
         if (!ownerId.equals(travel.getOwnerId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.travel.not.owned"));
         }
-        if (travelDepartureRepository.existsByTravel(travel)){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.travel.has.confirmed.departures"));
-        }
+
+        boolean hasConfirmedDepartures = travel.getDepartures().stream().anyMatch(d -> d.getStatus() == Status.CONFIRMED);
+        if (hasConfirmedDepartures) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.travel.has.confirmed.departures"));}
 
         if (travel.getImages() != null){
             for (Image image : travel.getImages()) {
@@ -187,15 +212,23 @@ public class TravelServiceImpl implements TravelService {
 
         Map<UUID, Tag> tagsMap = tagRepository.findAll().stream().collect(Collectors.toMap(Tag::getId, t -> t));
 
-        if (!tagsMap.isEmpty() && (travelUpdateRequest.getTagScores() == null || travelUpdateRequest.getTagScores().size() < tagsMap.size())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.number.not.valid"));
-        }
-
         if (travelUpdateRequest.getTagScores() != null){
-            travel.getTagScores().clear();
-            for (TravelTagRequest ts : travelUpdateRequest.getTagScores().stream().distinct().toList()) {
-                Tag tag =  tagsMap.get(ts.getTagId());
-                if (tag == null) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.not.found"));}
+            Map<UUID, TravelTagRequest> incomingTags = travelUpdateRequest.getTagScores().stream()
+                    .collect(Collectors.toMap(TravelTagRequest::getTagId, ts -> ts, (existing, replacement) -> existing));
+
+            for (TravelTag existingTag : travel.getTagScores()) {
+                TravelTagRequest incoming = incomingTags.get(existingTag.getTag().getId());
+                if (incoming != null) {
+                    existingTag.setScore(incoming.getScore());
+                    incomingTags.remove(existingTag.getTag().getId());
+                }
+            }
+
+            for (TravelTagRequest ts : incomingTags.values()) {
+                Tag tag = tagsMap.get(ts.getTagId());
+                if (tag == null) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.tag.not.found"));
+                }
                 TravelTag travelTag = new TravelTag();
                 travelTag.setTravel(travel);
                 travelTag.setTag(tag);

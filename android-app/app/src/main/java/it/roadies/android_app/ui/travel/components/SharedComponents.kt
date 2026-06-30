@@ -1,5 +1,6 @@
 package it.roadies.android_app.ui.travel.components
 
+import android.net.Uri
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -52,6 +53,7 @@ import com.utsman.osmandcompose.rememberMarkerState
 import it.roadies.android_app.R
 import it.roadies.android_app.client.models.travel.ImageResponse
 import org.osmdroid.util.GeoPoint
+import java.util.UUID
 
 @Composable
 fun BoxCentered(text: String? = null) {
@@ -72,9 +74,9 @@ fun DetailHeader(
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 23.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = title ?: "", fontSize = 35.sp, lineHeight = 40.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
+            Text(text = title ?: "", fontSize = 35.sp, lineHeight = 40.sp, fontWeight = FontWeight.ExtraBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(text = "${destination ?: ""}, ${country ?: ""}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             trailingContent()
         }
@@ -222,5 +224,12 @@ fun CheckAvailabilityButton(onClick: () -> Unit){
         Text(text = stringResource(R.string.check_availability), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
     }
 }
+
+data class UploadableImage(
+    val localUri: Uri,
+    val imageUUID: UUID? = null,
+    val isUploading: Boolean = true,
+    val isFailed: Boolean = false
+)
 
 

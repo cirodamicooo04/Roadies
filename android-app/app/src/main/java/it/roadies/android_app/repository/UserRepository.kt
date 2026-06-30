@@ -28,4 +28,10 @@ class UserRepository @Inject constructor(
             userApi.syncUser(request)
         }
     }
+
+    suspend fun searchUsers(query: String): ApiResponse<List<UserProfileResponseDTO>> {
+        return safeApiCall {
+            userApi.searchUser(query)
+        }
+    }
 }

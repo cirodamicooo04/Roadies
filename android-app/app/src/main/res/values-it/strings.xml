@@ -46,6 +46,57 @@
     <string name="available_departures">Partenze disponibili</string>
     <string name="no_available_departures">Nessuna partenza disponibile</string>
     <string name="hours">Ore</string>
+    <string name="travel_created">Viaggio creato con successo</string>
+    <string name="create_new_travel">Nuovo viaggio</string>
+    <string name="create_new_activity">Nuova attività</string>
+    <string name="your_travels_and_activities">Le tue attività e viaggi</string>
+    <string name="edit">Modifica</string>
+    <string name="delete">Elimina</string>
+    <string name="no_activities">Non hai ancora attività</string>
+    <string name="no_travels">Non hai ancora viaggi</string>
+    <string name="confirm_deleting">Conferma eliminazione</string>
+    <string name="confirm_deleting_body">Vuoi davvero eliminare %1$s? L\'azione è irreversibile</string>
+    <string name="this_activity">questa attività</string>
+    <string name="this_travel">questo viaggio</string>
+    <string name="cancel">Annulla</string>
+    <string name="next">Avanti</string>
+    <string name="back">Indietro</string>
+    <string name="create_travel_btn">Crea Viaggio</string>
+    <string name="title_label">Titolo</string>
+    <string name="title_placeholder">Es: Avventura in Patagonia</string>
+    <string name="description_placeholder">Descrivi il viaggio...</string>
+    <string name="duration_placeholder">Es: 14</string>
+    <string name="destination_placeholder">Es: Parigi, Francia</string>
+    <string name="search">Cerca</string>
+    <string name="travel_photos_label">Foto</string>
+    <string name="add_photo">Aggiungi Foto</string>>
+    <string name="photo_upload_failed">Fallito</string>
+    <string name="rate_trip_type">Valuta il tipo di viaggio</string>
+    <string name="error_title_invalid">Il titolo deve essere compreso tra 3 e 150 caratteri</string>
+    <string name="error_description_invalid">La descrizione deve essere compresa tra 20 e 1000 caratteri</string>
+    <string name="error_destination_invalid">Seleziona una destinazione valida dalla lista</string>
+    <string name="error_duration_invalid">Inserisci una durata valida (minimo 1 giorno)</string>
+    <string name="itinerary_empty">Il tuo itinerario è vuoto</string>
+    <string name="new_activity">Nuova attività</string>
+    <string name="departures">Partenze</string>
+    <string name="new_departure">Nuova partenza</string>
+    <string name="no_departures_added">Nessuna partenza aggiunta</string>
+    <string name="cancel_creation_confirm">Vuoi annullare la creazione del viaggio?</string>
+    <string name="cancel_creation_confirm_body">Tutte le tue modifiche andranno perse</string>
+    <string name="create_travel_confirm">Vuoi creare il viaggio?</string>
+    <string name="create_travel_confirm_body">Sei sicuro di voler procedere con la creazione?</string>
+    <string name="create_activity_confirm">Vuoi creare l\'attività?</string>
+    <string name="create_activity_confirm_body">Sei sicuro di voler procedere con la creazione?</string>
+    <string name="cancel_activity_creation_confirm">Vuoi annullare la creazione dell\'attività?</string>
+    <string name="cancel_activity_creation_confirm_body">Tutte le tue modifiche andranno perse</string>
+    <string name="create_activity_btn">Crea Attività</string>
+    <string name="activity_date_label">Data dell\'attività</string>
+    <string name="start_time_label">Ora di inizio</string>
+    <string name="end_time_label">Ora di fine</string>
+    <string name="error_time_invalid">Orario non valido</string>
+    <string name="select_time_title">Seleziona orario</string>
+    <string name="confirm">Conferma</string>
+    <string name="activity_created">Attività creata con successo</string>
 
     <!-- booking -->
     <string name="booking_tab_active">Attivi</string>
@@ -56,6 +107,13 @@
     <string name="booking_people_count">%1$d persone</string>
     <string name="booking_total_price">€%1$.2f</string>
     <string name="booking_not_logged_in">Accedi per vedere le tue prenotazioni</string>
+    <string name="save">Salva</string>
+    <string name="activity_name_label">Nome attività</string>
+    <string name="duration_less_than_activties">La durata non può essere minore delle attività aggiunte</string>
+    <string name="activity_description_label">Descrizione</string>
+    <string name="insert_address">Cerca indirizzo</string>
+    <string name="day_number_label">Giorno del viaggio (es. 1, 2, 3)</string>
+    <string name="address_error">Devi selezionare un indirizzo valido</string>
 
     <!-- booking detail -->
     <string name="booking_detail_title">Dettaglio Prenotazione</string>
@@ -67,14 +125,19 @@
     <string name="booking_detail_end_date">Data di fine</string>
     <string name="booking_detail_view_travel">Dettagli viaggio</string>
 
-    <string name="booking_without_seats">Posti non disponibili. Scegli un altro viaggio</string>
+    <string name="booking_without_seats">Posti non disponibili. Scegli un altra partenza</string>
     <string name="booking_searching_seats">Stiamo cercando posti disponibili…</string>
     <string name="booking_step_1_of_4">Passo 1 di 4</string>
+    <string name="booking_step_2_of_4">Passo 2 di 4</string>
+    <string name="booking_step_3_of_4">Passo 3 di 4</string>
+    <string name="booking_step_4_of_4">Passo 4 di 4</string>
     <string name="booking_people_title">Quante persone?</string>
     <string name="booking_people_subtitle">Seleziona il numero di ospiti per la prenotazione</string>
     <string name="booking_decrease">Diminuisci</string>
     <string name="booking_increase">Aumenta</string>
     <string name="booking_continue">Continua</string>
+    <string name="booking_confirm">Conferma</string>
+    <string name="booking_back">Indietro</string>
     <string name="booking_cancel">Annulla</string>
     <string name="booking_person">persona</string>
     <string name="booking_people">persone</string>
@@ -88,4 +151,63 @@
     <string name="in_planning">In programmazione</string>
     <string name="activity_photo">Foto dell\'attività</string>
     <string name="expand">Espandi</string>
+
+    <string name="departure_start_date">Data Inizio</string>
+    <string name="departure_end_date">Data Fine</string>
+    <string name="departure_price">Prezzo (€)</string>
+    <string name="departure_max_slots">Posti Massimi</string>
+    <string name="error_start_date_invalid">Seleziona una data di inizio valida</string>
+    <string name="error_end_date_invalid">La data di fine deve essere successiva all\'inizio</string>
+    <string name="error_price_invalid">Inserisci un prezzo valido maggiore di 0</string>
+    <string name="error_max_slots_invalid">Inserisci un numero di posti valido</string>
+    <string name="error_departure_duration">La durata deve essere esattamente di %1$d giorni</string>
+    <string name="departures_empty">Ancora nessuna partenza aggiunta. Inserisci la prima!</string>
+
+
+    <!-- User -->
+    <string name="edit_profile"> Modifica Profilo</string>
+    <string name="friends"> Amici</string>
+    <string name="logout"> Esci</string>
+    <string name="search_friend"> Cerca nuovi amici...</string>
+    <string name="pending_request"> Richieste di amicizia in attesa</string>
+    <string name="no_user"> Nessun utente trovato</string>
+    <string name="no_friends"> Non hai ancora aggiunto nessun amico</string>
+    <string name="your_friends"> I tuoi amici</string>
+    <string name="close"> Chiudi</string>
+    <string name="reject"> Rifiuta</string>
+    <string name="accept"> Accetta</string>
+    <string name="add_friend"> Aggiungi amico</string>
+    <string name="request_sent"> Richiesta inviata</string>
+
+
+    <string name="participant_details"> Dati dei partecipanti</string>
+    <string name="insert_participant_details">Inserisci le informazioni di ogni partecipante al viaggio</string>
+    <string name="saving_partecipants">Salvataggio partecipanti…</string>
+    <string name="partecipants">Partecipante %1$d</string>
+    <string name="first_name">Nome</string>
+    <string name="last_name">Cognome</string>
+    <string name="tel">Telefono</string>
+    <string name="booking_members_invalid_fields">Alcuni campi non sono validi:\n- Nome e cognome obbligatori (massimo 100 caratteri)\n- Numero di telefono obbligatorio\n-Data di nascita precedente a oggi</string>
+    <string name="date">Data di nascita</string>
+    <string name="type_documents">Tipo di documento</string>
+    <string name="id_card">Carta d\'identità</string>
+    <string name="dr_license">Patente</string>
+    <string name="passport">Passaporto</string>
+    <string name="upload_documents">Carica i documenti</string>
+    <string name="add_ph">Aggiungi una foto del documento per ogni partecipante</string>
+    <string name="upload_and_complete">Carica e completa</string>
+    <string name="uploading_documents">Caricamento documenti…</string>
+    <string name="uploaded">Caricato</string>
+    <string name="document_preview">Anteprima documento</string>
+    <string name="choose_photo">Scegli foto</string>
+    <string name="change_photo">Cambia foto</string>
+
+    <!-- booking payment -->
+    <string name="booking_payment_step_label">Pagamento</string>
+    <string name="booking_payment_title">Completa la prenotazione</string>
+    <string name="booking_payment_subtitle">Paga in modo sicuro tramite Stripe per confermare il tuo viaggio</string>
+    <string name="booking_payment_pay_now">Paga ora</string>
+    <string name="booking_payment_confirming">Conferma del pagamento in corso…</string>
+    <string name="booking_payment_preparing">Preparazione del pagamento…</string>
+    <string name="booking_payment_confirmed">Prenotazione confermata!</string>
 </resources>

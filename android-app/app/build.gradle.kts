@@ -1,8 +1,17 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+}
+
+val envFile = rootProject.file("../.env")
+val envProperties = Properties()
+if (envFile.exists()) {
+    envProperties.load(FileInputStream(envFile))
 }
 
 android {
@@ -21,6 +30,9 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["appAuthRedirectScheme"] = "roadies"
+
+        val stripeKey = envProperties.getProperty("STRIPE_pk")
+        buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", "\"$stripeKey\"")
     }
 
     buildTypes {
@@ -79,4 +91,5 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.4.0")
     implementation("org.osmdroid:osmdroid-android:6.1.20")
     implementation("tech.utsmankece:osm-android-compose:0.0.5")
+    implementation("com.stripe:stripe-android:23.11.0")
 }

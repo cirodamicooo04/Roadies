@@ -3,6 +3,7 @@ package it.roadies.android_app.repository.utils
 import it.roadies.android_app.client.infrastructure.getErrorResponse
 import it.roadies.android_app.client.models.travel.ErrorResponse
 import retrofit2.Response
+import java.io.EOFException
 import java.io.IOException
 
 suspend fun <T> safeApiCall(
@@ -28,6 +29,13 @@ suspend fun <T> safeApiCall(
                 statusCode = response.code()
             )
         }
+    } catch (e: EOFException) {
+        // Retrofit lancia EOFException se il server restituisce 204 No Content
+        ApiResponse(
+            success = true,
+            data = null,
+            statusCode = 204
+        )
     } catch (e: IOException) {
         ApiResponse(
             success = false,

@@ -97,6 +97,9 @@ data class ActivityResponse (
     @SerializedName("type")
     val type: String? = null,
 
+    @SerializedName("editable")
+    val editable: Boolean? = null,
+
     @SerializedName("departures")
     val departures: List<ActivityDepartureResponse>? = null,
 

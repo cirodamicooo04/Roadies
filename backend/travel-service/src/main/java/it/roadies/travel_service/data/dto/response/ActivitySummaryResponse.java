@@ -19,4 +19,5 @@ public class ActivitySummaryResponse {
     private String type;
     private Double averageRating;
     private List<ImageResponse> images;
+    private Boolean editable;
 }

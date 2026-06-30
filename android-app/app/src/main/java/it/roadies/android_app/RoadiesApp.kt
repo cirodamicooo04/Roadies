@@ -22,8 +22,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -33,9 +35,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import it.roadies.android_app.ui.bookingFlow.BookingDocumentsScreen
+import it.roadies.android_app.ui.bookingFlow.BookingPaymentScreen
+import it.roadies.android_app.ui.bookingFlow.BookingStepMembersScreen
 import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
+import it.roadies.android_app.viewmodel.bookingFlow.BookingFlowViewModel
 import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
+import it.roadies.android_app.ui.user.FriendScreen
+import it.roadies.android_app.ui.user.UserProfileScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -54,7 +62,7 @@ fun RoadiesApp(
     val currentDestination = navBackStackEntry?.destination
     val currentRoute = currentDestination?.route
 
-    val bottomRoutes = listOf("home", "home_graph", "travel", "bookings", "chat", "handle_users", "statistics", "handle_travels")
+    val bottomRoutes = listOf("home", "travel", "bookings", "chat", "handle_users", "statistics", "handle_travels")
     val showBackButton = currentRoute !in bottomRoutes
 
     val authState by authViewModel.authState.collectAsState()
@@ -90,7 +98,7 @@ fun RoadiesApp(
                         } else {
                             IconButton(
                                 onClick = {
-                                    navHostController.navigate("profile") {
+                                    navHostController.navigate("profile_graph") {
                                         popUpTo(navHostController.graph.startDestinationId) { saveState = true }
                                         launchSingleTop = true
                                         restoreState = true
@@ -159,7 +167,6 @@ fun RoadiesApp(
                                 navHostController.navigate("home_graph") {
                                     popUpTo(navHostController.graph.startDestinationId) { saveState = true }
                                     launchSingleTop = true
-                                    restoreState = true
                                 }
                             },
                             icon = {
@@ -229,9 +236,9 @@ fun RoadiesApp(
                         }
                         if ("ORGANIZER" in authState.roles) {
                             NavigationBarItem(
-                                selected = currentDestination?.hierarchy?.any { it.route == "handle_travels" } == true,
+                                selected = currentDestination?.hierarchy?.any { it.route == "organizer_graph" } == true,
                                 onClick = {
-                                    navHostController.navigate("handle_travels") {
+                                    navHostController.navigate("organizer_graph") {
                                         popUpTo(navHostController.graph.startDestinationId) { saveState = true }
                                         launchSingleTop = true
                                         restoreState = true
@@ -271,40 +278,55 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
     val startDestination: String = if (isAdmin) "handle_users" else "home_graph"
 
 
-    NavHost(navController = navHostController, startDestination = startDestination, modifier = modifier) {
-        navigation(route="home_graph", startDestination="home"){
+    NavHost(
+        navController = navHostController,
+        startDestination = startDestination,
+        modifier = modifier
+    ) {
+        navigation(route = "home_graph", startDestination = "home") {
             composable(route = "home") {
                 HomeScreen(navHostController)
             }
-            composable(route="search_screen?continent={continent}&country={country}&destination={destination}&minPrice={minPrice}&maxPrice={maxPrice}&minDurationDays={minDurationDays}&maxDurationDays={maxDurationDays}&type={type}",
+            composable(
+                route = "search_screen?continent={continent}&country={country}&destination={destination}&minPrice={minPrice}&maxPrice={maxPrice}&minDurationDays={minDurationDays}&maxDurationDays={maxDurationDays}&type={type}",
                 arguments = listOf(
-                    navArgument("continent") {type = NavType.StringType; nullable=true},
-                    navArgument("country") {type = NavType.StringType; nullable=true},
-                    navArgument("destination") {type = NavType.StringType; nullable=true},
-                    navArgument("minPrice") {type = NavType.StringType; nullable=true},
-                    navArgument("maxPrice") {type = NavType.StringType; nullable=true},
-                    navArgument("minDurationDays") {type = NavType.StringType; nullable=true},
-                    navArgument("maxDurationDays") {type = NavType.StringType; nullable=true},
-                    navArgument("type") {type = NavType.StringType; nullable=true}
+                    navArgument("continent") { type = NavType.StringType; nullable = true },
+                    navArgument("country") { type = NavType.StringType; nullable = true },
+                    navArgument("destination") { type = NavType.StringType; nullable = true },
+                    navArgument("minPrice") { type = NavType.StringType; nullable = true },
+                    navArgument("maxPrice") { type = NavType.StringType; nullable = true },
+                    navArgument("minDurationDays") { type = NavType.StringType; nullable = true },
+                    navArgument("maxDurationDays") { type = NavType.StringType; nullable = true },
+                    navArgument("type") { type = NavType.StringType; nullable = true }
                 )
             ) {
-               SearchScreen(navHostController = navHostController)
+                SearchScreen(navHostController = navHostController)
             }
 
-            composable(route="travel_detail/{id}"){
-                TravelDetailScreen(navHostController=navHostController, onLoginRequest = onLoginClick)
+            composable(route = "travel_detail/{id}") {
+                TravelDetailScreen(
+                    navHostController = navHostController,
+                    onLoginRequest = onLoginClick
+                )
             }
 
-            composable(route="activity_detail/{id}"){
-                ActivityDetailScreen(navHostController=navHostController, onLoginRequest = onLoginClick)
+            composable(route = "activity_detail/{id}") {
+                ActivityDetailScreen(
+                    navHostController = navHostController,
+                    onLoginRequest = onLoginClick
+                )
             }
 
             composable(
                 route = "booking_people/{bookingId}?travelId={travelId}&activityId={activityId}",
                 arguments = listOf(
                     navArgument("bookingId") { type = NavType.StringType },
-                    navArgument("travelId") { type = NavType.StringType; nullable = true; defaultValue = null },
-                    navArgument("activityId") { type = NavType.StringType; nullable = true; defaultValue = null },
+                    navArgument("travelId") {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
+                    navArgument("activityId") {
+                        type = NavType.StringType; nullable = true; defaultValue = null
+                    },
                 )
             ) { backStackEntry ->
                 val bookingId = backStackEntry.arguments?.getString("bookingId").orEmpty()
@@ -312,24 +334,103 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 val activityId = backStackEntry.arguments?.getString("activityId")
 
                 BookingStepPeopleScreen(
-                    navController = navHostController,
+                    onBack = { navHostController.popBackStack() },
                     onConfirmed = { peopleCount ->
+                        navHostController.navigate("booking_members/$bookingId?peopleCount=$peopleCount")
                     }
                 )
             }
 
+            composable(
+                route = "booking_members/{bookingId}?peopleCount={peopleCount}",
+                arguments = listOf(
+                    navArgument("bookingId") { type = NavType.StringType },
+                    navArgument("peopleCount") { type = NavType.IntType; defaultValue = 1 },
+                )
+            ) { backStackEntry ->
+                val bookingId = backStackEntry.arguments?.getString("bookingId").orEmpty()
+                val parentEntry = remember(backStackEntry) {
+                    navHostController.getBackStackEntry("home_graph")
+                }
+                val flowViewModel: BookingFlowViewModel = hiltViewModel(parentEntry)
+
+                BookingStepMembersScreen(
+                    onBack = { navHostController.popBackStack() },
+                    onMembersInserted = { uploadItems ->
+                        flowViewModel.setItems(uploadItems)
+                        navHostController.navigate("booking_documents/$bookingId")
+                    },
+                    onExpired = {
+                        navHostController.navigate("bookings") {
+                            popUpTo("home_graph") { inclusive = true }
+                        }
+                    },
+                    flowViewModel = flowViewModel
+                )
+            }
+
+            composable(
+                route = "booking_documents/{bookingId}",
+                arguments = listOf(
+                    navArgument("bookingId") { type = NavType.StringType },
+                )
+            ) { backStackEntry ->
+                val bookingId = backStackEntry.arguments?.getString("bookingId").orEmpty()
+                val parentEntry = remember(backStackEntry) {
+                    navHostController.getBackStackEntry("home_graph")
+                }
+                val flowViewModel: BookingFlowViewModel = hiltViewModel(parentEntry)
+
+                BookingDocumentsScreen(
+                    flowViewModel = flowViewModel,
+                    onCompleted = {
+                        navHostController.navigate("booking_payment/$bookingId")
+                    },
+                    onExpired = {
+                        navHostController.navigate("home") {
+                            popUpTo("home_graph") { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = "booking_payment/{bookingId}",
+                arguments = listOf(
+                    navArgument("bookingId") { type = NavType.StringType },
+                )
+            ) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navHostController.getBackStackEntry("home_graph")
+                }
+                val flowViewModel: BookingFlowViewModel = hiltViewModel(parentEntry)
+
+                BookingPaymentScreen(
+                    onCompleted = {
+                        navHostController.navigate("home") {
+                            popUpTo("home_graph")
+                        }
+                    },
+                    onExpired = {
+                        navHostController.navigate("home") {
+                            popUpTo("home_graph") { inclusive = true }
+                        }
+                    },
+                    flowViewModel = flowViewModel
+                )
+            }
 
 
         }
 
 
-        composable(route ="bookings"){
+        composable(route = "bookings") {
             BookingHomeScreen(navHostController = navHostController)
         }
         composable(
             route = "booking_detail/{principalId}/{travelName}/{peopleCount}/{totalPrice}/{startDate}/{endDate}/{departureType}",
             arguments = listOf(
-                navArgument("principalId") {type = NavType.StringType},
+                navArgument("principalId") { type = NavType.StringType },
                 navArgument("travelName") { type = NavType.StringType },
                 navArgument("peopleCount") { type = NavType.IntType },
                 navArgument("totalPrice") { type = NavType.StringType },
@@ -345,11 +446,19 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
 
             val startDateStr = backStackEntry.arguments?.getString("startDate")
             val endDateStr = backStackEntry.arguments?.getString("endDate")
-            val startDate = startDateStr?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() } ?: LocalDateTime.now()
-            val endDate = endDateStr?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() } ?: LocalDateTime.now()
+            val startDate =
+                startDateStr?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() }
+                    ?: LocalDateTime.now()
+            val endDate = endDateStr?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() }
+                ?: LocalDateTime.now()
             val departureType = backStackEntry.arguments?.getString("departureType").orEmpty()
 
-            BookingDetailScreen(travelName = travelName, peopleCount = peopleCount, startDate = startDate, endDate = endDate, totalPrice = totalPrice,
+            BookingDetailScreen(
+                travelName = travelName,
+                peopleCount = peopleCount,
+                startDate = startDate,
+                endDate = endDate,
+                totalPrice = totalPrice,
                 onNavigateToTravel = {
                     if (departureType == "ACTIVITY") {
                         navHostController.navigate("activity_detail/$principalId")
@@ -359,20 +468,58 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 }
             )
         }
-        composable(route = "handle_users"){
+        composable(route = "handle_users") {
 
         }
-        composable(route = "statistics"){
+        composable(route = "statistics") {
 
         }
-        composable(route = "chat"){
+        composable(route = "chat") {
 
         }
-        composable(route = "handle_travels"){
 
+        navigation(route = "organizer_graph", startDestination = "handle_travels") {
+            composable(route = "handle_travels") {
+                OrganizerDashboard(navHostController = navHostController)
+            }
+            composable(route = "create_travel") {
+                TravelCreationScreen(
+                    navHostController = navHostController,
+                    onNavigateBack = { navHostController.popBackStack() })
+            }
+            composable(route = "create_activity"){
+                ActivityCreationScreen(navHostController = navHostController)
+            }
         }
-        composable(route = "profile") {
-            ProfileScreen()
+
+        navigation(route = "profile_graph", startDestination = "profile_main") {
+            composable(route = "profile_main") {
+                ProfileScreen(
+                    onNavigateTo = { rotta ->
+                        navHostController.navigate(rotta)
+                    }
+                )
+            }
+            composable(route = "edit_profile") {
+                //EditProfileScreen(onBack = { navHostController.popBackStack() })
+            }
+            composable(route = "friend") {
+                FriendScreen(
+                    navController = navHostController,
+                    onBack = { navHostController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "user_profile/{username}",
+                arguments = listOf(navArgument("username") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val username = backStackEntry.arguments?.getString("username").orEmpty()
+                UserProfileScreen(
+                    username = username,
+                    onBack = { navHostController.popBackStack() }
+                )
+            }
         }
     }
 }
