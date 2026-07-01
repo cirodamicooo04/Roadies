@@ -35,8 +35,8 @@ public class AdminController {
             description = "Permette ad un admin di sbloccare un utente specificato tramite il suo ID Keycloak. Un utente sbloccato potrà accedere nuovamente al sistema."
     )
     @PutMapping("users/{id}/unblock")
-    public ResponseEntity<Void> unblockUser(@PathVariable String id) {
-        adminService.unblockUser(id);
+    public ResponseEntity<Void> unblockUser(@PathVariable String keycloakId) {
+        adminService.unblockUser(keycloakId);
         return ResponseEntity.noContent().build();
     }
 
