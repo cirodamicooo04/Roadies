@@ -9,23 +9,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class KeycloakConfig {
 
-    @Value("${keycloak.auth-server-url:http://10.0.2.2:8081}")
+    @Value("${keycloak.auth-server-url:http://localhost:8081}")
     private String serverUrl;
 
-    @Value("${keycloak.admin.username}")
-    private String adminUsername;
-
-    @Value("${keycloak.admin.password}")
-    private String adminPassword;
+    @Value("${keycloak.client.secret}")
+    private String clientSecret;
 
     @Bean
     public Keycloak keycloakAdminClient() {
         return KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
-                .realm("master")
-                .clientId("admin-cli")
-                .username(adminUsername)
-                .password(adminPassword)
+                .realm("roadies-app")
+                .grantType("client_credentials")
+                .clientId("gateway-client")
+                .clientSecret(clientSecret)
                 .build();
     }
 }
