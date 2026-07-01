@@ -490,6 +490,12 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             composable(route = "create_activity"){
                 ActivityCreationScreen(navHostController = navHostController)
             }
+            composable(route = "update_travel/{id}", arguments = listOf(
+                navArgument("id") {type = NavType.StringType}
+            )
+            ){
+                TravelUpdateScreen(navHostController = navHostController)
+            }
         }
 
         navigation(route = "profile_graph", startDestination = "profile_main") {

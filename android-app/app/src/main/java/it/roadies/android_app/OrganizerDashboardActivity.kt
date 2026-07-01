@@ -160,7 +160,7 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
             }, onTravelDelete = {
                 travel -> travelToDelete = travel
             }, onTravelModify = {
-
+                travel -> navHostController.navigate("update_travel/${travel.id}")
             }, onActivityOpen = {
 
             }, onActivityDelete = {
@@ -396,7 +396,6 @@ fun OrganizerTravelCard(
                     ) {
                         OutlinedIconButton(
                             onClick = { onEditClick(travel) },
-                            enabled = editable,
                             modifier = Modifier.size(40.dp),
                             shape = RoundedCornerShape(10.dp),
                             colors = IconButtonDefaults.outlinedIconButtonColors(

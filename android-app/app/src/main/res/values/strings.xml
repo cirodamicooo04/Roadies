@@ -46,6 +46,7 @@
     <string name="no_available_departures">No available departures</string>
     <string name="create_new_travel">Create new travel</string>
     <string name="create_new_activity">Create new activity</string>
+    <string name="edit_activity">Edit activity</string>
     <string name="your_travels_and_activities">Your travels and activities</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
@@ -55,6 +56,7 @@
     <string name="confirm">Confirm</string>
     <string name="travel_created">Travel created with success</string>
     <string name="confirm_deleting_body">Do you really want to delete %1$s? The action is irreversible</string>
+    <string name="not_editable_travel">This trip already has confirmed departures. The details can no longer be modified; you can only manage departures.</string>
     <string name="this_activity">this activity</string>
     <string name="this_travel">this travel</string>
     <string name="cancel">Cancel</string>

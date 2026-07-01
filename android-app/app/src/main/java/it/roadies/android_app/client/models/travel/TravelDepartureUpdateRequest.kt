@@ -51,7 +51,10 @@ data class TravelDepartureUpdateRequest (
     val endDate: LocalDate? = null,
 
     @SerializedName("price")
-    val price: BigDecimal? = null
+    val price: BigDecimal? = null,
+
+    @SerializedName("maxSlots")
+    val maxSlots: Int? = null
 
 ) {
 

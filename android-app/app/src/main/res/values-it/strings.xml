@@ -48,7 +48,8 @@
     <string name="hours">Ore</string>
     <string name="travel_created">Viaggio creato con successo</string>
     <string name="create_new_travel">Nuovo viaggio</string>
-    <string name="create_new_activity">Nuova attività</string>
+    <string name="create_new_activity">Crea nuova attività</string>
+    <string name="edit_activity">Modifica attività</string>
     <string name="your_travels_and_activities">Le tue attività e viaggi</string>
     <string name="edit">Modifica</string>
     <string name="delete">Elimina</string>
@@ -68,6 +69,7 @@
     <string name="duration_placeholder">Es: 14</string>
     <string name="destination_placeholder">Es: Parigi, Francia</string>
     <string name="search">Cerca</string>
+    <string name="not_editable_travel">Modifiche bloccate: Questo viaggio ha già delle partenze confermate. I dettagli non possono più essere modificati, puoi solo gestire le partenze.</string>
     <string name="travel_photos_label">Foto</string>
     <string name="add_photo">Aggiungi Foto</string>>
     <string name="photo_upload_failed">Fallito</string>

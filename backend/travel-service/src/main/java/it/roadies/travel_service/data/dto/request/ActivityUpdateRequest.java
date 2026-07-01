@@ -16,8 +16,6 @@ public class ActivityUpdateRequest {
     @Pattern(regexp = ".*\\S.*")
     @Size(min = 1, max = 1000)
     private String description;
-    @Size(min = 1, max = 200)
-    @NotNull
     private Continent continent;
     @Pattern(regexp = ".*\\S.*")
     private String country;
