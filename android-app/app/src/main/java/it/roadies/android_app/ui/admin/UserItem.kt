@@ -25,7 +25,7 @@ fun UserItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = "${user.firstName} ${user.lastName}", style = MaterialTheme.typography.titleMedium)
             }
-            if (user.enabled) {
+            if (user.enabled == true) {
                 Button(onClick = { onBlockClick(user.keycloakId) }) { Text("Block") }
             } else {
                 Button(onClick = { onUnblockClick(user.keycloakId) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {

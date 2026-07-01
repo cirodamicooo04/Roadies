@@ -44,6 +44,8 @@ import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
 import it.roadies.android_app.ui.user.FriendScreen
 import it.roadies.android_app.ui.user.UserProfileScreen
+import it.roadies.android_app.ui.admin.AdminUsersScreen
+import it.roadies.android_app.ui.admin.PendingRequestsScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -420,7 +422,6 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 )
             }
 
-
         }
 
 
@@ -469,8 +470,15 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             )
         }
         composable(route = "handle_users") {
-
+            AdminUsersScreen(viewModel = hiltViewModel(), navController = navHostController)
         }
+
+        composable(route = "pending_requests") {
+            PendingRequestsScreen(
+                viewModel = hiltViewModel(),
+            )
+        }
+
         composable(route = "statistics") {
 
         }

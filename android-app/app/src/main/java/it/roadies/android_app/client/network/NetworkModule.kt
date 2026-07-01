@@ -164,6 +164,8 @@ object NetworkModule {
         URL(uri.toString()).openConnection() as HttpURLConnection
     }
 
+    @Provides
+    @Singleton
     fun provideAdminApi(retrofit: Retrofit): AdminManagementApi {
         return retrofit.create(AdminManagementApi::class.java)
     }
