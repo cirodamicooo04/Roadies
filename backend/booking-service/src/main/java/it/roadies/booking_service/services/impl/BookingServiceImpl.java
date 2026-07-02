@@ -73,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(requestDto.getBookingId())
                 .orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", requestDto.getBookingId())));
 
-        if (!booking.getUserId().equals(userId) || booking.getStatus().equals(BookingStatus.CONFIRMED)){
+        if (!booking.getUserId().equals(userId) || booking.getStatus().equals(BookingStatus.CONFIRMED) || booking.getStatus().equals(BookingStatus.EXPIRED) || booking.getStatus().equals(BookingStatus.CANCELLED)) {
             throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
 
@@ -189,15 +189,12 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", bookingId)));
         if (booking.getStatus() == BookingStatus.CONFIRMED) return;
         if (booking.getStatus() != BookingStatus.READY_FOR_PAYMENT) {
-            throw new StatusException(messageLang.getMessage("error.status.reserve"));
-        }
-        if (booking.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new StatusException(messageLang.getMessage("error.status.time"));
+            return;
         }
         log.info("Booking {} confermato con successo", bookingId);
         booking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(booking);
-        rabbitTemplate.convertAndSend("booking.exchange", "booking.gamification.points", new GamificationEvent(booking.getUserId(), booking.getTotalPrice()));
+        rabbitTemplate.convertAndSend("booking.exchange", "booking.gamification.points.add", new GamificationEvent(booking.getUserId(), booking.getTotalPrice()));
     }
 
     //metodi caso d'insuccesso
@@ -209,22 +206,25 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.getUserId().equals(userId)){
             throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
-        if (booking.getStatus() == BookingStatus.RESERVE_CONFIRMED || booking.getStatus() == BookingStatus.READY_FOR_PAYMENT) {
-            log.info("Booking {} cancellata con successo", bookingId);
-            booking.setStatus(BookingStatus.CANCELLED);
-            deleteMinioDocument(booking);
-            bookingRepository.save(booking);
-            rabbitTemplate.convertAndSend("notification.exchange", "notification.mail.send", new NotificationEvent(mailTo, "Eliminazione Prenotazione", "Ciao,\n\nti confermiamo che la tua prenotazione è stata cancellata con successo.\n\nUn saluto,\nIl Team"));
-            ReserveSeatCommand command = new ReserveSeatCommand(
-                    booking.getId(),
-                    booking.getTravelId(),
-                    booking.getActivityId(),
-                    booking.getPeopleCount()
-            );
-            if (booking.getTravelId() != null) {
-                rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.release.travel", command);
-            } else rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.release.activity", command);
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new StatusException(messageLang.getMessage("error.status.delete.booking"));
         }
+
+        log.info("Booking {} cancellata con successo", bookingId);
+        booking.setStatus(BookingStatus.CANCELLED);
+        deleteMinioDocument(booking);
+        bookingRepository.save(booking);
+        rabbitTemplate.convertAndSend("notification.exchange", "notification.mail.send", new NotificationEvent(mailTo, "Eliminazione Prenotazione", "Ciao,\n\nti confermiamo che la tua prenotazione è stata cancellata con successo.\n\nUn saluto,\nIl Team"));
+        ReserveSeatCommand command = new ReserveSeatCommand(
+                booking.getId(),
+                booking.getTravelId(),
+                booking.getActivityId(),
+                booking.getPeopleCount()
+        );
+        if (booking.getTravelId() != null) {
+            rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.release.travel", command);
+        } else rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.release.activity", command);
+        rabbitTemplate.convertAndSend("booking.exchange", "booking.gamification.points.remove", new GamificationEvent(booking.getUserId(), booking.getTotalPrice()));
     }
 
     public void deleteMinioDocument(Booking booking){
@@ -353,7 +353,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void updateBookingIfAllDocumentsUploaded(UUID bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(messageLang.getMessage("error.booking.not.found", bookingId)));
-        if (booking.getMembers() == null) return;
+        if (booking.getMembers() == null || booking.getStatus() == BookingStatus.CONFIRMED) return;
         boolean allDocumentsUploaded = booking.getMembers()
                 .stream()
                 .flatMap(member -> member.getDocuments().stream())

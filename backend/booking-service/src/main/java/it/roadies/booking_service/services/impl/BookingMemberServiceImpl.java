@@ -28,13 +28,6 @@ public class BookingMemberServiceImpl implements BookingMemberService {
     private final MessageLang messageLang;
     private final BookingService bookingService;
 
-//    @Override
-//    public void updateDocument(MemberDocumentUpdateRequest memberDocument) {
-//        MemberDocument member = memberDocumentRepository.findById(memberDocument.getId()).orElseThrow(()-> new DocumentNotFoundException(messageLang.getMessage("error.document.not.exists")));
-//        member.setFileUrl(memberDocument.getUrl());
-//        memberDocumentRepository.save(member);
-//    }
-
     @Transactional
     @Override
     public void acceptDocument(MemberDocumentUpdateRequest memberDocument) {
@@ -54,6 +47,7 @@ public class BookingMemberServiceImpl implements BookingMemberService {
     }
 
     @Override
+    @Transactional
     public String uploadDocumentPhoto(UUID documentId, MultipartFile file, String userId) throws MinioException {
         MemberDocument document = memberDocumentRepository.findById(documentId)
                 .orElseThrow(() -> new DocumentNotFoundException(messageLang.getMessage("error.document.not.exists")));
@@ -66,6 +60,7 @@ public class BookingMemberServiceImpl implements BookingMemberService {
         String fileUrl = minioService.uploadFile(file);
 
         document.setFileUrl(fileUrl);
+        document.setStatus(DocumentStatus.PENDING);
         memberDocumentRepository.save(document);
 
         bookingService.updateBookingIfAllDocumentsUploaded(booking.getId());

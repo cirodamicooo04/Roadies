@@ -11,7 +11,7 @@ import it.roadies.travel_service.exceptions.StatusException;
 import it.roadies.travel_service.services.TravelDepartureService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.bridge.Message;
+import it.roadies.travel_service.data.entity.enumerations.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,6 +31,9 @@ public class TravelDepartureServiceImpl implements TravelDepartureService {
     @Override
     public void reserveSeats(UUID travelDepartureId, Integer spots){
         TravelDeparture travel = travelDepartureRepository.findByIdWithLock(travelDepartureId);
+        if (travel.getStatus() != Status.CONFIRMED) {
+            throw new StatusException(messageLang.getMessage("error.departure.not.confirmed"));
+        }
 
         int newSlotsNumber = travel.getAvailableSlots() - spots;
         if (newSlotsNumber >= 0) {

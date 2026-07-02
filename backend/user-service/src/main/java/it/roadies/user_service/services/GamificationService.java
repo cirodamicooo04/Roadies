@@ -3,4 +3,5 @@ import java.math.BigDecimal;
 
 public interface GamificationService {
     void addPointsBySpending(String userId, BigDecimal amountSpent);
+    void removePoints(String userId, BigDecimal amountSpent);
 }

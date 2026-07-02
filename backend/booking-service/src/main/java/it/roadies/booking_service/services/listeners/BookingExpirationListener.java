@@ -4,12 +4,12 @@ import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
 import it.roadies.booking_service.services.BookingService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,7 +31,7 @@ public class BookingExpirationListener {
         bookingRepository.findById(bookingId).ifPresent(booking -> {
             
             if (booking.getStatus() == BookingStatus.READY_FOR_PAYMENT && LocalDateTime.now().isBefore(booking.getExpiresAt().plusMinutes(5))) {
-                log.info("Il booking {} è in fase di pagamento (scaduto da meno di 5 minuti). Concedo altri 5 minuti", bookingId);
+                log.info("Il booking {} è in fase di pagamento per la prima volta. Concedo altri 5 minuti", bookingId);
                 rabbitTemplate.convertAndSend("booking-delay-payment-queue", booking.getId().toString());
                 return;
             }

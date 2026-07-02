@@ -28,11 +28,21 @@ public class RabbitConfiguration {
 
     @Bean
     public Queue gamificationQueue() {
-        return new Queue("gamification-queue", true);
+        return new Queue("gamification-queue-add", true);
+    }
+
+    @Bean
+    public Queue gamificationQueueRemove() {
+        return new Queue("gamification-queue-remove", true);
     }
 
     @Bean
     public Binding bindGamification() {
-        return BindingBuilder.bind(gamificationQueue()).to(bookingExchange()).with("booking.gamification.points");
+        return BindingBuilder.bind(gamificationQueue()).to(bookingExchange()).with("booking.gamification.points.add");
+    }
+
+    @Bean
+    public Binding bindGamificationRemove() {
+        return BindingBuilder.bind(gamificationQueueRemove()).to(bookingExchange()).with("booking.gamification.points.remove");
     }
 }
