@@ -12,9 +12,16 @@ import org.springframework.stereotype.Service;
 public class GamificationListener {
     private final GamificationService gamificationService;
 
-    @RabbitListener(queues = "gamification-queue")
+    @RabbitListener(queues = "gamification-queue-add")
     public void addGamificationPoints(GamificationEvent gamificationEvent) {
         gamificationService.addPointsBySpending(gamificationEvent.getUserId(), gamificationEvent.getPrice());
     }
+
+    @RabbitListener(queues = "gamification-queue-remove")
+    public void removePoints(GamificationEvent gamificationEvent) {
+        gamificationService.removePoints(gamificationEvent.getUserId(), gamificationEvent.getPrice());
+    }
+
+
 
 }

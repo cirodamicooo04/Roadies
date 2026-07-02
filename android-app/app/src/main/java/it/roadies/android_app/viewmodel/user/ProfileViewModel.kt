@@ -3,7 +3,7 @@ package it.roadies.android_app.viewmodel.user
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import it.roadies.android_app.client.models.user.UserProfileResponseDTO
+import it.roadies.android_app.model.User
 import it.roadies.android_app.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,8 +14,10 @@ import javax.inject.Inject
 
 data class ProfileState(
     val isLoading: Boolean = false,
-    val profile: UserProfileResponseDTO? = null,
-    val error: String? = null
+    val profile: User? = null,
+    val error: String? = null,
+    val warningMessage: String? = null,
+    val organizerRequestSent: Boolean = false
 )
 
 @HiltViewModel
@@ -27,18 +29,106 @@ class ProfileViewModel @Inject constructor(
     val state: StateFlow<ProfileState> = _state.asStateFlow()
 
     init {
+        observeLocalProfile()
         loadProfile()
+    }
+
+    private fun observeLocalProfile() {
+        viewModelScope.launch {
+            repository.observeCurrentUser().collect { user ->
+                _state.update { current ->
+                    current.copy(profile = user)
+                }
+            }
+        }
     }
 
     fun loadProfile() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            val response = repository.getProfile()
-            if (response.success && response.data != null) {
-                _state.update { it.copy(isLoading = false, profile = response.data) }
-            } else {
-                _state.update { it.copy(isLoading = false, error = response.errorMessage) }
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    warningMessage = null
+                )
             }
+
+            val localUser = repository.getCurrentUser()
+
+            if (localUser == null) {
+                val response = repository.getProfile()
+
+                _state.update { current ->
+                    current.copy(
+                        isLoading = false,
+                        error = response.errorMessage,
+                        warningMessage = null
+                    )
+                }
+            } else {
+                _state.update {
+                    it.copy(isLoading = false)
+                }
+
+                val response = repository.getProfile()
+
+                if (!response.success) {
+                    _state.update { current ->
+                        current.copy(
+                            warningMessage = response.errorMessage
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun requestOrganizerRole() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    error = null,
+                    warningMessage = null
+                )
+            }
+
+            val response = repository.requestOrganizerRole()
+
+            if (response.success) {
+                _state.update {
+                    it.copy(
+                        organizerRequestSent = true,
+                        warningMessage = "Richiesta inviata correttamente. È in attesa di approvazione."
+                    )
+                }
+            } else {
+                val backendMessage = response.errorMessage.orEmpty()
+
+                val readableMessage = when {
+                    backendMessage.contains("error.organizer.request.sent", ignoreCase = true) ->
+                        "Hai già inviato una richiesta. Attendi la valutazione."
+                    backendMessage.contains("error.organizer.already.approved", ignoreCase = true) ->
+                        "Sei già approvato come organizzatore."
+                    else ->
+                        backendMessage.ifBlank { "Non è stato possibile inviare la richiesta." }
+                }
+
+                _state.update {
+                    it.copy(
+                        error = readableMessage,
+                        organizerRequestSent = true
+                    )
+                }
+            }
+        }
+    }
+
+    fun clearFeedback() {
+        _state.update {
+            it.copy(
+                error = null,
+                warningMessage = null
+            )
         }
     }
 }

@@ -55,6 +55,36 @@ public class GamificationServiceImpl implements GamificationService {
                 pointsToAdd, gamification.getPoints(), gamification.getBadge());
     }
 
+    @Override
+    @Transactional
+    public void removePoints(String userId, BigDecimal amountSpent) {
+        log.info("Iniziato calcolo punti gamification per l'utente ID: {} per una spesa di {}€", userId, amountSpent);
+
+        if (amountSpent.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException(messageLang.getMessage("error.points.negative.or.zero"));
+        }
+
+        Gamification gamification = gamificationRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.error("Impossibile aggiornare i punti: profilo gamification non trovato per l'utente ID: {}", userId);
+                    return new ResourceNotFoundException(messageLang.getMessage("error.gamification.points"));
+                });
+
+        long pointsToAdd = amountSpent
+                .multiply(BigDecimal.valueOf(POINTS_PER_EURO))
+                .setScale(0, RoundingMode.HALF_UP)
+                .longValue();
+
+        if (gamification.getPoints() >= pointsToAdd) {
+            gamification.setPoints(gamification.getPoints() - pointsToAdd);
+        }
+        gamification.setBadge(calculateBadge(gamification.getPoints()));
+
+        gamificationRepository.save(gamification);
+        log.info("Rimossi {} punti all'utente. Punti totali: {}. Nuovo badge: {}",
+                pointsToAdd, gamification.getPoints(), gamification.getBadge());
+    }
+
     private Badge calculateBadge(Long points) {
         if (points >= 250000) return Badge.EMERALD;
         if (points >= 100000) return Badge.DIAMOND;

@@ -28,7 +28,8 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/api/v1/users/public/**"
                         ).permitAll()
 
                         // 3. TUTTO IL RESTO: Richiede un token Keycloak valido

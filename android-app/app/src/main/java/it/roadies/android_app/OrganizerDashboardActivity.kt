@@ -32,6 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -41,7 +43,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import coil3.compose.AsyncImage
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.ui.res.painterResource
+import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -73,20 +78,30 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
     var travelToDelete by remember { mutableStateOf<TravelSummaryResponse?>(null) }
     var activityToDelete by remember { mutableStateOf<ActivitySummaryResponse?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
-
-
+    val scope = rememberCoroutineScope()
     val savedStateHandle = navHostController.currentBackStackEntry?.savedStateHandle
 
     // mi prendo lo stato che gli ho passato dopo la creazione
     val travelCreated by savedStateHandle?.getStateFlow("travel_created",false)?.collectAsState() ?: remember { mutableStateOf(false) }
     val activityCreated by savedStateHandle?.getStateFlow("activity_created",false)?.collectAsState() ?: remember { mutableStateOf(false) }
+    val travelUpdated by savedStateHandle?.getStateFlow("travel_updated",false)?.collectAsState() ?: remember { mutableStateOf(false) }
+    val activityUpdated by savedStateHandle?.getStateFlow("activity_updated",false)?.collectAsState() ?: remember { mutableStateOf(false) }
 
     val successMessage = stringResource(R.string.travel_created)
     LaunchedEffect(travelCreated) {
         if (travelCreated){
             savedStateHandle?.remove<Boolean>("travel_created")
             viewModel.loadData()
-            snackbarHostState.showSnackbar(message = successMessage)
+            scope.launch { snackbarHostState.showSnackbar(message = successMessage) }
+        }
+    }
+
+    val travelUpdateSuccessMessage = stringResource(R.string.travel_updated)
+    LaunchedEffect(travelUpdated) {
+        if (travelUpdated){
+            savedStateHandle?.remove<Boolean>("travel_updated")
+            viewModel.loadData()
+            scope.launch { snackbarHostState.showSnackbar(message = travelUpdateSuccessMessage) }
         }
     }
 
@@ -95,16 +110,23 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
         if (activityCreated){
             savedStateHandle?.remove<Boolean>("activity_created")
             viewModel.loadData()
-            snackbarHostState.showSnackbar(message = activitySuccessMessage)
+            scope.launch { snackbarHostState.showSnackbar(message = activitySuccessMessage) }
         }
     }
 
-
+    val activityUpdatedSuccessMessage = stringResource(R.string.activity_updated)
+    LaunchedEffect(activityUpdated) {
+        if (activityUpdated){
+            savedStateHandle?.remove<Boolean>("activity_updated")
+            viewModel.loadData()
+            scope.launch { snackbarHostState.showSnackbar(message = activityUpdatedSuccessMessage) }
+        }
+    }
     
     LaunchedEffect(uiState.value.deletingErrorMessage) {
         uiState.value.deletingErrorMessage?.let { error ->
-            snackbarHostState.showSnackbar(error)
             viewModel.clearDeleteError()
+            scope.launch { snackbarHostState.showSnackbar(error) }
         }
     }
 
@@ -160,13 +182,13 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
             }, onTravelDelete = {
                 travel -> travelToDelete = travel
             }, onTravelModify = {
-
+                travel -> navHostController.navigate("update_travel/${travel.id}")
             }, onActivityOpen = {
 
             }, onActivityDelete = {
                 activity -> activityToDelete = activity
             }, onActivityModify = {
-
+                activity -> navHostController.navigate("update_activity/${activity.id}")
             })
         }
         
@@ -188,6 +210,7 @@ fun TravelsActivitiesSection(items: OrganizerTravelsActivityResponse?, onTravelC
         Text(
             text = stringResource(R.string.your_travels_and_activities),
             fontSize = 32.sp,
+            lineHeight = 40.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(16.dp)
         )
@@ -302,11 +325,24 @@ fun OrganizerTravelCard(
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
-                AsyncImage(
-                    model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png", // travel.images?.firstOrNull()?.url
+                SubcomposeAsyncImage(
+                    model = travel.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = travel.title,
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        }
+                    },
+                    error = {
+                        Image(
+                            painter = painterResource(id = R.drawable.travel_placeholder),
+                            contentDescription = "Immagine di default",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 )
             }
 
@@ -396,14 +432,13 @@ fun OrganizerTravelCard(
                     ) {
                         OutlinedIconButton(
                             onClick = { onEditClick(travel) },
-                            enabled = editable,
                             modifier = Modifier.size(40.dp),
                             shape = RoundedCornerShape(10.dp),
                             colors = IconButtonDefaults.outlinedIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                 contentColor = MaterialTheme.colorScheme.primary
                             ),
-                            border = BorderStroke(1.dp, if (editable) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant)
+                            border = BorderStroke(1.dp,  MaterialTheme.colorScheme.outline)
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit), modifier = Modifier.size(20.dp))
                         }
@@ -449,11 +484,24 @@ fun OrganizerActivityCard(
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
-                AsyncImage(
-                    model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png", // activity.images?.firstOrNull()?.url
+                SubcomposeAsyncImage(
+                    model = activity.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = activity.name,
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        }
+                    },
+                    error = {
+                        Image(
+                            painter = painterResource(id = R.drawable.travel_placeholder),
+                            contentDescription = "Immagine di default",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 )
             }
 
@@ -525,14 +573,13 @@ fun OrganizerActivityCard(
                     ) {
                         OutlinedIconButton(
                             onClick = { onEditClick(activity) },
-                            enabled = editable,
                             modifier = Modifier.size(40.dp),
                             shape = RoundedCornerShape(10.dp),
                             colors = IconButtonDefaults.outlinedIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                 contentColor = MaterialTheme.colorScheme.primary
                             ),
-                            border = BorderStroke(1.dp, if (editable) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant)
+                            border = BorderStroke(1.dp,  MaterialTheme.colorScheme.outline)
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit), modifier = Modifier.size(20.dp))
                         }

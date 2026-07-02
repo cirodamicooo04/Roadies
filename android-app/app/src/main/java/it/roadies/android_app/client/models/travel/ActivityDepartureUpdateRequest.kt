@@ -51,7 +51,10 @@ data class ActivityDepartureUpdateRequest (
     val endTimestamp: OffsetDateTime? = null,
 
     @SerializedName("price")
-    val price: BigDecimal? = null
+    val price: BigDecimal? = null,
+
+    @SerializedName("maxSlots")
+    val maxSlots: Int? = null
 
 ) {
 

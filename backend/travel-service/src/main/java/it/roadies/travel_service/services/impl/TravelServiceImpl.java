@@ -380,6 +380,10 @@ public class TravelServiceImpl implements TravelService {
         if (!departure.getTravel().getId().equals(travelId)){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departure.not.found.in.this.travel"));}
         if (departure.getStatus().equals(Status.CONFIRMED)){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departure.already.confirmed"));}
 
+        if (request.getMaxSlots() != null) {
+            departure.setAvailableSlots(request.getMaxSlots());
+        }
+
         travelMapper.updateDepartureEntity(request, departure);
         validateTravelLogic(travel);
 

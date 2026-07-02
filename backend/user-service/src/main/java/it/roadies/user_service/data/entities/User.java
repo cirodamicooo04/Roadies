@@ -36,7 +36,6 @@ public class User {
     @Column()
     private String avatarUrl;
 
-    @Column(nullable = false)
     private LocalDate birthDate;
 
     @CreationTimestamp

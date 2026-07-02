@@ -56,12 +56,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImageContent
 import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
 import it.roadies.android_app.ui.travel.components.BoxCentered
 import it.roadies.android_app.viewmodel.SearchScreenViewModel
@@ -72,6 +82,9 @@ import it.roadies.android_app.viewmodel.SearchScreenViewModel
 @Composable
 fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: SearchScreenViewModel = hiltViewModel()){
     val uiState by searchScreenViewModel.searchScreenUiState.collectAsState()
+
+    val organizersUiState by searchScreenViewModel.organizersState.collectAsState()
+    val organizers = organizersUiState.organizers
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -334,12 +347,16 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                 BoxCentered(text = uiState.errorMessage ?: stringResource(R.string.search_error))
             } else {
                 if (uiState.type == "ACTIVITY") {
-                    ActivitiesResult(uiState.activities ?: emptyList(), onActivityClick = { activity ->
+                    ActivitiesResult(uiState.activities ?: emptyList(), organizers, organizersUiState.isLoading, onActivityClick = { activity ->
                         navHostController.navigate("activity_detail/${activity.id}")
+                    }, onOrganizerClick = { username -> 
+                        navHostController.navigate("user_profile/$username")
                     }, lazyListState, uiState.isLoadingMore || (uiState.isLoading && uiState.activities?.isNotEmpty() == true))
                 } else {
-                    TravelsResult(uiState.travels ?: emptyList(), onTravelClick = { travel ->
+                    TravelsResult(uiState.travels ?: emptyList(), organizers, organizersUiState.isLoading, onTravelClick = { travel ->
                         navHostController.navigate("travel_detail/${travel.id}")
+                    }, onOrganizerClick = { username -> 
+                        navHostController.navigate("user_profile/$username")
                     }, lazyListState, uiState.isLoadingMore || (uiState.isLoading && uiState.travels?.isNotEmpty() == true))
                 }
                 
@@ -362,7 +379,7 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
 }
 
 @Composable
-fun ActivitiesResult(activities: List<ActivitySummaryResponse>, onActivityClick: (ActivitySummaryResponse) -> Unit, lazyListState: LazyListState, isLoadingMore: Boolean){
+fun ActivitiesResult(activities: List<ActivitySummaryResponse>, organizers: List<MinimalInformationResponseDTO>?, isOrganizersLoading: Boolean = false, onActivityClick: (ActivitySummaryResponse) -> Unit, onOrganizerClick: (String) -> Unit, lazyListState: LazyListState, isLoadingMore: Boolean){
     if (activities.isEmpty()){
         BoxCentered(text = stringResource(R.string.no_activities_found))
     } else {
@@ -378,7 +395,7 @@ fun ActivitiesResult(activities: List<ActivitySummaryResponse>, onActivityClick:
             state = lazyListState
         ) {
             items(activities) { activity -> 
-                ActivityCard(activity, onCardClick = { onActivityClick(activity) })
+                ActivityCard(activity, organizers, isOrganizersLoading, onCardClick = { onActivityClick(activity) }, onOrganizerClick = onOrganizerClick)
             }
 
             if (isLoadingMore){
@@ -393,7 +410,7 @@ fun ActivitiesResult(activities: List<ActivitySummaryResponse>, onActivityClick:
 }
 
 @Composable
-fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySummaryResponse) -> Unit ){
+fun ActivityCard(activity: ActivitySummaryResponse, organizers: List<MinimalInformationResponseDTO>?, isOrganizersLoading: Boolean = false, onCardClick: (ActivitySummaryResponse) -> Unit, onOrganizerClick: (String) -> Unit){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -405,13 +422,24 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
         Row(modifier = Modifier.fillMaxSize()) {
             // Immagine a Sinistra
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
-                AsyncImage(
-                    //Non funziona localhost, quindi immagine momentanea
-                    //model = activity.images?.firstOrNull()?.url,
-                    model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
+                SubcomposeAsyncImage(
+                    model = activity.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = activity.name,
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        }
+                    },
+                    error = {
+                        Image(
+                            painter = painterResource(id = R.drawable.travel_placeholder),
+                            contentDescription = "Immagine di default",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 )
             }
 
@@ -454,14 +482,54 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // TODO: Recuperare l'username reale al posto di questa stringa fittizia
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "👤 @owner_fittizio",
-                            color = Color.Gray,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                    val organizer = organizers?.find { it.keycloakId == activity.ownerId }
+                    val organizerName = if (isOrganizersLoading) "Caricamento..." else organizer?.username ?: "Sconosciuto"
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable(enabled = organizer?.username != null) {
+                            organizer?.username?.let { onOrganizerClick(it) }
+                        }
+                    ) {
+                        if (isOrganizersLoading || organizer == null) {
+                            Text(
+                                text = "👤 @$organizerName",
+                                color = Color.Gray,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        } else {
+                            val avatarUrl = organizer.avatarUrl?.replace("localhost", "10.0.2.2")
+                            if (!avatarUrl.isNullOrEmpty()) {
+                                SubcomposeAsyncImage(
+                                    model = avatarUrl,
+                                    contentDescription = "Avatar",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.size(20.dp),
+                                    success = {
+                                        SubcomposeAsyncImageContent(modifier = Modifier.clip(CircleShape))
+                                    },
+                                    error = {
+                                        Text(text = "👤", fontSize = 14.sp)
+                                    },
+                                    loading = {
+                                        Text(text = "👤", fontSize = 14.sp)
+                                    }
+                                )
+                            } else {
+                                Text(
+                                    text = "👤",
+                                    fontSize = 14.sp
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "@${organizer.username}",
+                                color = Color.Gray,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -502,7 +570,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
 }
 
 @Composable
-fun TravelsResult(travels: List<TravelSummaryResponse>, onTravelClick: (TravelSummaryResponse) -> Unit, lazyListState: LazyListState, isLoadingMore: Boolean){
+fun TravelsResult(travels: List<TravelSummaryResponse>, organizers: List<MinimalInformationResponseDTO>?, isOrganizersLoading: Boolean = false, onTravelClick: (TravelSummaryResponse) -> Unit, onOrganizerClick: (String) -> Unit, lazyListState: LazyListState, isLoadingMore: Boolean){
     if (travels.isEmpty()){
         BoxCentered(text = stringResource(R.string.no_travels_found))
     } else {
@@ -517,7 +585,7 @@ fun TravelsResult(travels: List<TravelSummaryResponse>, onTravelClick: (TravelSu
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items (travels){ travel -> 
-                TravelCard(travel, onCardClick = { onTravelClick(travel)})
+                TravelCard(travel, organizers, isOrganizersLoading, onCardClick = { onTravelClick(travel)}, onOrganizerClick = onOrganizerClick)
             }
 
             if (isLoadingMore){
@@ -532,7 +600,7 @@ fun TravelsResult(travels: List<TravelSummaryResponse>, onTravelClick: (TravelSu
 }
 
 @Composable
-fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryResponse) -> Unit){
+fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformationResponseDTO>?, isOrganizersLoading: Boolean = false, onCardClick: (TravelSummaryResponse) -> Unit, onOrganizerClick: (String) -> Unit){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -543,13 +611,24 @@ fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryRespons
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
-                AsyncImage(
-                    //Non funziona localhost, quindi immagine momentanea
-                    //model = travel.images?.firstOrNull()?.url,
-                    model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
+                SubcomposeAsyncImage(
+                    model = travel.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = travel.title,
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        }
+                    },
+                    error = {
+                        Image(
+                            painter = painterResource(id = R.drawable.travel_placeholder),
+                            contentDescription = "Immagine di default",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 )
             }
 
@@ -592,14 +671,54 @@ fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryRespons
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // TODO: Recuperare l'username reale al posto di questa stringa fittizia
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "👤 @owner_fittizio",
-                            color = Color.Gray,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                    val organizer = organizers?.find { it.keycloakId == travel.ownerId }
+                    val organizerName = if (isOrganizersLoading) "Caricamento..." else organizer?.username ?: "Sconosciuto"
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable(enabled = organizer?.username != null) {
+                            organizer?.username?.let { onOrganizerClick(it) }
+                        }
+                    ) {
+                        if (isOrganizersLoading || organizer == null) {
+                            Text(
+                                text = "👤 @$organizerName",
+                                color = Color.Gray,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        } else {
+                            val avatarUrl = organizer.avatarUrl?.replace("localhost", "10.0.2.2")
+                            if (!avatarUrl.isNullOrEmpty()) {
+                                SubcomposeAsyncImage(
+                                    model = avatarUrl,
+                                    contentDescription = "Avatar",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.size(20.dp),
+                                    success = {
+                                        SubcomposeAsyncImageContent(modifier = Modifier.clip(CircleShape))
+                                    },
+                                    error = {
+                                        Text(text = "👤", fontSize = 14.sp)
+                                    },
+                                    loading = {
+                                        Text(text = "👤", fontSize = 14.sp)
+                                    }
+                                )
+                            } else {
+                                Text(
+                                    text = "👤",
+                                    fontSize = 14.sp
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "@${organizer.username}",
+                                color = Color.Gray,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))

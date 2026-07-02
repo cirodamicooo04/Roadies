@@ -47,7 +47,7 @@ public class ReviewController {
             summary = "Recupera le recensioni di un viaggio o attività",
             description = "Restituisce tutte le recensioni associate a un determinato viaggio o attività, identificato dal suo ID."
     )
-    @GetMapping("/{travelId}")
+    @GetMapping("/public/{travelId}")
     public ResponseEntity<List<ReviewResponse>> getByTravel(@PathVariable UUID travelId) {
         return ResponseEntity.ok(service.getByTravel(travelId));
     }

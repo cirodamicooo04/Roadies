@@ -37,6 +37,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -56,8 +57,17 @@ public class ActivityServiceImpl implements ActivityService {
         if (activity.getTravel() != null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.standalone.activity.cant.have.travel"));
 
         for (ActivityDeparture departure : activity.getDepartures()){
+            //price check
+            if (departure.getPrice() == null || departure.getPrice().compareTo(BigDecimal.ZERO) <= 0){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departures.price.not.valid"));
+            }
+
             if (!departure.getStartTimestamp().isBefore(departure.getEndTimestamp())){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departures.dates.not.valid"));
+            }
+            //same day check
+            if (!departure.getStartTimestamp().toLocalDate().isEqual(departure.getEndTimestamp().toLocalDate())){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage("error.departures.dates.not.equal"));
             }
         }
     }
@@ -162,6 +172,10 @@ public class ActivityServiceImpl implements ActivityService {
 
         activityMapper.updateDepartureEntity(request, departure);
         validateActivity(activity);
+
+        if (request.getMaxSlots() != null){
+            departure.setMaxSlots(request.getMaxSlots());
+        }
 
         activityDepartureRepository.save(departure);
         return activityMapper.toDeparturesResponse(departure);

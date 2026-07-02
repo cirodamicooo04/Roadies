@@ -7,8 +7,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import it.roadies.android_app.client.apis.travel.ViaggiApi
 import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.repository.ActivityRepository
 import it.roadies.android_app.repository.TravelRepository
+import it.roadies.android_app.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -33,8 +35,14 @@ data class SearchFiltersState(
     val sortCriteria: List<String>? = null
 )
 
+data class OrganizersUiState(
+    val organizers: List<MinimalInformationResponseDTO>? = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
+
 @HiltViewModel
-class SearchScreenViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle ,private val travelRepository: TravelRepository, private val activityRepository: ActivityRepository) : ViewModel(){
+class SearchScreenViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle ,private val travelRepository: TravelRepository, private val activityRepository: ActivityRepository, private val userRepository: UserRepository) : ViewModel(){
     //hilt inietta automaticamente SavedStateHandle per prendere i parametri della rotta search
     val continent: String? = savedStateHandle["continent"];
     val country: String? = savedStateHandle["country"]
@@ -50,6 +58,9 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
 
     private val _searchFiltersState = MutableStateFlow(SearchFiltersState())
     val searchFiltersState = _searchFiltersState.asStateFlow()
+
+    private val _organizersState = MutableStateFlow(OrganizersUiState())
+    val organizersState = _organizersState.asStateFlow()
 
     private var currentPage = 0
 
@@ -177,6 +188,17 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                         travels = emptyList(),
                         errorMessage = null
                     )
+
+                    _organizersState.value = OrganizersUiState(isLoading = true)
+
+                    val organizers: Set<String> = _searchScreenUiState.value.activities?.mapNotNull { it.ownerId }?.toSet() as Set<String>
+                    val organizersResponse = userRepository.getOrganizersInfo(organizers.toList())
+                    if (organizersResponse.success && organizersResponse.data != null){
+                        _organizersState.value = OrganizersUiState(organizers = organizersResponse.data, isLoading = false)
+                    } else {
+                        _organizersState.value = OrganizersUiState(error = organizersResponse.errorMessage, isLoading = false)
+                    }
+
                 } else {
                     if (isLoadMore) currentPage--
                     _searchScreenUiState.value = _searchScreenUiState.value.copy(
@@ -211,6 +233,17 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                         activities = emptyList(),
                         errorMessage = null
                     )
+
+                    _organizersState.value = OrganizersUiState(isLoading = true)
+
+                    val organizers: Set<String> = _searchScreenUiState.value.travels?.mapNotNull { it.ownerId }?.toSet() as Set<String>
+                    val organizersResponse = userRepository.getOrganizersInfo(organizers.toList())
+                    if (organizersResponse.success && organizersResponse.data != null){
+                        _organizersState.value = OrganizersUiState(organizers = organizersResponse.data, isLoading = false)
+                    } else {
+                        _organizersState.value = OrganizersUiState(error = organizersResponse.errorMessage, isLoading = false)
+                    }
+
                 } else {
                     if (isLoadMore) currentPage--
                     _searchScreenUiState.value = _searchScreenUiState.value.copy(

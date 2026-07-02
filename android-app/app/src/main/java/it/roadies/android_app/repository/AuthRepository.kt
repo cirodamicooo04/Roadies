@@ -18,8 +18,18 @@ data class AuthSessionState(
     val roles: List<String> = emptyList()
 )
 
+data class KeycloakUserClaims(
+    val sub: String,
+    val email: String,
+    val preferredUsername: String,
+    val firstName: String,
+    val lastName: String
+)
+
 @Singleton
-class AuthRepository @Inject constructor(private val tokenStorage: TokenStorage) {
+class AuthRepository @Inject constructor(
+    private val tokenStorage: TokenStorage
+) {
 
     private val _authState = MutableStateFlow(AuthSessionState())
     val authState = _authState.asStateFlow()
@@ -65,6 +75,25 @@ class AuthRepository @Inject constructor(private val tokenStorage: TokenStorage)
             isLogged = false,
             roles = emptyList()
         )
+    }
+
+    fun getUserClaims(accessToken: String): KeycloakUserClaims? {
+        return runCatching {
+            val payload = accessToken.split(".").getOrNull(1) ?: return null
+            val decodedPayload = String(
+                Base64.decode(payload, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING),
+                Charsets.UTF_8
+            )
+            val jsonPayload = JSONObject(decodedPayload)
+
+            KeycloakUserClaims(
+                sub = jsonPayload.optString("sub"),
+                email = jsonPayload.optString("email"),
+                preferredUsername = jsonPayload.optString("preferred_username"),
+                firstName = jsonPayload.optString("given_name"),
+                lastName = jsonPayload.optString("family_name")
+            )
+        }.getOrNull()
     }
 
     fun extractRoles(accessToken: String): List<String> {

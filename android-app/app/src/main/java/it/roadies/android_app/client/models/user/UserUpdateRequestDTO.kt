@@ -38,10 +38,6 @@ import com.google.gson.annotations.SerializedName
 
 
 data class UserUpdateRequestDTO (
-
-    @SerializedName("username")
-    val username: kotlin.String? = null,
-
     @SerializedName("firstName")
     val firstName: kotlin.String? = null,
 

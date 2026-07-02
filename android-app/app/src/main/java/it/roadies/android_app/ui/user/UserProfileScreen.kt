@@ -12,11 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.BadgeStatItem
 import it.roadies.android_app.StatItem
 import it.roadies.android_app.viewmodel.user.UserProfileViewModel
@@ -51,6 +53,7 @@ fun UserProfileScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
+
             state.error != null -> {
                 Text(
                     text = state.error!!,
@@ -58,6 +61,7 @@ fun UserProfileScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
+
             state.user != null -> {
                 val user = state.user!!
 
@@ -82,15 +86,32 @@ fun UserProfileScreen(
                                     .background(OrangeAvatarColor),
                                 contentAlignment = Alignment.Center
                             ) {
-                                val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                                val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                                val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
-                                Text(
-                                    text = initials,
-                                    color = Color.White,
-                                    fontSize = 36.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
+                                val avatarUrl = user.avatarUrl
+                                    ?.replace("localhost", "10.0.2.2")
+                                    ?.takeIf { it.isNotBlank() }
+                                    ?: ""
+
+                                if (avatarUrl.isNotBlank()) {
+                                    SubcomposeAsyncImage(
+                                        model = avatarUrl,
+                                        contentDescription = "Avatar di ${user.username}",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(CircleShape)
+                                    )
+                                } else {
+                                    val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
+                                    val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
+                                    val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
+
+                                    Text(
+                                        text = initials,
+                                        color = Color.White,
+                                        fontSize = 36.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -101,7 +122,9 @@ fun UserProfileScreen(
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold
                             )
+
                             Spacer(modifier = Modifier.height(4.dp))
+
                             Text(
                                 text = "@${user.username}",
                                 color = Color.White.copy(alpha = 0.8f),

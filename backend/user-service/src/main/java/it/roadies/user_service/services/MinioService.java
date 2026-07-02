@@ -4,7 +4,8 @@ import io.minio.errors.MinioException;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface MinioService {
-    String uploadFile(MultipartFile file, String bucketName) throws MinioException;
+
+    String uploadFile(MultipartFile file, String bucketName);
 
     void deleteFile(String fileName, String bucketName);
 

@@ -16,6 +16,7 @@ import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
 import it.roadies.android_app.client.apis.travel.MetadatiApi
 import it.roadies.android_app.client.apis.travel.PhotonApi
+import it.roadies.android_app.client.apis.travel.ViaggiApi
 import it.roadies.android_app.client.apis.user.DocumentManagementApi
 import it.roadies.android_app.client.apis.user.FriendshipManagementApi
 import it.roadies.android_app.client.apis.user.UserManagementApi
@@ -31,14 +32,19 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import it.roadies.android_app.client.apis.travel.ViaggiApi as ViaggiApi1
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val API_BASE_URL = "http://10.0.2.2:8080/"
+    private const val API_BASE_URL = "https://10.0.2.2:8443/"
     private const val PHOTON_BASE_URL = "https://photon.komoot.io"
 
     @Provides
@@ -70,6 +76,12 @@ object NetworkModule {
                             level = HttpLoggingInterceptor.Level.BASIC
                         }
                     )
+                    val trustManager = trustAllManager()
+                    val sslContext = SSLContext.getInstance("TLS").apply {
+                        init(null, arrayOf<TrustManager>(trustManager), SecureRandom())
+                    }
+                    sslSocketFactory(sslContext.socketFactory, trustManager)
+                    hostnameVerifier { _, _ -> true }
                 }
             }
             .build()
@@ -181,4 +193,11 @@ object NetworkModule {
     @Singleton
     fun provideReviewReplyApi(retrofit: Retrofit): ReviewReplyApi =
         retrofit.create(ReviewReplyApi::class.java)
+
+    // trustManager che accetta qualsiasi certificato
+    private fun trustAllManager(): X509TrustManager = object : X509TrustManager {
+        override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+        override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+    }
 }

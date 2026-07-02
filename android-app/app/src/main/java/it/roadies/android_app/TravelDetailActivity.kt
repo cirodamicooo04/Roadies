@@ -174,7 +174,7 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
                     destination = travel.destination,
                     country = travel.country
                 ) {
-                    Row(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Filled.AccessTime,
                             contentDescription = "Duration",
@@ -262,7 +262,7 @@ fun Activities(activities: List<ActivityResponse>?){
     if (activities.isNullOrEmpty()) return
 
     Column(modifier = Modifier.fillMaxWidth().padding(top= 20.dp, bottom = 15.dp),){
-        Text(text = stringResource(R.string.activities), fontWeight = FontWeight.Bold, fontSize = 24.sp)
+        Text(text = stringResource(R.string.activities), fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 30.sp, modifier = Modifier.padding(bottom = 16.dp))
 
         val sortedActivities = activities.sortedBy { it.dayNumber }
 

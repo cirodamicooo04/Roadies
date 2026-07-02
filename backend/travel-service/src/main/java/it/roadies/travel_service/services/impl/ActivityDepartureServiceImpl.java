@@ -4,6 +4,7 @@ import it.roadies.travel_service.conf.i8n.MessageLang;
 import it.roadies.travel_service.data.dao.ActivityDepartureRepository;
 import it.roadies.travel_service.data.dto.response.ActivityBatchResponse;
 import it.roadies.travel_service.data.entity.ActivityDeparture;
+import it.roadies.travel_service.data.entity.enumerations.Status;
 import it.roadies.travel_service.exceptions.NotEnoughSeatsException;
 import it.roadies.travel_service.exceptions.StatusException;
 import it.roadies.travel_service.services.ActivityDepartureService;
@@ -29,6 +30,10 @@ public class ActivityDepartureServiceImpl implements ActivityDepartureService {
     public void reserveSeats(UUID id, Integer peopleCount) {
         ActivityDeparture activityDeparture = activitySessionRepository.findByIdWithLock(id);
         log.info("Provo a riservare i posti");
+
+        if (activityDeparture.getStatus() != Status.CONFIRMED) {
+            throw new StatusException(messageLang.getMessage("error.departure.not.confirmed"));
+        }
 
         int newSlotsNumber = activityDeparture.getAvailableSlots() - peopleCount;
         if (newSlotsNumber >= 0) {

@@ -8,10 +8,6 @@ import java.time.LocalDate;
 
 @Data
 public class UserUpdateRequestDTO {
-
-    @Size(min = 3, max = 30)
-    private String username;
-
     @Size(min = 1, max = 30)
     private String firstName;
 

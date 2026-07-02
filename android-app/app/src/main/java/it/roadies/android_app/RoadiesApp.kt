@@ -42,6 +42,7 @@ import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
 import it.roadies.android_app.viewmodel.bookingFlow.BookingFlowViewModel
 import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
+import it.roadies.android_app.ui.user.EditProfileScreen
 import it.roadies.android_app.ui.user.FriendScreen
 import it.roadies.android_app.ui.user.UserProfileScreen
 import it.roadies.android_app.ui.admin.AdminUsersScreen
@@ -498,6 +499,17 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             composable(route = "create_activity"){
                 ActivityCreationScreen(navHostController = navHostController)
             }
+            composable(route = "update_travel/{id}", arguments = listOf(
+                navArgument("id") {type = NavType.StringType}
+            )
+            ){
+                TravelUpdateScreen(navHostController = navHostController)
+            }
+            composable(route="update_activity/{id}", arguments = listOf(
+                navArgument("id") {type = NavType.StringType}
+            )){
+                ActivityUpdateScreen(navHostController = navHostController)
+            }
         }
 
         navigation(route = "profile_graph", startDestination = "profile_main") {
@@ -509,7 +521,7 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 )
             }
             composable(route = "edit_profile") {
-                //EditProfileScreen(onBack = { navHostController.popBackStack() })
+                EditProfileScreen(onBack = { navHostController.popBackStack() })
             }
             composable(route = "friend") {
                 FriendScreen(
