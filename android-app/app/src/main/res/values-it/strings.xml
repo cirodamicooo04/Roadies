@@ -48,7 +48,8 @@
     <string name="hours">Ore</string>
     <string name="travel_created">Viaggio creato con successo</string>
     <string name="create_new_travel">Nuovo viaggio</string>
-    <string name="create_new_activity">Nuova attività</string>
+    <string name="create_new_activity">Crea nuova attività</string>
+    <string name="edit_activity">Modifica attività</string>
     <string name="your_travels_and_activities">Le tue attività e viaggi</string>
     <string name="edit">Modifica</string>
     <string name="delete">Elimina</string>
@@ -68,6 +69,7 @@
     <string name="duration_placeholder">Es: 14</string>
     <string name="destination_placeholder">Es: Parigi, Francia</string>
     <string name="search">Cerca</string>
+    <string name="not_editable_travel">Modifiche bloccate: Questo viaggio ha già delle partenze confermate. I dettagli non possono più essere modificati, puoi solo gestire le partenze.</string>
     <string name="travel_photos_label">Foto</string>
     <string name="add_photo">Aggiungi Foto</string>>
     <string name="photo_upload_failed">Fallito</string>
@@ -210,4 +212,13 @@
     <string name="booking_payment_confirming">Conferma del pagamento in corso…</string>
     <string name="booking_payment_preparing">Preparazione del pagamento…</string>
     <string name="booking_payment_confirmed">Prenotazione confermata!</string>
+    <string name="error_date_past">La data deve essere successiva a oggi</string>
+    <string name="error_time_range">L\'orario di fine deve essere successivo a quello di inizio</string>
+    <string name="cancel_update_confirm">Vuoi davvero annullare l\'aggiornamento?</string>
+    <string name="basic_info">Informazioni generali</string>
+    <string name="travel_updated">Viaggio aggiornato con successo</string>
+    <string name="activity_updated">Attività aggiornata con successo</string>
+    <string name="confirm_departure">Conferma partenza</string>
+    <string name="confirm_departure_body_travel">Vuoi davvero confermare questa partenza? Non potrai più modificare questo viaggio.</string>
+    <string name="confirm_departure_body_actvity">Vuoi davvero confermare questa partenza? Non potrai più modificare questa attività.</string>
 </resources>

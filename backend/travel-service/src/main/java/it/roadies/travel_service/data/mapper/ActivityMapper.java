@@ -39,7 +39,6 @@ public interface ActivityMapper {
     ActivityDeparture toDepartureEntity(ActivityDepartureCreateRequest request);
 
     @Mapping(target = "activity", ignore = true)
-    @Mapping(target = "maxSlots", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "availableSlots", ignore = true)
     ActivityDeparture updateDepartureEntity(ActivityDepartureUpdateRequest request, @MappingTarget ActivityDeparture departure);

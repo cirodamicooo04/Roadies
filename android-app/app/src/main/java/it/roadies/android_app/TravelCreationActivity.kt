@@ -58,6 +58,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.activity.compose.BackHandler
+import androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -85,6 +86,8 @@ import it.roadies.android_app.ui.travel.components.ActivityAddressPicker
 import it.roadies.android_app.ui.travel.components.ActivityTitleDescriptionInput
 import it.roadies.android_app.ui.travel.components.BoxCentered
 import it.roadies.android_app.ui.travel.components.UploadableImage
+import it.roadies.android_app.ui.travel.components.ImageCarousel
+import it.roadies.android_app.ui.travel.components.TravelTagsSection
 import it.roadies.android_app.utils.ContinentMapper
 import it.roadies.android_app.viewmodel.CreateTravelStep
 import it.roadies.android_app.viewmodel.CreateTravelUiState
@@ -437,128 +440,6 @@ fun BasicInfoForm(
     }
 }
 
-@Composable
-fun TravelTagsSection(tags: List<TagResponse>, tagScores: Map<UUID, Int> , onValueChange: (UUID, Int) -> Unit) {
-    if(tags.isEmpty()) return
-
-    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)){
-        Text(text = stringResource(R.string.rate_trip_type), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 10.dp))
-
-        tags.forEach { tag ->
-            val tagId = tag.id?: return@forEach
-            val currentScore = tagScores[tagId]?: 3
-
-            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = tag.name ?: "", fontWeight = FontWeight.SemiBold)
-                    Text(text = "$currentScore", fontWeight = FontWeight.Bold)
-                }
-                Slider(value = currentScore.toFloat(), onValueChange = {newValue -> onValueChange(tagId, newValue.toInt())}, valueRange = 1f .. 5f, steps = 3)
-            }
-        }
-    }
-}
-
-@Composable
-fun ImageCarousel(
-    images: List<UploadableImage>,
-    onImagesSelected: (List<Uri>) -> Unit,
-    onRemoveImage: (Uri) -> Unit
-) {
-    val photoPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickMultipleVisualMedia(5)
-    ) { uris ->
-        if (uris.isNotEmpty()) {
-            onImagesSelected(uris)
-        }
-    }
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = stringResource(R.string.travel_photos_label),
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            item {
-                Surface(
-                    onClick = {
-                        photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier
-                        .height(120.dp)
-                        .width(120.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = stringResource(R.string.add_photo),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            items(images) { image ->
-                Box(
-                    modifier = Modifier
-                        .height(120.dp)
-                        .width(120.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                ) {
-                    AsyncImage(
-                        model = image.localUri,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-
-                    if (image.isUploading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.5f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = Color.White)
-                        }
-                    } else if (image.isFailed) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Red.copy(alpha = 0.5f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(stringResource(R.string.photo_upload_failed), color = Color.White)
-                        }
-                    }
-
-                    if (!image.isUploading) {
-                        IconButton(
-                            onClick = { onRemoveImage(image.localUri) },
-                            modifier = Modifier.align(Alignment.TopEnd)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Rimuovi",
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivitiesSummaryForm(
@@ -814,7 +695,7 @@ fun TravelActivityCreationForm(
                     .fillMaxWidth()
                     .menuAnchor(),
                 trailingIcon = {
-                    androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDayDropdown)
+                    TrailingIcon(expanded = expandedDayDropdown)
                 }
             )
             DropdownMenu(
@@ -917,9 +798,9 @@ fun DeparturesSummaryForm(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(text = stringResource(R.string.departures), fontWeight = FontWeight.Bold, fontSize = 35.sp)
+            Text(text = stringResource(R.string.departures), fontWeight = FontWeight.Bold, fontSize = 24.sp)
             Button(onClick = {
                 departureToEdit = null
                 isModalSheetOpen = true
@@ -931,7 +812,7 @@ fun DeparturesSummaryForm(
         if (departures.isEmpty()) {
             BoxCentered(text = stringResource(R.string.departures_empty))
         } else {
-            Column(modifier = Modifier.fillMaxWidth().fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 departures.sortedBy { it.startDate }.forEach { departure ->
                     DepartureSummaryCard(
                         departure = departure,
@@ -1089,7 +970,7 @@ fun DepartureCreateForm(
                 }
                 
                 if (startDate != null && endDate != null && !endDate!!.isBefore(startDate)) {
-                    val daysBetween = ChronoUnit.DAYS.between(startDate, endDate).toInt() + 1
+                    val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate).toInt()
                     if (daysBetween != travelDurationDays) {
                         endDateError = errorDurationStr
                         isValid = false

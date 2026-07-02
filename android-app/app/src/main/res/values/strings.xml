@@ -46,6 +46,7 @@
     <string name="no_available_departures">No available departures</string>
     <string name="create_new_travel">Create new travel</string>
     <string name="create_new_activity">Create new activity</string>
+    <string name="edit_activity">Edit activity</string>
     <string name="your_travels_and_activities">Your travels and activities</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
@@ -55,6 +56,7 @@
     <string name="confirm">Confirm</string>
     <string name="travel_created">Travel created with success</string>
     <string name="confirm_deleting_body">Do you really want to delete %1$s? The action is irreversible</string>
+    <string name="not_editable_travel">This trip already has confirmed departures. The details can no longer be modified; you can only manage departures.</string>
     <string name="this_activity">this activity</string>
     <string name="this_travel">this travel</string>
     <string name="cancel">Cancel</string>
@@ -207,5 +209,13 @@
     <string name="accept"> Accept</string>
     <string name="add_friend"> Add friend</string>
     <string name="request_sent"> Request sent</string>
-
+    <string name="error_date_past">The date must be in the future</string>
+    <string name="error_time_range">End time must be after start time</string>
+    <string name="cancel_update_confirm">Do you really want to cancel updating ?</string>
+    <string name="basic_info">Basic info</string>
+    <string name="travel_updated">Travel updated with success</string>
+    <string name="activity_updated">Activity updated with success</string>
+    <string name="confirm_departure">Confirm departure</string>
+    <string name="confirm_departure_body_travel">Do you really want to confirm this departure ? You will not be able to update this travel.</string>
+    <string name="confirm_departure_body_actvity">Do you really want to confirm this departure ? You will not be able to update this activity.</string>
 </resources>
