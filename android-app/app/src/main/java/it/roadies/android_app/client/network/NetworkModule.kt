@@ -29,13 +29,18 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val API_BASE_URL = "http://10.0.2.2:8080/"
+    private const val API_BASE_URL = "https://10.0.2.2:8443/"
     private const val PHOTON_BASE_URL = "https://photon.komoot.io"
 
     @Provides
@@ -67,6 +72,12 @@ object NetworkModule {
                             level = HttpLoggingInterceptor.Level.BASIC
                         }
                     )
+                    val trustManager = trustAllManager()
+                    val sslContext = SSLContext.getInstance("TLS").apply {
+                        init(null, arrayOf<TrustManager>(trustManager), SecureRandom())
+                    }
+                    sslSocketFactory(sslContext.socketFactory, trustManager)
+                    hostnameVerifier { _, _ -> true }
                 }
             }
             .build()
@@ -161,5 +172,12 @@ object NetworkModule {
 
     private val devConnectionBuilder = ConnectionBuilder { uri ->
         URL(uri.toString()).openConnection() as HttpURLConnection
+    }
+
+    // trustManager che accetta qualsiasi certificato
+    private fun trustAllManager(): X509TrustManager = object : X509TrustManager {
+        override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+        override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
     }
 }

@@ -75,7 +75,9 @@ public class GamificationServiceImpl implements GamificationService {
                 .setScale(0, RoundingMode.HALF_UP)
                 .longValue();
 
-        gamification.setPoints(gamification.getPoints() - pointsToAdd);
+        if (gamification.getPoints() >= pointsToAdd) {
+            gamification.setPoints(gamification.getPoints() - pointsToAdd);
+        }
         gamification.setBadge(calculateBadge(gamification.getPoints()));
 
         gamificationRepository.save(gamification);
