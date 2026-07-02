@@ -94,7 +94,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/minimal-info")
+    @PostMapping("/public/minimal-info")
     @Operation(summary = "Recupera info minime", description = "Restituisce ID, username e avatar per una lista di ID")
     public ResponseEntity<List<MinimalInformationResponseDTO>> getMinimalInformation(
             @RequestBody List<String> userIds) {

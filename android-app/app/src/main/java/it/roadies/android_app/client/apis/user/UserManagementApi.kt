@@ -10,6 +10,7 @@ import it.roadies.android_app.client.models.user.PendingOrganizerRequestResponse
 import it.roadies.android_app.client.models.user.UserProfileResponseDTO
 import it.roadies.android_app.client.models.user.UserSyncRequestDTO
 import it.roadies.android_app.client.models.user.UserUpdateRequestDTO
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import okhttp3.MultipartBody
 import retrofit2.Response
 
@@ -116,6 +117,18 @@ interface UserManagementApi {
     @PUT("api/v1/users/update")
     suspend fun updateProfile(@Body userUpdateRequestDTO: UserUpdateRequestDTO): Response<UserProfileResponseDTO>
 
+    /**
+     * POST api/v1/users/minimal-info
+     * Recupera info minime
+     * Restituisce ID, username e avatar per una lista di ID
+     * Responses:
+     *  - 200: OK
+     *
+     * @param userIds
+     * @return [Response]<[kotlin.collections.List<MinimalInformationResponseDTO>]>
+     */
+    @POST("api/v1/users/public/minimal-info")
+    suspend fun getMinimalInformation(@Body userIds: List<String>): Response<List<MinimalInformationResponseDTO>>
 
     @Multipart
     @POST("api/v1/users/avatar")
