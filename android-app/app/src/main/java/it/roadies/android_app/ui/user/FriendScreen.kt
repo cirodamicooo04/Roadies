@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.R
 import it.roadies.android_app.client.models.user.FriendshipResponseDTO
 import it.roadies.android_app.client.models.user.UserProfileResponseDTO
@@ -128,7 +130,7 @@ fun FriendScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = stringResource(R.string.pending_request) +"(${state.pendingRequests.size})",
+                    text = stringResource(R.string.pending_request) + "(${state.pendingRequests.size})",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -144,6 +146,7 @@ fun FriendScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+
                 state.error != null -> {
                     Text(
                         text = state.error!!,
@@ -151,6 +154,7 @@ fun FriendScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+
                 isShowingSearchResults -> {
                     if (state.searchResults.isEmpty() && !state.isSearching) {
                         Text(
@@ -175,6 +179,7 @@ fun FriendScreen(
                         )
                     }
                 }
+
                 else -> {
                     if (state.friends.isEmpty()) {
                         Text(
@@ -222,13 +227,13 @@ fun PendingRequestsSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text =  stringResource(R.string.no_friends),
+                text = stringResource(R.string.no_friends),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextDark
             )
             IconButton(onClick = onClose) {
-                Icon(Icons.Default.Close, contentDescription =  stringResource(R.string.close))
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
             }
         }
 
@@ -255,6 +260,7 @@ fun PendingRequestCard(
     onUserClick: () -> Unit = {}
 ) {
     val user = request.friendProfile
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -276,16 +282,33 @@ fun PendingRequestCard(
                     .background(OrangeAvatar),
                 contentAlignment = Alignment.Center
             ) {
-                val initials = buildString {
-                    user?.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
-                    user?.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
-                }.ifBlank { "?" }
-                Text(
-                    text = initials,
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                val avatarUrl = user?.avatarUrl
+                    ?.replace("localhost", "10.0.2.2")
+                    ?.takeIf { it.isNotBlank() }
+                    ?: ""
+
+                if (avatarUrl.isNotBlank()) {
+                    SubcomposeAsyncImage(
+                        model = avatarUrl,
+                        contentDescription = "Avatar di ${user?.username}",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
+                } else {
+                    val initials = buildString {
+                        user?.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
+                        user?.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
+                    }.ifBlank { "?" }
+
+                    Text(
+                        text = initials,
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -308,14 +331,14 @@ fun PendingRequestCard(
                 onClick = onReject,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFFE53935))
             ) {
-                Icon(Icons.Default.Close, contentDescription =  stringResource(R.string.reject), modifier = Modifier.size(24.dp))
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.reject), modifier = Modifier.size(24.dp))
             }
 
             IconButton(
                 onClick = onAccept,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF43A047))
             ) {
-                Icon(Icons.Default.Check, contentDescription =  stringResource(R.string.accept), modifier = Modifier.size(24.dp))
+                Icon(Icons.Default.Check, contentDescription = stringResource(R.string.accept), modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -344,9 +367,11 @@ fun UsersList(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
+
         items(users) { user ->
             val isAlreadyFriend = friendsList.any { it.username == user.username }
             val requestAlreadySent = requestSentTo.contains(user.username)
+
             FriendCard(
                 user = user,
                 isSearchMode = isSearchMode,
@@ -389,15 +414,32 @@ fun FriendCard(
                     .background(OrangeAvatar),
                 contentAlignment = Alignment.Center
             ) {
-                val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
-                Text(
-                    text = initials,
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                val avatarUrl = user.avatarUrl
+                    ?.replace("localhost", "10.0.2.2")
+                    ?.takeIf { it.isNotBlank() }
+                    ?: ""
+
+                if (avatarUrl.isNotBlank()) {
+                    SubcomposeAsyncImage(
+                        model = avatarUrl,
+                        contentDescription = "Avatar di ${user.username}",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
+                } else {
+                    val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
+                    val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
+                    val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
+
+                    Text(
+                        text = initials,
+                        color = Color.White,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -425,15 +467,16 @@ fun FriendCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PersonAdd,
-                                contentDescription =  stringResource(R.string.add_friend),
+                                contentDescription = stringResource(R.string.add_friend),
                                 modifier = Modifier.size(28.dp)
                             )
                         }
                     }
+
                     requestAlreadySent -> {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription =  stringResource(R.string.request_sent),
+                            contentDescription = stringResource(R.string.request_sent),
                             tint = Color(0xFF4CAF50),
                             modifier = Modifier
                                 .size(28.dp)
@@ -444,14 +487,15 @@ fun FriendCard(
             } else {
                 val badgeName = user.badge?.toString() ?: "NONE"
                 val imageRes = when (badgeName.uppercase()) {
-                    "BRONZE"   -> R.drawable.badge_bronze
-                    "SILVER"   -> R.drawable.badge_silver
-                    "GOLD"     -> R.drawable.badge_gold
+                    "BRONZE" -> R.drawable.badge_bronze
+                    "SILVER" -> R.drawable.badge_silver
+                    "GOLD" -> R.drawable.badge_gold
                     "PLATINUM" -> R.drawable.badge_platinum
-                    "DIAMOND"  -> R.drawable.badge_diamond
-                    "EMERALD"  -> R.drawable.badge_emerald
-                    else       -> R.drawable.badge_bronze
+                    "DIAMOND" -> R.drawable.badge_diamond
+                    "EMERALD" -> R.drawable.badge_emerald
+                    else -> R.drawable.badge_bronze
                 }
+
                 Icon(
                     painter = painterResource(id = imageRes),
                     contentDescription = "Badge $badgeName",

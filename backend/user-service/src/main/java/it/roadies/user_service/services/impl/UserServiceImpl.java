@@ -1,27 +1,32 @@
 package it.roadies.user_service.services.impl;
 
 import it.roadies.user_service.conf.i8n.MessageLang;
+import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
+import it.roadies.user_service.data.dto.request.UserUpdateRequestDTO;
 import it.roadies.user_service.data.dto.response.MinimalInformationResponseDTO;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
+import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
+import it.roadies.user_service.data.dto.result.UserSyncResult;
 import it.roadies.user_service.data.entities.Gamification;
 import it.roadies.user_service.data.entities.User;
 import it.roadies.user_service.data.entities.enumeration.Badge;
 import it.roadies.user_service.data.entities.enumeration.OrganizerRequestStatus;
 import it.roadies.user_service.data.repositories.GamificationRepository;
 import it.roadies.user_service.data.repositories.UserRepository;
-import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
-import it.roadies.user_service.data.dto.request.UserUpdateRequestDTO;
-import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
-import it.roadies.user_service.data.dto.result.UserSyncResult;
 import it.roadies.user_service.exception.ConflictException;
 import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.mappers.UserMapper;
+import it.roadies.user_service.services.MinioService;
 import it.roadies.user_service.services.UserService;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -34,20 +39,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private static final String REALM = "roadies-app";
+
     private final UserRepository userRepository;
     private final GamificationRepository gamificationRepository;
     private final UserMapper userMapper;
     private final MessageLang messageLang;
+    private final Keycloak keycloakAdminClient;
+
+    @Value("${minio.avatarBucket}")
+    private String avatarBucket;
+
+    private final MinioService minioService;
 
     @Override
     @Transactional
     public UserSyncResult syncUser(UserSyncRequestDTO requestDto) {
         log.info("Iniziata sincronizzazione per l'utente con ID: {}", requestDto.getKeycloakId());
 
-
         Optional<User> existingUserOpt = userRepository.findById(requestDto.getKeycloakId());
 
-        // Se l'utente esiste già restituisco un dto e dico che non è un nuovo utente e aggiorno anche il suo ultimo accesso
         if (existingUserOpt.isPresent()) {
             User user = existingUserOpt.get();
             user.setLastLogin(LocalDateTime.now());
@@ -64,16 +75,13 @@ public class UserServiceImpl implements UserService {
             throw new ConflictException(messageLang.getMessage("error.username.exist"));
         }
 
-        // Nel caso in cui ci troviamo davanti ad un nuovo utente lo mappiamo e restitiamo che è un nuovo utente
         User newUser = userMapper.toEntity(requestDto);
-
         newUser.setLastLogin(LocalDateTime.now());
         newUser.setAvatarUrl("default_avatar.png");
 
         User savedUser = userRepository.save(newUser);
         log.info("Nuovo utente creato con successo");
 
-        //Per ogni nuovo utente mappiamo anche il suo profilo gamification, così che ogni profilo si ritrovi anche un profilo gamification con 0 punti e badge BRONZE
         Gamification userGame = new Gamification();
         userGame.setUser(savedUser);
         userGame.setPoints(0L);
@@ -90,18 +98,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserProfileResponseDTO getProfile(String keycloakId) {
         log.info("Recupero profilo per l'utente ID: {}", keycloakId);
+
         User user = userRepository.findById(keycloakId)
                 .orElseThrow(() -> {
                     log.error("Impossibile recuperare il profilo: utente non trovato");
                     return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
                 });
+
         return userMapper.toDto(user);
     }
 
     @Override
     public List<UserProfileResponseDTO> getProfileByUsername(String username) {
         log.info("Ricerca profilo tramite username: {}", username);
-        log.info("Ricerca utenti in corso per la keyword: {}", username);
 
         if (username == null || username.trim().isEmpty()) {
             return Collections.emptyList();
@@ -117,23 +126,99 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserProfileResponseDTO updateProfile(String keycloakId, UserUpdateRequestDTO updateDto) {
-        log.info("Iniziato aggiornamento profilo per l'utente");
+        log.info("Iniziato aggiornamento profilo per l'utente {}", keycloakId);
+
         User user = userRepository.findById(keycloakId)
                 .orElseThrow(() -> {
                     log.error("Impossibile aggiornare il profilo: utente non trovato");
                     return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
                 });
 
-        if (updateDto.getUsername() != null && !updateDto.getUsername().equals(user.getUsername())) {
-            if (userRepository.findByUsername(updateDto.getUsername()).isPresent()) {
-                throw new ConflictException(messageLang.getMessage("error.user.username.exists"));
-            }
+        String newFirstName = updateDto.getFirstName() != null
+                ? updateDto.getFirstName().trim()
+                : user.getFirstName();
+
+        String newLastName = updateDto.getLastName() != null
+                ? updateDto.getLastName().trim()
+                : user.getLastName();
+
+        updateKeycloakBasicProfile(keycloakId, newFirstName, newLastName);
+
+        if (updateDto.getFirstName() != null) {
+            user.setFirstName(newFirstName);
         }
 
-        userMapper.updateEntityFromRequest(updateDto, user);
+        if (updateDto.getLastName() != null) {
+            user.setLastName(newLastName);
+        }
+
+        if (updateDto.getBirthDate() != null) {
+            user.setBirthDate(updateDto.getBirthDate());
+        }
+
+        if (updateDto.getAvatarUrl() != null) {
+            user.setAvatarUrl(updateDto.getAvatarUrl().trim());
+        }
+
         User updatedUser = userRepository.save(user);
 
-        log.info("Profilo aggiornato con successo per l'utente");
+        log.info("Profilo aggiornato con successo per l'utente {}", keycloakId);
+        return userMapper.toDto(updatedUser);
+    }
+
+    private void updateKeycloakBasicProfile(String keycloakId, String firstName, String lastName) {
+        try {
+            UserRepresentation representation =
+                    keycloakAdminClient.realm(REALM).users().get(keycloakId).toRepresentation();
+
+            representation.setFirstName(firstName);
+            representation.setLastName(lastName);
+
+            keycloakAdminClient.realm(REALM).users().get(keycloakId).update(representation);
+
+            log.info("Aggiornati firstName e lastName su Keycloak per utente {}", keycloakId);
+
+        } catch (jakarta.ws.rs.NotAuthorizedException ex) {
+            log.error("Keycloak admin client non autorizzato. Verifica realm, client_id, client_secret e service account roles. userId={}", keycloakId, ex);
+            throw new IllegalStateException("Keycloak admin client non autorizzato");
+
+        } catch (jakarta.ws.rs.NotFoundException ex) {
+            log.error("Utente non trovato su Keycloak. userId={}", keycloakId, ex);
+            throw new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
+
+        } catch (Exception ex) {
+            log.error("Errore generico durante aggiornamento profilo su Keycloak. userId={}", keycloakId, ex);
+            throw new IllegalStateException("Errore tecnico durante aggiornamento del profilo su Keycloak");
+        }
+    }
+
+    @Override
+    @Transactional
+    public UserProfileResponseDTO uploadAvatar(String keycloakId, MultipartFile avatarFile) {
+        log.info("Upload avatar per utente {}", keycloakId);
+
+        User user = userRepository.findById(keycloakId)
+                .orElseThrow(() -> {
+                    log.error("Utente non trovato durante upload avatar");
+                    return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
+                });
+
+        String oldAvatarUrl = user.getAvatarUrl();
+
+        String fileName = minioService.uploadFile(avatarFile, avatarBucket);
+        String publicUrl = minioService.getPublicUrl(fileName, avatarBucket);
+
+        user.setAvatarUrl(publicUrl);
+        User updatedUser = userRepository.save(user);
+
+        if (oldAvatarUrl != null
+                && !oldAvatarUrl.isBlank()
+                && !oldAvatarUrl.equals("default_avatar.png")
+                && oldAvatarUrl.contains("/")) {
+            String oldFileName = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf("/") + 1);
+            minioService.deleteFile(oldFileName, avatarBucket);
+        }
+
         return userMapper.toDto(updatedUser);
     }
 
@@ -146,6 +231,7 @@ public class UserServiceImpl implements UserService {
         if (user.getOrganizerRequestStatus() == OrganizerRequestStatus.PENDING) {
             throw new ConflictException(messageLang.getMessage("error.organizer.request.sent"));
         }
+
         if (user.getOrganizerRequestStatus() == OrganizerRequestStatus.ACCEPTED) {
             throw new ConflictException(messageLang.getMessage("error.organizer.already.approved"));
         }
@@ -155,8 +241,10 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
     public List<MinimalInformationResponseDTO> getMinimalInformation(List<String> keycloakId) {
         log.info("Recupero profilo per gli utenti della lista");
+
         List<User> users = userRepository.findAllById(keycloakId);
 
         return users.stream()

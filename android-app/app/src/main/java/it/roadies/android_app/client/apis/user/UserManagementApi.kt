@@ -10,6 +10,7 @@ import it.roadies.android_app.client.models.user.PendingOrganizerRequestResponse
 import it.roadies.android_app.client.models.user.UserProfileResponseDTO
 import it.roadies.android_app.client.models.user.UserSyncRequestDTO
 import it.roadies.android_app.client.models.user.UserUpdateRequestDTO
+import okhttp3.MultipartBody
 import retrofit2.Response
 
 interface UserManagementApi {
@@ -115,4 +116,10 @@ interface UserManagementApi {
     @PUT("api/v1/users/update")
     suspend fun updateProfile(@Body userUpdateRequestDTO: UserUpdateRequestDTO): Response<UserProfileResponseDTO>
 
+
+    @Multipart
+    @POST("api/v1/users/avatar")
+    suspend fun uploadAvatar(
+        @Part avatarFile: MultipartBody.Part
+    ): Response<UserProfileResponseDTO>
 }

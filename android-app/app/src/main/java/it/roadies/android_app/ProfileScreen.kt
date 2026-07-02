@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.viewmodel.user.ProfileViewModel
 import it.roadies.android_app.R
 import it.roadies.android_app.viewmodel.AuthViewModel
@@ -71,10 +73,20 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(),
                         .background(OrangeAvatar),
                     contentAlignment = Alignment.Center
                 ) {
-                    val imageUrl: String? = null
+                    val avatarUrl = user.avatarUrl
+                        ?.replace("localhost", "10.0.2.2")
+                        ?.takeIf { it.isNotBlank() }
+                        ?: ""
 
-                    if (imageUrl != null) {
-                        // TODO: Implementazione per l'immagine profilo
+                    if (avatarUrl.isNotBlank()) {
+                        SubcomposeAsyncImage(
+                            model = avatarUrl,
+                            contentDescription = "Avatar",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
                     } else {
                         val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
                         val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
