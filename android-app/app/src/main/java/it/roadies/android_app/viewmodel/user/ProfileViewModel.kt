@@ -16,7 +16,8 @@ data class ProfileState(
     val isLoading: Boolean = false,
     val profile: User? = null,
     val error: String? = null,
-    val warningMessage: String? = null
+    val warningMessage: String? = null,
+    val organizerRequestSent: Boolean = false
 )
 
 @HiltViewModel
@@ -79,6 +80,55 @@ class ProfileViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun requestOrganizerRole() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    error = null,
+                    warningMessage = null
+                )
+            }
+
+            val response = repository.requestOrganizerRole()
+
+            if (response.success) {
+                _state.update {
+                    it.copy(
+                        organizerRequestSent = true,
+                        warningMessage = "Richiesta inviata correttamente. È in attesa di approvazione."
+                    )
+                }
+            } else {
+                val backendMessage = response.errorMessage.orEmpty()
+
+                val readableMessage = when {
+                    backendMessage.contains("error.organizer.request.sent", ignoreCase = true) ->
+                        "Hai già inviato una richiesta. Attendi la valutazione."
+                    backendMessage.contains("error.organizer.already.approved", ignoreCase = true) ->
+                        "Sei già approvato come organizzatore."
+                    else ->
+                        backendMessage.ifBlank { "Non è stato possibile inviare la richiesta." }
+                }
+
+                _state.update {
+                    it.copy(
+                        error = readableMessage,
+                        organizerRequestSent = true
+                    )
+                }
+            }
+        }
+    }
+
+    fun clearFeedback() {
+        _state.update {
+            it.copy(
+                error = null,
+                warningMessage = null
+            )
         }
     }
 }

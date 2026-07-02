@@ -1,6 +1,5 @@
 package it.roadies.android_app
 
-import android.R.attr.onClick
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,13 +9,28 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -24,11 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import coil3.compose.SubcomposeAsyncImage
-import it.roadies.android_app.viewmodel.user.ProfileViewModel
 import it.roadies.android_app.R
 import it.roadies.android_app.viewmodel.AuthViewModel
+import it.roadies.android_app.viewmodel.user.ProfileViewModel
 
 val DarkBlueBg = Color(0xFF1B3B5A)
 val OrangeAvatar = Color(0xFFE26D38)
@@ -37,57 +49,77 @@ val TextDark = Color(0xFF1A2B4C)
 val BorderGray = Color(0xFFE0E0E0)
 
 @Composable
-fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(),
-                  authViewModel: AuthViewModel = hiltViewModel(),
-                  onNavigateTo:(String) -> Unit) {
+fun ProfileScreen(
+    viewModel: ProfileViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel(),
+    onNavigateTo: (String) -> Unit
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundGray)
-    ) {
-        if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (state.error != null) {
-            Text(
-                text = state.error!!,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.align(Alignment.Center)
+    LaunchedEffect(state.warningMessage) {
+        state.warningMessage?.let { message ->
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
             )
-        } else if (state.profile != null) {
-            val user = state.profile!!
+            viewModel.clearFeedback()
+        }
+    }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(60.dp))
+    LaunchedEffect(state.error) {
+        state.error?.let { message ->
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearFeedback()
+        }
+    }
 
-                Box(
+    Scaffold(
+        containerColor = BackgroundGray,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(16.dp)
+            ) { snackbarData ->
+                Snackbar(
+                    snackbarData = snackbarData,
+                    shape = RoundedCornerShape(14.dp),
+                    containerColor = Color(0xFF1F2937),
+                    contentColor = Color.White,
+                    actionColor = OrangeAvatar
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BackgroundGray)
+                .padding(innerPadding)
+        ) {
+            if (state.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (state.profile != null) {
+                val user = state.profile!!
+
+                Column(
                     modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(OrangeAvatar),
-                    contentAlignment = Alignment.Center
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    val avatarUrl = user.avatarUrl
-                        ?.replace("localhost", "10.0.2.2")
-                        ?.takeIf { it.isNotBlank() }
-                        ?: ""
+                    Spacer(modifier = Modifier.height(60.dp))
 
-                    if (avatarUrl.isNotBlank()) {
-                        SubcomposeAsyncImage(
-                            model = avatarUrl,
-                            contentDescription = "Avatar",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                        )
-                    } else {
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .background(OrangeAvatar),
+                        contentAlignment = Alignment.Center
+                    ) {
                         val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
                         val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
                         val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
@@ -99,76 +131,105 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(),
                             fontWeight = FontWeight.Medium
                         )
                     }
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "${user.firstName} ${user.lastName}",
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "@"+ user.username,
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 16.sp
-                )
+                    Text(
+                        text = "${user.firstName} ${user.lastName}",
+                        color = TextDark,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Row(
+                    Text(
+                        text = "@${user.username}",
+                        color = Color.Gray,
+                        fontSize = 16.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 20.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(horizontal = 24.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        StatItem(value = user.points.toString(), label = "Punti")
-
-                        Divider(
+                        Row(
                             modifier = Modifier
-                                .height(50.dp)
-                                .width(1.dp),
-                            color = BorderGray
+                                .fillMaxWidth()
+                                .padding(vertical = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            StatItem(value = user.points.toString(), label = "Punti")
+
+                            Divider(
+                                modifier = Modifier
+                                    .height(50.dp)
+                                    .width(1.dp),
+                                color = BorderGray
+                            )
+
+                            BadgeStatItem(badgeName = user.badge?.toString() ?: "NONE")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                    ) {
+                        if (!state.organizerRequestSent) {
+                            Button(
+                                onClick = { viewModel.requestOrganizerRole() },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = OrangeAvatar,
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text("Richiedi ruolo organizzatore")
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+
+                        MenuItem(
+                            text = stringResource(R.string.edit_profile),
+                            onClick = { onNavigateTo("edit_profile") }
                         )
 
-                        BadgeStatItem(badgeName = user.badge?.toString() ?: "NONE")
+                        MenuItem(
+                            text = stringResource(R.string.friends),
+                            onClick = { onNavigateTo("friend") }
+                        )
+
+                        MenuItem(
+                            text = stringResource(R.string.logout),
+                            textColor = Color(0xFFD32F2F),
+                            onClick = {
+                                authViewModel.logout()
+                                onNavigateTo("home")
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(40.dp))
                     }
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                ) {
-                    MenuItem(text = stringResource(R.string.edit_profile),
-                        onClick = {onNavigateTo("edit_profile")})
-
-                    MenuItem(text = stringResource(R.string.friends),
-                        onClick = {onNavigateTo("friend")})
-
-                    MenuItem(text = stringResource(R.string.logout),
-                        textColor = Color(0xFFD32F2F),
-                        onClick = {
-                            authViewModel.logout()
-
-                            onNavigateTo("home")
-                        })
-
-                    Spacer(modifier = Modifier.height(40.dp))
-                }
+            } else if (state.error != null) {
+                Text(
+                    text = state.error!!,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }

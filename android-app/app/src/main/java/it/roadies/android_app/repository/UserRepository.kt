@@ -69,6 +69,12 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun requestOrganizerRole(): ApiResponse<Unit> {
+        return safeApiCall {
+            userApi.requestOrganizerRole()
+        }
+    }
+
     suspend fun updateProfile(
         updateRequest: UserUpdateRequestDTO,
         localBirthDate: LocalDate?,
@@ -219,4 +225,6 @@ class UserRepository @Inject constructor(
             "placeholder@example.com"
         }
     }
+
+
 }
