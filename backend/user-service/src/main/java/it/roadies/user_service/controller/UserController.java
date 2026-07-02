@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
 import it.roadies.user_service.data.dto.request.UserUpdateRequestDTO;
+import it.roadies.user_service.data.dto.response.MinimalInformationResponseDTO;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.result.UserSyncResult;
@@ -79,5 +80,13 @@ public class UserController {
     public ResponseEntity<Void> requestOrganizerRole(@AuthenticationPrincipal Jwt jwt) {
         userService.requestOrganizerRole(jwt.getSubject());
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/minimal-info")
+    @Operation(summary = "Recupera info minime", description = "Restituisce ID, username e avatar per una lista di ID")
+    public ResponseEntity<List<MinimalInformationResponseDTO>> getMinimalInformation(
+            @RequestBody List<String> userIds) {
+
+        return ResponseEntity.ok(userService.getMinimalInformation(userIds));
     }
 }
