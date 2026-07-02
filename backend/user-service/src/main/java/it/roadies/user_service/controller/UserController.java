@@ -13,11 +13,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -72,6 +75,15 @@ public class UserController {
             @Valid @RequestBody UserUpdateRequestDTO updateDto) {
         log.info("Ricevuta richiesta di aggiornamento profilo dal subject JWT: {}", jwt.getSubject());
         return ResponseEntity.ok(userService.updateProfile(jwt.getSubject(), updateDto));
+    }
+
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserProfileResponseDTO> uploadAvatar(
+            @RequestPart("avatarFile") MultipartFile avatarFile,
+            Authentication authentication
+    ) {
+        String keycloakId = authentication.getName();
+        return ResponseEntity.ok(userService.uploadAvatar(keycloakId, avatarFile));
     }
 
     @PreAuthorize("hasRole('TRAVELER')")

@@ -42,6 +42,7 @@ import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
 import it.roadies.android_app.viewmodel.bookingFlow.BookingFlowViewModel
 import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
+import it.roadies.android_app.ui.user.EditProfileScreen
 import it.roadies.android_app.ui.user.FriendScreen
 import it.roadies.android_app.ui.user.UserProfileScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
@@ -512,7 +513,7 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 )
             }
             composable(route = "edit_profile") {
-                //EditProfileScreen(onBack = { navHostController.popBackStack() })
+                EditProfileScreen(onBack = { navHostController.popBackStack() })
             }
             composable(route = "friend") {
                 FriendScreen(

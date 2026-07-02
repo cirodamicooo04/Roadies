@@ -1,6 +1,9 @@
 package it.roadies.android_app.repository
 
+import android.content.Context
+import android.net.Uri
 import android.util.Patterns
+import dagger.hilt.android.qualifiers.ApplicationContext
 import it.roadies.android_app.client.apis.user.UserManagementApi
 import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.client.models.user.UserProfileResponseDTO
@@ -11,6 +14,10 @@ import it.roadies.android_app.model.dao.UserDao
 import it.roadies.android_app.repository.utils.ApiResponse
 import it.roadies.android_app.repository.utils.safeApiCall
 import kotlinx.coroutines.flow.Flow
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.time.LocalDate
 import javax.inject.Inject
 
 sealed class SyncResult {
@@ -21,36 +28,91 @@ sealed class SyncResult {
 
 class UserRepository @Inject constructor(
     private val userApi: UserManagementApi,
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    @ApplicationContext private val context: Context
 ) {
-    fun observeCurrentUser(): Flow<User?> = userDao.observeCurrentUser()
 
-    suspend fun getCurrentUser(): User? = userDao.getCurrentUser()
+    fun observeCurrentUser(): Flow<User?> {
+        return userDao.observeCurrentUser()
+    }
+
+    suspend fun getCurrentUser(): User? {
+        return userDao.getCurrentUser()
+    }
 
     suspend fun getProfile(): ApiResponse<UserProfileResponseDTO> {
-        val response = safeApiCall { userApi.getProfile() }
+        val response = safeApiCall {
+            userApi.getProfile()
+        }
+
         if (response.success && response.data != null) {
             mergeProfileIntoLocalUser(response.data)
         }
+
         return response
     }
 
     suspend fun syncUser(request: UserSyncRequestDTO): ApiResponse<UserProfileResponseDTO> {
-        val response = safeApiCall { userApi.syncUser(request) }
+        val response = safeApiCall {
+            userApi.syncUser(request)
+        }
+
         if (response.success && response.data != null) {
             saveUserFromSync(request, response.data)
         }
+
         return response
     }
 
-    suspend fun searchUsers(query: String): ApiResponse<List<UserProfileResponseDTO>> =
-        safeApiCall { userApi.searchUser(query) }
-
-    suspend fun updateProfile(updateRequest: UserUpdateRequestDTO): ApiResponse<UserProfileResponseDTO> {
-        val response = safeApiCall { userApi.updateProfile(updateRequest) }
-        if (response.success && response.data != null) {
-            mergeProfileIntoLocalUser(response.data)
+    suspend fun searchUsers(query: String): ApiResponse<List<UserProfileResponseDTO>> {
+        return safeApiCall {
+            userApi.searchUser(query)
         }
+    }
+
+    suspend fun updateProfile(
+        updateRequest: UserUpdateRequestDTO,
+        localBirthDate: LocalDate?,
+        localAvatarUrl: String?
+    ): ApiResponse<UserProfileResponseDTO> {
+        val response = safeApiCall {
+            userApi.updateProfile(updateRequest)
+        }
+
+        if (response.success && response.data != null) {
+            mergeProfileIntoLocalUser(
+                dto = response.data,
+                forcedBirthDate = localBirthDate,
+                forcedAvatarUrl = localAvatarUrl
+            )
+        }
+
+        return response
+    }
+
+    suspend fun uploadAvatar(uri: Uri): ApiResponse<UserProfileResponseDTO> {
+        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            ?: throw IllegalArgumentException("Impossibile leggere il file selezionato")
+
+        val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
+
+        val part = MultipartBody.Part.createFormData(
+            name = "avatarFile",
+            filename = "avatar.jpg",
+            body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+        )
+
+        val response = safeApiCall {
+            userApi.uploadAvatar(part)
+        }
+
+        if (response.success && response.data != null) {
+            mergeProfileIntoLocalUser(
+                dto = response.data,
+                forcedAvatarUrl = response.data.avatarUrl
+            )
+        }
+
         return response
     }
 
@@ -58,40 +120,24 @@ class UserRepository @Inject constructor(
         userDao.clearAll()
     }
 
-    private suspend fun mergeProfileIntoLocalUser(dto: UserProfileResponseDTO) {
-        val existing = userDao.getCurrentUser()
+    private suspend fun mergeProfileIntoLocalUser(
+        dto: UserProfileResponseDTO,
+        forcedBirthDate: LocalDate? = null,
+        forcedAvatarUrl: String? = null
+    ) {
+        val existing = userDao.getCurrentUser() ?: return
 
-        if (existing != null) {
-            val updatedUser = existing.copy(
-                firstName = dto.firstName.safeFirstName(existing.firstName),
-                lastName = dto.lastName.safeLastName(existing.lastName),
-                username = dto.username.safeUsername(existing.username),
-                avatarUrl = dto.avatarUrl ?: existing.avatarUrl,
-                points = dto.points ?: existing.points,
-                badge = dto.badge?.toString() ?: existing.badge
-            )
-            userDao.insert(updatedUser)
-            return
-        }
-
-        val username = dto.username.safeUsername("user123")
-        val firstName = dto.firstName.safeFirstName(username)
-        val lastName = dto.lastName.safeLastName("-")
-        val email = "placeholder@example.com"
-
-        val newUser = User(
-            id = username,
-            firstName = firstName,
-            lastName = lastName,
-            email = email,
-            username = username,
-            avatarUrl = dto.avatarUrl ?: "",
-            birthDate = null,
-            points = dto.points ?: 0L,
-            badge = dto.badge?.toString() ?: "BRONZE"
+        val updatedUser = existing.copy(
+            firstName = dto.firstName.safeFirstName(existing.firstName),
+            lastName = dto.lastName.safeLastName(existing.lastName),
+            username = dto.username.safeUsername(existing.username),
+            avatarUrl = forcedAvatarUrl ?: dto.avatarUrl ?: existing.avatarUrl,
+            birthDate = forcedBirthDate ?: existing.birthDate,
+            points = dto.points ?: existing.points,
+            badge = dto.badge?.toString() ?: existing.badge
         )
 
-        userDao.insert(newUser)
+        userDao.insert(updatedUser)
     }
 
     private suspend fun saveUserFromSync(
@@ -118,6 +164,7 @@ class UserRepository @Inject constructor(
                 email = safeEmail,
                 username = safeUsername,
                 avatarUrl = dto.avatarUrl ?: existing.avatarUrl,
+                birthDate = existing.birthDate,
                 points = dto.points ?: existing.points,
                 badge = dto.badge?.toString() ?: existing.badge
             )
