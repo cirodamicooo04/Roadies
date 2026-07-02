@@ -16,7 +16,6 @@ import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
 import it.roadies.android_app.client.apis.travel.MetadatiApi
 import it.roadies.android_app.client.apis.travel.PhotonApi
-import it.roadies.android_app.client.apis.travel.ViaggiApi
 import it.roadies.android_app.client.apis.user.DocumentManagementApi
 import it.roadies.android_app.client.apis.user.FriendshipManagementApi
 import it.roadies.android_app.client.apis.user.UserManagementApi
