@@ -22,4 +22,7 @@ public class TravelDepartureUpdateRequest {
 
     @Positive
     private BigDecimal price;
+
+    @Positive
+    private Integer maxSlots;
 }

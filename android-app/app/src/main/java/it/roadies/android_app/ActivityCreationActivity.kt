@@ -65,6 +65,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import it.roadies.android_app.ui.travel.components.ActivityAddressPicker
 import it.roadies.android_app.ui.travel.components.ActivityTitleDescriptionInput
+import it.roadies.android_app.ui.travel.components.ImageCarousel
 import it.roadies.android_app.ui.travel.components.BoxCentered
 import it.roadies.android_app.viewmodel.ActivityCreationDepartureState
 import it.roadies.android_app.viewmodel.ActivityCreationStep

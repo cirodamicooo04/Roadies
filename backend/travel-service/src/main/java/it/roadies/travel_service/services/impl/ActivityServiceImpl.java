@@ -173,6 +173,10 @@ public class ActivityServiceImpl implements ActivityService {
         activityMapper.updateDepartureEntity(request, departure);
         validateActivity(activity);
 
+        if (request.getMaxSlots() != null){
+            departure.setMaxSlots(request.getMaxSlots());
+        }
+
         activityDepartureRepository.save(departure);
         return activityMapper.toDeparturesResponse(departure);
     }

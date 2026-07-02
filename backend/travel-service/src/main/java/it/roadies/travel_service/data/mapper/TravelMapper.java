@@ -51,7 +51,6 @@ public interface TravelMapper {
     TravelDeparture toDepartureEntity(TravelDepartureCreateRequest request);
 
     @Mapping(target = "travel", ignore = true)
-    @Mapping(target = "maxSlots", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "availableSlots", ignore = true)
     void updateDepartureEntity(TravelDepartureUpdateRequest request, @MappingTarget TravelDeparture departure);

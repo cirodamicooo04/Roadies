@@ -298,9 +298,8 @@ fun RecommendedTravelCard(travel: TravelSummaryResponse, onTravelClick: (TravelS
     ){
         Column() {
             SubcomposeAsyncImage(
-                //Non funziona localhost, quindi immagine momentanea
-                //model = travel.images?.firstOrNull()?.url,
-                model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
+                //Non funziona localhost, quindi faccio replace
+                model = (travel.images?.firstOrNull()?.url)?.replace("localhost", "10.0.2.2"),
                 modifier = Modifier.fillMaxWidth().height(140.dp),
                 contentDescription = travel.title,
                 contentScale = ContentScale.Crop,
@@ -310,11 +309,13 @@ fun RecommendedTravelCard(travel: TravelSummaryResponse, onTravelClick: (TravelS
                     }
                 },
                 error = {
-                    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-                        Icon(imageVector = Icons.Default.Warning, contentDescription = "Errore immagine", tint = MaterialTheme.colorScheme.error)
-                    }
-                }
-            )
+                    Image(
+                        painter = painterResource(id = R.drawable.travel_placeholder),
+                        contentDescription = "Immagine di default",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                })
         }
         Column(
             modifier = Modifier.padding(12.dp),
