@@ -52,12 +52,8 @@ data class UserSyncRequestDTO (
     @SerializedName("lastName")
     val lastName: kotlin.String,
 
-    @SerializedName("birthDate")
-    val birthDate: java.time.LocalDate,
-
     @SerializedName("keycloakId")
     val keycloakId: kotlin.String? = null
-
 ) {
 
 

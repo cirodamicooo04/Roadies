@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import it.roadies.android_app.model.dao.BookingDao
+import it.roadies.android_app.model.dao.UserDao
 import javax.inject.Singleton
 
 @Module
@@ -28,4 +29,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideBookingDao(database: AppDatabase): BookingDao = database.bookingDao()
+
+    @Provides
+    @Singleton
+    fun provideUserDao(database: AppDatabase): UserDao = database.userDao()
 }

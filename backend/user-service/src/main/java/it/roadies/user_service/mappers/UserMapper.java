@@ -1,5 +1,6 @@
 package it.roadies.user_service.mappers;
 
+import it.roadies.user_service.data.dto.response.MinimalInformationResponseDTO;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
@@ -10,7 +11,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper {
 
-    @Mapping(target = "keycloakId", ignore = true)
+    @Mapping(source = "keycloakId", target = "keycloakId")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "lastLogin", ignore = true)
@@ -49,4 +50,9 @@ public interface UserMapper {
     @Mapping(target = "organizerRejectionReason", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(UserUpdateRequestDTO dto, @MappingTarget User entity);
+
+    @Mapping(source = "keycloakId", target = "keycloakId")
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "avatarUrl", target = "avatarUrl")
+    MinimalInformationResponseDTO toMinimalDto(User user);
 }
