@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserResponseDTO;
 import it.roadies.user_service.services.AdminService;
+import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,8 +25,8 @@ public class AdminController {
             description = "Permette ad un admin di bloccare un utente specificato tramite il suo ID Keycloak. Un utente bloccato non potrà accedere al sistema finché non viene sbloccato."
     )
     @PutMapping("users/{id}/block")
-    public ResponseEntity<Void> blockUser(String keycloakId) {
-        adminService.blockUser(keycloakId);
+    public ResponseEntity<Void> blockUser(@PathVariable String id) {
+        adminService.blockUser(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -34,13 +35,13 @@ public class AdminController {
             description = "Permette ad un admin di sbloccare un utente specificato tramite il suo ID Keycloak. Un utente sbloccato potrà accedere nuovamente al sistema."
     )
     @PutMapping("users/{id}/unblock")
-    public ResponseEntity<Void> unblockUser(String keycloakId) {
+    public ResponseEntity<Void> unblockUser(@PathVariable String keycloakId) {
         adminService.unblockUser(keycloakId);
         return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/admin/review-organizer/{targetUserId}")
+    @PatchMapping("/review-organizer/{targetUserId}")
     @Operation(summary = "Approva o rifiuta richiesta organizzatore")
     public ResponseEntity<Void> reviewOrganizerRequest(
             @PathVariable String targetUserId,

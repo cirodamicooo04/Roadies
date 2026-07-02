@@ -2,6 +2,7 @@ package it.roadies.user_service.services;
 
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
 import it.roadies.user_service.data.dto.request.UserUpdateRequestDTO;
+import it.roadies.user_service.data.dto.response.MinimalInformationResponseDTO;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.result.UserSyncResult;
@@ -14,5 +15,5 @@ public interface UserService {
     List<UserProfileResponseDTO> getProfileByUsername(String username);
     UserProfileResponseDTO updateProfile(String keycloakId, UserUpdateRequestDTO updateDto);
     void requestOrganizerRole(String keycloakId);
-
+    List<MinimalInformationResponseDTO> getMinimalInformation(List<String> keycloakId);
 }

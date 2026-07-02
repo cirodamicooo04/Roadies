@@ -1,6 +1,7 @@
 package it.roadies.user_service.services.impl;
 
 import it.roadies.user_service.conf.i8n.MessageLang;
+import it.roadies.user_service.data.dto.response.MinimalInformationResponseDTO;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.entities.Gamification;
 import it.roadies.user_service.data.entities.User;
@@ -154,5 +155,12 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    public List<MinimalInformationResponseDTO> getMinimalInformation(List<String> keycloakId) {
+        log.info("Recupero profilo per gli utenti della lista");
+        List<User> users = userRepository.findAllById(keycloakId);
 
+        return users.stream()
+                .map(userMapper::toMinimalDto)
+                .collect(Collectors.toList());
+    }
 }

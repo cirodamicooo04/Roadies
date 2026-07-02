@@ -72,7 +72,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public void reviewOrganizerRequest(String targetKeycloakId, boolean approved, String reason) {
         User user = userRepository.findById(targetKeycloakId)
                 .orElseThrow(() -> new ResourceNotFoundException(messageLang.getMessage("error.user.notfound")));
