@@ -24,8 +24,4 @@ public class UserSyncRequestDTO {
     @NotBlank
     @Size(min = 1, max = 30)
     private String lastName;
-
-    @NotNull
-    @Past
-    private LocalDate birthDate;
 }

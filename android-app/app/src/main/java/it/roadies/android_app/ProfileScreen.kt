@@ -23,8 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import it.roadies.android_app.viewmodel.user.ProfileViewModel
 import it.roadies.android_app.R
+import it.roadies.android_app.viewmodel.AuthViewModel
 
 val DarkBlueBg = Color(0xFF1B3B5A)
 val OrangeAvatar = Color(0xFFE26D38)
@@ -34,6 +36,7 @@ val BorderGray = Color(0xFFE0E0E0)
 
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(),
+                  authViewModel: AuthViewModel = hiltViewModel(),
                   onNavigateTo:(String) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -147,7 +150,9 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(),
                     MenuItem(text = stringResource(R.string.logout),
                         textColor = Color(0xFFD32F2F),
                         onClick = {
-                            //viewModel.logout()
+                            authViewModel.logout()
+
+                            onNavigateTo("home")
                         })
 
                     Spacer(modifier = Modifier.height(40.dp))
