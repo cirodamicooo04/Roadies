@@ -38,7 +38,7 @@ class FriendViewModel @Inject constructor(
     private val _state = MutableStateFlow(FriendState())
     val state: StateFlow<FriendState> = _state.asStateFlow()
 
-    val friendIds: List<String> get() = state.value.friends.map { it.username as String }
+    val friendIds: List<String> get() = state.value.friends.mapNotNull { it.username }
     private var searchJob: Job? = null
 
     init {
@@ -52,9 +52,20 @@ class FriendViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
             val response = repository.getFriendsList()
             if (response.success && response.data != null) {
-                _state.update { it.copy(isLoading = false, friends = response.data) }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        friends = response.data,
+                        error = null
+                    )
+                }
             } else {
-                _state.update { it.copy(isLoading = false, error = response.errorMessage) }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = response.errorMessage
+                    )
+                }
             }
         }
     }
@@ -66,7 +77,13 @@ class FriendViewModel @Inject constructor(
                 val sentUsernames = response.data
                     .mapNotNull { it.friendProfile?.username }
                     .toSet()
-                _state.update { it.copy(requestSentTo = sentUsernames) }
+
+                _state.update {
+                    it.copy(
+                        requestSentTo = sentUsernames,
+                        error = null
+                    )
+                }
             }
         }
     }
@@ -75,7 +92,12 @@ class FriendViewModel @Inject constructor(
         viewModelScope.launch {
             val response = repository.getPendingRequests()
             if (response.success && response.data != null) {
-                _state.update { it.copy(pendingRequests = response.data) }
+                _state.update {
+                    it.copy(
+                        pendingRequests = response.data,
+                        error = null
+                    )
+                }
             }
         }
     }
@@ -84,27 +106,49 @@ class FriendViewModel @Inject constructor(
         viewModelScope.launch {
             val status = if (accept) StatusRespond.ACCEPTED else StatusRespond.REJECTED
             val response = repository.respondToRequest(friendshipId, status)
+
             if (response.success) {
-                _state.update { it.copy(
-                    pendingRequests = it.pendingRequests.filter { r -> r.id != friendshipId }
-                )}
-                if (accept) loadFriends()
+                _state.update {
+                    it.copy(
+                        pendingRequests = it.pendingRequests.filter { request -> request.id != friendshipId },
+                        error = null
+                    )
+                }
+
+                if (accept) {
+                    loadFriends()
+                }
             } else {
-                _state.update { it.copy(error = "Errore nella risposta alla richiesta") }
+                _state.update {
+                    it.copy(error = "Errore nella risposta alla richiesta")
+                }
             }
         }
     }
 
     fun searchUser() {
-        val query = state.value.searchQuery
+        val query = state.value.searchQuery.trim()
         if (query.isBlank()) return
+
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true, error = null) }
             val response = userRepository.searchUsers(query)
+
             if (response.success && response.data != null) {
-                _state.update { it.copy(isSearching = false, searchResults = response.data) }
+                _state.update {
+                    it.copy(
+                        isSearching = false,
+                        searchResults = response.data,
+                        error = null
+                    )
+                }
             } else {
-                _state.update { it.copy(isSearching = false, error = response.errorMessage) }
+                _state.update {
+                    it.copy(
+                        isSearching = false,
+                        error = response.errorMessage
+                    )
+                }
             }
         }
     }
@@ -112,13 +156,19 @@ class FriendViewModel @Inject constructor(
     fun onSearchQueryChange(newQuery: String) {
         _state.update { it.copy(searchQuery = newQuery) }
         searchJob?.cancel()
+
         if (newQuery.length >= 3) {
             searchJob = viewModelScope.launch {
                 delay(500)
                 searchUser()
             }
         } else {
-            _state.update { it.copy(searchResults = emptyList(), isSearching = false) }
+            _state.update {
+                it.copy(
+                    searchResults = emptyList(),
+                    isSearching = false
+                )
+            }
         }
     }
 
@@ -126,12 +176,34 @@ class FriendViewModel @Inject constructor(
         viewModelScope.launch {
             val response = repository.sendFriendshipRequest(username)
             if (response.success) {
-                _state.update { it.copy(
-                    requestSentTo = it.requestSentTo + username,
-                    error = null
-                )}
+                _state.update {
+                    it.copy(
+                        requestSentTo = it.requestSentTo + username,
+                        error = null
+                    )
+                }
             } else {
-                _state.update { it.copy(error = "Errore nell'invio della richiesta a $username") }
+                _state.update {
+                    it.copy(error = "Errore nell'invio della richiesta a $username")
+                }
+            }
+        }
+    }
+
+    fun removeFriend(friendUsername: String) {
+        viewModelScope.launch {
+            val response = repository.removeFriend(friendUsername)
+            if (response.success) {
+                _state.update {
+                    it.copy(
+                        friends = it.friends.filterNot { friend -> friend.username == friendUsername },
+                        error = null
+                    )
+                }
+            } else {
+                _state.update {
+                    it.copy(error = response.errorMessage ?: "Errore nella rimozione dell'amico")
+                }
             }
         }
     }

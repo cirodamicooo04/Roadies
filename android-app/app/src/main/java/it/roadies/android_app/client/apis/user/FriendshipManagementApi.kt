@@ -57,8 +57,8 @@ interface FriendshipManagementApi {
      * @param friendshipId 
      * @return [Response]<[Unit]>
      */
-    @DELETE("api/v1/friends/{friendshipId}")
-    fun removeFriend(@Path("friendshipId") friendshipId: java.util.UUID): Response<Unit>
+    @DELETE("api/v1/friends/{friendUsername}")
+    suspend fun removeFriend(@Path("friendUsername") friendUsername: String): Response<Unit>
 
 
     /**

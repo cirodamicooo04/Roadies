@@ -13,6 +13,6 @@ public interface FriendshipService {
     List<UserProfileResponseDTO> getFriendsList(String userId);
     List<FriendshipResponseDTO> getDetailedFriendsList(String userId);
     List<FriendshipResponseDTO> getPendingRequests(String userId);
-    void removeFriend(UUID friendshipId, String currentUserId);
+    void removeFriend(String friendUsername, String currentUserId);
     List<FriendshipResponseDTO> getSentRequests(String userId);
 }
