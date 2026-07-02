@@ -17,4 +17,11 @@ public class GamificationListener {
         gamificationService.addPointsBySpending(gamificationEvent.getUserId(), gamificationEvent.getPrice());
     }
 
+    @RabbitListener(queues = "gamification-queue")
+    public void removePoints(GamificationEvent gamificationEvent) {
+        gamificationService.removePoints(gamificationEvent.getUserId(), gamificationEvent.getPrice());
+    }
+
+
+
 }

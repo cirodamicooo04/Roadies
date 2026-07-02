@@ -51,9 +51,6 @@ public class Booking {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @CreatedBy
-    private String createdBy;
-
     @LastModifiedBy
     private String lastUpdatedBy;
 
