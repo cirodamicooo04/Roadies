@@ -18,7 +18,6 @@ import it.roadies.android_app.viewmodel.AdminViewModel
 @Composable
 fun AdminUsersScreen(viewModel: AdminViewModel, navController: NavHostController) {
     val users by viewModel.users.collectAsState()
-    val pendingRequests by viewModel.pendingRequests.collectAsState()
 
     var selectedFilter by remember { mutableStateOf("ACTIVE") }
     var expanded by remember { mutableStateOf(false) }

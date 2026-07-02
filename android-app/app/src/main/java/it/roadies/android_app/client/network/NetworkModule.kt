@@ -7,6 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import it.roadies.android_app.client.apis.admin.AdminManagementApi
+import it.roadies.android_app.client.apis.review.ReviewApi
+import it.roadies.android_app.client.apis.review.ReviewReplyApi
 import it.roadies.android_app.client.apis.booking.GestioneDocumentiApi
 import it.roadies.android_app.client.apis.booking.GestionePagamentoApi
 import it.roadies.android_app.client.apis.booking.GestionePrenotazioniApi
@@ -169,4 +171,14 @@ object NetworkModule {
     fun provideAdminApi(retrofit: Retrofit): AdminManagementApi {
         return retrofit.create(AdminManagementApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideReviewApi(retrofit: Retrofit): ReviewApi =
+        retrofit.create(ReviewApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideReviewReplyApi(retrofit: Retrofit): ReviewReplyApi =
+        retrofit.create(ReviewReplyApi::class.java)
 }
