@@ -155,9 +155,8 @@ fun DetailImageCarousel(images: List<ImageResponse>?) {
                 .height(220.dp)
         ) {
             SubcomposeAsyncImage(
-                //Risolvere problema ip
-                //model = imageUrl,
-                model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
+                //non funziona localhost quindi faccio replace
+                model = imageUrl?.replace("localhost","10.0.2.2"),
                 contentDescription = "Foto",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
