@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Patterns
 import dagger.hilt.android.qualifiers.ApplicationContext
 import it.roadies.android_app.client.apis.user.UserManagementApi
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.client.models.user.UserProfileResponseDTO
 import it.roadies.android_app.client.models.user.UserSyncRequestDTO
 import it.roadies.android_app.client.models.user.UserUpdateRequestDTO
@@ -226,5 +227,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-
+    suspend fun getOrganizersInfo(ids: List<String> ): ApiResponse<List<MinimalInformationResponseDTO>> {
+        return safeApiCall { userApi.getMinimalInformation(ids) }
+    }
 }
