@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Surface
 import androidx.compose.material.icons.filled.Add
 import coil3.compose.AsyncImage
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.IconButton
 import androidx.compose.foundation.layout.Arrangement
@@ -101,8 +103,15 @@ fun DetailHeader(
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(text = title ?: "", fontSize = 35.sp, lineHeight = 40.sp, fontWeight = FontWeight.ExtraBold, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         }
-        Row(modifier = Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "${destination ?: ""}, ${country ?: ""}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "${destination ?: ""}, ${country ?: ""}", 
+                fontSize = 16.sp, 
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f).padding(end = 16.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             trailingContent()
         }
     }
@@ -137,7 +146,7 @@ fun DetailImageCarousel(images: List<ImageResponse>?) {
         pageSpacing = 16.dp,
         modifier = Modifier.padding(bottom = 18.dp)
     ) { page ->
-        val imageUrl = images[page].url
+        val imageUrl = images[page].url?.replace("localhost","10.0.2.2")
 
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -349,5 +358,88 @@ fun TravelTagsSection(tags: List<TagResponse>, tagScores: Map<UUID, Int>, isEdit
         val tagId = tag.id ?: return@forEach
         val currentScore = tagScores[tagId] ?: 0
         Slider(value = currentScore.toFloat(), enabled = isEditable, onValueChange = {newValue -> onValueChange(tagId, newValue.toInt())}, valueRange = 1f .. 5f, steps = 3)
+    }
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun UpdateDatePickerField(
+    label: String,
+    selectedDate: java.time.LocalDate?,
+    onDateSelected: (java.time.LocalDate) -> Unit,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+    modifier: Modifier = Modifier
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val datePickerState = androidx.compose.material3.rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate?.atStartOfDay(java.time.ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+    )
+
+    Column(modifier = modifier) {
+        Box {
+            androidx.compose.material3.OutlinedTextField(
+                value = selectedDate?.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: "",
+                onValueChange = {},
+                label = { Text(label) },
+                readOnly = true,
+                isError = isError,
+                trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = false,
+                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = if(isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+            Box(modifier = Modifier.matchParentSize().clickable { showDialog = true })
+        }
+        if (isError && errorMessage != null) {
+            Text(text = errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 16.dp, top = 4.dp))
+        }
+    }
+    
+    if (showDialog) {
+        androidx.compose.material3.DatePickerDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val date = java.time.Instant.ofEpochMilli(millis).atZone(java.time.ZoneId.of("UTC")).toLocalDate()
+                        onDateSelected(date)
+                    }
+                    showDialog = false
+                }) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) {
+            androidx.compose.material3.DatePicker(state = datePickerState)
+        }
+    }
+}
+
+@Composable
+fun NotEditableInfoBanner(text: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
+    ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(imageVector = Icons.Default.Info, contentDescription = null, tint = Color(0xFF1976D2))
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = text,
+                color = Color(0xFF1976D2),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }

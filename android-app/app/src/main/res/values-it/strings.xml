@@ -212,4 +212,13 @@
     <string name="booking_payment_confirming">Conferma del pagamento in corso…</string>
     <string name="booking_payment_preparing">Preparazione del pagamento…</string>
     <string name="booking_payment_confirmed">Prenotazione confermata!</string>
+    <string name="error_date_past">La data deve essere successiva a oggi</string>
+    <string name="error_time_range">L\'orario di fine deve essere successivo a quello di inizio</string>
+    <string name="cancel_update_confirm">Vuoi davvero annullare l\'aggiornamento?</string>
+    <string name="basic_info">Informazioni generali</string>
+    <string name="travel_updated">Viaggio aggiornato con successo</string>
+    <string name="activity_updated">Attività aggiornata con successo</string>
+    <string name="confirm_departure">Conferma partenza</string>
+    <string name="confirm_departure_body_travel">Vuoi davvero confermare questa partenza? Non potrai più modificare questo viaggio.</string>
+    <string name="confirm_departure_body_actvity">Vuoi davvero confermare questa partenza? Non potrai più modificare questa attività.</string>
 </resources>

@@ -60,7 +60,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.client.models.travel.ActivitySummaryResponse
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
 import it.roadies.android_app.ui.travel.components.BoxCentered
@@ -405,13 +409,24 @@ fun ActivityCard(activity: ActivitySummaryResponse, onCardClick : (ActivitySumma
         Row(modifier = Modifier.fillMaxSize()) {
             // Immagine a Sinistra
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
-                AsyncImage(
-                    //Non funziona localhost, quindi immagine momentanea
-                    //model = activity.images?.firstOrNull()?.url,
-                    model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
+                SubcomposeAsyncImage(
+                    model = activity.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = activity.name,
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        }
+                    },
+                    error = {
+                        Image(
+                            painter = painterResource(id = R.drawable.travel_placeholder),
+                            contentDescription = "Immagine di default",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 )
             }
 
@@ -543,13 +558,24 @@ fun TravelCard(travel: TravelSummaryResponse, onCardClick: (TravelSummaryRespons
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
-                AsyncImage(
-                    //Non funziona localhost, quindi immagine momentanea
-                    //model = travel.images?.firstOrNull()?.url,
-                    model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
+                SubcomposeAsyncImage(
+                    model = travel.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = travel.title,
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        }
+                    },
+                    error = {
+                        Image(
+                            painter = painterResource(id = R.drawable.travel_placeholder),
+                            contentDescription = "Immagine di default",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 )
             }
 

@@ -120,7 +120,9 @@ class TravelUpdateViewModel @Inject constructor(
 
     private fun loadTagsAndTravel() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isInitialLoading = true)
+            if (_uiState.value.title.isEmpty()) {
+                _uiState.value = _uiState.value.copy(isInitialLoading = true)
+            }
             
             val tagsResponse = metadataRepository.getTags()
             if (tagsResponse.success && tagsResponse.data != null) {
@@ -503,6 +505,38 @@ class TravelUpdateViewModel @Inject constructor(
 
     fun saveDeparture(departure: TravelDepartureUpdateState) {
         viewModelScope.launch {
+            val errors = mutableMapOf<String, Int>()
+            if (departure.startDate == null) {
+                errors["startDate"] = R.string.error_start_date_invalid
+            } else if (!departure.startDate.isAfter(LocalDate.now())) {
+                errors["startDate"] = R.string.error_date_past
+            }
+
+            if (departure.endDate == null || (departure.startDate != null && departure.endDate.isBefore(departure.startDate))) {
+                errors["endDate"] = R.string.error_end_date_invalid
+            }
+
+            if (departure.startDate != null && departure.endDate != null && !departure.endDate.isBefore(departure.startDate)) {
+                val travelDuration = _uiState.value.durationDays
+                if (travelDuration != null) {
+                    val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(departure.startDate, departure.endDate).toInt()
+                    if (daysBetween != travelDuration) {
+                        errors["duration"] = R.string.error_departure_duration
+                    }
+                }
+            }
+
+            if (departure.price == null || departure.price <= BigDecimal.ZERO) errors["price"] = R.string.error_price_invalid
+            if (departure.maxSlots == null || departure.maxSlots <= 0) errors["maxSlots"] = R.string.error_max_slots_invalid
+
+            if (errors.isNotEmpty()) {
+                val updatedDepartures = _uiState.value.departures.map {
+                    if (it.id == departure.id) it.copy(fieldErrors = errors) else it
+                }
+                _uiState.value = _uiState.value.copy(departures = updatedDepartures)
+                return@launch
+            }
+
             _uiState.value = _uiState.value.copy(isUpdating = true, updateErrorMessage = null)
             val tId = runCatching { UUID.fromString(travelId) }.getOrNull()
             if (tId != null) {

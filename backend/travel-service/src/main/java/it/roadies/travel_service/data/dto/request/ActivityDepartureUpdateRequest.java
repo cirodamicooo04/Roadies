@@ -19,4 +19,6 @@ public class ActivityDepartureUpdateRequest {
     private LocalDateTime endTimestamp;
     @Positive
     private BigDecimal price;
+    @Positive
+    private Integer maxSlots;
 }
