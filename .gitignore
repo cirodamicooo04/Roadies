@@ -6,4 +6,4 @@
 .target
 target/
 backend/shared-lib/target/
-backend/.mvn
+backend/.mvn/wrapper/maven-wrapper.jar

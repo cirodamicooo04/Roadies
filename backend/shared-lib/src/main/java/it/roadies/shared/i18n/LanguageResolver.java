@@ -2,6 +2,7 @@ package it.roadies.shared.i18n;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Component
+@ConditionalOnClass(name = "org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver")
 public class LanguageResolver extends AcceptHeaderLocaleResolver {
 
     @Override

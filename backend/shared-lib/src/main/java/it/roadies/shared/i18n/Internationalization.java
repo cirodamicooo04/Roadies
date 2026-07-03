@@ -8,7 +8,10 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import java.util.Arrays;
 import java.util.Locale;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+
 @Configuration
+@ConditionalOnClass(name = "org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver")
 public class Internationalization {
 
     @Bean

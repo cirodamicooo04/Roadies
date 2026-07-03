@@ -41,7 +41,9 @@
         <stripe.version>32.0.0</stripe.version>
         <okhttp.version>4.12.0</okhttp.version>
         <keycloak-admin-client.version>26.0.9</keycloak-admin-client.version>
+        <mail-version>4.1.0</mail-version>
     </properties>
+
 
     <dependencyManagement>
         <dependencies>
@@ -88,6 +90,11 @@
                 <groupId>org.keycloak</groupId>
                 <artifactId>keycloak-admin-client</artifactId>
                 <version>${keycloak-admin-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-mail</artifactId>
+                <version>${mail-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

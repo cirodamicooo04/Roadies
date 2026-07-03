@@ -7,7 +7,10 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+
 @Configuration
+@ConditionalOnClass(name = "io.swagger.v3.oas.models.OpenAPI")
 public class SwaggerConfiguration {
     @Bean
     public OpenAPI customOpenAPI() {

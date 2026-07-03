@@ -1,5 +1,6 @@
 package it.roadies.shared.security;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,13 +18,14 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@ConditionalOnClass(name = "org.springframework.security.web.SecurityFilterChain")
 public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/travels/public/**", "/api/v1/activities/public/**", "/api/v1/metadata/public/**", "/api/v1/bookings/public/**", "/api/v1/payments/public/**","/api/v1/reviews/public/**" ,"/api/v1/users/public/**","/fallback/**").permitAll()
+                        .requestMatchers("/api/v1/travels/public/**", "/api/v1/activities/public/**", "/api/v1/metadata/public/**", "/api/v1/bookings/public/**", "/api/v1/payments/public/**","/api/v1/reviews/public/**" ,"/api/v1/users/public/**","/fallback/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
