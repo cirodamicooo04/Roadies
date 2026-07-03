@@ -316,41 +316,12 @@ fun PendingRequestCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(CircleShape)
-                    .background(OrangeAvatar),
-                contentAlignment = Alignment.Center
-            ) {
-                val avatarUrl = user?.avatarUrl
-                    ?.replace("localhost", "10.0.2.2")
-                    ?.takeIf { it.isNotBlank() }
-                    ?: ""
-
-                if (avatarUrl.isNotBlank()) {
-                    SubcomposeAsyncImage(
-                        model = avatarUrl,
-                        contentDescription = "Avatar di ${user?.username}",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                    )
-                } else {
-                    val initials = buildString {
-                        user?.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
-                        user?.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
-                    }.ifBlank { "?" }
-
-                    Text(
-                        text = initials,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
+            it.roadies.android_app.ui.components.UserAvatar(
+                username = user?.username,
+                avatarUrl = user?.avatarUrl?.replace("localhost", "10.0.2.2"),
+                modifier = Modifier.size(52.dp),
+                fontSize = 18.sp
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -459,40 +430,12 @@ fun FriendCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(CircleShape)
-                    .background(OrangeAvatar),
-                contentAlignment = Alignment.Center
-            ) {
-                val avatarUrl = user.avatarUrl
-                    ?.replace("localhost", "10.0.2.2")
-                    ?.takeIf { it.isNotBlank() }
-                    ?: ""
-
-                if (avatarUrl.isNotBlank()) {
-                    SubcomposeAsyncImage(
-                        model = avatarUrl,
-                        contentDescription = "Avatar di ${user.username}",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                    )
-                } else {
-                    val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                    val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                    val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
-
-                    Text(
-                        text = initials,
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
+            it.roadies.android_app.ui.components.UserAvatar(
+                username = user.username,
+                avatarUrl = user.avatarUrl?.replace("localhost", "10.0.2.2"),
+                modifier = Modifier.size(60.dp),
+                fontSize = 22.sp
+            )
 
             Spacer(modifier = Modifier.width(16.dp))
 

@@ -135,4 +135,12 @@ interface UserManagementApi {
     suspend fun uploadAvatar(
         @Part avatarFile: MultipartBody.Part
     ): Response<UserProfileResponseDTO>
+
+    @GET("api/v1/users/{username}/is-organizer")
+    suspend fun checkIsOrganizer(@Path("username") username: String): Response<Boolean>
+
+    @GET("api/v1/users/id/{username}")
+    suspend fun getUserIdByUsername(@Path("username") username: String): Response<String>
+
+
 }

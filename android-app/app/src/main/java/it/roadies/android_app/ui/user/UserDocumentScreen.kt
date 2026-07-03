@@ -105,7 +105,6 @@ fun UserDocumentScreen(
                                     .padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Info del documento
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "Tipo: ${doc.documentType?.value ?: "Sconosciuto"}",
@@ -126,7 +125,6 @@ fun UserDocumentScreen(
                                     )
                                 }
 
-                                // Pulsante per visualizzare il file
                                 if (!doc.fileUrl.isNullOrBlank()) {
                                     IconButton(
                                         onClick = {
@@ -171,7 +169,6 @@ fun UserDocumentScreen(
         )
     }
 
-    // Mostra l'immagine in-app se ce n'è una selezionata
     viewingImageUrl?.let { url ->
         DocumentImageViewerDialog(
             imageUrl = url,
@@ -304,7 +301,6 @@ fun DocumentImageViewerDialog(
                     }
                 )
 
-                // Pulsante di chiusura (X) in alto a destra
                 IconButton(
                     onClick = onDismiss,
                     modifier = Modifier

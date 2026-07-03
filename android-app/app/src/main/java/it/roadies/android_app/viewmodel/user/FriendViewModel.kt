@@ -133,12 +133,14 @@ class FriendViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true, error = null) }
             val response = userRepository.searchUsers(query)
+            val currentUser = userRepository.getCurrentUser()
 
             if (response.success && response.data != null) {
+                val filteredResults = response.data.filter { it.username != currentUser?.username }
                 _state.update {
                     it.copy(
                         isSearching = false,
-                        searchResults = response.data,
+                        searchResults = filteredResults,
                         error = null
                     )
                 }

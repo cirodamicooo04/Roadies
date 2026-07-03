@@ -42,6 +42,8 @@ import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
 import it.roadies.android_app.viewmodel.bookingFlow.BookingFlowViewModel
 import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
+import it.roadies.android_app.ui.chat.ChatListScreen
+import it.roadies.android_app.ui.chat.ChatScreen
 import it.roadies.android_app.ui.user.EditProfileScreen
 import it.roadies.android_app.ui.user.FriendScreen
 import it.roadies.android_app.ui.user.UserProfileScreen
@@ -181,21 +183,6 @@ fun RoadiesApp(
                                 Text(stringResource(R.string.home))
                             }
                         )
-//                    NavigationBarItem(
-//                        selected = currentRoute == "travel",
-//                        onClick = {
-//                            navHostController.navigate("travel")
-//                        },
-//                        icon = {
-//                            Icon(
-//                                imageVector = Icons.Default.FlightTakeoff,
-//                                contentDescription = stringResource(R.string.travel)
-//                            )
-//                        },
-//                        label = {
-//                            Text(stringResource(R.string.travel))
-//                        }
-//                    )
                         NavigationBarItem(
                             selected = currentDestination?.hierarchy?.any { it.route == "bookings" } == true,
                             onClick = {
@@ -263,7 +250,7 @@ fun RoadiesApp(
         }
 
     ) {
-        paddingValues ->
+            paddingValues ->
         if (!authState.isLoading) {
             NavigationView(
                 navHostController = navHostController,
@@ -476,8 +463,23 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
         composable(route = "statistics") {
 
         }
-        composable(route = "chat") {
 
+        composable(route = "chat") {
+            ChatListScreen(
+                onNavigateToChat = { conversationId ->
+                    navHostController.navigate("chat/$conversationId")
+                }
+            )
+        }
+
+        // NUOVA ROTTA PER LA SINGOLA CONVERSAZIONE (Usata quando si clicca dal Profilo o dalla lista)
+        composable(
+            route = "chat/{conversationId}",
+            arguments = listOf(navArgument("conversationId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val conversationId = backStackEntry.arguments?.getString("conversationId").orEmpty()
+
+            ChatScreen(conversationId = conversationId, onBack = { navHostController.popBackStack() })
         }
 
         navigation(route = "organizer_graph", startDestination = "handle_travels") {
@@ -530,7 +532,11 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 val username = backStackEntry.arguments?.getString("username").orEmpty()
                 UserProfileScreen(
                     username = username,
-                    onBack = { navHostController.popBackStack() }
+                    onBack = { navHostController.popBackStack() },
+                    // ECCO LA RIGA AGGIUNTA CHE FA SCATTARE LA NAVIGAZIONE ALLA CHAT SPECIFICA
+                    onNavigateToChat = { conversationId ->
+                        navHostController.navigate("chat/$conversationId")
+                    }
                 )
             }
 

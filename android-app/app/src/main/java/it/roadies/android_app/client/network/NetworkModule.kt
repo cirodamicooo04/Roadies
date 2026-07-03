@@ -10,6 +10,7 @@ import it.roadies.android_app.BuildConfig
 import it.roadies.android_app.client.apis.booking.GestioneDocumentiApi
 import it.roadies.android_app.client.apis.booking.GestionePagamentoApi
 import it.roadies.android_app.client.apis.booking.GestionePrenotazioniApi
+import it.roadies.android_app.client.apis.chat.ChatApi
 import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
 import it.roadies.android_app.client.apis.travel.MetadatiApi
@@ -179,5 +180,11 @@ object NetworkModule {
         override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
         override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
         override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+    }
+
+    @Provides
+    @Singleton
+    fun provideChatApi(retrofit: Retrofit): ChatApi {
+        return retrofit.create(ChatApi::class.java)
     }
 }

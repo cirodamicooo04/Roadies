@@ -113,24 +113,12 @@ fun ProfileScreen(
                 ) {
                     Spacer(modifier = Modifier.height(60.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                            .background(OrangeAvatar),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                        val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                        val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
-
-                        Text(
-                            text = initials,
-                            color = Color.White,
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    it.roadies.android_app.ui.components.UserAvatar(
+                        username = user.username,
+                        avatarUrl = user.avatarUrl?.replace("localhost", "10.0.2.2"),
+                        modifier = Modifier.size(100.dp),
+                        fontSize = 36.sp
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 

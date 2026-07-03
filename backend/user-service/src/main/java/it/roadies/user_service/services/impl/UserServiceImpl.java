@@ -251,4 +251,19 @@ public class UserServiceImpl implements UserService {
                 .map(userMapper::toMinimalDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public boolean isUserOrganizer(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato con username: " + username));
+
+        return OrganizerRequestStatus.ACCEPTED.equals(user.getOrganizerRequestStatus());
+    }
+
+    @Override
+    public String findIdByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> user.getKeycloakId().toString()) // O quello che è il tipo del tuo ID
+                .orElse(null);
+    }
 }

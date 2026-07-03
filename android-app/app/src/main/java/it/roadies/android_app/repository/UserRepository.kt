@@ -227,7 +227,19 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun getOrganizersInfo(ids: List<String> ): ApiResponse<List<MinimalInformationResponseDTO>> {
+    suspend fun getOrganizersInfo(ids: List<String>): ApiResponse<List<MinimalInformationResponseDTO>> {
         return safeApiCall { userApi.getMinimalInformation(ids) }
+    }
+
+    suspend fun checkIsOrganizer(username: String): ApiResponse<Boolean> {
+        return safeApiCall {
+            userApi.checkIsOrganizer(username)
+        }
+    }
+
+    suspend fun getUserIdByUsername(username: String): ApiResponse<String> {
+        return safeApiCall {
+            userApi.getUserIdByUsername(username)
+        }
     }
 }

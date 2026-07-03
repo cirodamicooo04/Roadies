@@ -68,6 +68,12 @@ public class UserController {
         return ResponseEntity.ok(results);
     }
 
+    @GetMapping("/id/{username}")
+    public ResponseEntity<String> getUserIdByUsername(@PathVariable String username) {
+        String userId = userService.findIdByUsername(username);
+        return userId != null ? ResponseEntity.ok(userId) : ResponseEntity.notFound().build();
+    }
+
     @PutMapping("/update")
     @Operation(summary = "Aggiorna profilo", description = "Modifica i dati del proprio profilo")
     public ResponseEntity<UserProfileResponseDTO> updateProfile(
