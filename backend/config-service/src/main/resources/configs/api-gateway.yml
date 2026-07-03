@@ -61,8 +61,33 @@ spring:
               args:
                 name: booking-service-circuit-breaker
                 fallbackUri: forward:/fallback/booking
+
+        - id: travel-service-docs
+          uri: lb://TRAVEL-SERVICE
+          predicates:
+            - Path=/travel-service/v3/api-docs
+          filters:
+            - RewritePath=/travel-service/v3/api-docs, /v3/api-docs
+        - id: user-service-docs
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/v3/api-docs
+          filters:
+            - RewritePath=/user-service/v3/api-docs, /v3/api-docs
+        - id: review-service-docs
+          uri: lb://REVIEW-SERVICE
+          predicates:
+            - Path=/review-service/v3/api-docs
+          filters:
+            - RewritePath=/review-service/v3/api-docs, /v3/api-docs
+        - id: booking-service-docs
+          uri: lb://BOOKING-SERVICE
+          predicates:
+            - Path=/booking-service/v3/api-docs
+          filters:
+            - RewritePath=/booking-service/v3/api-docs, /v3/api-docs
       default-filters:
-        - TokenRelay #Inietta il token nella richiesta al microservizio
+        - TokenRelay
 
 resilience4j:
   circuitbreaker:
@@ -79,3 +104,17 @@ resilience4j:
       travel-service-circuit-breaker:
         timeout-duration:
           seconds: 3
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: travel-service
+        url: /travel-service/v3/api-docs
+      - name: user-service
+        url: /user-service/v3/api-docs
+      - name: review-service
+        url: /review-service/v3/api-docs
+      - name: booking-service
+        url: /booking-service/v3/api-docs

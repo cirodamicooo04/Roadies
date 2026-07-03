@@ -22,6 +22,7 @@ public class SecurityConfiguration {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/api/v1/travels/public/**", "/api/v1/activities/public/**", "/api/v1/metadata/public/**", "/api/v1/bookings/public/**", "/api/v1/payments/public/**","/api/v1/reviews/public/**" ,"/api/v1/users/public/**","/fallback/**").permitAll()
+                        .pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/webjars/**", "/v3/api-docs/**", "/*/v3/api-docs").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth
