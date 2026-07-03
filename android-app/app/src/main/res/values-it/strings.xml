@@ -116,6 +116,12 @@
     <string name="insert_address">Cerca indirizzo</string>
     <string name="day_number_label">Giorno del viaggio (es. 1, 2, 3)</string>
     <string name="address_error">Devi selezionare un indirizzo valido</string>
+    <string name="booking_delete">Elimina Prenotazione</string>
+    <string name="booking_delete_dialog_title">Eliminare prenotazione?</string>
+    <string name="booking_delete_dialog_message">Questo annullerà definitivamente la tua prenotazione. Come indicato nei nostri Termini e Condizioni, le prenotazioni già pagate non sono rimborsabili.</string>
+    <string name="booking_delete_dialog_confirm">Annulla prenotazione</string>
+    <string name="booking_delete_dialog_dismiss">Mantieni prenotazione</string>
+
 
     <!-- booking detail -->
     <string name="booking_detail_title">Dettaglio Prenotazione</string>
