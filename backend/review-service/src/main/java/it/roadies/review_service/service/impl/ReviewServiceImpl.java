@@ -1,17 +1,22 @@
 package it.roadies.review_service.service.impl;
 
+import it.roadies.shared.contracts.ReviewActivityUpdateEvent;
+import it.roadies.shared.contracts.ReviewTravelUpdateEvent;
 import it.roadies.shared.i18n.MessageLang;
 import it.roadies.review_service.data.dao.ReviewRepository;
+import it.roadies.review_service.data.dto.RatingSummary;
 import it.roadies.review_service.data.dto.ReviewRequest;
 import it.roadies.review_service.data.dto.ReviewResponse;
 import it.roadies.review_service.data.dto.ReviewUpdateRequest;
 import it.roadies.review_service.data.entity.Review;
+import it.roadies.review_service.data.entity.ReviewType;
 import it.roadies.review_service.data.mapper.ReviewMapper;
 import it.roadies.review_service.exceptions.ReviewNotFoundException;
 import it.roadies.review_service.service.ReviewService;
 import it.roadies.review_service.service.client.TravelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +33,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final MessageLang messageLang;
     private final ReviewRepository repository;
     private final TravelService travelService;
+    private final RabbitTemplate rabbitTemplate;
 
     @Transactional
     @Override
@@ -41,6 +47,19 @@ public class ReviewServiceImpl implements ReviewService {
             throw new AccessDeniedException("l'utente " + userId + " ha tentato di accedere ad una risorsa non autorizzato");
         }
         repository.save(review);
+
+
+        RatingSummary summary = repository.findRatingSummaryByTravelId(travelId);
+
+        if (request.getReviewType() == ReviewType.TRAVEL) {
+            //mando evento di update per travel
+            ReviewTravelUpdateEvent event = new ReviewTravelUpdateEvent(travelId, summary.getAverageRating(), summary.getTotalRatings());
+            rabbitTemplate.convertAndSend("review.exchange", "review.travel.added", event);
+        } else {
+            //mando evento di update per activity
+            ReviewActivityUpdateEvent event = new ReviewActivityUpdateEvent(travelId, summary.getAverageRating(), summary.getTotalRatings());
+            rabbitTemplate.convertAndSend("review.exchange", "review.activity.added", event);
+        }
     }
 
     @Override
