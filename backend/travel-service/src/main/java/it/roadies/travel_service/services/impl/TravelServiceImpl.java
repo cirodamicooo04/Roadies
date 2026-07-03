@@ -1,10 +1,10 @@
 package it.roadies.travel_service.services.impl;
 
-import it.roadies.travel_service.conf.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.travel_service.controller.client.BookingClient;
 import it.roadies.travel_service.data.dao.*;
 import it.roadies.travel_service.data.dao.specification.TravelSpecification;
-import it.roadies.travel_service.data.dto.event.ReviewTravelUpdateEvent;
+import it.roadies.shared.contracts.ReviewTravelUpdateEvent;
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.data.entity.*;

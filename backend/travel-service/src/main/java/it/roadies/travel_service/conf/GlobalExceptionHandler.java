@@ -1,7 +1,7 @@
 package it.roadies.travel_service.conf;
 
-import it.roadies.travel_service.conf.i8n.MessageLang;
-import it.roadies.travel_service.data.dto.response.ErrorResponse;
+import it.roadies.shared.i18n.MessageLang;
+import it.roadies.shared.web.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

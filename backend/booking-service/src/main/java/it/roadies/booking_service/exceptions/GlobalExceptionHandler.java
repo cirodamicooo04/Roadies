@@ -1,7 +1,7 @@
 package it.roadies.booking_service.exceptions;
 
-import it.roadies.booking_service.config.i8n.MessageLang;
-import it.roadies.booking_service.data.dto.response.ErrorResponse;
+import it.roadies.shared.i18n.MessageLang;
+import it.roadies.shared.web.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

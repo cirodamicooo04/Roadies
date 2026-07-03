@@ -1,6 +1,6 @@
 package it.roadies.review_service.clients;
 
-import it.roadies.review_service.conf.FeignConfiguration;
+import it.roadies.shared.feign.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

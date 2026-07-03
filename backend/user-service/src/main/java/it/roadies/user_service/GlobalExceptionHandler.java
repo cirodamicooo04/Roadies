@@ -1,7 +1,7 @@
 package it.roadies.user_service;
 
-import it.roadies.user_service.conf.i8n.MessageLang;
-import it.roadies.user_service.data.dto.response.ErrorResponse;
+import it.roadies.shared.i18n.MessageLang;
+import it.roadies.shared.web.ErrorResponse;
 import it.roadies.user_service.exception.ConflictException;
 import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.exception.StorageException;

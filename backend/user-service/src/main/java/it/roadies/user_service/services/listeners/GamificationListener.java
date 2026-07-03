@@ -1,7 +1,7 @@
 package it.roadies.user_service.services.listeners;
 
-import it.roadies.user_service.conf.i8n.MessageLang;
-import it.roadies.user_service.data.dto.event.GamificationEvent;
+import it.roadies.shared.i18n.MessageLang;
+import it.roadies.shared.contracts.GamificationEvent;
 import it.roadies.user_service.services.GamificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

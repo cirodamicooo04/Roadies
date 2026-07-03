@@ -1,8 +1,8 @@
 package it.roadies.booking_service.clients;
 
-import it.roadies.booking_service.config.FeignConfiguration;
-import it.roadies.booking_service.data.dto.response.TravelBatchResponse;
-import it.roadies.booking_service.data.dto.response.ActivityBatchResponse;
+import it.roadies.shared.feign.FeignConfiguration;
+import it.roadies.shared.contracts.TravelBatchResponse;
+import it.roadies.shared.contracts.ActivityBatchResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

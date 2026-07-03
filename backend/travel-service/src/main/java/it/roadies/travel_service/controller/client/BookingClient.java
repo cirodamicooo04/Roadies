@@ -1,7 +1,7 @@
 package it.roadies.travel_service.controller.client;
 
 import io.github.resilience4j.retry.annotation.Retry;
-import it.roadies.travel_service.conf.FeignConfiguration;
+import it.roadies.shared.feign.FeignConfiguration;
 import it.roadies.travel_service.controller.fallback.BookingClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -4,7 +4,7 @@ import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
-import it.roadies.user_service.conf.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.user_service.exception.StorageException;
 import io.minio.Http.Method;
 import it.roadies.user_service.services.MinioService;

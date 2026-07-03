@@ -9,10 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfiguration {
 
-    @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new JacksonJsonMessageConverter();
-    }
+    
 
     @Bean
     public TopicExchange notificationExchange() {

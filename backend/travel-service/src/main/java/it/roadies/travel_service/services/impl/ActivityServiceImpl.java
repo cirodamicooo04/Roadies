@@ -1,11 +1,11 @@
 package it.roadies.travel_service.services.impl;
 
-import it.roadies.travel_service.conf.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.travel_service.data.dao.ActivityDepartureRepository;
 import it.roadies.travel_service.data.dao.ActivityRepository;
 import it.roadies.travel_service.data.dao.ImageRepository;
 import it.roadies.travel_service.data.dao.specification.ActivitySpecification;
-import it.roadies.travel_service.data.dto.event.ReviewActivityUpdateEvent;
+import it.roadies.shared.contracts.ReviewActivityUpdateEvent;
 import it.roadies.travel_service.data.dto.request.ActivityCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureCreateRequest;
 import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest;

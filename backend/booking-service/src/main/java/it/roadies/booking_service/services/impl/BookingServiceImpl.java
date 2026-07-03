@@ -1,12 +1,14 @@
 package it.roadies.booking_service.services.impl;
 
-import it.roadies.booking_service.config.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.BookingMemberDTO;
-import it.roadies.booking_service.data.dto.event.GamificationEvent;
-import it.roadies.booking_service.data.dto.event.NotificationEvent;
+import it.roadies.shared.contracts.GamificationEvent;
+import it.roadies.shared.contracts.NotificationEvent;
 import it.roadies.booking_service.data.dto.response.*;
-import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
+import it.roadies.shared.contracts.ActivityBatchResponse;
+import it.roadies.shared.contracts.TravelBatchResponse;
+import it.roadies.shared.contracts.ReserveSeatCommand;
 import it.roadies.booking_service.data.dto.request.BookingCreateRequest;
 import it.roadies.booking_service.data.dto.request.BookingDraftRequest;
 import it.roadies.booking_service.data.dto.request.BookingMemberRequest;

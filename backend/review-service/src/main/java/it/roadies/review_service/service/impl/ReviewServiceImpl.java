@@ -1,6 +1,6 @@
 package it.roadies.review_service.service.impl;
 
-import it.roadies.review_service.conf.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.review_service.data.dao.ReviewRepository;
 import it.roadies.review_service.data.dto.ReviewRequest;
 import it.roadies.review_service.data.dto.ReviewResponse;

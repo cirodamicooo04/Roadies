@@ -1,6 +1,6 @@
 package it.roadies.travel_service.services;
 
-import it.roadies.travel_service.data.dto.event.ReviewTravelUpdateEvent;
+import it.roadies.shared.contracts.ReviewTravelUpdateEvent;
 import it.roadies.travel_service.data.dto.request.*;
 import it.roadies.travel_service.data.dto.response.*;
 import it.roadies.travel_service.data.entity.enumerations.Continent;

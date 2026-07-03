@@ -1,6 +1,6 @@
 package it.roadies.user_service.services.impl;
 
-import it.roadies.user_service.conf.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
 import it.roadies.user_service.data.dto.response.UserResponseDTO;
 import it.roadies.user_service.data.entities.User;

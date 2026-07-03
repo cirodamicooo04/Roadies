@@ -3,7 +3,7 @@ package it.roadies.booking_service.services.impl;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
-import it.roadies.booking_service.config.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.booking_service.exceptions.StorageException;
 import it.roadies.booking_service.services.MinioService;
 import lombok.RequiredArgsConstructor;

@@ -4,7 +4,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
-import it.roadies.booking_service.config.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.booking_service.data.dao.BookingRepository;
 import it.roadies.booking_service.data.dto.request.PaymentRequest;
 import it.roadies.booking_service.data.dto.response.PaymentResponse;

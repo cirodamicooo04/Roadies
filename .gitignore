@@ -3,3 +3,7 @@
 !.env.example
 .idea
 .DS_store
+.target
+target/
+backend/shared-lib/target/
+backend/.mvn

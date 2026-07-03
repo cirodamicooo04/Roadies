@@ -1,6 +1,6 @@
 package it.roadies.travel_service.services;
 
-import it.roadies.travel_service.data.dto.response.TravelBatchResponse;
+import it.roadies.shared.contracts.TravelBatchResponse;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;

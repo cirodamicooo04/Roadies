@@ -1,7 +1,7 @@
 package it.roadies.review_service.exceptions;
 
-import it.roadies.review_service.conf.i8n.MessageLang;
-import it.roadies.review_service.data.dto.ErrorResponse;
+import it.roadies.shared.i18n.MessageLang;
+import it.roadies.shared.web.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,7 @@
 package it.roadies.travel_service.services.listeners;
 
-import it.roadies.travel_service.data.dto.event.ReviewActivityUpdateEvent;
-import it.roadies.travel_service.data.dto.event.ReviewTravelUpdateEvent;
+import it.roadies.shared.contracts.ReviewActivityUpdateEvent;
+import it.roadies.shared.contracts.ReviewTravelUpdateEvent;
 import it.roadies.travel_service.services.ActivityService;
 import it.roadies.travel_service.services.TravelService;
 import lombok.RequiredArgsConstructor;

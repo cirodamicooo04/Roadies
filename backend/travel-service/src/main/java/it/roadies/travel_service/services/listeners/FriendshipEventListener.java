@@ -1,7 +1,7 @@
 package it.roadies.travel_service.services.listeners;
 
 import it.roadies.travel_service.data.dao.UserFriendshipRepository;
-import it.roadies.travel_service.data.dto.event.FriendshipEvent;
+import it.roadies.shared.contracts.FriendshipEvent;
 import it.roadies.travel_service.data.entity.UserFriendship;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -5,7 +5,7 @@ import feign.RetryableException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import it.roadies.review_service.clients.TravelServiceClient;
-import it.roadies.review_service.conf.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.review_service.data.entity.ReviewType;
 import it.roadies.review_service.exceptions.ServiceUnavailableException;
 import it.roadies.review_service.exceptions.TravelNotFoundException;

@@ -1,7 +1,7 @@
 package it.roadies.booking_service.services.impl;
 
 import io.minio.errors.MinioException;
-import it.roadies.booking_service.config.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.booking_service.data.dao.MemberDocumentRepository;
 import it.roadies.booking_service.data.dto.request.MemberDocumentUpdateRequest;
 import it.roadies.booking_service.data.entities.Booking;

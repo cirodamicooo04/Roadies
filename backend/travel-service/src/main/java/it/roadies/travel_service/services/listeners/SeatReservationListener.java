@@ -1,8 +1,8 @@
 package it.roadies.travel_service.services.listeners;
 
-import it.roadies.travel_service.data.dto.event.ReserveSeatCommand;
-import it.roadies.travel_service.data.dto.event.SeatReservationFailedEvent;
-import it.roadies.travel_service.data.dto.event.SeatReservedEvent;
+import it.roadies.shared.contracts.ReserveSeatCommand;
+import it.roadies.shared.contracts.SeatReservationFailedEvent;
+import it.roadies.shared.contracts.SeatReservedEvent;
 import it.roadies.travel_service.exceptions.NotEnoughSeatsException;
 import it.roadies.travel_service.services.impl.ActivityDepartureServiceImpl;
 import it.roadies.travel_service.services.TravelDepartureService;

@@ -1,8 +1,8 @@
 package it.roadies.travel_service.services.impl;
 
-import it.roadies.travel_service.conf.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.travel_service.data.dao.TravelDepartureRepository;
-import it.roadies.travel_service.data.dto.response.TravelBatchResponse;
+import it.roadies.shared.contracts.TravelBatchResponse;
 import it.roadies.travel_service.data.entity.TravelDeparture;
 import it.roadies.travel_service.data.mapper.TravelDepartureMapper;
 import it.roadies.travel_service.exceptions.NotEnoughSeatsException;

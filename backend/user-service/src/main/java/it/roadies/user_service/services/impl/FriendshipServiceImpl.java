@@ -19,8 +19,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import it.roadies.user_service.data.dto.event.FriendshipEvent;
-import it.roadies.user_service.conf.i8n.MessageLang;
+import it.roadies.shared.contracts.FriendshipEvent;
+import it.roadies.shared.i18n.MessageLang;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -107,8 +107,8 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         if (newStatus == Status.ACCEPTED) {
             FriendshipEvent event = new FriendshipEvent();
-            event.setUserId1(friendship.getRequesterId().getKeycloakId());
-            event.setUserId2(friendship.getReceiverId().getKeycloakId());
+            event.setUserId(friendship.getRequesterId().getKeycloakId());
+            event.setFriendId(friendship.getReceiverId().getKeycloakId());
             event.setStatus("ACCEPTED");
 
             log.info("Invio evento RabbitMQ 'travel-service.friendship.accepted.queue' per l'amicizia}");
@@ -192,8 +192,8 @@ public class FriendshipServiceImpl implements FriendshipService {
         log.info("Amicizia con {} eliminata con successo dal DB", friendUsername);
 
         FriendshipEvent event = new FriendshipEvent();
-        event.setUserId1(friendship.getRequesterId().getKeycloakId());
-        event.setUserId2(friendship.getReceiverId().getKeycloakId());
+        event.setUserId(friendship.getRequesterId().getKeycloakId());
+        event.setFriendId(friendship.getReceiverId().getKeycloakId());
         event.setStatus("DELETED");
 
         log.info("Invio evento RabbitMQ 'user.exchange' per l'amicizia rimossa");

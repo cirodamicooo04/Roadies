@@ -1,6 +1,6 @@
 package it.roadies.travel_service.services.impl;
 
-import it.roadies.travel_service.conf.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.travel_service.data.dao.*;
 import it.roadies.travel_service.data.entity.*;
 import it.roadies.travel_service.data.entity.enumerations.Visibility;

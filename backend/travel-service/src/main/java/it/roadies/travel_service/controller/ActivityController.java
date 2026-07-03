@@ -8,7 +8,7 @@ import it.roadies.travel_service.data.dto.request.ActivityDepartureUpdateRequest
 import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
-import it.roadies.travel_service.data.dto.response.ActivityBatchResponse;
+import it.roadies.shared.contracts.ActivityBatchResponse;
 import it.roadies.travel_service.services.ActivityDepartureService;
 import it.roadies.travel_service.services.ActivityService;
 import jakarta.validation.Valid;

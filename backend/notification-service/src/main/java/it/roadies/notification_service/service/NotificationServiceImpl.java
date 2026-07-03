@@ -1,6 +1,6 @@
 package it.roadies.notification_service.service;
 
-import it.roadies.notification_service.data.NotificationEvent;
+import it.roadies.shared.contracts.NotificationEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;

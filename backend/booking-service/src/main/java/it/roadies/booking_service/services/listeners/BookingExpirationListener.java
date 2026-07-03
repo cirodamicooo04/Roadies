@@ -1,7 +1,7 @@
 package it.roadies.booking_service.services.listeners;
 
 import it.roadies.booking_service.data.dao.BookingRepository;
-import it.roadies.booking_service.data.dto.event.ReserveSeatCommand;
+import it.roadies.shared.contracts.ReserveSeatCommand;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
 import it.roadies.booking_service.services.BookingService;
 import lombok.RequiredArgsConstructor;

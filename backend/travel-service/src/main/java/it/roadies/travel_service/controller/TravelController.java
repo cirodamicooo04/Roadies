@@ -1,4 +1,5 @@
 package it.roadies.travel_service.controller;
+import it.roadies.shared.contracts.TravelBatchResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

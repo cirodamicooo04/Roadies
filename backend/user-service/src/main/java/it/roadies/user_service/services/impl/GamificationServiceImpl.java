@@ -1,6 +1,6 @@
 package it.roadies.user_service.services.impl;
 
-import it.roadies.user_service.conf.i8n.MessageLang;
+import it.roadies.shared.i18n.MessageLang;
 import it.roadies.user_service.data.entities.Gamification;
 import it.roadies.user_service.data.entities.enumeration.Badge;
 import it.roadies.user_service.data.repositories.GamificationRepository;
