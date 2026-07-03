@@ -16,5 +16,6 @@ public class ConversationResponseDTO {
     private String travelerId;
     private String organizerId;
     private UUID travelId;
+    private int unreadCount;
     private LocalDateTime createdAt;
 }
