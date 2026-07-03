@@ -45,6 +45,7 @@ import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
 import it.roadies.android_app.ui.user.EditProfileScreen
 import it.roadies.android_app.ui.user.FriendScreen
 import it.roadies.android_app.ui.user.UserProfileScreen
+import it.roadies.android_app.ui.user.UserDocumentScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -529,6 +530,13 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 val username = backStackEntry.arguments?.getString("username").orEmpty()
                 UserProfileScreen(
                     username = username,
+                    onBack = { navHostController.popBackStack() }
+                )
+            }
+
+            composable(
+                route="user_documents" ){
+                UserDocumentScreen(
                     onBack = { navHostController.popBackStack() }
                 )
             }

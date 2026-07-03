@@ -208,6 +208,11 @@ fun ProfileScreen(
                         )
 
                         MenuItem(
+                            text = "I miei documenti",
+                            onClick = { onNavigateTo("user_documents") }
+                        )
+
+                        MenuItem(
                             text = stringResource(R.string.friends),
                             onClick = { onNavigateTo("friend") }
                         )

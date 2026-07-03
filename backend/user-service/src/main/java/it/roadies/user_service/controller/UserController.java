@@ -101,4 +101,10 @@ public class UserController {
 
         return ResponseEntity.ok(userService.getMinimalInformation(userIds));
     }
+
+    @GetMapping("/{username}/is-organizer")
+    public ResponseEntity<Boolean> checkIsOrganizer(@PathVariable String username) {
+        boolean isOrganizer = userService.isUserOrganizer(username);
+        return ResponseEntity.ok(isOrganizer);
+    }
 }
