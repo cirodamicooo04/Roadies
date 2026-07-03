@@ -114,6 +114,11 @@
     <string name="booking_people_count">%1$d people</string>
     <string name="booking_total_price">€%1$.2f</string>
     <string name="booking_not_logged_in">Log in to see your bookings</string>
+    <string name="booking_delete">Delete booking</string>
+    <string name="booking_delete_dialog_title">Cancel booking?</string>
+    <string name="booking_delete_dialog_message">This will permanently cancel your booking. As stated in our Terms and Conditions, bookings that have already been paid are not eligible for a refund.</string>
+    <string name="booking_delete_dialog_confirm">Cancel booking</string>
+    <string name="booking_delete_dialog_dismiss">Keep booking</string>
 
     <!-- booking detail -->
     <string name="booking_detail_title">Booking Detail</string>
