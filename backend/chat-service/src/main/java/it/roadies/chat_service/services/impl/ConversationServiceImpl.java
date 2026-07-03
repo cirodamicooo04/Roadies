@@ -38,7 +38,14 @@ public class ConversationServiceImpl implements ConversationService {
     public List<ConversationResponseDTO> getUserConversations(String userId) {
         return conversationRepository.findByTravelerIdOrOrganizerId(userId, userId)
                 .stream()
-                .map(conversationMapper::toDto)
+                .map(conversation -> {
+                    ConversationResponseDTO dto = conversationMapper.toDto(conversation);
+                    long unreadCount = conversation.getMessages().stream()
+                            .filter(m -> !m.isRead() && !m.getSenderId().equals(userId))
+                            .count();
+                    dto.setUnreadCount((int) unreadCount);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 }

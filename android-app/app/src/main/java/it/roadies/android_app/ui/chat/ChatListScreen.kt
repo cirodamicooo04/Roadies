@@ -1,5 +1,6 @@
 package it.roadies.android_app.ui.chat
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -59,23 +60,47 @@ fun ConversationItem(
         modifier = Modifier.fillMaxWidth().padding(8.dp).clickable { onClick() },
         shape = RoundedCornerShape(12.dp)
     ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-
-            UserAvatar(
-                username = userInfo?.username,
-                avatarUrl = userInfo?.avatarUrl,
-                modifier = Modifier.size(48.dp),
-                fontSize = 18.sp
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column {
-                Text(
-                    text = userInfo?.username ?: "Utente ${otherUserId?.take(6)}",
-                    fontWeight = FontWeight.Bold
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(), 
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                UserAvatar(
+                    username = userInfo?.username,
+                    avatarUrl = userInfo?.avatarUrl,
+                    modifier = Modifier.size(48.dp),
+                    fontSize = 18.sp
                 )
-                Text(text = "Chat aperta", fontSize = 12.sp, color = Color.Gray)
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column {
+                    Text(
+                        text = userInfo?.username ?: "Utente ${otherUserId?.take(6)}",
+                        fontWeight = if (conversation.unreadCount > 0) FontWeight.ExtraBold else FontWeight.Bold
+                    )
+                    Text(text = "Chat aperta", fontSize = 12.sp, color = Color.Gray)
+                }
+            }
+            
+            if (conversation.unreadCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primary, 
+                            RoundedCornerShape(percent = 50)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = conversation.unreadCount.toString(),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

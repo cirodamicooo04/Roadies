@@ -13,5 +13,8 @@ data class ConversationResponseDTO(
     val organizerId: String,
 
     @SerializedName("createdAt")
-    val createdAt: String? = null
+    val createdAt: String? = null,
+
+    @SerializedName("unreadCount")
+    val unreadCount: Int = 0
 )

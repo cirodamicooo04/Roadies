@@ -41,12 +41,10 @@ class ChatListViewModel @Inject constructor(
             if (response.success && response.data != null) {
                 val conversations = response.data
 
-                // Estrai gli ID degli interlocutori
                 val otherUserIds = conversations.map {
                     if (it.travelerId == myId) it.organizerId else it.travelerId
                 }.distinct().filterNotNull()
 
-                // Recupero batch dal backend
                 val infoResponse = userRepository.getOrganizersInfo(otherUserIds)
 
                 val userInfosMap = if (infoResponse.success && infoResponse.data != null) {

@@ -36,7 +36,7 @@ fun UserAvatar(
             Text(
                 text = initial,
                 color = Color.White,
-                fontSize = fontSize, // Usa la dimensione passata
+                fontSize = fontSize,
                 fontWeight = FontWeight.Bold
             )
         }
