@@ -18,7 +18,7 @@ interface ReviewReplyApi {
 
     // Get reply by review id
     @GET("/api/v1/reviews/replies/{reviewId}")
-    suspend fun getReply(@Path("reviewId") reviewId: UUID): ReplyResponse
+    suspend fun getReply(@Path("reviewId") reviewId: UUID): Response<ReplyResponse>
 
     // Update a reply
     @PUT("/api/v1/reviews/replies/replyId/{replyId}")

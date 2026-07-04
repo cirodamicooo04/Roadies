@@ -17,12 +17,12 @@ interface ReviewApi {
     ): Response<Void>
 
     // Get all reviews for a specific travel
-    @GET("/api/v1/reviews/{travelId}")
-    suspend fun getReviewsByTravel(@Path("travelId") travelId: UUID): List<ReviewResponse>
+    @GET("/api/v1/reviews/public/{travelId}")
+    suspend fun getReviewsByTravel(@Path("travelId") travelId: UUID): Response<List<ReviewResponse>>
 
     // Get average rating
     @GET("/api/v1/reviews/{travelId}/average")
-    suspend fun getAverageRating(@Path("travelId") travelId: UUID): Double
+    suspend fun getAverageRating(@Path("travelId") travelId: UUID): Response<Double>
 
     // Update an existing review
     @PUT("/api/v1/reviews/{reviewId}")
