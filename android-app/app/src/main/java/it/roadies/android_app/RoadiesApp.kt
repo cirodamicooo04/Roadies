@@ -473,7 +473,6 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             )
         }
 
-        // NUOVA ROTTA PER LA SINGOLA CONVERSAZIONE (Usata quando si clicca dal Profilo o dalla lista)
         composable(
             route = "chat/{conversationId}",
             arguments = listOf(navArgument("conversationId") { type = NavType.StringType })

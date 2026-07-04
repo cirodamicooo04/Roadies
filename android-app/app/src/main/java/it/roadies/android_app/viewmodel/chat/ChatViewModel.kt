@@ -46,7 +46,6 @@ class ChatViewModel @Inject constructor(
             val myId = localUser?.id ?: ""
             _state.update { it.copy(currentUserId = myId) }
 
-            // 1. Carica lo storico
             loadMessages(conversationId)
 
             val token = authRepository.getAuthState().accessToken

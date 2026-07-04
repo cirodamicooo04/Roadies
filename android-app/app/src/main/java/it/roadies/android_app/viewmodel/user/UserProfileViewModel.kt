@@ -70,12 +70,9 @@ class UserProfileViewModel @Inject constructor(
     fun contactOrganizer() {
         val username = _state.value.user?.username ?: return
 
-        // Tutto dentro il launch, così possiamo usare le funzioni suspend
         viewModelScope.launch {
-            // 1. Recupero utente locale (nella coroutine, niente più errore Kotlin!)
             val localUser = userRepository.getCurrentUser() ?: return@launch
 
-            // 2. Recupero ID organizzatore tramite il nuovo endpoint
             val response = userRepository.getUserIdByUsername(username)
 
             if (response.success && response.data != null) {
