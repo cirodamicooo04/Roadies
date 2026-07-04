@@ -3,6 +3,7 @@ package it.roadies.review_service.service.impl;
 import it.roadies.review_service.conf.i8n.MessageLang;
 import it.roadies.review_service.data.dto.ReplyRequest;
 import it.roadies.review_service.data.dto.ReplyResponse;
+import it.roadies.review_service.data.dto.ReplyUpdateRequest;
 import it.roadies.review_service.data.entity.Review;
 import it.roadies.review_service.data.entity.ReviewReply;
 import it.roadies.review_service.data.dao.ReviewRepository;
@@ -67,7 +68,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     // Edit the content of an existing reply by its ID
     @Transactional
     @Override
-    public ReviewReply updateReply(UUID replyId, ReplyRequest request, String userId) {
+    public ReviewReply updateReply(UUID replyId, ReplyUpdateRequest request, String userId) {
         log.info("provo ad aggiornare una risposta di una recensione - replyId: {} userId: {}", replyId, userId);
         ReviewReply existingReply = replyRepository.findById(replyId)
                 .orElseThrow(() -> new ReplyNotFoundException(messageLang.getMessage("review.reply.not.found",replyId)));

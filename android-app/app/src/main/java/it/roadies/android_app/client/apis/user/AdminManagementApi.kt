@@ -25,9 +25,9 @@ interface AdminManagementApi {
 
     // (GET /api/v1/admin/organizer-requests/pending)
     @GET("api/v1/admin/organizer-requests/pending")
-    suspend fun getPendingOrganizerRequests(): List<PendingOrganizerRequestResponseDTO>
+    suspend fun getPendingOrganizerRequests(): Response<List<PendingOrganizerRequestResponseDTO>>
 
     // (GET /api/v1/admin/users)
     @GET("api/v1/admin/users")
-    suspend fun getUsersByFilter(@Query("filter") filter: String): List<UserResponseDTO>
+    suspend fun getUsersByFilter(@Query("filter") filter: String): Response<List<UserResponseDTO>>
 }

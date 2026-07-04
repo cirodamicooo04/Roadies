@@ -12,7 +12,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import it.roadies.android_app.client.models.user.UserResponseDTO
 import it.roadies.android_app.ui.admin.UserDetailsUi
 
 @Composable

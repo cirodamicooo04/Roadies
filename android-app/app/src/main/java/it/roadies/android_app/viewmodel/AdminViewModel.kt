@@ -12,81 +12,100 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AdminViewModel @Inject constructor(private val admRepository: AdminRepository) : ViewModel() {
+class AdminViewModel @Inject constructor(
+    private val admRepository: AdminRepository
+) : ViewModel() {
 
-    // User state
+    // States for data
     private val _users = MutableStateFlow<List<UserResponseDTO>>(emptyList())
     val users: StateFlow<List<UserResponseDTO>> = _users
 
     private val _pendingRequests = MutableStateFlow<List<PendingOrganizerRequestResponseDTO>>(emptyList())
     val pendingRequests: StateFlow<List<PendingOrganizerRequestResponseDTO>> = _pendingRequests
 
-    // Get users by filter
+    // UI States for handling errors and loading
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    // Fetch users by filter
     fun fetchUsers(filter: String) {
         viewModelScope.launch {
-            try {
-                _users.value = admRepository.getUsersByFilter(filter)
-            } catch (e: Exception) {
-                // Error processing logic
+            _isLoading.value = true
+            val response = admRepository.getUsersByFilter(filter)
+            if (response.success && response.data != null) {
+                _users.value = response.data
+                _errorMessage.value = null
+            } else {
+                _users.value = emptyList()
+                _errorMessage.value = response.errorMessage ?: "Failed to load users"
             }
+            _isLoading.value = false
         }
-        // for testing only
-//        _users.value = listOf(
-//            UserResponseDTO(keycloakId = "1", username = "beast",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv", avatarUrl = "...", points = 1, badge = "..", enabled = true ),
-//            UserResponseDTO(keycloakId = "2", username = "monster",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv", avatarUrl = "...", points = 1, badge = "..", enabled = true ),
-//            UserResponseDTO(keycloakId = "3", username = "user",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv", avatarUrl = "...", points = 1, badge = "..", enabled = true ),
-//            UserResponseDTO(keycloakId = "4", username = "beast",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv", avatarUrl = "...", points = 1, badge = "..", enabled = true ),
-//            UserResponseDTO(keycloakId = "5", username = "beast",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv", avatarUrl = "...", points = 1, badge = "..", enabled = true ),
-//            UserResponseDTO(keycloakId = "6", username = "beast",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv", avatarUrl = "...", points = 1, badge = "..", enabled = false ),
-//            UserResponseDTO(keycloakId = "7", username = "beast",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv", avatarUrl = "...", points = 1, badge = "..", enabled = true ),
-//            UserResponseDTO(keycloakId = "8", username = "beast",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv", avatarUrl = "...", points = 1, badge = "..", enabled = false )
-//        )
     }
 
-    // block user
+    // Block user
     fun blockUser(keycloakId: String) {
         viewModelScope.launch {
-            try {
-                admRepository.blockUser(keycloakId)
-                // Aggiorna la lista
-                fetchUsers("ACTIVE")
-            } catch (e: Exception) { /* handle error */ }
+            _isLoading.value = true
+            val response = admRepository.blockUser(keycloakId)
+            if (response.success) {
+                fetchUsers("ACTIVE") // Refresh list
+            } else {
+                _errorMessage.value = response.errorMessage ?: "Failed to block user"
+            }
+            _isLoading.value = false
         }
     }
 
-    // unblock user
+    // Unblock user
     fun unblockUser(keycloakId: String) {
         viewModelScope.launch {
-            try {
-                admRepository.unblockUser(keycloakId)
-                fetchUsers("BANNED")
-            } catch (e: Exception) { /* handle error */ }
+            _isLoading.value = true
+            val response = admRepository.unblockUser(keycloakId)
+            if (response.success) {
+                fetchUsers("BANNED") // Refresh list
+            } else {
+                _errorMessage.value = response.errorMessage ?: "Failed to unblock user"
+            }
+            _isLoading.value = false
         }
     }
 
-    // accept/reject organizer request
+    // Accept/Reject organizer request
     fun reviewOrganizerRequest(keycloakId: String, approved: Boolean, reason: String?) {
         viewModelScope.launch {
-            try {
-                admRepository.reviewOrganizerRequest(keycloakId, approved, reason)
-                loadPendingRequests() // update list
-            } catch (e: Exception) { /* handle error */ }
+            _isLoading.value = true
+            val response = admRepository.reviewOrganizerRequest(keycloakId, approved, reason)
+            if (response.success) {
+                loadPendingRequests() // Refresh list
+            } else {
+                _errorMessage.value = response.errorMessage ?: "Failed to process request"
+            }
+            _isLoading.value = false
         }
     }
 
-    // get requests
+    // Get pending requests
     fun loadPendingRequests() {
         viewModelScope.launch {
-            try {
-                _pendingRequests.value = admRepository.getPendingOrganizerRequests()
-            } catch (e: Exception) { /* handle error */ }
+            _isLoading.value = true
+            val response = admRepository.getPendingOrganizerRequests()
+            if (response.success && response.data != null) {
+                _pendingRequests.value = response.data
+                _errorMessage.value = null
+            } else {
+                _pendingRequests.value = emptyList()
+                _errorMessage.value = response.errorMessage ?: "Failed to load requests"
+            }
+            _isLoading.value = false
         }
+    }
 
-//        _pendingRequests.value = listOf(
-//            PendingOrganizerRequestResponseDTO(keycloakId = "1", username = "beast",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv"),
-//            PendingOrganizerRequestResponseDTO(keycloakId = "1", username = "monster",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv"),
-//            PendingOrganizerRequestResponseDTO(keycloakId = "1", username = "legendary",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv"),
-//            PendingOrganizerRequestResponseDTO(keycloakId = "1", username = "Huge",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv")
-//        )
+    // Clear error message after displaying it
+    fun clearError() {
+        _errorMessage.value = null
     }
 }

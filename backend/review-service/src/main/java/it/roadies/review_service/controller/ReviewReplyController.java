@@ -3,6 +3,7 @@ package it.roadies.review_service.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import it.roadies.review_service.data.dto.ReplyRequest;
 import it.roadies.review_service.data.dto.ReplyResponse;
+import it.roadies.review_service.data.dto.ReplyUpdateRequest;
 import it.roadies.review_service.data.entity.ReviewReply;
 import it.roadies.review_service.service.impl.ReviewReplyServiceImpl;
 import jakarta.validation.Valid;
@@ -55,13 +56,13 @@ public class ReviewReplyController {
             summary = "Modifica una risposta a una recensione",
             description = "Permette a un utente autenticato di modificare il contenuto di una risposta (commento) esistente, identificata dal suo ID."
     )
-    public ResponseEntity<ReviewReply> updateReply(
+    public ResponseEntity<ReplyUpdateRequest> updateReply(
             @PathVariable UUID replyId,
-            @Valid @RequestBody ReplyRequest request,
+            @Valid @RequestBody ReplyUpdateRequest request,
             @AuthenticationPrincipal Jwt jwt) {
 
-        ReviewReply updatedReply = replyService.updateReply(replyId, request, jwt.getSubject());
-        return ResponseEntity.ok(updatedReply);
+        replyService.updateReply(replyId, request, jwt.getSubject());
+        return ResponseEntity.ok().build();
     }
 
     // delete the reply based on the reply's id

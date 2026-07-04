@@ -21,6 +21,7 @@ fun AdminUsersScreen(viewModel: AdminViewModel, navController: NavHostController
 
     var selectedFilter by remember { mutableStateOf("ACTIVE") }
     var expanded by remember { mutableStateOf(false) }
+    val isLoading by viewModel.isLoading.collectAsState()
 
     var selectedUser by remember { mutableStateOf<UserResponseDTO?>(null) }
     val filters = listOf("ACTIVE", "BANNED", "ORGANIZER")
@@ -29,51 +30,60 @@ fun AdminUsersScreen(viewModel: AdminViewModel, navController: NavHostController
         viewModel.fetchUsers(selectedFilter)
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box {
-                Button(onClick = { expanded = true }) {
-                    Text(text = "Filter: $selectedFilter")
+    if (isLoading){
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+            CircularProgressIndicator()
+        }
+    }
+
+    else{
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box {
+                    Button(onClick = { expanded = true }) {
+                        Text(text = "Filter: $selectedFilter")
+                    }
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        filters.forEach { filter ->
+                            DropdownMenuItem(
+                                text = { Text(filter) },
+                                onClick = {
+                                    selectedFilter = filter
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
                 }
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    filters.forEach { filter ->
-                        DropdownMenuItem(
-                            text = { Text(filter) },
-                            onClick = {
-                                selectedFilter = filter
-                                expanded = false
-                            }
+                Button(
+                    onClick = {
+                        navController.navigate("pending_requests")
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Text(text = "Organizer Requests")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(users) { user ->
+                    Box(modifier = Modifier.clickable { selectedUser = user }) {
+                        UserItem(
+                            user = user,
+                            onBlockClick = { viewModel.blockUser(it) },
+                            onUnblockClick = { viewModel.unblockUser(it) }
                         )
                     }
                 }
             }
-            Button(
-                onClick = {
-                    navController.navigate("pending_requests")
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-            ) {
-                Text(text = "Organizer Requests")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(users) { user ->
-                Box(modifier = Modifier.clickable { selectedUser = user }) {
-                    UserItem(
-                        user = user,
-                        onBlockClick = { viewModel.blockUser(it) },
-                        onUnblockClick = { viewModel.unblockUser(it) }
-                    )
-                }
-            }
         }
     }
+
 
     selectedUser?.let { user ->
         UserDetailDialog(
