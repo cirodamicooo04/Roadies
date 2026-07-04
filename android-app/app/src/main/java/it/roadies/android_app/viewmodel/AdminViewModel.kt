@@ -81,6 +81,7 @@ class AdminViewModel @Inject constructor(private val admRepository: AdminReposit
                 _pendingRequests.value = admRepository.getPendingOrganizerRequests()
             } catch (e: Exception) { /* handle error */ }
         }
+
 //        _pendingRequests.value = listOf(
 //            PendingOrganizerRequestResponseDTO(keycloakId = "1", username = "beast",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv"),
 //            PendingOrganizerRequestResponseDTO(keycloakId = "1", username = "monster",firstName = "Ahmad", lastName = "Alradi", email = "sn;lkmfv"),

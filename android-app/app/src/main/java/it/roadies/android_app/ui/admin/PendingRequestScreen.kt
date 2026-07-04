@@ -31,7 +31,7 @@ fun PendingRequestsScreen(
         mutableStateOf<PendingOrganizerRequestResponseDTO?>(null)
     }
 
-    LaunchedEffect(requests) {
+    LaunchedEffect(Unit) {
         viewModel.loadPendingRequests()
     }
 
@@ -47,7 +47,7 @@ fun PendingRequestsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
+        }else{
             LazyColumn {
                 items(requests) { request ->
                     RequestItem(
@@ -90,5 +90,6 @@ fun PendingRequestsScreen(
                 )
             }
         }
+
     }
 }
