@@ -108,6 +108,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getMinimalInformation(userIds));
     }
 
+    @GetMapping("/public/{username}/minimal-info")
+    @Operation(summary = "Recupera info minime utente", description = "Restituisce ID, username e avatar per un singolo utente tramite username")
+    public ResponseEntity<MinimalInformationResponseDTO> getUserMinimalInformation(@PathVariable String username){
+        return ResponseEntity.ok(userService.getUserMinimalInformation(username));
+    }
+
     @GetMapping("/{username}/is-organizer")
     public ResponseEntity<Boolean> checkIsOrganizer(@PathVariable String username) {
         boolean isOrganizer = userService.isUserOrganizer(username);

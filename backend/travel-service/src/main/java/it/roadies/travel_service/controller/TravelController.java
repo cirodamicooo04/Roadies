@@ -91,6 +91,13 @@ public class TravelController {
         return ResponseEntity.ok(activities);
     }
 
+    @Operation(summary = "Viaggi e attività organizzatore", description = "Recupera pubblicamente i viaggi e le attività creati da uno specifico organizzatore.")
+    @GetMapping("/public/organizer/{id}")
+    public ResponseEntity<OrganizerTravelsActivityResponse> getOrganizerTravelsActivity(@PathVariable String id){
+        OrganizerTravelsActivityResponse response = travelService.getOrganizerTravelsActivity(id);
+        return ResponseEntity.ok(response);
+    }
+
     //TRAVEL DEPARTURES AREA
 
     @Operation(summary = "Aggiungi partenza viaggio", description = "Aggiunge una nuova partenza a un viaggio dell'organizzatore autenticato.")

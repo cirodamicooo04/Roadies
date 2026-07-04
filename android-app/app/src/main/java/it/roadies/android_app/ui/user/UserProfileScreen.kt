@@ -1,5 +1,6 @@
 package it.roadies.android_app.ui.user
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -38,7 +39,7 @@ fun UserProfileScreen(
     viewModel: UserProfileViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
     onNavigateToFavoriteLists: () -> Unit = {},
-    onNavigateToOrganizedTrips: () -> Unit = {},
+    onNavigateToOrganizedTrips: (String) -> Unit = {},
     onNavigateToChat: (String) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -169,8 +170,13 @@ fun UserProfileScreen(
                         }
 
                         if (state.isOrganizer) {
+                            Log.d("È UN ORGANIZZATORE", "organizer_check")
                             Button(
-                                onClick = { onNavigateToOrganizedTrips() },
+                                onClick = {
+                                    state.user?.username?.let { username ->
+                                        onNavigateToOrganizedTrips(username)
+                                    }
+                                },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(50.dp),
@@ -194,6 +200,8 @@ fun UserProfileScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Contatta Organizzatore", fontSize = 16.sp, fontWeight = FontWeight.Medium)
                             }
+                        } else {
+                            Log.d("NON E UN ORGANIZZATORE", "organizer_check")
                         }
                     }
 

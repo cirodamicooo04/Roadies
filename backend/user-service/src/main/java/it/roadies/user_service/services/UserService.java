@@ -20,4 +20,5 @@ public interface UserService {
     List<MinimalInformationResponseDTO> getMinimalInformation(List<String> keycloakId);
     boolean isUserOrganizer(String username);
     String findIdByUsername(String username);
+    MinimalInformationResponseDTO getUserMinimalInformation(String userId);
 }

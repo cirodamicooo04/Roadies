@@ -24,9 +24,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -251,6 +253,19 @@ public class UserServiceImpl implements UserService {
                 .map(userMapper::toMinimalDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public MinimalInformationResponseDTO getUserMinimalInformation(String username) {
+        log.info("Recupero profilo per l'utente username: {}", username);
+
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.user.notfound"));
+        }
+
+        return userMapper.toMinimalDto(user.get());
+    }
+
 
     @Override
     public boolean isUserOrganizer(String username) {

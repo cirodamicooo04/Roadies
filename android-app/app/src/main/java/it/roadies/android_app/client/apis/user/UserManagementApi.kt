@@ -130,6 +130,10 @@ interface UserManagementApi {
     @POST("api/v1/users/public/minimal-info")
     suspend fun getMinimalInformation(@Body userIds: List<String>): Response<List<MinimalInformationResponseDTO>>
 
+
+    @GET("api/v1/users/public/{username}/minimal-info")
+    suspend fun getUserMinimalInformation(@Path("username") userId: String): Response<MinimalInformationResponseDTO>
+
     @Multipart
     @POST("api/v1/users/avatar")
     suspend fun uploadAvatar(

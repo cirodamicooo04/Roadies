@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -55,6 +56,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -320,9 +322,7 @@ fun CollasableActivityCard(activity: ActivityResponse?){
                         modifier = Modifier.size(70.dp)
                     ) {
                         SubcomposeAsyncImage(
-                            // TODO: Da risolvere problema url
-                            //model = imageUrl,
-                            model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
+                            model = activity?.images?.firstOrNull()?.url?.replace("localhost","10.0.2.2"),
                             contentDescription = stringResource(R.string.activity_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize(),
@@ -332,9 +332,12 @@ fun CollasableActivityCard(activity: ActivityResponse?){
                                 }
                             },
                             error = {
-                                Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-                                    Icon(imageVector = Icons.Default.Warning, contentDescription = "Errore immagine", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
-                                }
+                                Image(
+                                    painter = painterResource(id = R.drawable.travel_placeholder),
+                                    contentDescription = "Errore immagine",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
                             }
                         )
                     }
