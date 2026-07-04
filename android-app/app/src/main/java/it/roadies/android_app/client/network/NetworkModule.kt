@@ -23,7 +23,7 @@ import it.roadies.android_app.client.apis.user.UserManagementApi
 import it.roadies.android_app.client.infrastructure.Serializer
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationService
-import net.openid.appauth.BuildConfig
+import it.roadies.android_app.BuildConfig
 import net.openid.appauth.connectivity.ConnectionBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
