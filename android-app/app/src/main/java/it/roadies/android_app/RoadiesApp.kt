@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
+import androidx.compose.material.icons.filled.Dataset
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.PeopleAlt
@@ -49,6 +50,7 @@ import it.roadies.android_app.ui.user.FriendScreen
 import it.roadies.android_app.ui.user.OrganizerTravelsScreen
 import it.roadies.android_app.ui.user.UserProfileScreen
 import it.roadies.android_app.ui.admin.AdminUsersScreen
+import it.roadies.android_app.ui.admin.MetadataScreen
 import it.roadies.android_app.ui.admin.PendingRequestsScreen
 import it.roadies.android_app.ui.user.UserDocumentScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
@@ -165,6 +167,27 @@ fun RoadiesApp(
                                 Text(stringResource(R.string.statistics))
                             }
                         )
+                        NavigationBarItem(
+                            selected = currentDestination?.hierarchy?.any { it.route == "metadata" } == true,
+                            onClick = {
+                                navHostController.navigate("metadata") {
+                                    popUpTo(navHostController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.Dataset,
+                                    contentDescription = "metadata"
+                                )
+                            },
+                            label = {
+                                Text("Metadata")
+                            }
+                        )
+
+
 
                     } else {
 
@@ -486,6 +509,9 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
 
         composable(route = "statistics") {
 
+        }
+        composable(route = "metadata"){
+            MetadataScreen()
         }
 
         composable(route = "chat") {
