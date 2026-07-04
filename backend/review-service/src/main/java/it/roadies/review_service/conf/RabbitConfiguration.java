@@ -9,8 +9,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfiguration {
 
-    
-
     @Bean
     public TopicExchange reviewExchange() {
         return new TopicExchange("review.exchange");

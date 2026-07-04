@@ -4,7 +4,7 @@ import feign.FeignException;
 import feign.RetryableException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
-import it.roadies.review_service.clients.TravelServiceClient;
+import it.roadies.review_service.clients.TravelClient;
 import it.roadies.shared.i18n.MessageLang;
 import it.roadies.review_service.data.entity.ReviewType;
 import it.roadies.review_service.exceptions.ServiceUnavailableException;
@@ -20,26 +20,26 @@ import java.util.UUID;
 @Slf4j
 public class TravelService {
 
-    private final TravelServiceClient travelServiceClient;
+    private final TravelClient travelClient;
     private final MessageLang messageLang;
 
     @Retry(name = "travelService")
     @CircuitBreaker(name = "travelService")
-    public void verifyTravelExists(UUID travelId, ReviewType reviewType) {
-        log.info("Verifica esistenza viaggio/attività");
+    public void verifyValidTravel(UUID travelId, ReviewType reviewType, boolean isReply) {
+        log.info("Verifica consistenza viaggio/attività");
 
         try {
             if (reviewType == ReviewType.TRAVEL) {
-                travelServiceClient.verifyTravelExists(travelId);
-                log.info("Esistenza viaggio {} verificata con successo", travelId);
+                travelClient.verifyTravel(travelId, isReply);
+                log.info("Consistenza viaggio {} verificata con successo", travelId);
             } else {
-                travelServiceClient.verifyActivityExistsAndIsNotIntoATravel(travelId);
-                log.info("Esistenza attività {} verificata con successo", travelId);
+                travelClient.verifyActivity(travelId, isReply);
+                log.info("Consistenza attività {} verificata con successo", travelId);
             }
 
         } catch (FeignException.NotFound e) {
             if (reviewType == ReviewType.ACTIVITY) {
-                log.warn("Attività {} non esiste", travelId);
+                log.warn("Attività {} inesiste", travelId);
                 throw new TravelNotFoundException(messageLang.getMessage("error.activity.not.found"));
             }
 

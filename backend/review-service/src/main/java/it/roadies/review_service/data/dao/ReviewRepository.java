@@ -19,9 +19,7 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     @Query("SELECT COUNT(r) as totalRatings, AVG(r.rating) as averageRating FROM Review r WHERE r.travelId = :travelId")
     RatingSummary findRatingSummaryByTravelId(@Param("travelId") UUID travelId);
 
-    // Per scopi di debug o amministrativi, potresti voler recuperare tutte le recensioni
     List<Review> findAll();
 
-    // Implementazione personalizzata per verificare se l'utente ha già recensito questo viaggio
     boolean existsByTravelIdAndUserId(UUID travelId, String userId);
 }

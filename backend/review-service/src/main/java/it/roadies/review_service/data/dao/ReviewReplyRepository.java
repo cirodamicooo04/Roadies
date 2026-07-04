@@ -13,6 +13,4 @@ public interface ReviewReplyRepository extends JpaRepository<ReviewReply, UUID> 
     Optional<ReviewReply> findByReviewId(UUID reviewId);
 
     boolean existsByReviewId(UUID reviewId);
-
-    boolean existsByUserId(String userId);
 }

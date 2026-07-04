@@ -39,10 +39,9 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
         log.info("provo a creare una risposta ad una recensione - reviewId: {} userId: {}", reviewId, userId);
 
         // First validation: Ensure the original review exists before allowing a reply to be created
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("error.resource.not.found")));
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("error.resource.not.found")));
 
-        travelServiceClient.verifyTravelExists(review.getTravelId(), review.getReviewType());
+        travelServiceClient.verifyValidTravel(review.getTravelId(), review.getReviewType(), true);
 
         // Second validation: Ensure that a reply does not already exist for this review (enforcing the one-to-one relationship)
         if (replyRepository.existsByReviewId(reviewId)) {
@@ -67,7 +66,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
     // Edit the content of an existing reply by its ID
     @Transactional
     @Override
-    public ReviewReply updateReply(UUID replyId, ReplyRequest request, String userId) {
+    public void updateReply(UUID replyId, ReplyRequest request, String userId) {
         log.info("provo ad aggiornare una risposta di una recensione - replyId: {} userId: {}", replyId, userId);
         ReviewReply existingReply = replyRepository.findById(replyId)
                 .orElseThrow(() -> new ReplyNotFoundException(messageLang.getMessage("review.reply.not.found",replyId)));
@@ -76,7 +75,7 @@ public class ReviewReplyServiceImpl implements ReviewReplyService {
             throw new AccessDeniedException("l'utente " + userId + " ha tentato di accedere ad una risorsa non autorizzato");
         }
         existingReply.setContent(request.getContent());
-        return replyRepository.save(existingReply);
+        replyRepository.save(existingReply);
     }
 
     // Delete a reply by its ID

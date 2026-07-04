@@ -33,10 +33,7 @@ public class ReviewController {
     )
     @PreAuthorize("hasRole('TRAVELER') or hasRole('ADMIN')")
     @PostMapping("/{travelId}")
-    public ResponseEntity<Void> create(
-            @PathVariable("travelId") UUID travelId,
-            @Valid @RequestBody ReviewRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<Void> create(@PathVariable UUID travelId, @Valid @RequestBody ReviewRequest request, @AuthenticationPrincipal Jwt jwt) {
         service.createReview(request, travelId, jwt.getSubject());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -68,12 +65,9 @@ public class ReviewController {
             description = "Permette a un utente autenticato di modificare il contenuto di una recensione esistente, identificata dal suo ID."
     )
     @PutMapping("/{reviewId}")
-    public ResponseEntity<ReviewUpdateRequest> updateReview(
-            @PathVariable UUID reviewId,
-            @Valid @RequestBody ReviewUpdateRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<Void> updateReview(@PathVariable UUID reviewId, @Valid @RequestBody ReviewUpdateRequest request, @AuthenticationPrincipal Jwt jwt) {
         service.updateReview(request, reviewId, jwt.getSubject());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     // Delete the review by its id
@@ -82,15 +76,8 @@ public class ReviewController {
             description = "Permette a un utente autenticato di eliminare una recensione esistente, identificata dal suo ID."
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable("id") UUID reviewlId, @AuthenticationPrincipal Jwt jwt) {
-        service.deleteReview(reviewlId, jwt.getSubject());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    // for testing purposes only
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/all")
-    public ResponseEntity<List<ReviewResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll().stream().map(review -> service.createReviewResponse(review.getId())).toList());
+    public ResponseEntity<Void> deleteReview(@PathVariable("id") UUID reviewId, @AuthenticationPrincipal Jwt jwt) {
+        service.deleteReview(reviewId, jwt.getSubject());
+        return ResponseEntity.noContent().build();
     }
 }

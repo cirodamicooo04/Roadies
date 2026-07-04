@@ -40,12 +40,13 @@ public class ReviewServiceImpl implements ReviewService {
     public void createReview(ReviewRequest request, UUID travelId, String userId) {
         log.info("provo a creare una recensione - userId: {} travelId: {}", userId, travelId);
         Review review = reviewMapper.toEntity(request, userId);
-        travelService.verifyTravelExists(travelId, request.getReviewType());
+        travelService.verifyValidTravel(travelId, request.getReviewType(), false);
         review.setTravelId(travelId);
         // Check if the user has already reviewed this travel
         if (repository.existsByTravelIdAndUserId(travelId, userId)) {
             throw new AccessDeniedException("l'utente " + userId + " ha tentato di accedere ad una risorsa non autorizzato");
         }
+
         repository.save(review);
 
 
@@ -93,15 +94,18 @@ public class ReviewServiceImpl implements ReviewService {
 
     // For administrative purposes
     @Override
-    public List<Review> getAll() {
+    public List<ReviewResponse> getAll() {
         log.info("provo a recuperare tutte le recensioni");
-        return repository.findAll();
+        return repository.findAll()
+                .stream()
+                .map(reviewMapper::toReviewResponse)
+                .toList();
     }
 
     // Update the review by its id
     @Transactional
     @Override
-    public Review updateReview(ReviewUpdateRequest reviewUpdateRequest, UUID reviewId, String userId) {
+    public void updateReview(ReviewUpdateRequest reviewUpdateRequest, UUID reviewId, String userId) {
         log.info("provo a modificare una recensione - reviewId: {} userId: {}", reviewId, userId);
         Review existingReview = repository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("review.not.found")));
         // Only the user who created the review can update it
@@ -111,7 +115,7 @@ public class ReviewServiceImpl implements ReviewService {
         existingReview.setRating(reviewUpdateRequest.getRating());
         existingReview.setContent(reviewUpdateRequest.getContent());
 
-        return repository.save(existingReview);
+        repository.save(existingReview);
     }
 
     // Convert a Review entity to a ReviewResponse DTO by its id
