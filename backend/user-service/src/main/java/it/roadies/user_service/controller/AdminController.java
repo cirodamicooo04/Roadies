@@ -24,7 +24,7 @@ public class AdminController {
             summary = "Blocca un utente",
             description = "Permette ad un admin di bloccare un utente specificato tramite il suo ID Keycloak. Un utente bloccato non potrà accedere al sistema finché non viene sbloccato."
     )
-    @PutMapping("users/{id}/block")
+    @PutMapping("/users/{id}/block")
     public ResponseEntity<Void> blockUser(@PathVariable String id) {
         adminService.blockUser(id);
         return ResponseEntity.noContent().build();
@@ -60,7 +60,7 @@ public class AdminController {
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("users")
+    @GetMapping("/users")
     @Operation(summary = "Recupera utenti filtrati", description = "Recupera una lista di utenti filtrati in base allo stato specificato. " +
             "Se non viene fornito alcun filtro, il valore predefinito è 'ACTIVE'.")
     public ResponseEntity<List<UserResponseDTO>> getFilteredUsers(
