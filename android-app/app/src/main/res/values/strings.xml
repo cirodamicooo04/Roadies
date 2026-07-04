@@ -224,4 +224,15 @@
     <string name="confirm_departure_body_travel">Do you really want to confirm this departure ? You will not be able to update this travel.</string>
     <string name="confirm_departure_body_actvity">Do you really want to confirm this departure ? You will not be able to update this activity.</string>
     <string name="travel_activities_organized">Travels and activities organized</string>
+    <string name="reviews">Reviews</string>
+    <string name="no_reviews">No reviews yet.</string>
+    <string name="show_all_reviews">Show all %1$d reviews</string>
+    <string name="all_reviews">All reviews (%1$d)</string>
+    <string name="read_more">Read more</string>
+    <string name="reply_from_organizer">1 reply from organizer</string>
+    <string name="fictitious_user">User</string>
+    <string name="loading_reviews_error">Unable to load reviews</string>
+    <string name="review_details">Review Details</string>
+    <string name="organizer_reply">Organizer reply</string>
+
 </resources>

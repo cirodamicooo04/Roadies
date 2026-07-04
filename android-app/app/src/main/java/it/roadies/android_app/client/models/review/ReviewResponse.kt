@@ -10,5 +10,6 @@ data class ReviewResponse(
     val userId: String,
     val rating: Int,
     val content: String,
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime,
+    val reply: ReplyResponse?
 )
