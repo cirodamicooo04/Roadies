@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -54,6 +55,34 @@ fun FriendScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    var friendToRemove by remember { mutableStateOf<UserProfileResponseDTO?>(null) }
+
+    if (friendToRemove != null) {
+        AlertDialog(
+            onDismissRequest = { friendToRemove = null },
+            title = { Text("Rimuovi amico") },
+            text = {
+                Text("Vuoi davvero rimuovere @${friendToRemove?.username ?: "utente"} dai tuoi amici?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        friendToRemove?.username?.let { username ->
+                            viewModel.removeFriend(username)
+                        }
+                        friendToRemove = null
+                    }
+                ) {
+                    Text("Rimuovi", color = Color(0xFFD32F2F))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { friendToRemove = null }) {
+                    Text("Annulla")
+                }
+            }
+        )
+    }
 
     if (showBottomSheet) {
         ModalBottomSheet(
@@ -91,11 +120,19 @@ fun FriendScreen(
             onValueChange = { viewModel.onSearchQueryChange(it) },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(stringResource(R.string.search_friend)) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search)) },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = stringResource(R.string.search)
+                )
+            },
             trailingIcon = {
                 if (state.searchQuery.isNotBlank()) {
                     IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.delete))
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = stringResource(R.string.delete)
+                        )
                     }
                 }
             },
@@ -173,6 +210,7 @@ fun FriendScreen(
                             onAddFriendClick = { username ->
                                 viewModel.sendFriendRequest(username)
                             },
+                            onRemoveFriendClick = {},
                             onUserClick = { username ->
                                 navController.navigate("user_profile/$username")
                             }
@@ -196,6 +234,9 @@ fun FriendScreen(
                             friendsList = state.friends,
                             requestSentTo = state.requestSentTo,
                             onAddFriendClick = {},
+                            onRemoveFriendClick = { user ->
+                                friendToRemove = user
+                            },
                             onUserClick = { username ->
                                 navController.navigate("user_profile/$username")
                             }
@@ -227,7 +268,7 @@ fun PendingRequestsSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.no_friends),
+                text = stringResource(R.string.pending_request),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextDark
@@ -275,41 +316,12 @@ fun PendingRequestCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(CircleShape)
-                    .background(OrangeAvatar),
-                contentAlignment = Alignment.Center
-            ) {
-                val avatarUrl = user?.avatarUrl
-                    ?.replace("localhost", "10.0.2.2")
-                    ?.takeIf { it.isNotBlank() }
-                    ?: ""
-
-                if (avatarUrl.isNotBlank()) {
-                    SubcomposeAsyncImage(
-                        model = avatarUrl,
-                        contentDescription = "Avatar di ${user?.username}",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                    )
-                } else {
-                    val initials = buildString {
-                        user?.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
-                        user?.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase()?.let { append(it) }
-                    }.ifBlank { "?" }
-
-                    Text(
-                        text = initials,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
+            it.roadies.android_app.ui.components.UserAvatar(
+                username = user?.username,
+                avatarUrl = user?.avatarUrl?.replace("localhost", "10.0.2.2"),
+                modifier = Modifier.size(52.dp),
+                fontSize = 18.sp
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -331,14 +343,22 @@ fun PendingRequestCard(
                 onClick = onReject,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFFE53935))
             ) {
-                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.reject), modifier = Modifier.size(24.dp))
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = stringResource(R.string.reject),
+                    modifier = Modifier.size(24.dp)
+                )
             }
 
             IconButton(
                 onClick = onAccept,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF43A047))
             ) {
-                Icon(Icons.Default.Check, contentDescription = stringResource(R.string.accept), modifier = Modifier.size(24.dp))
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = stringResource(R.string.accept),
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }
@@ -352,6 +372,7 @@ fun UsersList(
     friendsList: List<UserProfileResponseDTO>,
     requestSentTo: Set<String>,
     onAddFriendClick: (String) -> Unit,
+    onRemoveFriendClick: (UserProfileResponseDTO) -> Unit,
     onUserClick: (String) -> Unit
 ) {
     LazyColumn(
@@ -378,6 +399,7 @@ fun UsersList(
                 showAddButton = !isAlreadyFriend && !requestAlreadySent,
                 requestAlreadySent = requestAlreadySent,
                 onAddFriendClick = { onAddFriendClick(user.username ?: "") },
+                onRemoveFriendClick = { onRemoveFriendClick(user) },
                 onUserClick = { onUserClick(user.username ?: "") }
             )
         }
@@ -391,6 +413,7 @@ fun FriendCard(
     showAddButton: Boolean = true,
     requestAlreadySent: Boolean = false,
     onAddFriendClick: () -> Unit = {},
+    onRemoveFriendClick: () -> Unit = {},
     onUserClick: () -> Unit = {}
 ) {
     Card(
@@ -407,40 +430,12 @@ fun FriendCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(CircleShape)
-                    .background(OrangeAvatar),
-                contentAlignment = Alignment.Center
-            ) {
-                val avatarUrl = user.avatarUrl
-                    ?.replace("localhost", "10.0.2.2")
-                    ?.takeIf { it.isNotBlank() }
-                    ?: ""
-
-                if (avatarUrl.isNotBlank()) {
-                    SubcomposeAsyncImage(
-                        model = avatarUrl,
-                        contentDescription = "Avatar di ${user.username}",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                    )
-                } else {
-                    val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                    val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                    val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
-
-                    Text(
-                        text = initials,
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
+            it.roadies.android_app.ui.components.UserAvatar(
+                username = user.username,
+                avatarUrl = user.avatarUrl?.replace("localhost", "10.0.2.2"),
+                modifier = Modifier.size(60.dp),
+                fontSize = 22.sp
+            )
 
             Spacer(modifier = Modifier.width(16.dp))
 
@@ -496,14 +491,32 @@ fun FriendCard(
                     else -> R.drawable.badge_bronze
                 }
 
-                Icon(
-                    painter = painterResource(id = imageRes),
-                    contentDescription = "Badge $badgeName",
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape),
-                    tint = Color.Unspecified
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = "Badge $badgeName",
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape),
+                        tint = Color.Unspecified
+                    )
+
+                    IconButton(
+                        onClick = onRemoveFriendClick,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = Color(0xFFD32F2F)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Rimuovi amico",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
             }
         }
     }

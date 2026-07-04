@@ -56,8 +56,10 @@ import it.roadies.android_app.ui.travel.components.DetailImageCarousel
 import it.roadies.android_app.ui.travel.components.ExpandableDescription
 import it.roadies.android_app.ui.travel.components.LocationMap
 import it.roadies.android_app.viewmodel.ActivityDetailViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.Duration
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +80,8 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
         ActivityDetail(uiState.activity, onCheckAvailability = {
             viewModel.loadDepartures()
             isDeparturesSheetOpen = true
+        }, onFavoriteClick = {
+            activityId -> //vincenzo usa activity id
         })
     }
 
@@ -143,7 +147,9 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
 }
 
 @Composable
-fun ActivityDetail(activity: ActivityResponse?, onCheckAvailability: () -> Unit){
+fun ActivityDetail(activity: ActivityResponse?, onCheckAvailability: () -> Unit, onFavoriteClick: (UUID) -> Unit){
+    var isFavorite by remember { mutableStateOf(false) }
+
     if (activity == null){
         BoxCentered(text = stringResource(R.string.error_loading_travel))
     } else {
@@ -158,7 +164,9 @@ fun ActivityDetail(activity: ActivityResponse?, onCheckAvailability: () -> Unit)
                 DetailHeader(
                     title = activity.name,
                     destination = activity.destination,
-                    country = activity.country
+                    country = activity.country,
+                    isFavorite = isFavorite,
+                    onFavoriteClick = { activity.id?.let { id -> onFavoriteClick(id) } }
                 ) {
                     val durationHours = activity.departures?.firstOrNull()?.let {
                         if (it.startTimestamp != null && it.endTimestamp != null) {

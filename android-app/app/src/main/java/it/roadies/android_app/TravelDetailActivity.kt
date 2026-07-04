@@ -12,6 +12,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -72,6 +73,7 @@ import it.roadies.android_app.ui.travel.components.DetailImageCarousel
 import it.roadies.android_app.ui.travel.components.ExpandableDescription
 import it.roadies.android_app.ui.travel.components.LocationMap
 import it.roadies.android_app.viewmodel.TravelDetailViewModel
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,6 +94,8 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
         TravelDetail(uiState.travel, onCheckAvailability = {
             viewModel.loadDepartures()
             isDeparturesSheetOpen = true
+        }, onFavoriteClick = {
+            travelId -> // vincenzo usa travel id per aggiungerlo ai preferiti
         })
     }
 
@@ -157,7 +161,10 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
 }
 
 @Composable
-fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
+fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit, onFavoriteClick: (UUID) -> Unit){
+    //variabile is favorite , da cambiare in caso volessimo fare cuoricino rosso se favorito
+    var isFavorite by remember { mutableStateOf(false) }
+
     if (travel == null){
         BoxCentered(text = stringResource(R.string.error_loading_travel))
     } else {
@@ -172,7 +179,11 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
                 DetailHeader(
                     title = travel.title,
                     destination = travel.destination,
-                    country = travel.country
+                    country = travel.country,
+                    isFavorite = isFavorite,
+                    onFavoriteClick = {
+                        travel.id?.let { id -> onFavoriteClick(id) }
+                    }
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(

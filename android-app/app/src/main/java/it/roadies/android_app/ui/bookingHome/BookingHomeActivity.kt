@@ -17,19 +17,27 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -62,18 +70,38 @@ fun BookingHomeScreen(navHostController: NavHostController, viewModel: BookingHo
             //uso l'encode per evitare visione di caraterri speciali
             val travelNameEncoded = encode(booking.travelName ?: "")
             navHostController.navigate("booking_detail/${booking.principalId}/$travelNameEncoded/${booking.peopleCount ?: 1}/${booking.totalPrice}/${booking.startDate}/${booking.endDate}/${booking.departureType?.name ?: "TRAVEL"}")
-        }
+        },
+        onDeleteBooking = { booking ->
+            booking.bookingId?.let { viewModel.deleteBooking(it) }
+        },
+        onErrorShown = { viewModel.clearError() }
     )
 }
 
 @Composable
-fun BookingHomeScreenContent(state: BookingHomeState, onLoadMoreActive: () -> Unit = {}, onLoadMorePast: () -> Unit = {}, onFilterChanged: (BookingFilterType) -> Unit = {}, onBookingClick: (BookingHomeResponse) -> Unit = {}) {
+fun BookingHomeScreenContent(state: BookingHomeState, onLoadMoreActive: () -> Unit = {}, onLoadMorePast: () -> Unit = {}, onFilterChanged: (BookingFilterType) -> Unit = {}, onBookingClick: (BookingHomeResponse) -> Unit = {}, onDeleteBooking: ((BookingHomeResponse) -> Unit)? = null, onErrorShown: () -> Unit = {}) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoggedIn) {
-            BookingHomeContent(state, onLoadMoreActive, onLoadMorePast, onFilterChanged, onBookingClick)
+            BookingHomeContent(state, onLoadMoreActive, onLoadMorePast, onFilterChanged, onBookingClick, onDeleteBooking)
         } else {
             BookingHomeNotLogged()
         }
+
+        LaunchedEffect(state.errorMessage) {
+            state.errorMessage?.let { errorMsg ->
+                snackbarHostState.showSnackbar(errorMsg)
+                onErrorShown()
+            }
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp)
+        )
     }
 }
 
@@ -83,7 +111,8 @@ fun BookingHomeContent(
     onLoadMoreActive: () -> Unit,
     onLoadMorePast: () -> Unit,
     onFilterChanged: (BookingFilterType) -> Unit,
-    onBookingClick: (BookingHomeResponse) -> Unit
+    onBookingClick: (BookingHomeResponse) -> Unit,
+    onDeleteBooking: ((BookingHomeResponse) -> Unit)? = null
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val tabs = listOf(stringResource(R.string.booking_tab_active), stringResource(R.string.booking_tab_past))
@@ -125,7 +154,8 @@ fun BookingHomeContent(
         }
 
         when (selectedTab) {
-            0 -> BookingListSection(state.active.copy(items = filteredActiveItems), R.string.booking_empty_active, onLoadMoreActive, onBookingClick)
+            // delete solo per booking attivi
+            0 -> BookingListSection(state.active.copy(items = filteredActiveItems), R.string.booking_empty_active, onLoadMoreActive, onBookingClick, onDeleteBooking)
             1 -> BookingListSection(state.past.copy(items = filteredPastItems), R.string.booking_empty_past, onLoadMorePast, onBookingClick)
         }
     }
@@ -146,7 +176,8 @@ fun BookingListSection(
     paging: BookingPagingState,
     emptyMessageRes: Int,
     onLoadMore: () -> Unit,
-    onBookingClick: (BookingHomeResponse) -> Unit
+    onBookingClick: (BookingHomeResponse) -> Unit,
+    onDeleteBooking: ((BookingHomeResponse) -> Unit)? = null
 ) {
     when {
         paging.isLoading && paging.items.isEmpty() -> CenteredBox { CircularProgressIndicator() }
@@ -162,7 +193,11 @@ fun BookingListSection(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             itemsIndexed(paging.items) { _, booking ->
-                BookingCard(booking, onClick = { onBookingClick(booking) })
+                BookingCard(
+                    booking = booking,
+                    onClick = { onBookingClick(booking) },
+                    onDelete = if (onDeleteBooking != null) { { onDeleteBooking(booking) } } else null
+                )
             }
             if (!paging.isLast) {
                 item {
@@ -185,16 +220,33 @@ fun BookingListSection(
 }
 
 @Composable
-fun BookingCard(booking: BookingHomeResponse, onClick: () -> Unit = {}) {
+fun BookingCard(booking: BookingHomeResponse, onClick: () -> Unit = {}, onDelete: (() -> Unit)? = null) {
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = booking.travelName ?: "",
-                style = MaterialTheme.typography.titleMedium
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = booking.travelName ?: "",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                if (onDelete != null) {
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.booking_delete),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -220,6 +272,27 @@ fun BookingCard(booking: BookingHomeResponse, onClick: () -> Unit = {}) {
                 )
             }
         }
+    }
+
+    if (showDeleteDialog && onDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(R.string.booking_delete_dialog_title)) },
+            text = { Text(stringResource(R.string.booking_delete_dialog_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    onDelete()
+                }) {
+                    Text(stringResource(R.string.booking_delete_dialog_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.booking_delete_dialog_dismiss))
+                }
+            }
+        )
     }
 }
 

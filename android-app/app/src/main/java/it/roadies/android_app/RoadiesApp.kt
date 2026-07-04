@@ -42,11 +42,14 @@ import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
 import it.roadies.android_app.viewmodel.bookingFlow.BookingFlowViewModel
 import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
+import it.roadies.android_app.ui.chat.ChatListScreen
+import it.roadies.android_app.ui.chat.ChatScreen
 import it.roadies.android_app.ui.user.EditProfileScreen
 import it.roadies.android_app.ui.user.FriendScreen
 import it.roadies.android_app.ui.user.UserProfileScreen
 import it.roadies.android_app.ui.admin.AdminUsersScreen
 import it.roadies.android_app.ui.admin.PendingRequestsScreen
+import it.roadies.android_app.ui.user.UserDocumentScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -264,7 +267,7 @@ fun RoadiesApp(
         }
 
     ) {
-        paddingValues ->
+            paddingValues ->
         if (!authState.isLoading) {
             NavigationView(
                 navHostController = navHostController,
@@ -483,8 +486,22 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
         composable(route = "statistics") {
 
         }
-        composable(route = "chat") {
 
+        composable(route = "chat") {
+            ChatListScreen(
+                onNavigateToChat = { conversationId ->
+                    navHostController.navigate("chat/$conversationId")
+                }
+            )
+        }
+
+        composable(
+            route = "chat/{conversationId}",
+            arguments = listOf(navArgument("conversationId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val conversationId = backStackEntry.arguments?.getString("conversationId").orEmpty()
+
+            ChatScreen(conversationId = conversationId, onBack = { navHostController.popBackStack() })
         }
 
         navigation(route = "organizer_graph", startDestination = "handle_travels") {
@@ -537,6 +554,16 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 val username = backStackEntry.arguments?.getString("username").orEmpty()
                 UserProfileScreen(
                     username = username,
+                    onBack = { navHostController.popBackStack() },
+                    onNavigateToChat = { conversationId ->
+                        navHostController.navigate("chat/$conversationId")
+                    }
+                )
+            }
+
+            composable(
+                route="user_documents" ){
+                UserDocumentScreen(
                     onBack = { navHostController.popBackStack() }
                 )
             }

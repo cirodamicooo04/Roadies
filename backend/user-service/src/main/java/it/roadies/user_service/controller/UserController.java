@@ -68,6 +68,12 @@ public class UserController {
         return ResponseEntity.ok(results);
     }
 
+    @GetMapping("/id/{username}")
+    public ResponseEntity<String> getUserIdByUsername(@PathVariable String username) {
+        String userId = userService.findIdByUsername(username);
+        return userId != null ? ResponseEntity.ok(userId) : ResponseEntity.notFound().build();
+    }
+
     @PutMapping("/update")
     @Operation(summary = "Aggiorna profilo", description = "Modifica i dati del proprio profilo")
     public ResponseEntity<UserProfileResponseDTO> updateProfile(
@@ -100,5 +106,11 @@ public class UserController {
             @RequestBody List<String> userIds) {
 
         return ResponseEntity.ok(userService.getMinimalInformation(userIds));
+    }
+
+    @GetMapping("/{username}/is-organizer")
+    public ResponseEntity<Boolean> checkIsOrganizer(@PathVariable String username) {
+        boolean isOrganizer = userService.isUserOrganizer(username);
+        return ResponseEntity.ok(isOrganizer);
     }
 }

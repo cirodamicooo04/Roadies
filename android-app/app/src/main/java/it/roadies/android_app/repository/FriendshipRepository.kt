@@ -42,4 +42,10 @@ class FriendshipRepository @Inject constructor(
             friendshipApi.getPendingRequests()
         }
     }
+
+    suspend fun removeFriend(username: String): ApiResponse<Unit> {
+        return safeApiCall {
+            friendshipApi.removeFriend(username)
+        }
+    }
 }

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 
@@ -103,6 +104,19 @@ class BookingHomeViewModel @Inject constructor(private val repository: BookingRe
                 )
             }
         }
+    }
+
+    fun deleteBooking(bookingId: UUID) {
+        viewModelScope.launch {
+            val res = repository.deleteBooking(bookingId)
+            if (!res.success) {
+                _state.update { it.copy(errorMessage = res.errorMessage) }
+            }
+        }
+    }
+
+    fun clearError() {
+        _state.update { it.copy(errorMessage = null) }
     }
 
     fun loadMorePast() {

@@ -101,6 +101,10 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendshipRepository.save(friendship);
         log.info("Stato dell'amicizia ID: {} aggiornato a: {}", friendshipId, newStatus);
 
+        if(newStatus == Status.REJECTED) {
+            friendshipRepository.delete(friendship);
+        }
+
         if (newStatus == Status.ACCEPTED) {
             FriendshipEvent event = new FriendshipEvent();
             event.setUserId1(friendship.getRequesterId().getKeycloakId());
@@ -161,12 +165,18 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     @Transactional
-    public void removeFriend(UUID friendshipId, String currentUserId) {
-        log.info("Richiesta rimozione amicizia ID: {} da parte dell'utente", friendshipId);
+    public void removeFriend(String friendUsername, String currentUserId) {
+        log.info("Richiesta rimozione amicizia verso username: {} da parte dell'utente {}", friendUsername, currentUserId);
 
-        Friendship friendship = friendshipRepository.findById(friendshipId)
+        User friend = userRepository.findByUsername(friendUsername)
                 .orElseThrow(() -> {
-                    log.error("Rimozione fallita: amicizia non trovata (ID: {})", friendshipId);
+                    log.error("Rimozione fallita: utente non trovato ({})", friendUsername);
+                    return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
+                });
+
+        Friendship friendship = friendshipRepository.findExistingFriendship(currentUserId, friend.getKeycloakId())
+                .orElseThrow(() -> {
+                    log.error("Rimozione fallita: amicizia non trovata tra {} e {}", currentUserId, friendUsername);
                     return new ResourceNotFoundException(messageLang.getMessage("error.friendship.notfound"));
                 });
 
@@ -174,12 +184,12 @@ public class FriendshipServiceImpl implements FriendshipService {
                 friendship.getReceiverId().getKeycloakId().equals(currentUserId);
 
         if (!isParticipant) {
-            log.error("Tentativo non autorizzato di eliminazione dell'amicizia ID: {} da parte dell'utente", friendshipId);
+            log.error("Tentativo non autorizzato di eliminazione dell'amicizia verso {}", friendUsername);
             throw new AccessDeniedException(messageLang.getMessage("error.unauthorized"));
         }
 
         friendshipRepository.delete(friendship);
-        log.info("Amicizia ID: {} eliminata con successo dal DB", friendshipId);
+        log.info("Amicizia con {} eliminata con successo dal DB", friendUsername);
 
         FriendshipEvent event = new FriendshipEvent();
         event.setUserId1(friendship.getRequesterId().getKeycloakId());

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -75,15 +76,15 @@ public class FriendshipController {
         return ResponseEntity.ok(friendshipService.getPendingRequests(jwt.getSubject()));
     }
 
-    @PreAuthorize("hasRole('TRAVELER')")
-    @DeleteMapping("/{friendshipId}")
     @Operation(summary = "Rimuovi un amico", description = "Elimina una relazione di amicizia esistente.")
     @ApiResponse(responseCode = "204", description = "Amicizia rimossa correttamente")
+    @DeleteMapping("/{friendUsername}")
     public ResponseEntity<Void> removeFriend(
-            @PathVariable UUID friendshipId,
-            @AuthenticationPrincipal Jwt jwt) {
-        log.info("Ricevuta richiesta di rimozione amicizia ID: {} dal subject JWT: {}", friendshipId, jwt.getSubject());
-        friendshipService.removeFriend(friendshipId, jwt.getSubject());
+            @PathVariable String friendUsername,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        String userId = jwt.getSubject();
+        friendshipService.removeFriend(friendUsername, userId);
         return ResponseEntity.noContent().build();
     }
 
