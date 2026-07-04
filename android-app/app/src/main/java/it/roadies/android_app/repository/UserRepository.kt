@@ -231,6 +231,10 @@ class UserRepository @Inject constructor(
         return safeApiCall { userApi.getMinimalInformation(ids) }
     }
 
+    suspend fun getOrganizerInfo(username: String ): ApiResponse<MinimalInformationResponseDTO> {
+        return safeApiCall { userApi.getUserMinimalInformation(username) }
+    }
+
     suspend fun checkIsOrganizer(username: String): ApiResponse<Boolean> {
         return safeApiCall {
             userApi.checkIsOrganizer(username)

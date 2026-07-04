@@ -46,6 +46,7 @@ import it.roadies.android_app.ui.chat.ChatListScreen
 import it.roadies.android_app.ui.chat.ChatScreen
 import it.roadies.android_app.ui.user.EditProfileScreen
 import it.roadies.android_app.ui.user.FriendScreen
+import it.roadies.android_app.ui.user.OrganizerTravelsScreen
 import it.roadies.android_app.ui.user.UserProfileScreen
 import it.roadies.android_app.ui.user.UserDocumentScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
@@ -533,9 +534,13 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 UserProfileScreen(
                     username = username,
                     onBack = { navHostController.popBackStack() },
-                    // ECCO LA RIGA AGGIUNTA CHE FA SCATTARE LA NAVIGAZIONE ALLA CHAT SPECIFICA
                     onNavigateToChat = { conversationId ->
                         navHostController.navigate("chat/$conversationId")
+                    },
+                    onNavigateToOrganizedTrips = { organizerUsername ->
+                        if (!organizerUsername.isNullOrEmpty()) {
+                            navHostController.navigate("organizer_travels/$organizerUsername")
+                        }
                     }
                 )
             }
@@ -545,6 +550,12 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 UserDocumentScreen(
                     onBack = { navHostController.popBackStack() }
                 )
+            }
+
+            composable(route="organizer_travels/{username}",
+                arguments = listOf(navArgument("username") {type = NavType.StringType})
+            ){
+                OrganizerTravelsScreen(navHostController = navHostController)
             }
         }
     }

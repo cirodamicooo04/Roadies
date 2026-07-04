@@ -223,4 +223,5 @@
     <string name="confirm_departure">Confirm departure</string>
     <string name="confirm_departure_body_travel">Do you really want to confirm this departure ? You will not be able to update this travel.</string>
     <string name="confirm_departure_body_actvity">Do you really want to confirm this departure ? You will not be able to update this activity.</string>
+    <string name="travel_activities_organized">Travels and activities organized</string>
 </resources>

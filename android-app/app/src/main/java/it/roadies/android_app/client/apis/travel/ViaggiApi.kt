@@ -275,6 +275,10 @@ interface ViaggiApi {
         @Query("sort") sort: List<String>? = null,
         @Query("type") type: String = "ACTIVITY"
     ): Response<PageResponse<ActivitySummaryResponse>>
+
+    @GET("api/v1/travels/public/organizer/{id}")
+    suspend fun getOrganizerTravelsActivity(@Path("id") id: String): Response<OrganizerTravelsActivityResponse>
+
     /**
      * PUT api/v1/travels/{travelId}/activities/{activityId}
      * Aggiorna attività del viaggio

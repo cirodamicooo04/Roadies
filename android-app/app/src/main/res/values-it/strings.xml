@@ -227,4 +227,5 @@
     <string name="confirm_departure">Conferma partenza</string>
     <string name="confirm_departure_body_travel">Vuoi davvero confermare questa partenza? Non potrai più modificare questo viaggio.</string>
     <string name="confirm_departure_body_actvity">Vuoi davvero confermare questa partenza? Non potrai più modificare questa attività.</string>
+    <string name="travel_activities_organized">Viaggi ed attività organizzate</string>
 </resources>
