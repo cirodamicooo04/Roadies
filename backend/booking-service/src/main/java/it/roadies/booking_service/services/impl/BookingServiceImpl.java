@@ -197,6 +197,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(booking);
         rabbitTemplate.convertAndSend("booking.exchange", "booking.gamification.points.add", new GamificationEvent(booking.getUserId(), booking.getTotalPrice()));
+        rabbitTemplate.convertAndSend("notification.exchange", "notification.mail.send", new NotificationEvent(booking.getUserId(), "Conferma Prenotazione", "Ciao,\n\nti confermiamo che la tua prenotazione è stata completata con successo.\n\nUn saluto,\nIl Team"));
     }
 
     //metodi caso d'insuccesso

@@ -519,8 +519,19 @@ public class TravelServiceImpl implements TravelService {
     }
 
     //REVIEW AREA
-    public boolean isValidTravel(UUID travelId){
-        return travelRepository.existsById(travelId);
+    // il metodo consente di creare una NUOVA recensione soltanto se non si è proprietari del viaggio
+    // il metodo consente di creare una REPLY ad una recensione già esistente soltanto se si è proprietari del viaggio
+    public boolean isValidTravel(UUID travelId, boolean isReply, String userId){
+        boolean condition1= travelRepository.existsById(travelId);
+        if (condition1 && !isReply) {
+            Travel travel = travelRepository.getTravelById(travelId);
+            return !travel.getOwnerId().equals(userId);
+        }
+        else if (condition1 && isReply) {
+            Travel travel = travelRepository.getTravelById(travelId);
+            return travel.getOwnerId().equals(userId);
+        }
+        return false;
     }
 }
 

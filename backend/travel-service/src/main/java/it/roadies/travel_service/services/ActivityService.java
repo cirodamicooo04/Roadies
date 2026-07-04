@@ -30,6 +30,6 @@ public interface ActivityService {
     ActivityResponse updateActivity(UUID id, ActivityUpdateRequest request, String ownerId);
     void updateActivityReviews(ReviewActivityUpdateEvent event);
 
-    public boolean isValidActivityAndIsNotIntoATravel(UUID activityId);
+    boolean isValidActivity(UUID activityId, boolean isReply, String userId);
 
 }

@@ -13,10 +13,7 @@ import it.roadies.travel_service.data.dto.request.ActivityUpdateRequest;
 import it.roadies.travel_service.data.dto.response.ActivityDepartureResponse;
 import it.roadies.travel_service.data.dto.response.ActivityResponse;
 import it.roadies.travel_service.data.dto.response.ActivitySummaryResponse;
-import it.roadies.travel_service.data.entity.Activity;
-import it.roadies.travel_service.data.entity.ActivityDeparture;
-import it.roadies.travel_service.data.entity.Image;
-import it.roadies.travel_service.data.entity.TravelDeparture;
+import it.roadies.travel_service.data.entity.*;
 import it.roadies.travel_service.data.entity.enumerations.Continent;
 import it.roadies.travel_service.data.entity.enumerations.ImageStatus;
 import it.roadies.travel_service.data.entity.enumerations.Status;
@@ -260,12 +257,19 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     //REVIEW AREA
+    // il metodo consente di creare una NUOVA recensione soltanto se non si è proprietari dell'attivita
+    // il metodo consente di creare una REPLY ad una recensione già esistente soltanto se si è proprietari dell'attività
     @Override
-    public boolean isValidActivityAndIsNotIntoATravel(UUID activityId) {
-        Activity activity = activityRepository.findById(activityId).orElseThrow(()->new StatusException(""));
-        if (activity.getTravel()!=null){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageLang.getMessage(""));
+    public boolean isValidActivity(UUID activityId, boolean isReply, String userId) {
+        boolean condition1= activityRepository.existsById(activityId);
+        if (condition1 && !isReply) {
+            Activity activity = activityRepository.getActivitiesById((activityId));
+            return !activity.getOwnerId().equals(userId) && activity.getTravel() == null;
         }
-        return true;
+        else if (condition1 && isReply) {
+            Activity activity = activityRepository.getActivitiesById(activityId);
+            return activity.getOwnerId().equals(userId)&& activity.getTravel() == null;
+        }
+        return false;
     }
 }

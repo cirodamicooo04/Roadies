@@ -202,10 +202,10 @@ public class TravelController {
     }
 
     //REVIEW AREA
-
+    @Operation(summary = "Verifica viaggio", description = "Verifica se un viaggio esiste e se l'utente non è il proprietario.")
     @GetMapping("/review/{travelId}")
-    public ResponseEntity<Void> isValidTravel(@PathVariable UUID travelId) {
-        if (travelService.isValidTravel(travelId)) {
+    public ResponseEntity<Void> validTravel(@PathVariable UUID travelId, @RequestParam boolean isReply, @AuthenticationPrincipal Jwt jwt) {
+        if (travelService.isValidTravel(travelId, isReply, jwt.getSubject())) {
             return ResponseEntity.ok().build();
         }
         else return ResponseEntity.notFound().build();

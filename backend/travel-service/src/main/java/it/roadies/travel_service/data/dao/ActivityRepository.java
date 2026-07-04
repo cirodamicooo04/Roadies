@@ -15,4 +15,6 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID>, JpaSp
 
     @Query("SELECT DISTINCT a.destination FROM Activity a WHERE a.destination IS NOT NULL AND a.travel IS NULL")
     List<String> findUniqueDestinations();
+
+    Activity getActivitiesById(UUID id);
 }
