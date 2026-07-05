@@ -30,7 +30,7 @@ class ReviewRepository @Inject constructor(
         safeApiCall { reviewApi.getAverageRating(travelId) }
 
     // Update an existing review
-    suspend fun updateReview(reviewId: UUID, request: ReviewUpdateRequest): ApiResponse<ReviewUpdateRequest> =
+    suspend fun updateReview(reviewId: UUID, request: ReviewUpdateRequest): ApiResponse<Void> =
         safeApiCall { reviewApi.updateReview(reviewId, request) }
 
     // Delete a review

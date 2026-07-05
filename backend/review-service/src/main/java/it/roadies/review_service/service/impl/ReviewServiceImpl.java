@@ -51,14 +51,16 @@ public class ReviewServiceImpl implements ReviewService {
 
 
         RatingSummary summary = repository.findRatingSummaryByTravelId(travelId);
+        Double avgRating = summary.getAverageRating() != null ? summary.getAverageRating() : 0.0;
+        Integer totalRatings = summary.getTotalRatings() != null ? summary.getTotalRatings() : 0;
 
         if (request.getReviewType() == ReviewType.TRAVEL) {
             //mando evento di update per travel
-            ReviewTravelUpdateEvent event = new ReviewTravelUpdateEvent(travelId, summary.getAverageRating(), summary.getTotalRatings());
+            ReviewTravelUpdateEvent event = new ReviewTravelUpdateEvent(travelId, avgRating, totalRatings);
             rabbitTemplate.convertAndSend("review.exchange", "review.travel.added", event);
         } else {
             //mando evento di update per activity
-            ReviewActivityUpdateEvent event = new ReviewActivityUpdateEvent(travelId, summary.getAverageRating(), summary.getTotalRatings());
+            ReviewActivityUpdateEvent event = new ReviewActivityUpdateEvent(travelId, avgRating, totalRatings);
             rabbitTemplate.convertAndSend("review.exchange", "review.activity.added", event);
         }
     }
@@ -83,6 +85,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Transactional
+    @Override
     public void deleteReview(UUID reviewId, String userId) {
         log.info("provo a cancellare una recensione - reviewId: {} userId: {}", reviewId, userId);
         Review existingReview = repository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(messageLang.getMessage("review.not.exists")));
@@ -90,6 +93,21 @@ public class ReviewServiceImpl implements ReviewService {
             throw new AccessDeniedException("l'utente " + userId + " ha tentato di accedere ad una risorsa non autorizzato");
         }
         repository.deleteById(reviewId);
+
+        UUID travelId = existingReview.getTravelId();
+        RatingSummary summary = repository.findRatingSummaryByTravelId(travelId);
+        Double avgRating = summary.getAverageRating() != null ? summary.getAverageRating() : 0.0;
+        Integer totalRatings = summary.getTotalRatings() != null ? summary.getTotalRatings() : 0;
+
+        if (existingReview.getReviewType() == ReviewType.TRAVEL) {
+            //mando evento di update per travel
+            ReviewTravelUpdateEvent event = new ReviewTravelUpdateEvent(travelId, avgRating, totalRatings);
+            rabbitTemplate.convertAndSend("review.exchange", "review.travel.added", event);
+        } else {
+            //mando evento di update per activity
+            ReviewActivityUpdateEvent event = new ReviewActivityUpdateEvent(travelId, avgRating, totalRatings);
+            rabbitTemplate.convertAndSend("review.exchange", "review.activity.added", event);
+        }
     }
 
     // For administrative purposes
@@ -116,6 +134,21 @@ public class ReviewServiceImpl implements ReviewService {
         existingReview.setContent(reviewUpdateRequest.getContent());
 
         repository.save(existingReview);
+
+        UUID travelId = existingReview.getTravelId();
+        RatingSummary summary = repository.findRatingSummaryByTravelId(travelId);
+        Double avgRating = summary.getAverageRating() != null ? summary.getAverageRating() : 0.0;
+        Integer totalRatings = summary.getTotalRatings() != null ? summary.getTotalRatings() : 0;
+
+        if (existingReview.getReviewType() == ReviewType.TRAVEL) {
+            //mando evento di update per travel
+            ReviewTravelUpdateEvent event = new ReviewTravelUpdateEvent(travelId, avgRating, totalRatings);
+            rabbitTemplate.convertAndSend("review.exchange", "review.travel.added", event);
+        } else {
+            //mando evento di update per activity
+            ReviewActivityUpdateEvent event = new ReviewActivityUpdateEvent(travelId, avgRating, totalRatings);
+            rabbitTemplate.convertAndSend("review.exchange", "review.activity.added", event);
+        }
     }
 
     // Convert a Review entity to a ReviewResponse DTO by its id

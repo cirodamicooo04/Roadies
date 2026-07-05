@@ -106,10 +106,10 @@ public class MinioServiceImpl implements MinioService {
         return minioUrl + "/" + bucketName + "/" + fileName;
     }
 
-    @Value("${minio.accessKey}")
+    @Value("${minio.access-key}")
     private String accessKey;
 
-    @Value("${minio.secretKey}")
+    @Value("${minio.secret-key}")
     private String secretKey;
 
     @Override

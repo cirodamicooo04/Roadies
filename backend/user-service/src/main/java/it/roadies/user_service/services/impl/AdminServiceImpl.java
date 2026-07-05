@@ -137,7 +137,7 @@ public class AdminServiceImpl implements AdminService {
         log.info("Recupero lista utenti filtrata per {}", filter);
 
         switch (filter.toUpperCase()) {
-            case "ORGANIZERS" -> users = userRepository.findByOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);
+            case "ORGANIZER", "ORGANIZERS" -> users = userRepository.findByOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);
             case "BANNED", "ACTIVE" -> users = userRepository.findAll();
             default -> users = userRepository.findAll();
         }

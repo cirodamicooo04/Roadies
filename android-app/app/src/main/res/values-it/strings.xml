@@ -84,7 +84,7 @@
     <string name="new_departure">Nuova partenza</string>
     <string name="no_departures_added">Nessuna partenza aggiunta</string>
     <string name="cancel_creation_confirm">Vuoi annullare la creazione del viaggio?</string>
-    <string name="cancel_creation_confirm_body">Tutte le tue modifiche andranno perse</string>
+    <string name="cancel_creation_confirm_body">Tutte le tue modifiche non salvate andranno perse</string>
     <string name="create_travel_confirm">Vuoi creare il viaggio?</string>
     <string name="create_travel_confirm_body">Sei sicuro di voler procedere con la creazione?</string>
     <string name="create_activity_confirm">Vuoi creare l\'attività?</string>

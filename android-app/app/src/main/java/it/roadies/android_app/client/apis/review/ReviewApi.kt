@@ -29,7 +29,7 @@ interface ReviewApi {
     suspend fun updateReview(
         @Path("reviewId") reviewId: UUID,
         @Body request: ReviewUpdateRequest
-    ): Response<ReviewUpdateRequest>
+    ): Response<Void>
 
     // Delete a review
     @DELETE("/api/v1/reviews/{id}")
