@@ -1,11 +1,16 @@
 package it.roadies.android_app.ui.user
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,19 +31,27 @@ import it.roadies.android_app.viewmodel.user.UserProfileViewModel
 private val DarkBlueBg = Color(0xFF1B3B5A)
 private val OrangeAvatarColor = Color(0xFFE26D38)
 private val BackgroundGrayColor = Color(0xFFF5F5F5)
-private val TextDarkColor = Color(0xFF1A2B4C)
 private val BorderGrayColor = Color(0xFFE0E0E0)
 
 @Composable
 fun UserProfileScreen(
     username: String,
     viewModel: UserProfileViewModel = hiltViewModel(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onNavigateToFavoriteLists: () -> Unit = {},
+    onNavigateToOrganizedTrips: (String) -> Unit = {},
+    onNavigateToChat: (String) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(username) {
         viewModel.loadProfile(username)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.navigateToChatEvent.collect { conversationId ->
+            onNavigateToChat(conversationId)
+        }
     }
 
     Box(
@@ -79,40 +92,12 @@ fun UserProfileScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(CircleShape)
-                                    .background(OrangeAvatarColor),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                val avatarUrl = user.avatarUrl
-                                    ?.replace("localhost", "10.0.2.2")
-                                    ?.takeIf { it.isNotBlank() }
-                                    ?: ""
-
-                                if (avatarUrl.isNotBlank()) {
-                                    SubcomposeAsyncImage(
-                                        model = avatarUrl,
-                                        contentDescription = "Avatar di ${user.username}",
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(CircleShape)
-                                    )
-                                } else {
-                                    val initialNome = user.firstName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                                    val initialCognome = user.lastName?.takeIf { it.isNotBlank() }?.take(1)?.uppercase() ?: ""
-                                    val initials = if (initialNome.isBlank() && initialCognome.isBlank()) "?" else "$initialNome$initialCognome"
-
-                                    Text(
-                                        text = initials,
-                                        color = Color.White,
-                                        fontSize = 36.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                }
-                            }
+                            it.roadies.android_app.ui.components.UserAvatar(
+                                username = user.username,
+                                avatarUrl = user.avatarUrl?.replace("localhost", "10.0.2.2"),
+                                modifier = Modifier.size(100.dp),
+                                fontSize = 36.sp
+                            )
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -160,6 +145,63 @@ fun UserProfileScreen(
                             )
 
                             BadgeStatItem(badgeName = user.badge?.toString() ?: "NONE")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = { onNavigateToFavoriteLists() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = OrangeAvatarColor),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.Favorite, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Liste Preferiti", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        }
+
+                        if (state.isOrganizer) {
+                            Log.d("È UN ORGANIZZATORE", "organizer_check")
+                            Button(
+                                onClick = {
+                                    state.user?.username?.let { username ->
+                                        onNavigateToOrganizedTrips(username)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = DarkBlueBg),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(Icons.Default.FlightTakeoff, contentDescription = null, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Vedi Viaggi Organizzati", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                            }
+
+                            OutlinedButton(
+                                onClick = { viewModel.contactOrganizer() },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = DarkBlueBg)
+                            ) {
+                                Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Contatta Organizzatore", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                            }
+                        } else {
+                            Log.d("NON E UN ORGANIZZATORE", "organizer_check")
                         }
                     }
 

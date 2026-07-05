@@ -5,10 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import it.roadies.android_app.client.models.booking.BookingDraftRequest
+import it.roadies.android_app.client.models.review.ReplyRequest
+import it.roadies.android_app.client.models.review.ReviewResponse
+import it.roadies.android_app.client.models.review.ReviewUpdateRequest
 import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
 import it.roadies.android_app.repository.AuthRepository
 import it.roadies.android_app.repository.BookingRepository
+import it.roadies.android_app.repository.ReviewRepository
 import it.roadies.android_app.repository.TravelRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +21,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
+import it.roadies.android_app.repository.UserRepository
 
 data class TravelDetailState(
     val isLoading: Boolean = false,
@@ -33,8 +39,16 @@ data class TravelDepartureState(
     val errorMessage: String? = null
 )
 
+data class TravelReviewsState(
+    val isLoading: Boolean = false,
+    val reviews: List<ReviewResponse>? = emptyList(),
+    val usersInfo: Map<String, MinimalInformationResponseDTO> = emptyMap(),
+    val errorMessage: String? = null,
+    val currentUserId: String? = null
+)
+
 @HiltViewModel
-class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository,private val bookingRepository: BookingRepository, private val authRepository: AuthRepository): ViewModel() {
+class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository,private val bookingRepository: BookingRepository, private val authRepository: AuthRepository, private val reviewRepository: ReviewRepository, private val userRepository: UserRepository): ViewModel() {
     val id: String? = savedStateHandle["id"]
     private val _uiState = MutableStateFlow(TravelDetailState())
     val uiState = _uiState.asStateFlow()
@@ -42,10 +56,18 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
     private val _departuresState = MutableStateFlow(TravelDepartureState())
     val departuresState = _departuresState.asStateFlow()
 
+    private val _reviewsState = MutableStateFlow(TravelReviewsState())
+    val reviewsState = _reviewsState.asStateFlow()
+
     init {
         val uuid = runCatching { UUID.fromString(id) }.getOrNull()
         if (uuid != null) loadTravel(uuid)
         else _uiState.value = TravelDetailState(errorMessage = "Travel id not valid")
+
+        viewModelScope.launch {
+            val user = userRepository.getCurrentUser()
+            _reviewsState.value = _reviewsState.value.copy(currentUserId = user?.id)
+        }
     }
 
     private fun loadTravel(id: UUID){
@@ -55,9 +77,41 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
             val response = travelRepository.getTravelById(id)
             if (response.success){
                 _uiState.value = TravelDetailState(travel = response.data, isLoading = false)
+                loadReviews(id)
             }
             else {
                 _uiState.value = TravelDetailState(isLoading = false, errorMessage = response.errorMessage)
+            }
+        }
+    }
+
+    private fun loadReviews(id: UUID) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val reviewsResponse = reviewRepository.getReviews(id)
+            if (reviewsResponse.success && reviewsResponse.data != null){
+                val reviews = reviewsResponse.data
+                val userIds = reviews.map { it.userId }.toSet().toList()
+                var usersMap = emptyMap<String, MinimalInformationResponseDTO>()
+                
+                if (userIds.isNotEmpty()) {
+                    val usersResponse = userRepository.getOrganizersInfo(userIds)
+                    if (usersResponse.success && usersResponse.data != null) {
+                        usersMap = usersResponse.data.associateBy { it.keycloakId ?: "" }.filterKeys { it.isNotEmpty() }
+                    }
+                }
+                
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false, 
+                    reviews = reviews, 
+                    usersInfo = usersMap,
+                    errorMessage = null
+                )
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false, 
+                    errorMessage = reviewsResponse.errorMessage ?: "Error while fetching reviews"
+                )
             }
         }
     }
@@ -112,5 +166,55 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
 
     fun onLoginHandled() {
         _uiState.value = _uiState.value.copy(requireLogin = false)
+    }
+
+    fun deleteReview(reviewId: UUID) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val response = reviewRepository.deleteReview(reviewId)
+            if (response.success) {
+                val uuid = runCatching { UUID.fromString(id) }.getOrNull()
+                if (uuid != null) loadReviews(uuid)
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    errorMessage = response.errorMessage ?: "Error deleting review"
+                )
+            }
+        }
+    }
+
+    fun updateReview(reviewId: UUID, rating: Int, newContent: String) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val request = ReviewUpdateRequest(rating = rating, content = newContent)
+            val response = reviewRepository.updateReview(reviewId, request)
+            if (response.success) {
+                val uuid = runCatching { UUID.fromString(id) }.getOrNull()
+                if (uuid != null) loadReviews(uuid)
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    errorMessage = response.errorMessage ?: "Error updating review"
+                )
+            }
+        }
+    }
+
+    fun replyToReview(reviewId: UUID, replyContent: String) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val request = ReplyRequest(content = replyContent)
+            val response = reviewRepository.createReply(reviewId, request)
+            if (response.success) {
+                val uuid = runCatching { UUID.fromString(id) }.getOrNull()
+                if (uuid != null) loadReviews(uuid)
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    errorMessage = response.errorMessage ?: "Error replying to review"
+                )
+            }
+        }
     }
 }

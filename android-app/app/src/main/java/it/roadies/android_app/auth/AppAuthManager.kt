@@ -20,6 +20,7 @@ class AppAuthManager {
             Uri.parse(AuthConfig.REDIRECT_URI)
         )
             .setScope("openid profile email")
+            .setPrompt("login")
             .build()
     }
 }

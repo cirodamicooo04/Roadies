@@ -2,6 +2,7 @@ package it.roadies.user_service.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
+import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.response.UserResponseDTO;
 import it.roadies.user_service.services.AdminService;
 import jakarta.ws.rs.Path;
@@ -35,8 +36,8 @@ public class AdminController {
             description = "Permette ad un admin di sbloccare un utente specificato tramite il suo ID Keycloak. Un utente sbloccato potrà accedere nuovamente al sistema."
     )
     @PutMapping("users/{id}/unblock")
-    public ResponseEntity<Void> unblockUser(@PathVariable String keycloakId) {
-        adminService.unblockUser(keycloakId);
+    public ResponseEntity<Void> unblockUser(@PathVariable String id) {
+        adminService.unblockUser(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -59,7 +60,6 @@ public class AdminController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("users")
     @Operation(summary = "Recupera utenti filtrati", description = "Recupera una lista di utenti filtrati in base allo stato specificato. " +
             "Se non viene fornito alcun filtro, il valore predefinito è 'ACTIVE'.")
@@ -68,5 +68,14 @@ public class AdminController {
 
         List<UserResponseDTO> users = adminService.getUsersByFilter(filter);
         return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/best-travelers")
+    @Operation(
+            summary = "Recupera i migliori 20 viaggiatori",
+            description = "Recupera una lista dei migliori 20 viaggiatori in base ai punti accumulati")
+    public ResponseEntity<List<UserProfileResponseDTO>> getBest20Travelers() {
+        List<UserProfileResponseDTO> bestTravelers = adminService.getBest20Travelers();
+        return ResponseEntity.ok(bestTravelers);
     }
 }

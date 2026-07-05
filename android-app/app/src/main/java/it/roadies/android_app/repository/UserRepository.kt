@@ -131,17 +131,31 @@ class UserRepository @Inject constructor(
         forcedBirthDate: LocalDate? = null,
         forcedAvatarUrl: String? = null
     ) {
-        val existing = userDao.getCurrentUser() ?: return
+        val existing = userDao.getCurrentUser()
 
-        val updatedUser = existing.copy(
-            firstName = dto.firstName.safeFirstName(existing.firstName),
-            lastName = dto.lastName.safeLastName(existing.lastName),
-            username = dto.username.safeUsername(existing.username),
-            avatarUrl = forcedAvatarUrl ?: dto.avatarUrl ?: existing.avatarUrl,
-            birthDate = forcedBirthDate ?: existing.birthDate,
-            points = dto.points ?: existing.points,
-            badge = dto.badge?.toString() ?: existing.badge
-        )
+        val updatedUser = if (existing != null) {
+            existing.copy(
+                firstName = dto.firstName.safeFirstName(existing.firstName),
+                lastName = dto.lastName.safeLastName(existing.lastName),
+                username = dto.username.safeUsername(existing.username),
+                avatarUrl = forcedAvatarUrl ?: dto.avatarUrl ?: existing.avatarUrl,
+                birthDate = forcedBirthDate ?: existing.birthDate,
+                points = dto.points ?: existing.points,
+                badge = dto.badge?.toString() ?: existing.badge
+            )
+        } else {
+            User(
+                id = dto.username ?: "user123",
+                firstName = dto.firstName.safeFirstName("User"),
+                lastName = dto.lastName.safeLastName("-"),
+                username = dto.username.safeUsername("user123"),
+                email = "user@roadies.it",
+                avatarUrl = forcedAvatarUrl ?: dto.avatarUrl ?: "",
+                birthDate = forcedBirthDate,
+                points = dto.points ?: 0L,
+                badge = dto.badge?.toString() ?: "BRONZE"
+            )
+        }
 
         userDao.insert(updatedUser)
     }
@@ -227,7 +241,23 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun getOrganizersInfo(ids: List<String> ): ApiResponse<List<MinimalInformationResponseDTO>> {
+    suspend fun getOrganizersInfo(ids: List<String>): ApiResponse<List<MinimalInformationResponseDTO>> {
         return safeApiCall { userApi.getMinimalInformation(ids) }
+    }
+
+    suspend fun getOrganizerInfo(username: String ): ApiResponse<MinimalInformationResponseDTO> {
+        return safeApiCall { userApi.getUserMinimalInformation(username) }
+    }
+
+    suspend fun checkIsOrganizer(username: String): ApiResponse<Boolean> {
+        return safeApiCall {
+            userApi.checkIsOrganizer(username)
+        }
+    }
+
+    suspend fun getUserIdByUsername(username: String): ApiResponse<String> {
+        return safeApiCall {
+            userApi.getUserIdByUsername(username)
+        }
     }
 }

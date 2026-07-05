@@ -49,4 +49,7 @@ public class Review {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "review", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private ReviewReply reply;
 }

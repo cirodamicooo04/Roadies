@@ -16,4 +16,5 @@ public class ReviewResponse {
     private int rating;
     private String content;
     private LocalDateTime createdAt;
+    private ReplyResponse reply;
 }

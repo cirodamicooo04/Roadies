@@ -18,4 +18,7 @@ public interface UserService {
     UserProfileResponseDTO uploadAvatar(String keycloakId, MultipartFile avatarFile);
     void requestOrganizerRole(String keycloakId);
     List<MinimalInformationResponseDTO> getMinimalInformation(List<String> keycloakId);
+    boolean isUserOrganizer(String username);
+    String findIdByUsername(String username);
+    MinimalInformationResponseDTO getUserMinimalInformation(String userId);
 }

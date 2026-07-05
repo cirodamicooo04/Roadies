@@ -90,7 +90,13 @@ public class UserDocumentServiceImpl implements UserDocumentService {
         try {
             UserDocument saved = documentRepository.save(doc);
             log.info("Documento salvato nel database");
-            return userDocumentMapper.toDto(saved);
+            
+            UserDocumentResponseDTO responseDto = userDocumentMapper.toDto(saved);
+            if (responseDto.getFileUrl() != null && !responseDto.getFileUrl().isBlank()) {
+                String presignedUrl = minioService.generatePresignedUrl(responseDto.getFileUrl(), documentBucket);
+                responseDto.setFileUrl(presignedUrl);
+            }
+            return responseDto;
         } catch (Exception e) {
             log.error("Errore salvataggio DB. Eseguo rollback: elimino il file da MinIO...", e);
             try {
@@ -112,7 +118,16 @@ public class UserDocumentServiceImpl implements UserDocumentService {
         }
 
         List<UserDocument> docs = documentRepository.findByUserId(userId);
-        return userDocumentMapper.toDtoList(docs);
+        List<UserDocumentResponseDTO> dtoList = userDocumentMapper.toDtoList(docs);
+
+        dtoList.forEach(dto -> {
+            if (dto.getFileUrl() != null && !dto.getFileUrl().isBlank()) {
+                String presignedUrl = minioService.generatePresignedUrl(dto.getFileUrl(), documentBucket);
+                dto.setFileUrl(presignedUrl);
+            }
+        });
+
+        return dtoList;
     }
 
     @Override
@@ -120,7 +135,16 @@ public class UserDocumentServiceImpl implements UserDocumentService {
         log.info("Recupero documenti per l'utente");
 
         List<UserDocument> docs = documentRepository.findByUserId(userId);
-        return userDocumentMapper.toDtoList(docs);
+        List<UserDocumentResponseDTO> dtoList = userDocumentMapper.toDtoList(docs);
+
+        dtoList.forEach(dto -> {
+            if (dto.getFileUrl() != null && !dto.getFileUrl().isBlank()) {
+                String presignedUrl = minioService.generatePresignedUrl(dto.getFileUrl(), documentBucket);
+                dto.setFileUrl(presignedUrl);
+            }
+        });
+
+        return dtoList;
     }
 
     @Override
@@ -151,7 +175,12 @@ public class UserDocumentServiceImpl implements UserDocumentService {
             log.info("Documento RIFIUTATO. Motivo: {}", reason);
         }
 
-        return userDocumentMapper.toDto(documentRepository.save(doc));
+        UserDocumentResponseDTO responseDto = userDocumentMapper.toDto(documentRepository.save(doc));
+        if (responseDto.getFileUrl() != null && !responseDto.getFileUrl().isBlank()) {
+            String presignedUrl = minioService.generatePresignedUrl(responseDto.getFileUrl(), documentBucket);
+            responseDto.setFileUrl(presignedUrl);
+        }
+        return responseDto;
     }
 
     @Override

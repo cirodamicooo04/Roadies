@@ -49,6 +49,15 @@ public class MinioServiceImpl implements MinioService {
         try {
 
             String extension = getFileExtension(file.getOriginalFilename());
+            if (extension.isEmpty()) {
+                if ("application/pdf".equals(contentType)) {
+                    extension = ".pdf";
+                } else if ("image/jpeg".equals(contentType)) {
+                    extension = ".jpg";
+                } else if ("image/png".equals(contentType)) {
+                    extension = ".png";
+                }
+            }
             String fileName = UUID.randomUUID() + extension;
 
             InputStream inputStream = file.getInputStream();
@@ -97,13 +106,29 @@ public class MinioServiceImpl implements MinioService {
         return minioUrl + "/" + bucketName + "/" + fileName;
     }
 
+    @Value("${minio.accessKey}")
+    private String accessKey;
+
+    @Value("${minio.secretKey}")
+    private String secretKey;
+
     @Override
     public String generatePresignedUrl(String fileName, String bucketName) {
         if (fileName == null || fileName.isBlank()) {
             return null;
         }
         try {
-            return minioClient.getPresignedObjectUrl(
+            // Genera il client per i presigned url sostituendo localhost con 10.0.2.2
+            // In questo modo la firma AWS viene calcolata per l'host 10.0.2.2 (utilizzato dall'emulatore Android),
+            // evitando l'errore HTTP 403 SignatureDoesNotMatch quando l'app rimpiazza localhost con 10.0.2.2.
+            String presignedEndpoint = minioUrl.replace("localhost", "10.0.2.2").replace("127.0.0.1", "10.0.2.2");
+            MinioClient presignedClient = MinioClient.builder()
+                    .endpoint(presignedEndpoint)
+                    .credentials(accessKey, secretKey)
+                    .region("us-east-1") // Evita il discovery della region che causa Connection Timeout
+                    .build();
+
+            String url = presignedClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(bucketName)
@@ -111,6 +136,8 @@ public class MinioServiceImpl implements MinioService {
                             .expiry(15, TimeUnit.MINUTES)
                             .build()
             );
+            log.info("Generato Presigned URL per {}: {}", fileName, url);
+            return url;
         } catch (Exception e) {
             log.error("Errore nella generazione del Presigned URL per {}: {}", fileName, e.getMessage());
             throw new StorageException(messageLang.getMessage("error.access.private.image"));

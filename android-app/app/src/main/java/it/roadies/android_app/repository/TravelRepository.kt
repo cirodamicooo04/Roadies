@@ -119,4 +119,8 @@ class TravelRepository @Inject constructor(
     suspend fun confirmDeparture(travelId: UUID, departureId: UUID): ApiResponse<TravelDepartureResponse> {
         return safeApiCall { viaggiApi.confirmDeparture(travelId, departureId) }
     }
+
+    suspend fun getOrganizerTravelsActivities (id: String): ApiResponse<OrganizerTravelsActivityResponse> {
+        return safeApiCall { viaggiApi.getOrganizerTravelsActivity(id) }
+    }
 }

@@ -227,4 +227,23 @@
     <string name="confirm_departure">Conferma partenza</string>
     <string name="confirm_departure_body_travel">Vuoi davvero confermare questa partenza? Non potrai più modificare questo viaggio.</string>
     <string name="confirm_departure_body_actvity">Vuoi davvero confermare questa partenza? Non potrai più modificare questa attività.</string>
+    <string name="travel_activities_organized">Viaggi ed attività organizzate</string>
+    <string name="reviews">Recensioni</string>
+    <string name="no_reviews">Nessuna recensione ancora.</string>
+    <string name="show_all_reviews">Mostra tutte le %1$d recensioni</string>
+    <string name="all_reviews">Tutte le recensioni (%1$d)</string>
+    <string name="read_more">Leggi di più</string>
+    <string name="reply_from_organizer">1 risposta dall\'organizzatore</string>
+    <string name="fictitious_user">Utente Fittizio</string>
+    <string name="loading_reviews_error">Impossibile caricare le recensioni</string>
+    <string name="review_details">Dettaglio recensione</string>
+    <string name="organizer_reply">Risposta dell\'organizzatore</string>
+    <string name="delete_review_title">Elimina recensione</string>
+    <string name="delete_review_msg">Sei sicuro di voler eliminare questa recensione?</string>
+    <string name="edit_review_title">Modifica recensione</string>
+    <string name="reply_review_title">Rispondi alla recensione</string>
+    <string name="submit">Invia</string>
+    <string name="type_your_reply">Scrivi la tua risposta...</string>
+    <string name="type_your_review">Scrivi la tua recensione...</string>
+    <string name="reply">Rispondi</string>
 </resources>

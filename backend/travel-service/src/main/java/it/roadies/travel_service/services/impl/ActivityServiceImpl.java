@@ -207,7 +207,12 @@ public class ActivityServiceImpl implements ActivityService {
     @Transactional
     public void updateActivityReviews(ReviewActivityUpdateEvent event) {
         Activity activity = activityRepository.findById(event.getActivityId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
-        activity.setAverageRating(event.getAverageRating());
+
+        double rawRating = event.getAverageRating();
+        double roundedRating = Math.round(rawRating * 100.0) / 100.0;
+
+
+        activity.setAverageRating(roundedRating);
         activity.setNumberOfRatings(event.getNumberOfRatings());
         activityRepository.save(activity);
     }

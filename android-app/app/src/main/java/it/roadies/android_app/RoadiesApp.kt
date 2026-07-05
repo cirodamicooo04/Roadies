@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
+import androidx.compose.material.icons.filled.Dataset
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.PeopleAlt
@@ -42,9 +43,16 @@ import it.roadies.android_app.ui.bookingFlow.BookingStepPeopleScreen
 import it.roadies.android_app.viewmodel.bookingFlow.BookingFlowViewModel
 import it.roadies.android_app.ui.bookingHome.BookingDetailScreen
 import it.roadies.android_app.ui.bookingHome.BookingHomeScreen
+import it.roadies.android_app.ui.chat.ChatListScreen
+import it.roadies.android_app.ui.chat.ChatScreen
 import it.roadies.android_app.ui.user.EditProfileScreen
 import it.roadies.android_app.ui.user.FriendScreen
+import it.roadies.android_app.ui.user.OrganizerTravelsScreen
 import it.roadies.android_app.ui.user.UserProfileScreen
+import it.roadies.android_app.ui.admin.AdminUsersScreen
+import it.roadies.android_app.ui.admin.MetadataScreen
+import it.roadies.android_app.ui.admin.PendingRequestsScreen
+import it.roadies.android_app.ui.user.UserDocumentScreen
 import it.roadies.android_app.viewmodel.AuthViewModel
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -159,6 +167,27 @@ fun RoadiesApp(
                                 Text(stringResource(R.string.statistics))
                             }
                         )
+                        NavigationBarItem(
+                            selected = currentDestination?.hierarchy?.any { it.route == "metadata" } == true,
+                            onClick = {
+                                navHostController.navigate("metadata") {
+                                    popUpTo(navHostController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.Dataset,
+                                    contentDescription = "metadata"
+                                )
+                            },
+                            label = {
+                                Text("Metadata")
+                            }
+                        )
+
+
 
                     } else {
 
@@ -262,7 +291,7 @@ fun RoadiesApp(
         }
 
     ) {
-        paddingValues ->
+            paddingValues ->
         if (!authState.isLoading) {
             NavigationView(
                 navHostController = navHostController,
@@ -421,7 +450,6 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 )
             }
 
-
         }
 
 
@@ -470,13 +498,37 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             )
         }
         composable(route = "handle_users") {
-
+            AdminUsersScreen(viewModel = hiltViewModel(), navController = navHostController)
         }
+
+        composable(route = "pending_requests") {
+            PendingRequestsScreen(
+                viewModel = hiltViewModel(),
+            )
+        }
+
         composable(route = "statistics") {
 
         }
-        composable(route = "chat") {
+        composable(route = "metadata"){
+            MetadataScreen()
+        }
 
+        composable(route = "chat") {
+            ChatListScreen(
+                onNavigateToChat = { conversationId ->
+                    navHostController.navigate("chat/$conversationId")
+                }
+            )
+        }
+
+        composable(
+            route = "chat/{conversationId}",
+            arguments = listOf(navArgument("conversationId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val conversationId = backStackEntry.arguments?.getString("conversationId").orEmpty()
+
+            ChatScreen(conversationId = conversationId, onBack = { navHostController.popBackStack() })
         }
 
         navigation(route = "organizer_graph", startDestination = "handle_travels") {
@@ -529,8 +581,29 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 val username = backStackEntry.arguments?.getString("username").orEmpty()
                 UserProfileScreen(
                     username = username,
+                    onBack = { navHostController.popBackStack() },
+                    onNavigateToChat = { conversationId ->
+                        navHostController.navigate("chat/$conversationId")
+                    },
+                    onNavigateToOrganizedTrips = { organizerUsername ->
+                        if (!organizerUsername.isNullOrEmpty()) {
+                            navHostController.navigate("organizer_travels/$organizerUsername")
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route="user_documents" ){
+                UserDocumentScreen(
                     onBack = { navHostController.popBackStack() }
                 )
+            }
+
+            composable(route="organizer_travels/{username}",
+                arguments = listOf(navArgument("username") {type = NavType.StringType})
+            ){
+                OrganizerTravelsScreen(navHostController = navHostController)
             }
         }
     }

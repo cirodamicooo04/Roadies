@@ -6,21 +6,24 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import it.roadies.android_app.BuildConfig
+import it.roadies.android_app.client.apis.admin.AdminManagementApi
+import it.roadies.android_app.client.apis.review.ReviewApi
+import it.roadies.android_app.client.apis.review.ReviewReplyApi
 import it.roadies.android_app.client.apis.booking.GestioneDocumentiApi
 import it.roadies.android_app.client.apis.booking.GestionePagamentoApi
 import it.roadies.android_app.client.apis.booking.GestionePrenotazioniApi
+import it.roadies.android_app.client.apis.chat.ChatApi
 import it.roadies.android_app.client.apis.travel.AttivitApi
 import it.roadies.android_app.client.apis.travel.FavouriteListsManagementApi
 import it.roadies.android_app.client.apis.travel.MetadatiApi
 import it.roadies.android_app.client.apis.travel.PhotonApi
-import it.roadies.android_app.client.apis.travel.ViaggiApi
 import it.roadies.android_app.client.apis.user.DocumentManagementApi
 import it.roadies.android_app.client.apis.user.FriendshipManagementApi
 import it.roadies.android_app.client.apis.user.UserManagementApi
 import it.roadies.android_app.client.infrastructure.Serializer
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationService
+import it.roadies.android_app.BuildConfig
 import net.openid.appauth.connectivity.ConnectionBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -33,6 +36,7 @@ import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import it.roadies.android_app.client.apis.travel.ViaggiApi as ViaggiApi1
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
@@ -95,8 +99,8 @@ object NetworkModule {
     // travel service apis
     @Provides
     @Singleton
-    fun provideViaggiApi(retrofit: Retrofit): ViaggiApi =
-        retrofit.create(ViaggiApi::class.java)
+    fun provideViaggiApi(retrofit: Retrofit): ViaggiApi1 =
+        retrofit.create(ViaggiApi1::class.java)
 
     @Provides
     @Singleton
@@ -174,10 +178,32 @@ object NetworkModule {
         URL(uri.toString()).openConnection() as HttpURLConnection
     }
 
+    @Provides
+    @Singleton
+    fun provideAdminApi(retrofit: Retrofit): AdminManagementApi {
+        return retrofit.create(AdminManagementApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideReviewApi(retrofit: Retrofit): ReviewApi =
+        retrofit.create(ReviewApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideReviewReplyApi(retrofit: Retrofit): ReviewReplyApi =
+        retrofit.create(ReviewReplyApi::class.java)
+
     // trustManager che accetta qualsiasi certificato
     private fun trustAllManager(): X509TrustManager = object : X509TrustManager {
         override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
         override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
         override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+    }
+
+    @Provides
+    @Singleton
+    fun provideChatApi(retrofit: Retrofit): ChatApi {
+        return retrofit.create(ChatApi::class.java)
     }
 }

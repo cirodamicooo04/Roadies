@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +34,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.draw.rotate
@@ -54,6 +54,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,13 +72,17 @@ import it.roadies.android_app.ui.travel.components.DetailHeader
 import it.roadies.android_app.ui.travel.components.DetailImageCarousel
 import it.roadies.android_app.ui.travel.components.ExpandableDescription
 import it.roadies.android_app.ui.travel.components.LocationMap
+import it.roadies.android_app.ui.travel.components.Reviews
 import it.roadies.android_app.viewmodel.TravelDetailViewModel
+import it.roadies.android_app.viewmodel.TravelReviewsState
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () -> Unit, viewModel: TravelDetailViewModel = hiltViewModel()){
     val uiState by viewModel.uiState.collectAsState()
     val departuresState by viewModel.departuresState.collectAsState()
+    val reviewsState by viewModel.reviewsState.collectAsState()
 
     val departuresSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isDeparturesSheetOpen by remember { mutableStateOf(false) }
@@ -92,7 +97,11 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
         TravelDetail(uiState.travel, onCheckAvailability = {
             viewModel.loadDepartures()
             isDeparturesSheetOpen = true
-        })
+        }, reviewsState = reviewsState ,onFavoriteClick = {
+            travelId -> // vincenzo usa travel id per aggiungerlo ai preferiti
+        }, onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
+        onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
+        onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) })
     }
 
     LaunchedEffect(uiState.requireLogin) {
@@ -157,7 +166,18 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
 }
 
 @Composable
-fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
+fun TravelDetail(
+    travel: TravelResponse?, 
+    reviewsState: TravelReviewsState,
+    onCheckAvailability: () -> Unit, 
+    onFavoriteClick: (UUID) -> Unit,
+    onDeleteReview: (UUID) -> Unit,
+    onEditReview: (UUID, Int, String) -> Unit,
+    onReplyReview: (UUID, String) -> Unit
+){
+    //variabile is favorite , da cambiare in caso volessimo fare cuoricino rosso se favorito
+    var isFavorite by remember { mutableStateOf(false) }
+
     if (travel == null){
         BoxCentered(text = stringResource(R.string.error_loading_travel))
     } else {
@@ -172,7 +192,11 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
                 DetailHeader(
                     title = travel.title,
                     destination = travel.destination,
-                    country = travel.country
+                    country = travel.country,
+                    isFavorite = isFavorite,
+                    onFavoriteClick = {
+                        travel.id?.let { id -> onFavoriteClick(id) }
+                    }
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -205,8 +229,17 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
                 //travel activity con ogni attività collasabile
                 Activities(travel.activities)
 
-                // recensioni
-
+                Reviews(
+                    isLoading = reviewsState.isLoading,
+                    errorMessage = reviewsState.errorMessage,
+                    reviews = reviewsState.reviews,
+                    usersInfo = reviewsState.usersInfo,
+                    currentUserId = reviewsState.currentUserId,
+                    travelOwnerId = travel.ownerId,
+                    onDeleteReview = onDeleteReview,
+                    onEditReview = onEditReview,
+                    onReplyReview = onReplyReview
+                )
             }
 
             CheckAvailabilityButton(onClick = {
@@ -215,8 +248,6 @@ fun TravelDetail(travel: TravelResponse?, onCheckAvailability: () -> Unit){
         }
     }
 }
-
-
 
 @Composable
 fun TravelTags(tags: List<TravelTagResponse>?) {
@@ -309,9 +340,7 @@ fun CollasableActivityCard(activity: ActivityResponse?){
                         modifier = Modifier.size(70.dp)
                     ) {
                         SubcomposeAsyncImage(
-                            // TODO: Da risolvere problema url
-                            //model = imageUrl,
-                            model = "http://10.0.2.2:9000/travels/69b14ce2-af34-497f-8d03-f2555600700e-Screenshot_2026-04-11_alle_20.38.04_(2).png",
+                            model = activity?.images?.firstOrNull()?.url?.replace("localhost","10.0.2.2"),
                             contentDescription = stringResource(R.string.activity_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize(),
@@ -321,9 +350,12 @@ fun CollasableActivityCard(activity: ActivityResponse?){
                                 }
                             },
                             error = {
-                                Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-                                    Icon(imageVector = Icons.Default.Warning, contentDescription = "Errore immagine", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
-                                }
+                                Image(
+                                    painter = painterResource(id = R.drawable.travel_placeholder),
+                                    contentDescription = "Errore immagine",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
                             }
                         )
                     }
@@ -449,3 +481,5 @@ fun DepartureCard(departure: TravelDepartureResponse, onBookClick: () -> Unit) {
         }
     }
 }
+
+
