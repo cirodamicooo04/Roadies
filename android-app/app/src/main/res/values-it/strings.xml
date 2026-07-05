@@ -238,5 +238,12 @@
     <string name="loading_reviews_error">Impossibile caricare le recensioni</string>
     <string name="review_details">Dettaglio recensione</string>
     <string name="organizer_reply">Risposta dell\'organizzatore</string>
-
+    <string name="delete_review_title">Elimina recensione</string>
+    <string name="delete_review_msg">Sei sicuro di voler eliminare questa recensione?</string>
+    <string name="edit_review_title">Modifica recensione</string>
+    <string name="reply_review_title">Rispondi alla recensione</string>
+    <string name="submit">Invia</string>
+    <string name="type_your_reply">Scrivi la tua risposta...</string>
+    <string name="type_your_review">Scrivi la tua recensione...</string>
+    <string name="reply">Rispondi</string>
 </resources>

@@ -10,6 +10,16 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -440,6 +450,501 @@ fun NotEditableInfoBanner(text: String) {
                 color = Color(0xFF1976D2),
                 style = MaterialTheme.typography.bodyMedium
             )
+        }
+    }
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun Reviews(
+    isLoading: Boolean,
+    errorMessage: String?,
+    reviews: List<it.roadies.android_app.client.models.review.ReviewResponse>?,
+    usersInfo: Map<String, it.roadies.android_app.client.models.user.MinimalInformationResponseDTO>,
+    currentUserId: String?,
+    travelOwnerId: String?,
+    onDeleteReview: (UUID) -> Unit,
+    onEditReview: (UUID, Int, String) -> Unit,
+    onReplyReview: (UUID, String) -> Unit
+) {
+    var isListSheetOpen by remember { mutableStateOf(false) }
+    var selectedReview by remember { mutableStateOf<it.roadies.android_app.client.models.review.ReviewResponse?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    var reviewToDelete by remember { mutableStateOf<it.roadies.android_app.client.models.review.ReviewResponse?>(null) }
+    var reviewToEdit by remember { mutableStateOf<it.roadies.android_app.client.models.review.ReviewResponse?>(null) }
+    var reviewToReply by remember { mutableStateOf<it.roadies.android_app.client.models.review.ReviewResponse?>(null) }
+    
+    if (reviewToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { reviewToDelete = null },
+            title = { Text(stringResource(R.string.delete_review_title)) },
+            text = { Text(stringResource(R.string.delete_review_msg)) },
+            confirmButton = {
+                Button(onClick = {
+                    reviewToDelete?.id?.let { onDeleteReview(it) }
+                    reviewToDelete = null
+                }) { Text(stringResource(R.string.confirm)) }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { reviewToDelete = null }) { Text(stringResource(R.string.cancel)) }
+            }
+        )
+    }
+    
+    if (reviewToReply != null) {
+        var replyContent by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { reviewToReply = null },
+            title = { Text(stringResource(R.string.reply_review_title)) },
+            text = {
+                OutlinedTextField(
+                    value = replyContent,
+                    onValueChange = { replyContent = it },
+                    label = { Text(stringResource(R.string.type_your_reply)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        reviewToReply?.id?.let { onReplyReview(it, replyContent.trim()) }
+                        reviewToReply = null
+                    },
+                    enabled = replyContent.trim().isNotEmpty()
+                ) { Text(stringResource(R.string.submit)) }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { reviewToReply = null }) { Text(stringResource(R.string.cancel)) }
+            }
+        )
+    }
+
+    if (reviewToEdit != null) {
+        var editContent by remember { mutableStateOf(reviewToEdit?.content ?: "") }
+        var editRating by remember { mutableStateOf(reviewToEdit?.rating ?: 5) }
+        AlertDialog(
+            onDismissRequest = { reviewToEdit = null },
+            title = { Text(stringResource(R.string.edit_review_title)) },
+            text = {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        for (i in 1..5) {
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = null,
+                                tint = if (i <= editRating) Color(0xFFFFD700) else Color.LightGray,
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clickable { editRating = i }
+                            )
+                        }
+                    }
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = editContent,
+                        onValueChange = { editContent = it },
+                        label = { Text(stringResource(R.string.type_your_review)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        reviewToEdit?.id?.let { onEditReview(it, editRating, editContent.trim()) }
+                        reviewToEdit = null
+                    },
+                    enabled = editContent.trim().isNotEmpty()
+                ) { Text(stringResource(R.string.save)) }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { reviewToEdit = null }) { Text(stringResource(R.string.cancel)) }
+            }
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp, bottom = 16.dp)
+    ) {
+        if (isLoading) {
+            Text(
+                text = stringResource(R.string.reviews),
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (errorMessage != null) {
+            Text(
+                text = stringResource(R.string.reviews),
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                Text(text = stringResource(R.string.loading_reviews_error), color = MaterialTheme.colorScheme.error)
+            }
+        } else if (reviews.isNullOrEmpty()) {
+            Text(
+                text = stringResource(R.string.reviews),
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                Text(text = stringResource(R.string.no_reviews), color = Color.Gray)
+            }
+        } else {
+            val totalReviews = reviews.size
+            val averageRating = reviews.map { it.rating }.average()
+            val formattedRating = String.format(java.util.Locale.US, "%.1f", averageRating)
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.reviews),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(8.dp))
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = null,
+                    tint = Color(0xFFFFD700), // Gold color
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = formattedRating,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            }
+
+            val topReviews = reviews.take(5)
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
+                items(topReviews) { review ->
+                    ReviewCard(
+                        review = review,
+                        user = usersInfo[review.userId],
+                        modifier = Modifier.width(300.dp).height(240.dp).padding(bottom = 8.dp),
+                        currentUserId = currentUserId,
+                        travelOwnerId = travelOwnerId,
+                        onEditClick = { reviewToEdit = review },
+                        onDeleteClick = { reviewToDelete = review },
+                        onReplyClick = { reviewToReply = review },
+                        onReviewClick = { selectedReview = it }
+                    )
+                }
+            }
+
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = { isListSheetOpen = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = stringResource(R.string.show_all_reviews, totalReviews))
+            }
+        }
+    }
+
+    if (isListSheetOpen && !reviews.isNullOrEmpty()) {
+        ModalBottomSheet(
+            onDismissRequest = { isListSheetOpen = false },
+            sheetState = sheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .fillMaxHeight(0.9f)
+            ) {
+                Text(
+                    text = stringResource(R.string.all_reviews, reviews.size),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(reviews) { review ->
+                        ReviewCard(
+                            review = review,
+                            user = usersInfo[review.userId],
+                            modifier = Modifier.fillMaxWidth().height(240.dp).padding(bottom = 8.dp),
+                            currentUserId = currentUserId,
+                            travelOwnerId = travelOwnerId,
+                            onEditClick = { reviewToEdit = review },
+                            onDeleteClick = { reviewToDelete = review },
+                            onReplyClick = { reviewToReply = review },
+                            onReviewClick = { selectedReview = it }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    selectedReview?.let { review ->
+        ReviewDetailSheet(
+            review = review,
+            user = usersInfo[review.userId],
+            onDismiss = { selectedReview = null }
+        )
+    }
+}
+
+@Composable
+fun ReviewCard(
+    review: it.roadies.android_app.client.models.review.ReviewResponse, 
+    user: it.roadies.android_app.client.models.user.MinimalInformationResponseDTO?, 
+    modifier: Modifier = Modifier, 
+    currentUserId: String? = null,
+    travelOwnerId: String? = null,
+    onEditClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
+    onReplyClick: () -> Unit = {},
+    onReviewClick: (it.roadies.android_app.client.models.review.ReviewResponse) -> Unit
+) {
+    val username = user?.username ?: stringResource(R.string.fictitious_user)
+    val avatarInitial = username.take(1).uppercase()
+    
+    Card(
+        modifier = modifier.clickable { onReviewClick(review) },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = avatarInitial,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = username,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        for (i in 1..5) {
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = null,
+                                tint = if (i <= review.rating) Color(0xFFFFD700) else Color.LightGray,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+
+            ExpandableReviewText(
+                text = review.content,
+                onReadMoreClick = { onReviewClick(review) }
+            )
+
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
+
+            if (review.reply != null) {
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onReviewClick(review) }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.reply_from_organizer),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+                }
+            } else if (currentUserId == travelOwnerId) {
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+                Button(onClick = onReplyClick, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.reply))
+                }
+            }
+
+            if (currentUserId == review.userId) {
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = onEditClick, modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.edit))
+                    }
+                    OutlinedButton(onClick = onDeleteClick, modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpandableReviewText(text: String, modifier: Modifier = Modifier, onReadMoreClick: () -> Unit) {
+    var isClickable by remember { mutableStateOf(false) }
+
+    Column(modifier = modifier) {
+        Text(
+            text = text,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { textLayoutResult ->
+                if (textLayoutResult.hasVisualOverflow) {
+                    isClickable = true
+                }
+            }
+        )
+
+        if (isClickable) {
+            Text(
+                text = stringResource(R.string.read_more),
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .clickable { onReadMoreClick() }
+            )
+        }
+    }
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun ReviewDetailSheet(review: it.roadies.android_app.client.models.review.ReviewResponse, user: it.roadies.android_app.client.models.user.MinimalInformationResponseDTO?, onDismiss: () -> Unit) {
+    val username = user?.username ?: stringResource(R.string.fictitious_user)
+    val avatarInitial = username.take(1).uppercase()
+    
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = stringResource(R.string.review_details),
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = avatarInitial,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                }
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        text = username,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        for (i in 1..5) {
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = null,
+                                tint = if (i <= review.rating) Color(0xFFFFD700) else Color.LightGray,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = review.content,
+                fontSize = 16.sp,
+                lineHeight = 24.sp
+            )
+
+            review.reply?.let { reply ->
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(24.dp))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.organizer_reply),
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = reply.content,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            lineHeight = 22.sp
+                        )
+                    }
+                }
+            }
+            
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }

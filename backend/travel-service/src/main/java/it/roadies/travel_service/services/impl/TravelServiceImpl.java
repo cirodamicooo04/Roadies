@@ -415,7 +415,11 @@ public class TravelServiceImpl implements TravelService {
     @Transactional
     public void updateTravelReviews(ReviewTravelUpdateEvent event) {
         Travel travel = travelRepository.findById(event.getTravelId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.travel.not.found")));
-        travel.setAverageRating(event.getAverageRating());
+
+        double rawRating = event.getAverageRating();
+        double roundedRating = Math.round(rawRating * 100.0) / 100.0;
+
+        travel.setAverageRating(roundedRating);
         travel.setNumberOfRatings(event.getNumberOfRatings());
         travelRepository.save(travel);
     }

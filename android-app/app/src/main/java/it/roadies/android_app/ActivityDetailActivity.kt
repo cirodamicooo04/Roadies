@@ -55,6 +55,7 @@ import it.roadies.android_app.ui.travel.components.DetailHeader
 import it.roadies.android_app.ui.travel.components.DetailImageCarousel
 import it.roadies.android_app.ui.travel.components.ExpandableDescription
 import it.roadies.android_app.ui.travel.components.LocationMap
+import it.roadies.android_app.ui.travel.components.Reviews
 import it.roadies.android_app.viewmodel.ActivityDetailViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.Duration
@@ -66,6 +67,7 @@ import java.util.UUID
 fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: () -> Unit, viewModel: ActivityDetailViewModel = hiltViewModel()){
     val uiState by viewModel.uiState.collectAsState()
     val departuresState by viewModel.departuresState.collectAsState()
+    val reviewsState by viewModel.reviewsState.collectAsState()
 
     val departuresSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isDeparturesSheetOpen by remember { mutableStateOf(false) }
@@ -77,12 +79,19 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
     } else if (uiState.errorMessage != null){
         BoxCentered(text = uiState.errorMessage)
     } else {
-        ActivityDetail(uiState.activity, onCheckAvailability = {
-            viewModel.loadDepartures()
-            isDeparturesSheetOpen = true
-        }, onFavoriteClick = {
-            activityId -> //vincenzo usa activity id
-        })
+        ActivityDetail(
+            activity = uiState.activity, 
+            onCheckAvailability = {
+                viewModel.loadDepartures()
+                isDeparturesSheetOpen = true
+            }, 
+            onFavoriteClick = { activityId -> //vincenzo usa activity id
+            },
+            reviewsState = reviewsState,
+            onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
+            onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
+            onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) }
+        )
     }
 
     LaunchedEffect(uiState.requireLogin) {
@@ -147,7 +156,15 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
 }
 
 @Composable
-fun ActivityDetail(activity: ActivityResponse?, onCheckAvailability: () -> Unit, onFavoriteClick: (UUID) -> Unit){
+fun ActivityDetail(
+    activity: ActivityResponse?, 
+    onCheckAvailability: () -> Unit, 
+    onFavoriteClick: (UUID) -> Unit,
+    reviewsState: it.roadies.android_app.viewmodel.ActivityReviewsState,
+    onDeleteReview: (UUID) -> Unit,
+    onEditReview: (UUID, Int, String) -> Unit,
+    onReplyReview: (UUID, String) -> Unit
+){
     var isFavorite by remember { mutableStateOf(false) }
 
     if (activity == null){
@@ -208,6 +225,17 @@ fun ActivityDetail(activity: ActivityResponse?, onCheckAvailability: () -> Unit,
                 //mappa
                 LocationMap(lon = activity.longitude, lat = activity.latitude)
 
+                Reviews(
+                    isLoading = reviewsState.isLoading,
+                    errorMessage = reviewsState.errorMessage,
+                    reviews = reviewsState.reviews,
+                    usersInfo = reviewsState.usersInfo,
+                    currentUserId = reviewsState.currentUserId,
+                    travelOwnerId = activity.ownerId,
+                    onDeleteReview = onDeleteReview,
+                    onEditReview = onEditReview,
+                    onReplyReview = onReplyReview
+                )
             }
 
             CheckAvailabilityButton(onClick = {

@@ -13,16 +13,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -35,15 +31,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.draw.rotate
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -70,8 +62,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.SubcomposeAsyncImage
-import it.roadies.android_app.client.models.review.ReviewResponse
-import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.client.models.travel.ActivityResponse
 import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
@@ -82,6 +72,7 @@ import it.roadies.android_app.ui.travel.components.DetailHeader
 import it.roadies.android_app.ui.travel.components.DetailImageCarousel
 import it.roadies.android_app.ui.travel.components.ExpandableDescription
 import it.roadies.android_app.ui.travel.components.LocationMap
+import it.roadies.android_app.ui.travel.components.Reviews
 import it.roadies.android_app.viewmodel.TravelDetailViewModel
 import it.roadies.android_app.viewmodel.TravelReviewsState
 import java.util.UUID
@@ -108,7 +99,9 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
             isDeparturesSheetOpen = true
         }, reviewsState = reviewsState ,onFavoriteClick = {
             travelId -> // vincenzo usa travel id per aggiungerlo ai preferiti
-        })
+        }, onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
+        onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
+        onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) })
     }
 
     LaunchedEffect(uiState.requireLogin) {
@@ -173,7 +166,15 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
 }
 
 @Composable
-fun TravelDetail(travel: TravelResponse?, reviewsState: TravelReviewsState ,onCheckAvailability: () -> Unit, onFavoriteClick: (UUID) -> Unit){
+fun TravelDetail(
+    travel: TravelResponse?, 
+    reviewsState: TravelReviewsState,
+    onCheckAvailability: () -> Unit, 
+    onFavoriteClick: (UUID) -> Unit,
+    onDeleteReview: (UUID) -> Unit,
+    onEditReview: (UUID, Int, String) -> Unit,
+    onReplyReview: (UUID, String) -> Unit
+){
     //variabile is favorite , da cambiare in caso volessimo fare cuoricino rosso se favorito
     var isFavorite by remember { mutableStateOf(false) }
 
@@ -228,7 +229,17 @@ fun TravelDetail(travel: TravelResponse?, reviewsState: TravelReviewsState ,onCh
                 //travel activity con ogni attività collasabile
                 Activities(travel.activities)
 
-                Reviews(reviewsState = reviewsState)
+                Reviews(
+                    isLoading = reviewsState.isLoading,
+                    errorMessage = reviewsState.errorMessage,
+                    reviews = reviewsState.reviews,
+                    usersInfo = reviewsState.usersInfo,
+                    currentUserId = reviewsState.currentUserId,
+                    travelOwnerId = travel.ownerId,
+                    onDeleteReview = onDeleteReview,
+                    onEditReview = onEditReview,
+                    onReplyReview = onReplyReview
+                )
             }
 
             CheckAvailabilityButton(onClick = {
@@ -471,355 +482,4 @@ fun DepartureCard(departure: TravelDepartureResponse, onBookClick: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Reviews(reviewsState: TravelReviewsState) {
-    var isListSheetOpen by remember { mutableStateOf(false) }
-    var selectedReview by remember { mutableStateOf<ReviewResponse?>(null) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp, bottom = 16.dp)
-    ) {
-        if (reviewsState.isLoading) {
-            Text(
-                text = stringResource(R.string.reviews),
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else if (reviewsState.errorMessage != null) {
-            Text(
-                text = stringResource(R.string.reviews),
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                Text(text = stringResource(R.string.loading_reviews_error), color = MaterialTheme.colorScheme.error)
-            }
-        } else if (reviewsState.reviews.isNullOrEmpty()) {
-            Text(
-                text = stringResource(R.string.reviews),
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                Text(text = stringResource(R.string.no_reviews), color = Color.Gray)
-            }
-        } else {
-            val totalReviews = reviewsState.reviews.size
-            val averageRating = reviewsState.reviews.map { it.rating }.average()
-            val formattedRating = String.format(java.util.Locale.US, "%.1f", averageRating)
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.reviews),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = null,
-                    tint = Color(0xFFFFD700), // Gold color
-                    modifier = Modifier.size(24.dp)
-                )
-                Text(
-                    text = formattedRating,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-            }
-
-            val topReviews = reviewsState.reviews.take(5)
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp)
-            ) {
-                items(topReviews) { review ->
-                    ReviewCard(
-                        review = review,
-                        user = reviewsState.usersInfo[review.userId],
-                        modifier = Modifier.width(300.dp).height(200.dp),
-                        onReviewClick = { selectedReview = it }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedButton(
-                onClick = { isListSheetOpen = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = stringResource(R.string.show_all_reviews, totalReviews))
-            }
-        }
-    }
-
-    if (isListSheetOpen && !reviewsState.reviews.isNullOrEmpty()) {
-        ModalBottomSheet(
-            onDismissRequest = { isListSheetOpen = false },
-            sheetState = sheetState
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .fillMaxHeight(0.9f)
-            ) {
-                Text(
-                    text = stringResource(R.string.all_reviews, reviewsState.reviews.size),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(reviewsState.reviews) { review ->
-                        ReviewCard(
-                            review = review,
-                            user = reviewsState.usersInfo[review.userId],
-                            modifier = Modifier.fillMaxWidth().height(200.dp),
-                            onReviewClick = { selectedReview = it }
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    selectedReview?.let { review ->
-        ReviewDetailSheet(
-            review = review,
-            user = reviewsState.usersInfo[review.userId],
-            onDismiss = { selectedReview = null }
-        )
-    }
-}
-
-@Composable
-fun ReviewCard(review: ReviewResponse, user: MinimalInformationResponseDTO?, modifier: Modifier = Modifier, onReviewClick: (ReviewResponse) -> Unit) {
-    val username = user?.username ?: stringResource(R.string.fictitious_user)
-    val avatarInitial = username.take(1).uppercase()
-    
-    Card(
-        modifier = modifier.clickable { onReviewClick(review) },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = avatarInitial,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = username,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        for (i in 1..5) {
-                            Icon(
-                                imageVector = Icons.Filled.Star,
-                                contentDescription = null,
-                                tint = if (i <= review.rating) Color(0xFFFFD700) else Color.LightGray,
-                                modifier = Modifier.size(14.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            ExpandableReviewText(
-                text = review.content,
-                onReadMoreClick = { onReviewClick(review) }
-            )
-
-            if (review.reply != null) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onReviewClick(review) }
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.reply_from_organizer),
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ExpandableReviewText(text: String, modifier: Modifier = Modifier, onReadMoreClick: () -> Unit) {
-    var isClickable by remember { mutableStateOf(false) }
-
-    Column(modifier = modifier) {
-        Text(
-            text = text,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            onTextLayout = { textLayoutResult ->
-                if (textLayoutResult.hasVisualOverflow) {
-                    isClickable = true
-                }
-            }
-        )
-
-        if (isClickable) {
-            Text(
-                text = stringResource(R.string.read_more),
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .clickable { onReadMoreClick() }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ReviewDetailSheet(review: ReviewResponse, user: MinimalInformationResponseDTO?, onDismiss: () -> Unit) {
-    val username = user?.username ?: stringResource(R.string.fictitious_user)
-    val avatarInitial = username.take(1).uppercase()
-    
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Text(
-                text = stringResource(R.string.review_details),
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = avatarInitial,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = username,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        for (i in 1..5) {
-                            Icon(
-                                imageVector = Icons.Filled.Star,
-                                contentDescription = null,
-                                tint = if (i <= review.rating) Color(0xFFFFD700) else Color.LightGray,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = review.content,
-                fontSize = 16.sp,
-                lineHeight = 24.sp
-            )
-
-            review.reply?.let { reply ->
-                Spacer(modifier = Modifier.height(24.dp))
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.organizer_reply),
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = reply.content,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            lineHeight = 22.sp
-                        )
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-        }
-    }
-}

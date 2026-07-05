@@ -526,6 +526,28 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
+    "id" : "ee9193b8-fc49-4110-bfdc-b26fe145b34f",
+    "username" : "prova1",
+    "firstName" : "c",
+    "lastName" : "c",
+    "email" : "ciao@gmail.com",
+    "emailVerified" : false,
+    "createdTimestamp" : 1783245758035,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "7d3e6736-6f9f-4da7-8392-5352c89eb43c",
+      "type" : "password",
+      "createdDate" : 1783245758322,
+      "secretData" : "{\"value\":\"HShpJhfJ6qwTA/uPXeXnKiEvwW0z4zRBVUkmVJfOVzt77ESIlgWVpkJewl1X4j4dhz7LKH4s68Ey4UkkKQSd8A==\",\"salt\":\"dywu1WE/H4FZVObuq6UdPQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "ORGANIZER", "default-roles-roadies-app" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "207eefe3-0e2d-4b42-a1e3-408e71c3fe01",
     "username" : "service-account-gateway-client",
     "emailVerified" : false,
@@ -538,7 +560,7 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-roadies-app" ],
     "clientRoles" : {
-      "realm-management" : [ "manage-authorization", "manage-users" ],
+      "realm-management" : [ "manage-authorization", "manage-users", "manage-realm" ],
       "account" : [ "delete-account", "view-groups", "manage-account", "view-applications", "view-profile", "view-consent", "manage-account-links", "manage-consent" ]
     },
     "notBefore" : 0,
