@@ -36,6 +36,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import it.roadies.android_app.ui.admin.AdminStatsScreen
 import it.roadies.android_app.ui.bookingFlow.BookingDocumentsScreen
 import it.roadies.android_app.ui.bookingFlow.BookingPaymentScreen
 import it.roadies.android_app.ui.bookingFlow.BookingStepMembersScreen
@@ -53,6 +54,7 @@ import it.roadies.android_app.ui.admin.AdminUsersScreen
 import it.roadies.android_app.ui.admin.MetadataScreen
 import it.roadies.android_app.ui.admin.PendingRequestsScreen
 import it.roadies.android_app.ui.user.UserDocumentScreen
+import it.roadies.android_app.viewmodel.AdminViewModel
 import it.roadies.android_app.viewmodel.AuthViewModel
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -507,8 +509,9 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             )
         }
 
-        composable(route = "statistics") {
-
+        composable("statistics") {
+            val viewModel: AdminViewModel = hiltViewModel()
+            AdminStatsScreen(viewModel = viewModel)
         }
         composable(route = "metadata"){
             MetadataScreen()

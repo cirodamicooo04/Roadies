@@ -18,10 +18,10 @@ import it.roadies.android_app.viewmodel.AdminViewModel
 @Composable
 fun AdminUsersScreen(viewModel: AdminViewModel, navController: NavHostController) {
     val users by viewModel.users.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     var selectedFilter by remember { mutableStateOf("ACTIVE") }
     var expanded by remember { mutableStateOf(false) }
-    val isLoading by viewModel.isLoading.collectAsState()
 
     var selectedUser by remember { mutableStateOf<UserResponseDTO?>(null) }
     val filters = listOf("ACTIVE", "BANNED", "ORGANIZER")
@@ -30,14 +30,13 @@ fun AdminUsersScreen(viewModel: AdminViewModel, navController: NavHostController
         viewModel.fetchUsers(selectedFilter)
     }
 
-    if (isLoading){
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-    }
-
-    else{
+    } else {
         Column(modifier = Modifier.padding(16.dp)) {
+            // Filter dropdown and navigation row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -70,21 +69,39 @@ fun AdminUsersScreen(viewModel: AdminViewModel, navController: NavHostController
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(users) { user ->
-                    Box(modifier = Modifier.clickable { selectedUser = user }) {
-                        UserItem(
-                            user = user,
-                            onBlockClick = { viewModel.blockUser(it) },
-                            onUnblockClick = { viewModel.unblockUser(it) }
-                        )
+
+            // Check if user list is empty to display the contextual placeholder
+            if (users.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Capitalize first letter and make others lower case for better visual output (e.g., Active, Banned, Organizer)
+                    val formattedFilter = selectedFilter.lowercase().replaceFirstChar { it.uppercase() }
+                    Text(
+                        text = "There are no $formattedFilter users",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                // Display the list of filtered users
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(users) { user ->
+                        Box(modifier = Modifier.clickable { selectedUser = user }) {
+                            UserItem(
+                                user = user,
+                                onBlockClick = { viewModel.blockUser(it) },
+                                onUnblockClick = { viewModel.unblockUser(it) }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 
-
+    // Overlay dialog for user detailed views
     selectedUser?.let { user ->
         UserDetailDialog(
             user = UserDetailsUi(

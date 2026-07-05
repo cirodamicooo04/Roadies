@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import it.roadies.android_app.client.models.user.PendingOrganizerRequestResponseDTO
+import it.roadies.android_app.client.models.user.UserProfileResponseDTO
 import it.roadies.android_app.client.models.user.UserResponseDTO
 import it.roadies.android_app.repository.AdminRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,6 +32,11 @@ class AdminViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _topUsers = MutableStateFlow<List<UserProfileResponseDTO>>(emptyList())
+    val topUsers: StateFlow<List<UserProfileResponseDTO>> = _topUsers.asStateFlow()
+    private val _isStatsLoading = MutableStateFlow(false)
+    val isStatsLoading: StateFlow<Boolean> = _isStatsLoading.asStateFlow()
+
     // Fetch users by filter
     fun fetchUsers(filter: String) {
         viewModelScope.launch {
@@ -43,6 +50,36 @@ class AdminViewModel @Inject constructor(
                 _errorMessage.value = response.errorMessage ?: "Failed to load users"
             }
             _isLoading.value = false
+        }
+    }
+
+    // Fetch top 20 users by points
+    fun fetchTopUsers() {
+        viewModelScope.launch {
+            _isStatsLoading.value = true
+//            val response = admRepository.getTop20Travelers()
+//            if (response.success && response.data != null) {
+//                _topUsers.value = response.data
+//                _errorMessage.value = null
+//            } else {
+//                _topUsers.value = emptyList()
+//                _errorMessage.value = response.errorMessage ?: "Failed to load leaderboard statistics"
+//            }
+            _topUsers.value = listOf(
+                UserProfileResponseDTO("Cristian", "Cristian", "Cristian", "", 2500,
+                    UserProfileResponseDTO.Badge.DIAMOND),
+                UserProfileResponseDTO("Cris", "Cristian", "Cristian", "", 2400,
+                    UserProfileResponseDTO.Badge.EMERALD),
+                UserProfileResponseDTO("Cristi", "Cristian", "Cristian", "", 2200,
+                    UserProfileResponseDTO.Badge.GOLD),
+                UserProfileResponseDTO("Ciro1", "Cristian", "Cristian", "", 1900,
+                    UserProfileResponseDTO.Badge.GOLD),
+                UserProfileResponseDTO("Vincenzo", "Cristian", "Cristian", "", 1500,
+                    UserProfileResponseDTO.Badge.GOLD),
+                UserProfileResponseDTO("Ciro2", "Cristian", "Cristian", "", 2500,
+                    UserProfileResponseDTO.Badge.GOLD)
+            )
+            _isStatsLoading.value = false
         }
     }
 
@@ -108,4 +145,6 @@ class AdminViewModel @Inject constructor(
     fun clearError() {
         _errorMessage.value = null
     }
+
+
 }
