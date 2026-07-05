@@ -57,28 +57,14 @@ class AdminViewModel @Inject constructor(
     fun fetchTopUsers() {
         viewModelScope.launch {
             _isStatsLoading.value = true
-//            val response = admRepository.getTop20Travelers()
-//            if (response.success && response.data != null) {
-//                _topUsers.value = response.data
-//                _errorMessage.value = null
-//            } else {
-//                _topUsers.value = emptyList()
-//                _errorMessage.value = response.errorMessage ?: "Failed to load leaderboard statistics"
-//            }
-            _topUsers.value = listOf(
-                UserProfileResponseDTO("Cristian", "Cristian", "Cristian", "", 2500,
-                    UserProfileResponseDTO.Badge.DIAMOND),
-                UserProfileResponseDTO("Cris", "Cristian", "Cristian", "", 2400,
-                    UserProfileResponseDTO.Badge.EMERALD),
-                UserProfileResponseDTO("Cristi", "Cristian", "Cristian", "", 2200,
-                    UserProfileResponseDTO.Badge.GOLD),
-                UserProfileResponseDTO("Ciro1", "Cristian", "Cristian", "", 1900,
-                    UserProfileResponseDTO.Badge.GOLD),
-                UserProfileResponseDTO("Vincenzo", "Cristian", "Cristian", "", 1500,
-                    UserProfileResponseDTO.Badge.GOLD),
-                UserProfileResponseDTO("Ciro2", "Cristian", "Cristian", "", 2500,
-                    UserProfileResponseDTO.Badge.GOLD)
-            )
+            val response = admRepository.getTop20Travelers()
+            if (response.success && response.data != null) {
+                _topUsers.value = response.data
+                _errorMessage.value = null
+            } else {
+                _topUsers.value = emptyList()
+                _errorMessage.value = response.errorMessage ?: "Failed to load leaderboard statistics"
+            }
             _isStatsLoading.value = false
         }
     }
