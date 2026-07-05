@@ -134,6 +134,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public List<UserResponseDTO> getUsersByFilter(String filter) {
         List<User> users;
+        log.info("Recupero lista utenti filtrata per {}", filter);
 
         switch (filter.toUpperCase()) {
             case "ORGANIZERS" -> users = userRepository.findByOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);

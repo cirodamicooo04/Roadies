@@ -10,4 +10,8 @@ class MetadataRepository @Inject constructor(private val metadataApi: MetadatiAp
     suspend fun getTags(): ApiResponse<List<TagResponse>> {
         return safeApiCall { metadataApi.getTags() }
     }
+
+    suspend fun addTag(tagName: String): ApiResponse<TagResponse> {
+        return safeApiCall { metadataApi.addTag(tagName) }
+    }
 }

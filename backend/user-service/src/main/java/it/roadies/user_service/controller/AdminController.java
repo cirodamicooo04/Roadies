@@ -5,6 +5,7 @@ import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponse
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.response.UserResponseDTO;
 import it.roadies.user_service.services.AdminService;
+import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +41,7 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/review-organizer/{targetUserId}")
     @Operation(summary = "Approva o rifiuta richiesta organizzatore")
     public ResponseEntity<Void> reviewOrganizerRequest(
@@ -50,6 +52,7 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/organizer-requests/pending")
     @Operation(summary = "Lista richieste organizzatore in sospeso")
     public ResponseEntity<List<PendingOrganizerRequestResponseDTO>> getPendingOrganizerRequests() {
