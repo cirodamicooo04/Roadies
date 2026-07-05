@@ -2,9 +2,12 @@ package it.roadies.user_service.services.impl;
 
 import it.roadies.user_service.conf.i8n.MessageLang;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
+import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.response.UserResponseDTO;
+import it.roadies.user_service.data.entities.Gamification;
 import it.roadies.user_service.data.entities.User;
 import it.roadies.user_service.data.entities.enumeration.OrganizerRequestStatus;
+import it.roadies.user_service.data.repositories.GamificationRepository;
 import it.roadies.user_service.data.repositories.UserRepository;
 import it.roadies.user_service.exception.ConflictException;
 import it.roadies.user_service.exception.ResourceNotFoundException;
@@ -34,8 +37,9 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserMapper userMapper;
     private final AdminUserMapper adminUserMapper;
-    private final MessageLang messageLang;
+    private final GamificationRepository gamificationRepository;
     private final UserRepository userRepository;
+    private final MessageLang messageLang;
     private final Keycloak keycloak;
 
     private boolean isUserEnabledInKeycloak(String keycloakId) {
@@ -148,6 +152,18 @@ public class AdminServiceImpl implements AdminService {
                     if ("ACTIVE".equals(filter.toUpperCase())) return dto.isEnabled();
                     return true;
                 })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<UserProfileResponseDTO> getBest20Travelers(){
+        log.info("Recupero top 20 utenti con più punti");
+
+        List<Gamification> topGamification = gamificationRepository.findTop20ByOrderByPointsDesc();
+
+        return topGamification.stream()
+                .map(gamification -> userMapper.toDto(gamification.getUser()))
                 .collect(Collectors.toList());
     }
 }

@@ -2,9 +2,9 @@ package it.roadies.user_service.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import it.roadies.user_service.data.dto.response.PendingOrganizerRequestResponseDTO;
+import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
 import it.roadies.user_service.data.dto.response.UserResponseDTO;
 import it.roadies.user_service.services.AdminService;
-import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,7 +40,6 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/review-organizer/{targetUserId}")
     @Operation(summary = "Approva o rifiuta richiesta organizzatore")
     public ResponseEntity<Void> reviewOrganizerRequest(
@@ -51,7 +50,6 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/organizer-requests/pending")
     @Operation(summary = "Lista richieste organizzatore in sospeso")
     public ResponseEntity<List<PendingOrganizerRequestResponseDTO>> getPendingOrganizerRequests() {
@@ -59,7 +57,6 @@ public class AdminController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("users")
     @Operation(summary = "Recupera utenti filtrati", description = "Recupera una lista di utenti filtrati in base allo stato specificato. " +
             "Se non viene fornito alcun filtro, il valore predefinito è 'ACTIVE'.")
@@ -68,5 +65,14 @@ public class AdminController {
 
         List<UserResponseDTO> users = adminService.getUsersByFilter(filter);
         return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/best-travelers")
+    @Operation(
+            summary = "Recupera i migliori 20 viaggiatori",
+            description = "Recupera una lista dei migliori 20 viaggiatori in base ai punti accumulati")
+    public ResponseEntity<List<UserProfileResponseDTO>> getBest20Travelers() {
+        List<UserProfileResponseDTO> bestTravelers = adminService.getBest20Travelers();
+        return ResponseEntity.ok(bestTravelers);
     }
 }
