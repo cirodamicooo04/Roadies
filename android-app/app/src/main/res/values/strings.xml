@@ -242,4 +242,5 @@
     <string name="type_your_reply">Type your reply...</string>
     <string name="type_your_review">Type your review...</string>
     <string name="reply">Reply</string>
+    <string name="no_travels_on_platfrom">No travels on the platfrom yet. Come back later!</string>
 </resources>

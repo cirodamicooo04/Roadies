@@ -176,15 +176,14 @@ fun OrganizerDashboard(navHostController: NavHostController, viewModel: Organize
                     navHostController.navigate("create_travel")
             }, onActivityCreationClick = {
                 navHostController.navigate("create_activity")
-
             }, onTravelOpen = {
-
+                travel -> navHostController.navigate("travel_detail/${travel.id}")
             }, onTravelDelete = {
                 travel -> travelToDelete = travel
             }, onTravelModify = {
                 travel -> navHostController.navigate("update_travel/${travel.id}")
             }, onActivityOpen = {
-
+                activity -> navHostController.navigate("activity_detail/${activity.id}")
             }, onActivityDelete = {
                 activity -> activityToDelete = activity
             }, onActivityModify = {
