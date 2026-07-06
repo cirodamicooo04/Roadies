@@ -260,4 +260,10 @@ class UserRepository @Inject constructor(
             userApi.getUserIdByUsername(username)
         }
     }
+
+    suspend fun getMinimalInformation(userIds: List<String>): ApiResponse<List<it.roadies.android_app.client.models.user.MinimalInformationResponseDTO>> {
+        return safeApiCall {
+            userApi.getMinimalInformation(userIds)
+        }
+    }
 }

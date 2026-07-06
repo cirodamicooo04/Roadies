@@ -53,6 +53,8 @@ import it.roadies.android_app.ui.user.UserProfileScreen
 import it.roadies.android_app.ui.admin.AdminUsersScreen
 import it.roadies.android_app.ui.admin.MetadataScreen
 import it.roadies.android_app.ui.admin.PendingRequestsScreen
+import it.roadies.android_app.FavouriteListDetailScreen
+import it.roadies.android_app.FavouriteListsScreen
 import it.roadies.android_app.ui.user.UserDocumentScreen
 import it.roadies.android_app.viewmodel.AdminViewModel
 import it.roadies.android_app.viewmodel.AuthViewModel
@@ -592,6 +594,9 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                         if (!organizerUsername.isNullOrEmpty()) {
                             navHostController.navigate("organizer_travels/$organizerUsername")
                         }
+                    },
+                    onNavigateToFavoriteLists = {
+                        navHostController.navigate("favourite_lists/$username")
                     }
                 )
             }
@@ -607,6 +612,30 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 arguments = listOf(navArgument("username") {type = NavType.StringType})
             ){
                 OrganizerTravelsScreen(navHostController = navHostController)
+            }
+
+            composable(
+                route = "favourite_lists/{userId}",
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) {
+                FavouriteListsScreen(
+                    onBack = { navHostController.popBackStack() },
+                    onListClick = { listId ->
+                        navHostController.navigate("favourite_list_detail/$listId")
+                    }
+                )
+            }
+
+            composable(
+                route = "favourite_list_detail/{listId}",
+                arguments = listOf(navArgument("listId") { type = NavType.StringType })
+            ) {
+                FavouriteListDetailScreen(
+                    onBack = { navHostController.popBackStack() },
+                    onNavigateToTravel = { travelId ->
+                        navHostController.navigate("travel_detail/$travelId")
+                    }
+                )
             }
         }
     }

@@ -77,6 +77,12 @@ import it.roadies.android_app.viewmodel.TravelDetailViewModel
 import it.roadies.android_app.viewmodel.TravelReviewsState
 import java.util.UUID
 
+import it.roadies.android_app.client.models.travel.FavouriteListCreateRequest
+import it.roadies.android_app.client.models.travel.FavouriteListResponse
+import it.roadies.android_app.repository.FavouriteRepository
+import it.roadies.android_app.ui.travel.components.FavouriteListBottomSheet
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () -> Unit, viewModel: TravelDetailViewModel = hiltViewModel()){
@@ -86,6 +92,11 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
 
     val departuresSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isDeparturesSheetOpen by remember { mutableStateOf(false) }
+
+    var isFavouriteSheetOpen by remember { mutableStateOf(false) }
+    var favouriteLists by remember { mutableStateOf<List<FavouriteListResponse>>(emptyList()) }
+    var isFavouriteLoading by remember { mutableStateOf(false) }
+    var pendingItemId by remember { mutableStateOf<UUID?>(null) }
 
     if (uiState.isLoading){
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
@@ -97,8 +108,14 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
         TravelDetail(uiState.travel, onCheckAvailability = {
             viewModel.loadDepartures()
             isDeparturesSheetOpen = true
-        }, reviewsState = reviewsState ,onFavoriteClick = {
-            travelId -> // vincenzo usa travel id per aggiungerlo ai preferiti
+        }, reviewsState = reviewsState ,onFavoriteClick = { travelId ->
+            pendingItemId = travelId
+            isFavouriteLoading = true
+            isFavouriteSheetOpen = true
+            viewModel.loadFavouriteLists { lists ->
+                favouriteLists = lists
+                isFavouriteLoading = false
+            }
         }, onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
         onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
         onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) })
@@ -163,6 +180,49 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
             }
         }
     }
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    FavouriteListBottomSheet(
+        isOpen = isFavouriteSheetOpen,
+        lists = favouriteLists,
+        isLoading = isFavouriteLoading,
+        onDismiss = {
+            isFavouriteSheetOpen = false
+            pendingItemId = null
+        },
+        onListSelected = { list ->
+            pendingItemId?.let { itemId ->
+                list.id?.let { listId ->
+                    viewModel.addTravelToFavouriteList(listId, itemId) { success, errorMsg ->
+                        if (success) {
+                            android.widget.Toast.makeText(context, "Viaggio aggiunto ai preferiti!", android.widget.Toast.LENGTH_SHORT).show()
+                        } else {
+                            android.widget.Toast.makeText(context, errorMsg ?: "Errore durante l'aggiunta", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            isFavouriteSheetOpen = false
+            pendingItemId = null
+        },
+        onCreateList = { name, visibility ->
+            viewModel.createFavouriteList(name, visibility) { newList ->
+                pendingItemId?.let { itemId ->
+                    newList.id?.let { listId ->
+                        viewModel.addTravelToFavouriteList(listId, itemId) { success, errorMsg ->
+                            if (success) {
+                                android.widget.Toast.makeText(context, "Viaggio aggiunto alla nuova lista!", android.widget.Toast.LENGTH_SHORT).show()
+                            } else {
+                                android.widget.Toast.makeText(context, errorMsg ?: "Errore durante l'aggiunta", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+                isFavouriteSheetOpen = false
+                pendingItemId = null
+            }
+        }
+    )
 }
 
 @Composable

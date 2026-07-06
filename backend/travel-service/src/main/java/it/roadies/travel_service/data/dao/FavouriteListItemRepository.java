@@ -10,4 +10,7 @@ import java.util.UUID;
 public interface FavouriteListItemRepository extends JpaRepository<FavouriteListItem, UUID> {
     void deleteByListIdAndTravelId(UUID listId, UUID travelId);
     void deleteByListIdAndActivityId(UUID listId, UUID activityId);
+    boolean existsByListIdAndTravelId(UUID listId, UUID travelId);
+    boolean existsByListIdAndActivityId(UUID listId, UUID activityId);
+
 }

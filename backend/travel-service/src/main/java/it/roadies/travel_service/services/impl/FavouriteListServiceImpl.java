@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +79,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.private"));
 
             case SHARED_SPECIFIC:
-                if (requesterId == null || !sharedRepository.existsByListIdAndUserId(listId, requesterId)) {
+                if (requesterId == null || !sharedRepository.existsByListIdAndUserId(listId, requesterId) || !friendshipRepository.existsByUserIdAndFriendId(list.getOwnerId(), requesterId)) {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.list"));
                 }
                 break;
@@ -100,7 +101,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
     @Transactional
     public void addFriendToList(UUID listId, String friendId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
-        if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
+        if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.access"));
 
         if (!sharedRepository.existsByListIdAndUserId(listId, friendId)) {
             FavouriteListShared shared = new FavouriteListShared();
@@ -114,7 +115,7 @@ public class FavouriteListServiceImpl implements FavouriteListService {
     @Transactional
     public void removeFriendFromList(UUID listId, String friendId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
-        if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
+        if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.access"));
 
         sharedRepository.deleteByListIdAndUserId(listId, friendId);
     }
@@ -125,8 +126,12 @@ public class FavouriteListServiceImpl implements FavouriteListService {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
 
+        if (itemRepository.existsByListIdAndTravelId(listId, travelId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, messageLang.getMessage("error.travel.already.add"));
+        }
+
         Travel travel = travelRepository.findById(travelId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaggio non trovato"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.travel.not.found")));
 
         FavouriteListItem item = new FavouriteListItem();
         item.setList(list);
@@ -139,10 +144,14 @@ public class FavouriteListServiceImpl implements FavouriteListService {
     @Transactional
     public void addActivityToList(UUID listId, UUID activityId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
-        if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
+        if (!list.getOwnerId().equals(ownerId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.access"));
+
+        if (itemRepository.existsByListIdAndActivityId(listId, activityId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, messageLang.getMessage("error.travel.already.add"));
+        }
 
         Activity activity = activityRepository.findById(activityId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Attività non trovata"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("error.activity.not.found")));
 
         FavouriteListItem item = new FavouriteListItem();
 
@@ -167,10 +176,47 @@ public class FavouriteListServiceImpl implements FavouriteListService {
     public void removeActivityFromList(UUID listId, UUID activityId, String ownerId) {
         FavouriteList list = listRepository.findById(listId).orElseThrow();
         if (!list.getOwnerId().equals(ownerId))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Lista non tua");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("unauthorized.list"));
 
         itemRepository.deleteByListIdAndActivityId(listId, activityId);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<FavouriteList> getUserVisibleLists(String targetUserId, String requesterId) {
+        List<FavouriteList> allLists = listRepository.findAllByOwnerId(targetUserId);
+
+        return allLists.stream()
+                .filter(list -> {
+                    if (requesterId != null && requesterId.equals(list.getOwnerId())) return true;
+
+                    if (list.getVisibility() == Visibility.PUBLIC) {
+                        return requesterId != null && friendshipRepository.existsByUserIdAndFriendId(list.getOwnerId(), requesterId);
+                    }
+
+                    if (list.getVisibility() == Visibility.SHARED_SPECIFIC) {
+                        return requesterId != null && sharedRepository.existsByListIdAndUserId(list.getId(), requesterId) && friendshipRepository.existsByUserIdAndFriendId(list.getOwnerId(), requesterId);
+                    }
+
+                    return false;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    @Transactional
+    public FavouriteList updateList(UUID listId, String name, Visibility visibility, String ownerId) {
+        FavouriteList list = listRepository.findById(listId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messageLang.getMessage("list.not.found")));
+
+        if (!list.getOwnerId().equals(ownerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageLang.getMessage("error.updating.other.list"));
+        }
+
+        list.setName(name);
+        list.setVisibility(visibility);
+        return listRepository.save(list);
+    }
 
 }

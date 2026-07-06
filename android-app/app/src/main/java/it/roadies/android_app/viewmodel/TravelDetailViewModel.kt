@@ -23,6 +23,10 @@ import java.util.UUID
 import javax.inject.Inject
 import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.repository.UserRepository
+import it.roadies.android_app.client.models.travel.FavouriteListCreateRequest
+import it.roadies.android_app.client.models.travel.FavouriteListResponse
+import it.roadies.android_app.repository.FavouriteRepository
+
 
 data class TravelDetailState(
     val isLoading: Boolean = false,
@@ -44,11 +48,11 @@ data class TravelReviewsState(
     val reviews: List<ReviewResponse>? = emptyList(),
     val usersInfo: Map<String, MinimalInformationResponseDTO> = emptyMap(),
     val errorMessage: String? = null,
-    val currentUserId: String? = null
+    val currentUserId: String? = null,
 )
 
 @HiltViewModel
-class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository,private val bookingRepository: BookingRepository, private val authRepository: AuthRepository, private val reviewRepository: ReviewRepository, private val userRepository: UserRepository): ViewModel() {
+class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository,private val bookingRepository: BookingRepository, private val authRepository: AuthRepository, private val reviewRepository: ReviewRepository, private val userRepository: UserRepository, private val favouriteRepository: FavouriteRepository): ViewModel() {
     val id: String? = savedStateHandle["id"]
     private val _uiState = MutableStateFlow(TravelDetailState())
     val uiState = _uiState.asStateFlow()
@@ -58,6 +62,8 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
 
     private val _reviewsState = MutableStateFlow(TravelReviewsState())
     val reviewsState = _reviewsState.asStateFlow()
+
+
 
     init {
         val uuid = runCatching { UUID.fromString(id) }.getOrNull()
@@ -217,4 +223,37 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
             }
         }
     }
+
+    fun loadFavouriteLists(onResult: (List<FavouriteListResponse>) -> Unit) {
+        viewModelScope.launch {
+            val response = favouriteRepository.getMyLists()
+            if (response.success && response.data != null) {
+                onResult(response.data)
+            } else {
+                onResult(emptyList())
+            }
+        }
+    }
+
+    fun addTravelToFavouriteList(listId: UUID, travelId: UUID, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            val response = favouriteRepository.addTravelToList(listId, travelId)
+            onResult(response.success, response.errorMessage)
+        }
+    }
+
+    fun createFavouriteList(
+        name: String,
+        visibility: FavouriteListCreateRequest.Visibility,
+        onCreated: (FavouriteListResponse) -> Unit
+    ) {
+        viewModelScope.launch {
+            val request = FavouriteListCreateRequest(name = name, visibility = visibility)
+            val response = favouriteRepository.createList(request)
+            if (response.success && response.data != null) {
+                onCreated(response.data)
+            }
+        }
+    }
+
 }

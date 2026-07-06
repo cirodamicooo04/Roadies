@@ -57,7 +57,10 @@ data class FavouriteListResponse (
     val createdAt: OffsetDateTime? = null,
 
     @SerializedName("items")
-    val items: List<FavouriteListItemResponse>? = null
+    val items: List<FavouriteListItemResponse>? = null,
+
+    @SerializedName("sharedWithIds")
+    val sharedWithIds: List<String>? = null
 
 ) {
 

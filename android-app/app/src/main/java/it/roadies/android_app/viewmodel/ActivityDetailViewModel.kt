@@ -21,6 +21,10 @@ import it.roadies.android_app.client.models.review.ReviewUpdateRequest
 import it.roadies.android_app.repository.ReviewRepository
 import it.roadies.android_app.repository.UserRepository
 import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
+import it.roadies.android_app.client.models.travel.FavouriteListCreateRequest
+import it.roadies.android_app.client.models.travel.FavouriteListResponse
+import it.roadies.android_app.repository.FavouriteRepository
+
 
 data class ActivityDetailState(
     val isLoading: Boolean = false,
@@ -52,7 +56,8 @@ class ActivityDetailViewModel @Inject constructor(
     private val bookingRepository: BookingRepository,
     private val authRepository: AuthRepository,
     private val reviewRepository: ReviewRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val favouriteRepository: FavouriteRepository
 ): ViewModel() {
     val id: String? = savedStateHandle["id"]
     
@@ -220,4 +225,36 @@ class ActivityDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun loadFavouriteLists(onResult: (List<FavouriteListResponse>) -> Unit) {
+        viewModelScope.launch {
+            val response = favouriteRepository.getMyLists()
+            if (response.success && response.data != null) {
+                onResult(response.data)
+            } else {
+                onResult(emptyList())
+            }
+        }
+    }
+
+    fun addActivityToFavouriteList(listId: UUID, activityId: UUID) {
+        viewModelScope.launch {
+            favouriteRepository.addActivityToList(listId, activityId)
+        }
+    }
+
+    fun createFavouriteList(
+        name: String,
+        visibility: FavouriteListCreateRequest.Visibility,
+        onCreated: (FavouriteListResponse) -> Unit
+    ) {
+        viewModelScope.launch {
+            val request = FavouriteListCreateRequest(name = name, visibility = visibility)
+            val response = favouriteRepository.createList(request)
+            if (response.success && response.data != null) {
+                onCreated(response.data)
+            }
+        }
+    }
+
 }

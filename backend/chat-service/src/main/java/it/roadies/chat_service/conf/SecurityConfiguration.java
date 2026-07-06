@@ -32,10 +32,14 @@ public class SecurityConfiguration {
                                 "/ws/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/api/v1/chats/public/**",
+                                "/api/v1/conversations/public/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
+
+
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 );

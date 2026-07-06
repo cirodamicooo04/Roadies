@@ -186,6 +186,7 @@
     <string name="accept"> Accetta</string>
     <string name="add_friend"> Aggiungi amico</string>
     <string name="request_sent"> Richiesta inviata</string>
+    <string name= "favourite_list"> Le mie liste preferiti</string>
 
 
     <string name="participant_details"> Dati dei partecipanti</string>

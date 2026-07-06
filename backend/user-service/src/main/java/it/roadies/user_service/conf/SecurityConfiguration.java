@@ -29,11 +29,16 @@ public class SecurityConfiguration {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/api/v1/users/public/**"
+                                "/api/v1/users/public/**",
+                                "/api/v1/admin/public/**",
+                                "/api/v1/friends/public/**",
+                                "/api/v1/user-documents/public/**"
                         ).permitAll()
 
                         // 3. TUTTO IL RESTO: Richiede un token Keycloak valido
                         .anyRequest().authenticated()
+
+
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))

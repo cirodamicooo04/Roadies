@@ -206,6 +206,12 @@ fun ProfileScreen(
                         )
 
                         MenuItem(
+                            text = stringResource(R.string.favourite_list),
+                            onClick = { onNavigateTo("favourite_lists/${user.username}") }
+                        )
+
+
+                        MenuItem(
                             text = stringResource(R.string.logout),
                             textColor = Color(0xFFD32F2F),
                             onClick = {

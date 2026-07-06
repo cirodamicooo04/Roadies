@@ -15,5 +15,7 @@ public class FavouriteListResponse {
     private Visibility visibility;
     private LocalDateTime createdAt;
 
+    private List<String> sharedWithIds;
+
     private List<FavouriteListItemResponse> items;
 }
