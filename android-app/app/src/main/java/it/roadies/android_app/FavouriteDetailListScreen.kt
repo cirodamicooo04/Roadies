@@ -13,6 +13,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,36 +58,33 @@ fun FavouriteListDetailScreen(
                 }
             }
             state.list != null -> {
-                // INTESTAZIONE DELLA LISTA (Sostituisce la TopAppBar doppia)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Nome della lista in grande
                     Text(
-                        text = state.list?.name ?: "Dettaglio Lista",
+                        text = state.list?.name ?: stringResource(R.string.fav_detail_title),
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp,
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Icone per modificare/eliminare LA LISTA INTERA (solo per il proprietario)
                     if (state.isOwner) {
                         Row {
                             if (state.list?.visibility == FavouriteListResponse.Visibility.SHARED_SPECIFIC) {
-                                IconButton(onClick = { 
+                                IconButton(onClick = {
                                     viewModel.loadFriends()
-                                    showShareSheet = true 
+                                    showShareSheet = true
                                 }) {
-                                    Icon(Icons.Default.Share, contentDescription = "Condividi con amici", tint = Color(0xFFE26D38))
+                                    Icon(Icons.Default.Share, contentDescription = stringResource(R.string.fav_share_with_friends), tint = Color(0xFFE26D38))
                                 }
                             }
                             IconButton(onClick = { showEditDialog = true }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Modifica lista", tint = Color.Gray)
+                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.fav_edit_list), tint = Color.Gray)
                             }
                             IconButton(onClick = { showDeleteConfirm = true }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Elimina lista", tint = Color.Red)
+                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.fav_delete_list), tint = Color.Red)
                             }
                         }
                     }
@@ -93,12 +92,11 @@ fun FavouriteListDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // ELEMENTI DELLA LISTA
                 val listItems = state.list!!.items ?: emptyList()
 
                 if (listItems.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("La lista è vuota.", color = Color.Gray)
+                        Text(stringResource(R.string.fav_list_empty), color = Color.Gray)
                     }
                 } else {
                     LazyColumn(
@@ -122,24 +120,24 @@ fun FavouriteListDetailScreen(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = travel.title ?: "Viaggio",
+                                                text = travel.title ?: stringResource(R.string.fav_travel_placeholder),
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 18.sp
                                             )
                                             Text(
-                                                text = travel.destination ?: "Destinazione ignota",
+                                                text = travel.destination ?: stringResource(R.string.fav_unknown_destination),
                                                 color = Color.Gray
                                             )
                                         }
 
-                                        // Icona per RIMUOVERE IL SINGOLO VIAGGIO
+                                        // Icona per rimuovere singolo viaggio
                                         if (state.isOwner) {
                                             IconButton(
                                                 onClick = { travel.id?.let { viewModel.removeTravel(it) } }
                                             ) {
                                                 Icon(
                                                     Icons.Default.Delete,
-                                                    contentDescription = "Rimuovi elemento",
+                                                    contentDescription = stringResource(R.string.fav_remove_item),
                                                     tint = Color.Red
                                                 )
                                             }
@@ -154,13 +152,13 @@ fun FavouriteListDetailScreen(
         }
     }
 
-    // Dialogo per ELIMINARE l'intera lista
+    // Dialogo per eliminare l'intera lista
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
             icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Red) },
-            title = { Text("Eliminare la lista?") },
-            text = { Text("Questa azione cancellerà la lista e tutti gli elementi al suo interno in modo irreversibile.") },
+            title = { Text(stringResource(R.string.fav_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.fav_delete_confirm_body)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -168,52 +166,51 @@ fun FavouriteListDetailScreen(
                         showDeleteConfirm = false
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) { Text("Elimina") }
+                ) { Text(stringResource(R.string.fav_delete_btn)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Annulla") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.fav_cancel_btn)) }
             }
         )
     }
 
-    // Dialogo per MODIFICARE l'intera lista
     if (showEditDialog) {
         var editName by remember { mutableStateOf(state.list?.name ?: "") }
         var editVisibility by remember { mutableStateOf(state.list?.visibility ?: FavouriteListResponse.Visibility.PRIVATE) }
 
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
-            title = { Text("Modifica Lista") },
+            title = { Text(stringResource(R.string.fav_edit_title)) },
             text = {
                 Column {
                     OutlinedTextField(
                         value = editName,
                         onValueChange = { editName = it },
-                        label = { Text("Nome lista") },
+                        label = { Text(stringResource(R.string.fav_name_label)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Visibilità:", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.fav_visibility_label), fontWeight = FontWeight.SemiBold)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = editVisibility == FavouriteListResponse.Visibility.PRIVATE,
                             onClick = { editVisibility = FavouriteListResponse.Visibility.PRIVATE }
                         )
-                        Text("Privata")
+                        Text(stringResource(R.string.fav_visibility_private))
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = editVisibility == FavouriteListResponse.Visibility.PUBLIC,
                             onClick = { editVisibility = FavouriteListResponse.Visibility.PUBLIC }
                         )
-                        Text("Pubblica")
+                        Text(stringResource(R.string.fav_visibility_public))
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = editVisibility == FavouriteListResponse.Visibility.SHARED_SPECIFIC,
                             onClick = { editVisibility = FavouriteListResponse.Visibility.SHARED_SPECIFIC }
                         )
-                        Text("Condivisa")
+                        Text(stringResource(R.string.fav_visibility_shared))
                     }
                 }
             },
@@ -223,15 +220,14 @@ fun FavouriteListDetailScreen(
                         viewModel.updateList(editName, editVisibility)
                         showEditDialog = false
                     }
-                ) { Text("Salva") }
+                ) { Text(stringResource(R.string.fav_save_btn)) }
             },
             dismissButton = {
-                TextButton(onClick = { showEditDialog = false }) { Text("Annulla") }
+                TextButton(onClick = { showEditDialog = false }) { Text(stringResource(R.string.fav_cancel_btn)) }
             }
         )
     }
 
-    // BottomSheet per CONDIVISIONE con amici
     if (showShareSheet) {
         ModalBottomSheet(
             onDismissRequest = { showShareSheet = false },
@@ -243,7 +239,7 @@ fun FavouriteListDetailScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Condividi con amici",
+                    text = stringResource(R.string.fav_share_with_friends),
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -254,7 +250,7 @@ fun FavouriteListDetailScreen(
                         CircularProgressIndicator()
                     }
                 } else if (state.friendsList.isEmpty()) {
-                    Text("Nessun amico trovato.", color = Color.Gray)
+                    Text(stringResource(R.string.fav_no_friends_found), color = Color.Gray)
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
@@ -268,7 +264,7 @@ fun FavouriteListDetailScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
-                                    Text(text = friend.username ?: "Sconosciuto", fontWeight = FontWeight.Bold)
+                                    Text(text = friend.username ?: stringResource(R.string.fav_unknown_friend), fontWeight = FontWeight.Bold)
                                     Text(text = "${friend.firstName} ${friend.lastName}", fontSize = 14.sp, color = Color.Gray)
                                 }
                                 Switch(

@@ -10,6 +10,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import it.roadies.android_app.viewmodel.MetadataViewModel
@@ -35,12 +37,12 @@ fun MetadataScreen(viewModel: MetadataViewModel = hiltViewModel()) {
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
-            title = { Text("Aggiungi Tag") },
+            title = { Text(stringResource(R.string.admin_add_tag)) },
             text = {
                 OutlinedTextField(
                     value = newTagName,
                     onValueChange = { newTagName = it },
-                    label = { Text("Nome Tag") },
+                    label = { Text(stringResource(R.string.admin_tag_name)) },
                     singleLine = true
                 )
             },
@@ -54,12 +56,12 @@ fun MetadataScreen(viewModel: MetadataViewModel = hiltViewModel()) {
                         newTagName = ""
                     }
                 ) {
-                    Text("Salva")
+                    Text(stringResource(R.string.admin_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text("Annulla")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

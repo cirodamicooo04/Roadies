@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -59,7 +61,7 @@ fun UserDocumentScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("I miei documenti") },
+                title = { Text(stringResource(R.string.my_documents)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -196,17 +198,17 @@ fun UploadDocumentDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isUploading) onDismiss() },
-        title = { Text("Carica nuovo documento") },
+        title = { Text(stringResource(R.string.upload_new_document)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = documentNumber,
                     onValueChange = { documentNumber = it },
-                    label = { Text("Numero Documento") },
+                    label = { Text(stringResource(R.string.document_number)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Text("Tipo di documento:", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.type_documents), style = MaterialTheme.typography.bodyMedium)
 
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -215,17 +217,17 @@ fun UploadDocumentDialog(
                     FilterChip(
                         selected = selectedType == UserDocumentRequestDTO.DocumentType.ID_CARD,
                         onClick = { selectedType = UserDocumentRequestDTO.DocumentType.ID_CARD },
-                        label = { Text("Carta d'Identità") }
+                        label = { Text(stringResource(R.string.id_card)) }
                     )
                     FilterChip(
                         selected = selectedType == UserDocumentRequestDTO.DocumentType.PASSPORT,
                         onClick = { selectedType = UserDocumentRequestDTO.DocumentType.PASSPORT },
-                        label = { Text("Passaporto") }
+                        label = { Text(stringResource(R.string.passport)) }
                     )
                     FilterChip(
                         selected = selectedType == UserDocumentRequestDTO.DocumentType.DRIVER_LICENSE,
                         onClick = { selectedType = UserDocumentRequestDTO.DocumentType.DRIVER_LICENSE },
-                        label = { Text("Patente") }
+                        label = { Text(stringResource(R.string.dr_license)) }
                     )
                 }
 
@@ -248,13 +250,13 @@ fun UploadDocumentDialog(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Carica")
+                    Text(stringResource(R.string.upload))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isUploading) {
-                Text("Annulla")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -296,7 +298,7 @@ fun DocumentImageViewerDialog(
                                 tint = Color.Red,
                                 modifier = Modifier.size(48.dp)
                             )
-                            Text("Impossibile caricare l'immagine", color = Color.White)
+                            Text(stringResource(R.string.error_upload_image), color = Color.White)
                         }
                     }
                 )

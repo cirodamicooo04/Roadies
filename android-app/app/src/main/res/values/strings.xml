@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Roadies</string>
     <string name="home">Home</string>
@@ -70,7 +71,7 @@
     <string name="destination_placeholder">Ex: Paris, France</string>
     <string name="search">Search</string>
     <string name="travel_photos_label">Photos</string>
-    <string name="add_photo">Add Photo</string>>
+    <string name="add_photo">Add Photo</string>&gt;
     <string name="photo_upload_failed">Failed</string>
     <string name="rate_trip_type">Rate tripe type</string>
     <string name="error_title_invalid">Title must be between 3 and 150 characters</string>
@@ -105,7 +106,7 @@
     <string name="select_time_title">Select time</string>
     <string name="activity_created">Activity created with success</string>
 
-    <!-- booking -->
+    
     <string name="booking_tab_active">Active</string>
     <string name="booking_tab_past">Past</string>
     <string name="booking_empty_active">No active bookings</string>
@@ -120,7 +121,7 @@
     <string name="booking_delete_dialog_confirm">Cancel booking</string>
     <string name="booking_delete_dialog_dismiss">Keep booking</string>
 
-    <!-- booking detail -->
+    
     <string name="booking_detail_title">Booking Detail</string>
     <string name="booking_detail_back">Back</string>
     <string name="booking_detail_info_title">Booking Information</string>
@@ -200,7 +201,7 @@
     <string name="error_departure_duration">The duration must be exactly %1$d days</string>
     <string name="departures_empty">No departures added yet. Add your first one!</string>
 
-    <!-- User -->
+    
     <string name="edit_profile"> Edit Profile</string>
     <string name="friends"> Friends</string>
     <string name="logout"> Logout</string>
@@ -214,7 +215,7 @@
     <string name="accept"> Accept</string>
     <string name="add_friend"> Add friend</string>
     <string name="request_sent"> Request sent</string>
-    <string name= "favourite_list"> Le mie liste preferiti</string>
+    <string name="favourite_list"> Le mie liste preferiti</string>
 
     <string name="error_date_past">The date must be in the future</string>
     <string name="error_time_range">End time must be after start time</string>
@@ -248,4 +249,100 @@
     <string name="organized_by">Organized by</string>
     <string name="loading">Loading...</string>
     <string name="organizer">Organizer</string>
+
+    
+    <string name="fav_my_lists">My Lists</string>
+    <string name="fav_lists">Favourite Lists</string>
+    <string name="fav_no_lists">No list found.</string>
+    <string name="fav_no_name">Unnamed</string>
+    <string name="fav_items_count">Items: %1$d</string>
+    <string name="fav_visibility"> • Visibility: %1$s</string>
+    <string name="fav_visibility_private">Private</string>
+    <string name="fav_visibility_public">Public</string>
+    <string name="fav_visibility_shared">Shared</string>
+    <string name="fav_error_loading">Error loading list</string>
+    <string name="fav_detail_title">List Detail</string>
+    <string name="fav_edit_list">Edit list</string>
+    <string name="fav_delete_list">Delete list</string>
+    <string name="fav_list_empty">The list is empty.</string>
+    <string name="fav_travel_placeholder">Travel</string>
+    <string name="fav_unknown_destination">Unknown destination</string>
+    <string name="fav_remove_item">Remove item</string>
+    <string name="fav_delete_confirm_title">Delete the list?</string>
+    <string name="fav_delete_confirm_body">This action will irreversibly delete the list and all items inside it.</string>
+    <string name="fav_delete_btn">Delete</string>
+    <string name="fav_cancel_btn">Cancel</string>
+    <string name="fav_edit_title">Edit List</string>
+    <string name="fav_name_label">List name</string>
+    <string name="fav_visibility_label">Visibility:</string>
+    <string name="fav_save_btn">Save</string>
+    <string name="fav_share_with_friends">Share with friends</string>
+    <string name="fav_no_friends_found">No friends found.</string>
+    <string name="fav_unknown_friend">Unknown</string>
+    <string name="fav_add_to_list">Add to a list</string>
+    <string name="fav_your_lists">Your Lists</string>
+    <string name="fav_new_list">New List</string>
+    <string name="fav_list_name_placeholder">List name</string>
+    <string name="fav_create_btn">Create</string>
+    <string name="fav_add_to_favorites">Add to favorites</string>
+    <string name="fav_no_lists_yet">You don\'t have any favourite lists yet</string>
+    <string name="fav_elements_count">%1$d elements</string>
+    <string name="fav_create_new_list">Create new list</string>
+    <string name="fav_visibility_label_only">Visibility</string>
+    <string name="fav_visibility_shared_specific">Shared with specific friends</string>
+    <string name="no_image_selected">No image selected</string>
+    <string name="send">Send</string>
+    <string name="view_organized_travels">View Organized Travels</string>
+    <string name="contact_organizer">Contact Organizer</string>
+    <string name="my_documents">My Documents</string>
+    <string name="upload_new_document">Upload new document</string>
+    <string name="document_number">Document Number</string>
+    <string name="upload">Upload</string>
+    <string name="error_upload_image">Unable to upload image</string>
+    <string name="avatar">Avatar</string>
+    <string name="select_avatar">Select avatar</string>
+    <string name="date_of_birth">Date of birth</string>
+    <string name="save_changes">Save changes</string>
+    <string name="remove_friend">Remove friend</string>
+    <string name="remove_friend_confirm">Do you really want to remove @%1$s from your friends?</string>
+    <string name="remove">Remove</string>
+    <string name="type_message">Type a message...</string>
+    <string name="all">All</string>
+    <string name="chat_opened">Chat opened</string>
+    <string name="time_expired">Time expired</string>
+    <string name="time_expired_message">The time to complete the booking has expired and the seats have been released. Please try again from the beginning.</string>
+    <string name="understood">Understood</string>
+    <string name="destination">Destination</string>
+    <string name="confirmed">Confirmed</string>
+    <string name="sold_out_status">Sold out</string>
+    <string name="planned">Planned</string>
+    <string name="price_format">Price: %1$s €</string>
+    <string name="max_slots_format">Max slots: %1$s</string>
+    <string name="price_range_format">%1$s€ - %2$s€</string>
+    <string name="duration_range_format">%1$s - %2$s %3$s</string>
+<string name="request_organizer_role">Request organizer role</string>
+    <string name="activity_address">Activity address</string>
+    <string name="yes_confirm">Yes, confirm</string>
+    <string name="metadata">Metadata</string>
+    <string name="loading_profile">Loading profile...</string>
+    <string name="no_documents">No documents uploaded.</string>
+    <string name="time_remaining">Time remaining %1$s</string>
+    <string name="admin_gamification_leaderboard">Gamification Leaderboard</string>
+    <string name="admin_no_stats">No user statistics available at the moment</string>
+    <string name="admin_badge">Badge: %1$s</string>
+    <string name="admin_points">%1$s pts</string>
+    <string name="admin_filter">Filter: %1$s</string>
+    <string name="admin_organizer_requests">Organizer Requests</string>
+    <string name="admin_no_users">There are no %1$s users</string>
+    <string name="admin_add_tag">Add Tag</string>
+    <string name="admin_tag_name">Tag Name</string>
+    <string name="admin_save">Save</string>
+    <string name="admin_tags">Tags</string>
+    <string name="admin_no_tags">No tags available.</string>
+    <string name="admin_no_pending_reqs">No pending requests at the moment</string>
+    <string name="admin_reject_reason">Reject Reason</string>
+    <string name="admin_reject_hint">Write the reason here...</string>
+    <string name="admin_user_details">User Details</string>
+    <string name="admin_block">Block</string>
+    <string name="admin_unblock">Unblock</string>
 </resources>

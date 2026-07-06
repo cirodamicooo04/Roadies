@@ -84,7 +84,7 @@ fun RoadiesApp(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Roadies")
+                    Text(stringResource(R.string.app_name))
                 },
                 navigationIcon = {
                     if (showBackButton) {
@@ -187,7 +187,7 @@ fun RoadiesApp(
                                 )
                             },
                             label = {
-                                Text("Metadata")
+                                Text(stringResource(R.string.metadata))
                             }
                         )
 

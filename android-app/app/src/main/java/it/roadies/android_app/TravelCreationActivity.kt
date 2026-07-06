@@ -850,8 +850,8 @@ fun DepartureSummaryCard(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "${stringResource(R.string.departure_price)}: ${departure.price} €", style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "${stringResource(R.string.departure_max_slots)}: ${departure.maxSlots}", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = stringResource(R.string.price_format, departure.price.toString()), style = MaterialTheme.typography.bodyMedium)
+                    Text(text = stringResource(R.string.max_slots_format, departure.maxSlots.toString()), style = MaterialTheme.typography.bodyMedium)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {

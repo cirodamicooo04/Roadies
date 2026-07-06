@@ -102,7 +102,6 @@ class FavouriteListDetailViewModel @Inject constructor(
         val listUuid = runCatching { UUID.fromString(listIdStr) }.getOrNull() ?: return
         
         viewModelScope.launch {
-            // Ottieni il Keycloak UUID dell'amico
             val userResponse = userRepository.getUserIdByUsername(username)
             if (!userResponse.success || userResponse.data == null) {
                 _uiState.value = _uiState.value.copy(errorMessage = "Errore nel recupero ID utente")
@@ -110,7 +109,6 @@ class FavouriteListDetailViewModel @Inject constructor(
             }
             val friendId = userResponse.data
 
-            // Effettua la chiamata API
             val response = if (isShared) {
                 favouriteRepository.addFriendToList(listUuid, friendId)
             } else {
@@ -166,7 +164,7 @@ class FavouriteListDetailViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             val response = favouriteRepository.removeTravelFromList(uuid, travelId)
             if (response.success) {
-                loadList() // Ricarica la lista per mostrare la modifica
+                loadList()
             } else {
                 _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = response.errorMessage)
             }
@@ -179,7 +177,7 @@ class FavouriteListDetailViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             val response = favouriteRepository.removeActivityFromList(uuid, activityId)
             if (response.success) {
-                loadList() // Ricarica la lista per mostrare la modifica
+                loadList()
             } else {
                 _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = response.errorMessage)
             }

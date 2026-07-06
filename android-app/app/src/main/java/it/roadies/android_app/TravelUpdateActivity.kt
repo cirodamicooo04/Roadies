@@ -571,7 +571,7 @@ fun DepartureUpdateSummaryCard(
                                 .background(color = Color(0xFFE8F5E9), shape = RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text(text = "Confermata", color = Color(0xFF4CAF50), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.confirmed), color = Color(0xFF4CAF50), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                     TravelDepartureResponse.Status.FULL -> {
@@ -580,7 +580,7 @@ fun DepartureUpdateSummaryCard(
                                 .background(color = Color(0xFFFFEBEE), shape = RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text(text = "Al completo", color = Color(0xFFF44336), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.sold_out_status), color = Color(0xFFF44336), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                     else -> {
@@ -589,15 +589,15 @@ fun DepartureUpdateSummaryCard(
                                 .background(color = Color(0xFFFFF3E0), shape = RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text(text = "Pianificata", color = Color(0xFFFF9800), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.planned), color = Color(0xFFFF9800), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "Prezzo: ${departure.price} €", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "Posti massimi: ${departure.maxSlots}", style = MaterialTheme.typography.bodyMedium)
+                Text(text = stringResource(R.string.price_format, departure.price.toString()), style = MaterialTheme.typography.bodyMedium)
+                Text(text = stringResource(R.string.max_slots_format, departure.maxSlots.toString()), style = MaterialTheme.typography.bodyMedium)
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 if (departure.status != TravelDepartureResponse.Status.CONFIRMED) {

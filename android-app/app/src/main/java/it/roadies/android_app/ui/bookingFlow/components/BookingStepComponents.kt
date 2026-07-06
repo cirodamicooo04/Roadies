@@ -29,6 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -106,13 +108,13 @@ fun BookingTimerBar(
 fun BookingExpiredDialog(onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onConfirm,
-        title = { Text("Tempo scaduto") },
+        title = { Text(stringResource(R.string.time_expired)) },
         text = {
-            Text("Il tempo per completare la prenotazione è scaduto e i posti sono stati liberati. Riprova dall'inizio.")
+            Text(stringResource(R.string.time_expired_message))
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Ho capito")
+                Text(stringResource(R.string.understood))
             }
         }
     )

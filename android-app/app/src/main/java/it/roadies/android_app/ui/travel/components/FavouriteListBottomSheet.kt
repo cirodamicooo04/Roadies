@@ -12,6 +12,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,7 +51,7 @@ fun FavouriteListBottomSheet(
                     .padding(bottom = 32.dp)
             ) {
                 Text(
-                    text = "Aggiungi ai preferiti",
+                    text = stringResource(R.string.fav_add_to_favorites),
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -74,7 +76,7 @@ fun FavouriteListBottomSheet(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Non hai ancora nessuna lista preferiti",
+                                text = stringResource(R.string.fav_no_lists_yet),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 15.sp
                             )
@@ -113,15 +115,15 @@ fun FavouriteListBottomSheet(
                                             Spacer(modifier = Modifier.width(12.dp))
                                             Column {
                                                 Text(
-                                                    text = list.name ?: "Lista senza nome",
+                                                    text = list.name ?: stringResource(R.string.fav_no_name),
                                                     fontWeight = FontWeight.SemiBold,
                                                     fontSize = 16.sp
                                                 )
                                                 Text(
                                                     text = when (list.visibility) {
-                                                        FavouriteListResponse.Visibility.PUBLIC -> "Pubblica"
-                                                        FavouriteListResponse.Visibility.PRIVATE -> "Privata"
-                                                        FavouriteListResponse.Visibility.SHARED_SPECIFIC -> "Condivisa"
+                                                        FavouriteListResponse.Visibility.PUBLIC -> stringResource(R.string.fav_visibility_public)
+                                                        FavouriteListResponse.Visibility.PRIVATE -> stringResource(R.string.fav_visibility_private)
+                                                        FavouriteListResponse.Visibility.SHARED_SPECIFIC -> stringResource(R.string.fav_visibility_shared)
                                                         else -> ""
                                                     },
                                                     fontSize = 12.sp,
@@ -130,7 +132,7 @@ fun FavouriteListBottomSheet(
                                             }
                                         }
                                         Text(
-                                            text = "${list.items?.size ?: 0} elementi",
+                                            text = stringResource(R.string.fav_elements_count, list.items?.size ?: 0),
                                             fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -152,12 +154,12 @@ fun FavouriteListBottomSheet(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Crea nuova lista")
+                        Text(stringResource(R.string.fav_create_new_list))
                     }
                 } else {
                     // Form di creazione nuova lista
                     Text(
-                        text = "Nuova lista",
+                        text = stringResource(R.string.fav_new_list),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 18.sp,
                         modifier = Modifier.padding(bottom = 12.dp)
@@ -165,7 +167,7 @@ fun FavouriteListBottomSheet(
                     OutlinedTextField(
                         value = newListName,
                         onValueChange = { newListName = it },
-                        label = { Text("Nome della lista") },
+                        label = { Text(stringResource(R.string.fav_list_name_placeholder)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -177,13 +179,13 @@ fun FavouriteListBottomSheet(
                     ) {
                         OutlinedTextField(
                             value = when (selectedVisibility) {
-                                FavouriteListCreateRequest.Visibility.PUBLIC -> "Pubblica"
-                                FavouriteListCreateRequest.Visibility.PRIVATE -> "Privata"
-                                FavouriteListCreateRequest.Visibility.SHARED_SPECIFIC -> "Condivisa con amici specifici"
+                                FavouriteListCreateRequest.Visibility.PUBLIC -> stringResource(R.string.fav_visibility_public)
+                                FavouriteListCreateRequest.Visibility.PRIVATE -> stringResource(R.string.fav_visibility_private)
+                                FavouriteListCreateRequest.Visibility.SHARED_SPECIFIC -> stringResource(R.string.fav_visibility_shared_specific)
                             },
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Visibilità") },
+                            label = { Text(stringResource(R.string.fav_visibility_label_only)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown) },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -194,21 +196,21 @@ fun FavouriteListBottomSheet(
                             onDismissRequest = { expandedDropdown = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Privata") },
+                                text = { Text(stringResource(R.string.fav_visibility_private)) },
                                 onClick = {
                                     selectedVisibility = FavouriteListCreateRequest.Visibility.PRIVATE
                                     expandedDropdown = false
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Pubblica") },
+                                text = { Text(stringResource(R.string.fav_visibility_public)) },
                                 onClick = {
                                     selectedVisibility = FavouriteListCreateRequest.Visibility.PUBLIC
                                     expandedDropdown = false
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Condivisa con amici specifici") },
+                                text = { Text(stringResource(R.string.fav_visibility_shared_specific)) },
                                 onClick = {
                                     selectedVisibility = FavouriteListCreateRequest.Visibility.SHARED_SPECIFIC
                                     expandedDropdown = false
@@ -229,7 +231,7 @@ fun FavouriteListBottomSheet(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Annulla")
+                            Text(stringResource(R.string.fav_cancel_btn))
                         }
                         Button(
                             onClick = {
@@ -241,7 +243,7 @@ fun FavouriteListBottomSheet(
                             shape = RoundedCornerShape(12.dp),
                             enabled = newListName.trim().isNotEmpty()
                         ) {
-                            Text("Crea")
+                            Text(stringResource(R.string.fav_create_btn))
                         }
                     }
                 }

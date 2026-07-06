@@ -184,7 +184,7 @@ fun ProfileScreen(
                                     contentColor = Color.White
                                 )
                             ) {
-                                Text("Richiedi ruolo organizzatore")
+                                Text(stringResource(R.string.request_organizer_role))
                             }
 
                             Spacer(modifier = Modifier.height(12.dp))

@@ -163,7 +163,7 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(stringResource(R.string.price_range), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                        Text("${priceRange.start.toInt()}€ - ${priceRange.endInclusive.toInt()}€", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.price_range_format, priceRange.start.toInt().toString(), priceRange.endInclusive.toInt().toString()), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     RangeSlider(
@@ -181,7 +181,7 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(stringResource(R.string.duration_days), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                            Text("${durationRange.start.toInt()} - ${durationRange.endInclusive.toInt()} ${stringResource(R.string.days)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.duration_range_format, durationRange.start.toInt().toString(), durationRange.endInclusive.toInt().toString(), stringResource(R.string.days)), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         RangeSlider(

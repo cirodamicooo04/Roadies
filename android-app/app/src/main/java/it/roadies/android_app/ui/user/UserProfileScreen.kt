@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -166,7 +168,7 @@ fun UserProfileScreen(
                         ) {
                             Icon(Icons.Default.Favorite, contentDescription = null, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Liste Preferiti", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                            Text(stringResource(R.string.fav_lists), fontSize = 16.sp, fontWeight = FontWeight.Medium)
                         }
 
                         if (state.isOrganizer) {
@@ -185,7 +187,7 @@ fun UserProfileScreen(
                             ) {
                                 Icon(Icons.Default.FlightTakeoff, contentDescription = null, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Vedi Viaggi Organizzati", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                                Text(stringResource(R.string.view_organized_travels), fontSize = 16.sp, fontWeight = FontWeight.Medium)
                             }
 
                             OutlinedButton(
@@ -198,7 +200,7 @@ fun UserProfileScreen(
                             ) {
                                 Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Contatta Organizzatore", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                                Text(stringResource(R.string.contact_organizer), fontSize = 16.sp, fontWeight = FontWeight.Medium)
                             }
                         } else {
                             Log.d("NON E UN ORGANIZZATORE", "organizer_check")

@@ -60,9 +60,9 @@ fun FriendScreen(
     if (friendToRemove != null) {
         AlertDialog(
             onDismissRequest = { friendToRemove = null },
-            title = { Text("Rimuovi amico") },
+            title = { Text(stringResource(R.string.remove_friend)) },
             text = {
-                Text("Vuoi davvero rimuovere @${friendToRemove?.username ?: "utente"} dai tuoi amici?")
+                Text(stringResource(R.string.remove_friend_confirm, friendToRemove?.username ?: "utente"))
             },
             confirmButton = {
                 TextButton(
@@ -73,12 +73,12 @@ fun FriendScreen(
                         friendToRemove = null
                     }
                 ) {
-                    Text("Rimuovi", color = Color(0xFFD32F2F))
+                    Text(stringResource(R.string.remove), color = Color(0xFFD32F2F))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { friendToRemove = null }) {
-                    Text("Annulla")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -512,7 +512,7 @@ fun FriendCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Rimuovi amico",
+                            contentDescription = stringResource(R.string.remove_friend),
                             modifier = Modifier.size(24.dp)
                         )
                     }

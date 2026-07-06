@@ -14,7 +14,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
+import it.roadies.android_app.R
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.graphics.Color
@@ -52,7 +54,7 @@ fun FavouriteListsScreen(
             .padding(16.dp)
     ) {
         Text(
-            text = if (state.isMyProfile) "Le mie Liste" else "Liste Preferiti",
+            text = if (state.isMyProfile) stringResource(R.string.fav_my_lists) else stringResource(R.string.fav_lists),
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -71,7 +73,7 @@ fun FavouriteListsScreen(
             }
             state.lists.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Nessuna lista trovata.", color = Color.Gray)
+                    Text(text = stringResource(R.string.fav_no_lists), color = Color.Gray)
                 }
             }
             else -> {
@@ -118,13 +120,21 @@ fun ListCard(list: FavouriteListResponse, isMyProfile: Boolean, onClick: () -> U
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
-                    text = list.name ?: "Senza nome",
+                    text = list.name ?: stringResource(R.string.fav_no_name),
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
-                val visibilityText = if (isMyProfile) " • Visibilità: ${list.visibility?.name ?: "N/A"}" else ""
+                
+                val visibilityName = when (list.visibility?.name) {
+                    "PRIVATE" -> stringResource(R.string.fav_visibility_private)
+                    "PUBLIC" -> stringResource(R.string.fav_visibility_public)
+                    "SHARED_SPECIFIC" -> stringResource(R.string.fav_visibility_shared)
+                    else -> list.visibility?.name ?: "N/A"
+                }
+                
+                val visibilityText = if (isMyProfile) stringResource(R.string.fav_visibility, visibilityName) else ""
                 Text(
-                    text = "Elementi: ${list.items?.size ?: 0}$visibilityText",
+                    text = stringResource(R.string.fav_items_count, list.items?.size ?: 0) + visibilityText,
                     color = Color.Gray,
                     fontSize = 14.sp
                 )
