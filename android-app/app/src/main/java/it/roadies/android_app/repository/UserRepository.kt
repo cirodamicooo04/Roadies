@@ -241,7 +241,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun getOrganizersInfo(ids: List<String>): ApiResponse<List<MinimalInformationResponseDTO>> {
+    suspend fun getUsersInfo(ids: List<String>): ApiResponse<List<MinimalInformationResponseDTO>> {
         return safeApiCall { userApi.getMinimalInformation(ids) }
     }
 

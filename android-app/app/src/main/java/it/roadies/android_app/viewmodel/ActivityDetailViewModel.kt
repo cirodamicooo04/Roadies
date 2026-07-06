@@ -25,10 +25,12 @@ import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 data class ActivityDetailState(
     val isLoading: Boolean = false,
     val activity: ActivityResponse? = null,
+    val organizerInfo: MinimalInformationResponseDTO? = null,
     val errorMessage: String? = null,
     val createdBookingId: UUID? = null,
     val selectedDepartureId: UUID? = null,
-    val requireLogin: Boolean = false
+    val requireLogin: Boolean = false,
+    val currentUserId: String? = null
 )
 
 data class ActivityDepartureState(
@@ -71,22 +73,35 @@ class ActivityDetailViewModel @Inject constructor(
         else _uiState.value = ActivityDetailState(errorMessage = "Activity id not valid")
 
         viewModelScope.launch {
-            val user = userRepository.getCurrentUser()
-            _reviewsState.value = _reviewsState.value.copy(currentUserId = user?.id)
+            authRepository.authState.collect { authState ->
+                _uiState.value = _uiState.value.copy(currentUserId = authState.userId)
+                _reviewsState.value = _reviewsState.value.copy(currentUserId = authState.userId)
+            }
         }
     }
 
     private fun loadActivity(id: UUID){
         viewModelScope.launch {
-            _uiState.value = ActivityDetailState(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
             val response = activityRepository.getActivityById(id)
             if (response.success){
-                _uiState.value = ActivityDetailState(activity = response.data, isLoading = false)
+                _uiState.value = _uiState.value.copy(activity = response.data, isLoading = false)
+                response.data?.ownerId?.let { loadOrganizerInfo(it) }
                 loadReviews(id)
             }
             else {
-                _uiState.value = ActivityDetailState(isLoading = false, errorMessage = response.errorMessage)
+                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = response.errorMessage)
+            }
+        }
+    }
+
+    private fun loadOrganizerInfo(ownerId: String) {
+        viewModelScope.launch {
+            val response = userRepository.getUsersInfo(listOf(ownerId))
+            if (response.success && response.data != null) {
+                val organizer = response.data.firstOrNull()
+                _uiState.value = _uiState.value.copy(organizerInfo = organizer)
             }
         }
     }
@@ -101,7 +116,7 @@ class ActivityDetailViewModel @Inject constructor(
                 var usersMap = emptyMap<String, MinimalInformationResponseDTO>()
                 
                 if (userIds.isNotEmpty()) {
-                    val usersResponse = userRepository.getOrganizersInfo(userIds)
+                    val usersResponse = userRepository.getUsersInfo(userIds)
                     if (usersResponse.success && usersResponse.data != null) {
                         usersMap = usersResponse.data.associateBy { it.keycloakId ?: "" }.filterKeys { it.isNotEmpty() }
                     }

@@ -11,6 +11,7 @@ import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.repository.ActivityRepository
 import it.roadies.android_app.repository.TravelRepository
 import it.roadies.android_app.repository.UserRepository
+import it.roadies.android_app.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -24,7 +25,8 @@ data class SearchScreenUiState(
     val travels: List<TravelSummaryResponse>? = emptyList(),
     val activities: List<ActivitySummaryResponse>? = emptyList(),
     val errorMessage: String? = null,
-    val type: String? = "TRAVEL"
+    val type: String? = "TRAVEL",
+    val currentUserId: String? = null
 )
 
 data class SearchFiltersState(
@@ -42,7 +44,7 @@ data class OrganizersUiState(
 )
 
 @HiltViewModel
-class SearchScreenViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle ,private val travelRepository: TravelRepository, private val activityRepository: ActivityRepository, private val userRepository: UserRepository) : ViewModel(){
+class SearchScreenViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle ,private val travelRepository: TravelRepository, private val activityRepository: ActivityRepository, private val userRepository: UserRepository, private val authRepository: AuthRepository) : ViewModel(){
     //hilt inietta automaticamente SavedStateHandle per prendere i parametri della rotta search
     val continent: String? = savedStateHandle["continent"];
     val country: String? = savedStateHandle["country"]
@@ -73,6 +75,12 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
             minDurationDays = minDurationDays?.toIntOrNull(),
             maxDurationDays = maxDurationDays?.toIntOrNull()
         )
+
+        viewModelScope.launch {
+            authRepository.authState.collect { authState ->
+                _searchScreenUiState.value = _searchScreenUiState.value.copy(currentUserId = authState.userId)
+            }
+        }
         
         val filters = _searchFiltersState.value
         loadItems(
@@ -192,7 +200,7 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                     _organizersState.value = OrganizersUiState(isLoading = true)
 
                     val organizers: Set<String> = _searchScreenUiState.value.activities?.mapNotNull { it.ownerId }?.toSet() as Set<String>
-                    val organizersResponse = userRepository.getOrganizersInfo(organizers.toList())
+                    val organizersResponse = userRepository.getUsersInfo(organizers.toList())
                     if (organizersResponse.success && organizersResponse.data != null){
                         _organizersState.value = OrganizersUiState(organizers = organizersResponse.data, isLoading = false)
                     } else {
@@ -237,7 +245,7 @@ class SearchScreenViewModel @Inject constructor(private val savedStateHandle: Sa
                     _organizersState.value = OrganizersUiState(isLoading = true)
 
                     val organizers: Set<String> = _searchScreenUiState.value.travels?.mapNotNull { it.ownerId }?.toSet() as Set<String>
-                    val organizersResponse = userRepository.getOrganizersInfo(organizers.toList())
+                    val organizersResponse = userRepository.getUsersInfo(organizers.toList())
                     if (organizersResponse.success && organizersResponse.data != null){
                         _organizersState.value = OrganizersUiState(organizers = organizersResponse.data, isLoading = false)
                     } else {

@@ -350,13 +350,25 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                     ActivitiesResult(uiState.activities ?: emptyList(), organizers, organizersUiState.isLoading, onActivityClick = { activity ->
                         navHostController.navigate("activity_detail/${activity.id}")
                     }, onOrganizerClick = { username -> 
-                        navHostController.navigate("user_profile/$username")
+                        val organizer = organizers?.find { it.username == username }
+                        val isMe = uiState.currentUserId != null && uiState.currentUserId == organizer?.keycloakId
+                        if (isMe) {
+                            navHostController.navigate("profile_graph")
+                        } else {
+                            navHostController.navigate("user_profile/$username")
+                        }
                     }, lazyListState, uiState.isLoadingMore || (uiState.isLoading && uiState.activities?.isNotEmpty() == true))
                 } else {
                     TravelsResult(uiState.travels ?: emptyList(), organizers, organizersUiState.isLoading, onTravelClick = { travel ->
                         navHostController.navigate("travel_detail/${travel.id}")
                     }, onOrganizerClick = { username -> 
-                        navHostController.navigate("user_profile/$username")
+                        val organizer = organizers?.find { it.username == username }
+                        val isMe = uiState.currentUserId != null && uiState.currentUserId == organizer?.keycloakId
+                        if (isMe) {
+                            navHostController.navigate("profile_graph")
+                        } else {
+                            navHostController.navigate("user_profile/$username")
+                        }
                     }, lazyListState, uiState.isLoadingMore || (uiState.isLoading && uiState.travels?.isNotEmpty() == true))
                 }
                 
@@ -672,7 +684,7 @@ fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformatio
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     val organizer = organizers?.find { it.keycloakId == travel.ownerId }
-                    val organizerName = if (isOrganizersLoading) "Caricamento..." else organizer?.username ?: "Sconosciuto"
+                    val organizerName = if (isOrganizersLoading) stringResource(R.string.loading) else organizer?.username ?: stringResource(R.string.organizer)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable(enabled = organizer?.username != null) {

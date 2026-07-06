@@ -1,5 +1,6 @@
 package it.roadies.android_app.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,10 +15,8 @@ import it.roadies.android_app.repository.AuthRepository
 import it.roadies.android_app.repository.BookingRepository
 import it.roadies.android_app.repository.ReviewRepository
 import it.roadies.android_app.repository.TravelRepository
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -27,10 +26,12 @@ import it.roadies.android_app.repository.UserRepository
 data class TravelDetailState(
     val isLoading: Boolean = false,
     val travel: TravelResponse? = null,
+    val organizerInfo: MinimalInformationResponseDTO? = null,
     val errorMessage: String? = null,
     val createdBookingId: UUID? = null,
     val selectedDepartureId: UUID? = null,
-    val requireLogin: Boolean = false
+    val requireLogin: Boolean = false,
+    val currentUserId: String? = null
 )
 
 data class TravelDepartureState(
@@ -65,22 +66,35 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
         else _uiState.value = TravelDetailState(errorMessage = "Travel id not valid")
 
         viewModelScope.launch {
-            val user = userRepository.getCurrentUser()
-            _reviewsState.value = _reviewsState.value.copy(currentUserId = user?.id)
+            authRepository.authState.collect { authState ->
+                _uiState.value = _uiState.value.copy(currentUserId = authState.userId)
+                _reviewsState.value = _reviewsState.value.copy(currentUserId = authState.userId)
+            }
         }
     }
 
     private fun loadTravel(id: UUID){
         viewModelScope.launch {
-            _uiState.value = TravelDetailState(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
             val response = travelRepository.getTravelById(id)
             if (response.success){
-                _uiState.value = TravelDetailState(travel = response.data, isLoading = false)
+                _uiState.value = _uiState.value.copy(travel = response.data, isLoading = false)
+                response.data?.ownerId?.let { loadOrganizerInfo(it) }
                 loadReviews(id)
             }
             else {
-                _uiState.value = TravelDetailState(isLoading = false, errorMessage = response.errorMessage)
+                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = response.errorMessage)
+            }
+        }
+    }
+
+    private fun loadOrganizerInfo(ownerId: String) {
+        viewModelScope.launch {
+            val response = userRepository.getUsersInfo(listOf(ownerId))
+            if (response.success && response.data != null) {
+                val organizer = response.data.firstOrNull()
+                _uiState.value = _uiState.value.copy(organizerInfo = organizer)
             }
         }
     }
@@ -95,7 +109,7 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
                 var usersMap = emptyMap<String, MinimalInformationResponseDTO>()
                 
                 if (userIds.isNotEmpty()) {
-                    val usersResponse = userRepository.getOrganizersInfo(userIds)
+                    val usersResponse = userRepository.getUsersInfo(userIds)
                     if (usersResponse.success && usersResponse.data != null) {
                         usersMap = usersResponse.data.associateBy { it.keycloakId ?: "" }.filterKeys { it.isNotEmpty() }
                     }

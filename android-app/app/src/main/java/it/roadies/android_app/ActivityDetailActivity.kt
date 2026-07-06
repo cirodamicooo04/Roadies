@@ -55,7 +55,9 @@ import it.roadies.android_app.ui.travel.components.DetailHeader
 import it.roadies.android_app.ui.travel.components.DetailImageCarousel
 import it.roadies.android_app.ui.travel.components.ExpandableDescription
 import it.roadies.android_app.ui.travel.components.LocationMap
+import it.roadies.android_app.ui.travel.components.OrganizerCard
 import it.roadies.android_app.ui.travel.components.Reviews
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.viewmodel.ActivityDetailViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.Duration
@@ -81,6 +83,7 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
     } else {
         ActivityDetail(
             activity = uiState.activity, 
+            organizerInfo = uiState.organizerInfo,
             onCheckAvailability = {
                 viewModel.loadDepartures()
                 isDeparturesSheetOpen = true
@@ -90,7 +93,15 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
             reviewsState = reviewsState,
             onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
             onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
-            onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) }
+            onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
+            onOrganizerClick = { username -> 
+                val isMe = uiState.currentUserId == uiState.organizerInfo?.keycloakId
+                if (isMe) {
+                    navHostController.navigate("profile_graph")
+                } else {
+                    navHostController.navigate("user_profile/$username")
+                }
+            }
         )
     }
 
@@ -158,12 +169,14 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
 @Composable
 fun ActivityDetail(
     activity: ActivityResponse?, 
+    organizerInfo: MinimalInformationResponseDTO?,
     onCheckAvailability: () -> Unit, 
     onFavoriteClick: (UUID) -> Unit,
     reviewsState: it.roadies.android_app.viewmodel.ActivityReviewsState,
     onDeleteReview: (UUID) -> Unit,
     onEditReview: (UUID, Int, String) -> Unit,
-    onReplyReview: (UUID, String) -> Unit
+    onReplyReview: (UUID, String) -> Unit,
+    onOrganizerClick: (String) -> Unit
 ){
     var isFavorite by remember { mutableStateOf(false) }
 
@@ -224,6 +237,11 @@ fun ActivityDetail(
 
                 //mappa
                 LocationMap(lon = activity.longitude, lat = activity.latitude)
+
+                OrganizerCard(
+                    organizerInfo = organizerInfo,
+                    onOrganizerClick = onOrganizerClick
+                )
 
                 Reviews(
                     isLoading = reviewsState.isLoading,
