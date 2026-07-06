@@ -45,7 +45,7 @@ class ChatListViewModel @Inject constructor(
                     if (it.travelerId == myId) it.organizerId else it.travelerId
                 }.distinct().filterNotNull()
 
-                val infoResponse = userRepository.getOrganizersInfo(otherUserIds)
+                val infoResponse = userRepository.getUsersInfo(otherUserIds)
 
                 val userInfosMap = if (infoResponse.success && infoResponse.data != null) {
                     infoResponse.data.associateBy { it.keycloakId ?: "" }

@@ -22,12 +22,16 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import java.util.UUID
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
@@ -83,6 +87,8 @@ import androidx.compose.foundation.shape.CircleShape
 import it.roadies.android_app.client.models.travel.TagResponse
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import it.roadies.android_app.client.models.review.ReviewResponse
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 
 @Composable
 fun BoxCentered(text: String? = null) {
@@ -710,15 +716,15 @@ fun Reviews(
 
 @Composable
 fun ReviewCard(
-    review: it.roadies.android_app.client.models.review.ReviewResponse, 
-    user: it.roadies.android_app.client.models.user.MinimalInformationResponseDTO?, 
+    review: ReviewResponse,
+    user: MinimalInformationResponseDTO?,
     modifier: Modifier = Modifier, 
     currentUserId: String? = null,
     travelOwnerId: String? = null,
     onEditClick: () -> Unit = {},
     onDeleteClick: () -> Unit = {},
     onReplyClick: () -> Unit = {},
-    onReviewClick: (it.roadies.android_app.client.models.review.ReviewResponse) -> Unit
+    onReviewClick: (ReviewResponse) -> Unit
 ) {
     val username = user?.username ?: stringResource(R.string.fictitious_user)
     val avatarInitial = username.take(1).uppercase()
@@ -849,7 +855,7 @@ fun ExpandableReviewText(text: String, modifier: Modifier = Modifier, onReadMore
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewDetailSheet(review: it.roadies.android_app.client.models.review.ReviewResponse, user: it.roadies.android_app.client.models.user.MinimalInformationResponseDTO?, onDismiss: () -> Unit) {
+fun ReviewDetailSheet(review: ReviewResponse, user: MinimalInformationResponseDTO?, onDismiss: () -> Unit) {
     val username = user?.username ?: stringResource(R.string.fictitious_user)
     val avatarInitial = username.take(1).uppercase()
     
@@ -945,6 +951,65 @@ fun ReviewDetailSheet(review: it.roadies.android_app.client.models.review.Review
             }
             
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+fun OrganizerCard(organizerInfo: MinimalInformationResponseDTO?, onOrganizerClick: (String) -> Unit) {
+    if (organizerInfo == null) return
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp)
+            .clickable { organizerInfo.username?.let { onOrganizerClick(it) } },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = organizerInfo.username?.take(1)?.uppercase() ?: "?",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.organized_by),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "@${organizerInfo.username ?: stringResource(R.string.fictitious_user)}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Vai al profilo",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

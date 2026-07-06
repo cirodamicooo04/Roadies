@@ -248,4 +248,7 @@
     <string name="type_your_review">Scrivi la tua recensione...</string>
     <string name="reply">Rispondi</string>
     <string name="no_travels_on_platfrom">Ancora nessun viaggio sulla piattaforma, torna più tardi!</string>
+    <string name="organized_by">Organizzato da</string>
+    <string name="loading">Caricamento...</string>
+    <string name="organizer">Organizzatore</string>
 </resources>

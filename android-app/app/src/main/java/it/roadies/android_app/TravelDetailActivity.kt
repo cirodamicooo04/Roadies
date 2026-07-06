@@ -1,5 +1,6 @@
 package it.roadies.android_app
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,22 +67,18 @@ import it.roadies.android_app.client.models.travel.ActivityResponse
 import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
 import it.roadies.android_app.client.models.travel.TravelTagResponse
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.ui.travel.components.BoxCentered
 import it.roadies.android_app.ui.travel.components.CheckAvailabilityButton
 import it.roadies.android_app.ui.travel.components.DetailHeader
 import it.roadies.android_app.ui.travel.components.DetailImageCarousel
 import it.roadies.android_app.ui.travel.components.ExpandableDescription
 import it.roadies.android_app.ui.travel.components.LocationMap
+import it.roadies.android_app.ui.travel.components.OrganizerCard
 import it.roadies.android_app.ui.travel.components.Reviews
 import it.roadies.android_app.viewmodel.TravelDetailViewModel
 import it.roadies.android_app.viewmodel.TravelReviewsState
 import java.util.UUID
-
-import it.roadies.android_app.client.models.travel.FavouriteListCreateRequest
-import it.roadies.android_app.client.models.travel.FavouriteListResponse
-import it.roadies.android_app.repository.FavouriteRepository
-import it.roadies.android_app.ui.travel.components.FavouriteListBottomSheet
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,11 +90,6 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
     val departuresSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isDeparturesSheetOpen by remember { mutableStateOf(false) }
 
-    var isFavouriteSheetOpen by remember { mutableStateOf(false) }
-    var favouriteLists by remember { mutableStateOf<List<FavouriteListResponse>>(emptyList()) }
-    var isFavouriteLoading by remember { mutableStateOf(false) }
-    var pendingItemId by remember { mutableStateOf<UUID?>(null) }
-
     if (uiState.isLoading){
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             CircularProgressIndicator()
@@ -105,20 +97,29 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
     } else if (uiState.errorMessage != null){
         BoxCentered(text = uiState.errorMessage)
         } else {
-        TravelDetail(uiState.travel, onCheckAvailability = {
-            viewModel.loadDepartures()
-            isDeparturesSheetOpen = true
-        }, reviewsState = reviewsState ,onFavoriteClick = { travelId ->
-            pendingItemId = travelId
-            isFavouriteLoading = true
-            isFavouriteSheetOpen = true
-            viewModel.loadFavouriteLists { lists ->
-                favouriteLists = lists
-                isFavouriteLoading = false
+        TravelDetail(
+            travel = uiState.travel, 
+            organizerInfo = uiState.organizerInfo,
+            onCheckAvailability = {
+                viewModel.loadDepartures()
+                isDeparturesSheetOpen = true
+            }, 
+            reviewsState = reviewsState,
+            onFavoriteClick = { travelId -> // vincenzo usa travel id per aggiungerlo ai preferiti
+            }, 
+            onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
+            onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
+            onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
+            onOrganizerClick = { username -> 
+                val isMe = uiState.currentUserId == uiState.organizerInfo?.keycloakId
+                Log.d("check_sono_io","my_id: ${uiState.currentUserId}, keyc_id: ${uiState.organizerInfo?.keycloakId}")
+                if (isMe) {
+                    navHostController.navigate("profile_graph")
+                } else {
+                    navHostController.navigate("user_profile/$username")
+                }
             }
-        }, onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
-        onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
-        onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) })
+        )
     }
 
     LaunchedEffect(uiState.requireLogin) {
@@ -180,60 +181,19 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
             }
         }
     }
-    val context = androidx.compose.ui.platform.LocalContext.current
-
-    FavouriteListBottomSheet(
-        isOpen = isFavouriteSheetOpen,
-        lists = favouriteLists,
-        isLoading = isFavouriteLoading,
-        onDismiss = {
-            isFavouriteSheetOpen = false
-            pendingItemId = null
-        },
-        onListSelected = { list ->
-            pendingItemId?.let { itemId ->
-                list.id?.let { listId ->
-                    viewModel.addTravelToFavouriteList(listId, itemId) { success, errorMsg ->
-                        if (success) {
-                            android.widget.Toast.makeText(context, "Viaggio aggiunto ai preferiti!", android.widget.Toast.LENGTH_SHORT).show()
-                        } else {
-                            android.widget.Toast.makeText(context, errorMsg ?: "Errore durante l'aggiunta", android.widget.Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-            isFavouriteSheetOpen = false
-            pendingItemId = null
-        },
-        onCreateList = { name, visibility ->
-            viewModel.createFavouriteList(name, visibility) { newList ->
-                pendingItemId?.let { itemId ->
-                    newList.id?.let { listId ->
-                        viewModel.addTravelToFavouriteList(listId, itemId) { success, errorMsg ->
-                            if (success) {
-                                android.widget.Toast.makeText(context, "Viaggio aggiunto alla nuova lista!", android.widget.Toast.LENGTH_SHORT).show()
-                            } else {
-                                android.widget.Toast.makeText(context, errorMsg ?: "Errore durante l'aggiunta", android.widget.Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                }
-                isFavouriteSheetOpen = false
-                pendingItemId = null
-            }
-        }
-    )
 }
 
 @Composable
 fun TravelDetail(
     travel: TravelResponse?, 
+    organizerInfo: MinimalInformationResponseDTO?,
     reviewsState: TravelReviewsState,
     onCheckAvailability: () -> Unit, 
     onFavoriteClick: (UUID) -> Unit,
     onDeleteReview: (UUID) -> Unit,
     onEditReview: (UUID, Int, String) -> Unit,
-    onReplyReview: (UUID, String) -> Unit
+    onReplyReview: (UUID, String) -> Unit,
+    onOrganizerClick: (String) -> Unit
 ){
     //variabile is favorite , da cambiare in caso volessimo fare cuoricino rosso se favorito
     var isFavorite by remember { mutableStateOf(false) }
@@ -288,6 +248,11 @@ fun TravelDetail(
 
                 //travel activity con ogni attività collasabile
                 Activities(travel.activities)
+
+                OrganizerCard(
+                    organizerInfo = organizerInfo,
+                    onOrganizerClick = onOrganizerClick
+                )
 
                 Reviews(
                     isLoading = reviewsState.isLoading,
