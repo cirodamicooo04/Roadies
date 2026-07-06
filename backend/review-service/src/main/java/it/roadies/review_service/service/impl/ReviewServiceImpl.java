@@ -44,7 +44,7 @@ public class ReviewServiceImpl implements ReviewService {
         review.setTravelId(travelId);
         // Check if the user has already reviewed this travel
         if (repository.existsByTravelIdAndUserId(travelId, userId)) {
-            throw new AccessDeniedException("l'utente " + userId + " ha tentato di accedere ad una risorsa non autorizzato");
+            throw new AccessDeniedException(messageLang.getMessage("review.already.exists"));
         }
 
         repository.save(review);

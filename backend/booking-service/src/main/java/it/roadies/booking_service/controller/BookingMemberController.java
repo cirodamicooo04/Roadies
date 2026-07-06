@@ -5,9 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.roadies.booking_service.data.dto.request.MemberDocumentUpdateRequest;
 import it.roadies.booking_service.services.BookingMemberService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,40 +24,6 @@ import java.util.UUID;
 public class BookingMemberController {
 
     private final BookingMemberService bookingMemberService;
-
-//    @PreAuthorize("hasAnyRole('TRAVELER', 'ADMIN')")
-//    @PatchMapping ("/update")
-//    public ResponseEntity<Void> updateDocument(@Valid @RequestBody MemberDocumentUpdateRequest request) {
-//        bookingMemberService.updateDocument(request);
-//        return ResponseEntity.ok().build();
-//    }
-
-    @Operation(summary = "Conferma la validazione di un documento", description = "Permette di validare un documento relativo ad una prenotazione")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Documento accettato con successo"),
-            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
-            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
-    })
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping ("/accept")
-    public ResponseEntity<Void> acceptDocument(@Valid @RequestBody MemberDocumentUpdateRequest request) {
-        bookingMemberService.acceptDocument(request);
-        return ResponseEntity.ok().build();
-    }
-
-    @Operation(summary = "Rifiuta la validazione di un documento", description = "Permette di rifiutare un documento relativo ad una prenotazione")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Documento rifiutato con successo"),
-            @ApiResponse(responseCode = "401", description = "Utente non autenticato"),
-            @ApiResponse(responseCode = "403", description = "Utente non autorizzato"),
-    })
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping ("/reject")
-    public ResponseEntity<Void> rejectDocument(@Valid @RequestBody MemberDocumentUpdateRequest request) {
-        bookingMemberService.rejectDocument(request);
-        return ResponseEntity.ok().build();
-    }
-
     @Operation(summary = "Invia documenti", description = "Permette di inserire un documento relativo ad una prenotazione")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Documento inserito con successo"),

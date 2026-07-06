@@ -90,7 +90,9 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
             reviewsState = reviewsState,
             onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
             onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
-            onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) }
+            onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
+            onEditReply = { replyId, content -> viewModel.editReply(replyId, content) },
+            onDeleteReply = { replyId -> viewModel.deleteReply(replyId) }
         )
     }
 
@@ -163,7 +165,9 @@ fun ActivityDetail(
     reviewsState: it.roadies.android_app.viewmodel.ActivityReviewsState,
     onDeleteReview: (UUID) -> Unit,
     onEditReview: (UUID, Int, String) -> Unit,
-    onReplyReview: (UUID, String) -> Unit
+    onReplyReview: (UUID, String) -> Unit,
+    onEditReply: (UUID, String) -> Unit,
+    onDeleteReply: (UUID) -> Unit
 ){
     var isFavorite by remember { mutableStateOf(false) }
 
@@ -234,7 +238,9 @@ fun ActivityDetail(
                     travelOwnerId = activity.ownerId,
                     onDeleteReview = onDeleteReview,
                     onEditReview = onEditReview,
-                    onReplyReview = onReplyReview
+                    onReplyReview = onReplyReview,
+                    onEditReply = onEditReply,
+                    onDeleteReply = onDeleteReply
                 )
             }
 

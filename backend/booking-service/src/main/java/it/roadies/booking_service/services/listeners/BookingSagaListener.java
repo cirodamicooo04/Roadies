@@ -37,6 +37,7 @@ public class BookingSagaListener {
     @RabbitListener(queues = "booking.failed.queue")
     public void handleSeatReservationFailed(SeatReservationFailedEvent event) {
         bookingRepository.findById(event.getBookingId()).ifPresent(booking -> {
+            booking.setPeopleCount(0);
             booking.setStatus(BookingStatus.RESERVE_REJECTED);
             bookingRepository.save(booking);
         });

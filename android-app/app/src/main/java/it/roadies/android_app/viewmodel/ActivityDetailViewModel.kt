@@ -220,4 +220,37 @@ class ActivityDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun editReply(replyId: UUID, newContent: String) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val request = ReplyRequest(content = newContent)
+            val response = reviewRepository.updateReply(replyId, request)
+            if (response.success) {
+                val uuid = runCatching { UUID.fromString(id) }.getOrNull()
+                if (uuid != null) loadReviews(uuid)
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    errorMessage = response.errorMessage ?: "Error updating reply"
+                )
+            }
+        }
+    }
+
+    fun deleteReply(replyId: UUID) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val response = reviewRepository.deleteReply(replyId)
+            if (response.success) {
+                val uuid = runCatching { UUID.fromString(id) }.getOrNull()
+                if (uuid != null) loadReviews(uuid)
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    errorMessage = response.errorMessage ?: "Error deleting reply"
+                )
+            }
+        }
+    }
 }

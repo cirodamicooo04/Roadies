@@ -47,29 +47,12 @@ public class SeatReservationListener {
 
     @RabbitListener(queues = "travel.release.queue")
     public void handleReleaseTravelCommand(ReserveSeatCommand command) {
-        try {
-            travelDepartureService.releaseSeats(command.getTravelId(), command.getPeopleCount());
-            SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.reserved", successEvent);
-
-        } catch (Exception e) {
-            SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.failed", failedEvent);
-        }
+        travelDepartureService.releaseSeats(command.getTravelId(), command.getPeopleCount());
     }
 
     @RabbitListener(queues = "activity.release.queue")
     public void handleReleaseActivityCommand(ReserveSeatCommand command) {
-        try {
-            activityDepartureService.releaseSeats(command.getActivityId(), command.getPeopleCount());
-
-            SeatReservedEvent successEvent = new SeatReservedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.reserved", successEvent);
-
-        } catch (Exception e) {
-            SeatReservationFailedEvent failedEvent = new SeatReservationFailedEvent(command.getBookingId());
-            rabbitTemplate.convertAndSend("travel.exchange", "travel.seat.failed", failedEvent);
-        }
+        activityDepartureService.releaseSeats(command.getActivityId(), command.getPeopleCount());
     }
 
 

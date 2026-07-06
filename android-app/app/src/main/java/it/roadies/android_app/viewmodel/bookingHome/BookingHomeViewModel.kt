@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import it.roadies.android_app.client.models.booking.BookingHomeResponse
+import it.roadies.android_app.client.models.booking.DepartureType
+import it.roadies.android_app.client.models.review.ReviewRequest
 import it.roadies.android_app.model.mappers.toHomeResponse
 import it.roadies.android_app.repository.AuthRepository
 import it.roadies.android_app.repository.BookingRepository
+import it.roadies.android_app.repository.ReviewRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,13 +36,14 @@ data class BookingHomeState(
     val active: BookingPagingState = BookingPagingState(),
     val past: BookingPagingState = BookingPagingState(),
     val filterType: BookingFilterType = BookingFilterType.ALL,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val infoMessage: String? = null
 )
 
 const val PAGE_SIZE = 10
 
 @HiltViewModel
-class BookingHomeViewModel @Inject constructor(private val repository: BookingRepository, private val authRepository: AuthRepository) : ViewModel() {
+class BookingHomeViewModel @Inject constructor(private val repository: BookingRepository, private val authRepository: AuthRepository, private val reviewRepository: ReviewRepository) : ViewModel() {
     private val _state = MutableStateFlow(BookingHomeState())
     val state: StateFlow<BookingHomeState> = _state.asStateFlow()
 
@@ -117,6 +121,23 @@ class BookingHomeViewModel @Inject constructor(private val repository: BookingRe
 
     fun clearError() {
         _state.update { it.copy(errorMessage = null) }
+    }
+
+    fun clearInfo() {
+        _state.update { it.copy(infoMessage = null) }
+    }
+
+    fun submitReview(booking: BookingHomeResponse, rating: Int, content: String, successMessage: String) {
+        val principalId = booking.principalId ?: return
+        val reviewType = (booking.departureType ?: DepartureType.TRAVEL).name
+        viewModelScope.launch {
+            val res = reviewRepository.createReview(principalId, ReviewRequest(rating, content.trim(), reviewType))
+            if (res.success) {
+                _state.update { it.copy(infoMessage = successMessage) }
+            } else {
+                _state.update { it.copy(errorMessage = res.errorMessage) }
+            }
+        }
     }
 
     fun loadMorePast() {

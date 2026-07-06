@@ -16,7 +16,6 @@ import it.roadies.booking_service.data.entities.Booking;
 import it.roadies.booking_service.data.entities.BookingMember;
 import it.roadies.booking_service.data.entities.MemberDocument;
 import it.roadies.booking_service.data.entities.enumeration.BookingStatus;
-import it.roadies.booking_service.data.entities.enumeration.DocumentStatus;
 import it.roadies.booking_service.data.mapper.BookingMemberMapper;
 import it.roadies.booking_service.exceptions.UnauthorizedActionException;
 import it.roadies.booking_service.exceptions.BookingNotFoundException;
@@ -35,7 +34,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,9 +77,10 @@ public class BookingServiceImpl implements BookingService {
             throw new UnauthorizedActionException(messageLang.getMessage("error.access.denied"));
         }
 
-        log.info("Inizio modica booking precedentemente in stato di draft per la prenotazione {}", booking.getId());
+
         int oldPeopleCount = booking.getPeopleCount();
         int newPeopleCount = requestDto.getPeopleCount();
+        if (oldPeopleCount == 0) log.info("Inizio modica booking precedentemente in stato di draft per la prenotazione {}", booking.getId());
 
         log.debug("bookingId={} oldPeopleCount={} newPeopleCount={}", booking.getId(), oldPeopleCount, newPeopleCount);
 
@@ -113,13 +112,13 @@ public class BookingServiceImpl implements BookingService {
         );
 
         if (newPeopleCount - oldPeopleCount > 0) {
-            log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), difference);
+            log.info("Invio evento RabbitMQ per Booking ID: {}. Aggiunta posti: {}", booking.getId(), difference);
             if (requestDto.getTravelId() != null) {
                 rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.reserve.travel", command);
             } else rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.reserve.activity", command);
 
         } else if (newPeopleCount - oldPeopleCount < 0){
-            log.info("Invio evento RabbitMQ per Booking ID: {}. Variazione posti: {}", booking.getId(), difference);
+            log.info("Invio evento RabbitMQ per Booking ID: {}. Rimozione posti: {}", booking.getId(), difference);
             if (requestDto.getTravelId() != null) {
                 rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.release.travel", command);
             } else rabbitTemplate.convertAndSend("booking.exchange", "booking.seat.release.activity", command);
@@ -149,10 +148,6 @@ public class BookingServiceImpl implements BookingService {
         for (BookingMemberDTO memberDto : requestDto.getMembers()) {
             BookingMember member = bookingMemberMapper.toEntity(memberDto);
             member.setBooking(booking);
-
-            if (member.getDocuments() != null) {
-                member.getDocuments().forEach(doc -> doc.setStatus(DocumentStatus.PENDING));
-            }
 
             entities.add(member);
         }

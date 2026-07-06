@@ -132,6 +132,9 @@
     <string name="booking_detail_start_date">Data d\'inizio</string>
     <string name="booking_detail_end_date">Data di fine</string>
     <string name="booking_detail_view_travel">Dettagli viaggio</string>
+    <string name="booking_add_review">Lascia una recensione</string>
+    <string name="booking_add_review_title">Inserimento recensione</string>
+    <string name="booking_review_success">Grazie! La tua recensione è stata inserita</string>
 
     <string name="booking_without_seats">Posti non disponibili. Scegli un altra partenza</string>
     <string name="booking_searching_seats">Stiamo cercando posti disponibili…</string>
@@ -246,4 +249,7 @@
     <string name="type_your_reply">Scrivi la tua risposta...</string>
     <string name="type_your_review">Scrivi la tua recensione...</string>
     <string name="reply">Rispondi</string>
+    <string name="edit_reply_title">Modifica</string>
+    <string name="delete_reply_title">Elimina</string>
+    <string name="delete_reply_msg">Sei sicuro di voler modificare questa risposta?</string>
 </resources>

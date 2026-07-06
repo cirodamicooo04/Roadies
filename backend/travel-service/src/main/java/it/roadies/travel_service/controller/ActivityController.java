@@ -127,7 +127,7 @@ public class ActivityController {
     }
 
     //REVIEW AREA
-    @GetMapping("/review/{activityId}/")
+    @GetMapping("/review/{activityId}")
     public ResponseEntity<Void> validActivity(@PathVariable UUID activityId, @RequestParam boolean isReply, @AuthenticationPrincipal Jwt jwt) {
         if (activityService.isValidActivity(activityId, isReply, jwt.getSubject())) {
             return ResponseEntity.ok().build();

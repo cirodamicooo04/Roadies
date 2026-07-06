@@ -2,7 +2,6 @@ package it.roadies.android_app.client.apis.review
 
 import it.roadies.android_app.client.models.review.ReplyRequest
 import it.roadies.android_app.client.models.review.ReplyResponse
-import it.roadies.android_app.client.models.review.ReviewReply
 import retrofit2.Response
 import retrofit2.http.*
 import java.util.UUID
@@ -25,7 +24,7 @@ interface ReviewReplyApi {
     suspend fun updateReply(
         @Path("replyId") replyId: UUID,
         @Body request: ReplyRequest
-    ): Response<ReviewReply>
+    ): Response<Void>
 
     // Delete a reply
     @DELETE("/api/v1/reviews/replies/replyId/{replyId}")

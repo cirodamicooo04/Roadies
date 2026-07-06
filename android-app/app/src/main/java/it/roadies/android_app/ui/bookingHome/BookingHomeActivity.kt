@@ -19,6 +19,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RateReview
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -27,12 +29,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +64,7 @@ import java.math.BigDecimal
 @Composable
 fun BookingHomeScreen(navHostController: NavHostController, viewModel: BookingHomeViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val reviewSuccessMessage = stringResource(R.string.booking_review_success)
 
     BookingHomeScreenContent(
         state = state, 
@@ -74,17 +79,21 @@ fun BookingHomeScreen(navHostController: NavHostController, viewModel: BookingHo
         onDeleteBooking = { booking ->
             booking.bookingId?.let { viewModel.deleteBooking(it) }
         },
-        onErrorShown = { viewModel.clearError() }
+        onAddReview = { booking, rating, content ->
+            viewModel.submitReview(booking, rating, content, reviewSuccessMessage)
+        },
+        onErrorShown = { viewModel.clearError() },
+        onInfoShown = { viewModel.clearInfo() }
     )
 }
 
 @Composable
-fun BookingHomeScreenContent(state: BookingHomeState, onLoadMoreActive: () -> Unit = {}, onLoadMorePast: () -> Unit = {}, onFilterChanged: (BookingFilterType) -> Unit = {}, onBookingClick: (BookingHomeResponse) -> Unit = {}, onDeleteBooking: ((BookingHomeResponse) -> Unit)? = null, onErrorShown: () -> Unit = {}) {
+fun BookingHomeScreenContent(state: BookingHomeState, onLoadMoreActive: () -> Unit = {}, onLoadMorePast: () -> Unit = {}, onFilterChanged: (BookingFilterType) -> Unit = {}, onBookingClick: (BookingHomeResponse) -> Unit = {}, onDeleteBooking: ((BookingHomeResponse) -> Unit)? = null, onAddReview: ((BookingHomeResponse, Int, String) -> Unit)? = null, onErrorShown: () -> Unit = {}, onInfoShown: () -> Unit = {}) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoggedIn) {
-            BookingHomeContent(state, onLoadMoreActive, onLoadMorePast, onFilterChanged, onBookingClick, onDeleteBooking)
+            BookingHomeContent(state, onLoadMoreActive, onLoadMorePast, onFilterChanged, onBookingClick, onDeleteBooking, onAddReview)
         } else {
             BookingHomeNotLogged()
         }
@@ -93,6 +102,13 @@ fun BookingHomeScreenContent(state: BookingHomeState, onLoadMoreActive: () -> Un
             state.errorMessage?.let { errorMsg ->
                 snackbarHostState.showSnackbar(errorMsg)
                 onErrorShown()
+            }
+        }
+
+        LaunchedEffect(state.infoMessage) {
+            state.infoMessage?.let { infoMsg ->
+                snackbarHostState.showSnackbar(infoMsg)
+                onInfoShown()
             }
         }
 
@@ -112,7 +128,8 @@ fun BookingHomeContent(
     onLoadMorePast: () -> Unit,
     onFilterChanged: (BookingFilterType) -> Unit,
     onBookingClick: (BookingHomeResponse) -> Unit,
-    onDeleteBooking: ((BookingHomeResponse) -> Unit)? = null
+    onDeleteBooking: ((BookingHomeResponse) -> Unit)? = null,
+    onAddReview: ((BookingHomeResponse, Int, String) -> Unit)? = null
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val tabs = listOf(stringResource(R.string.booking_tab_active), stringResource(R.string.booking_tab_past))
@@ -154,9 +171,9 @@ fun BookingHomeContent(
         }
 
         when (selectedTab) {
-            // delete solo per booking attivi
+            // delete solo per booking attivi, review solo per booking passati
             0 -> BookingListSection(state.active.copy(items = filteredActiveItems), R.string.booking_empty_active, onLoadMoreActive, onBookingClick, onDeleteBooking)
-            1 -> BookingListSection(state.past.copy(items = filteredPastItems), R.string.booking_empty_past, onLoadMorePast, onBookingClick)
+            1 -> BookingListSection(state.past.copy(items = filteredPastItems), R.string.booking_empty_past, onLoadMorePast, onBookingClick, onAddReview = onAddReview)
         }
     }
 }
@@ -177,7 +194,8 @@ fun BookingListSection(
     emptyMessageRes: Int,
     onLoadMore: () -> Unit,
     onBookingClick: (BookingHomeResponse) -> Unit,
-    onDeleteBooking: ((BookingHomeResponse) -> Unit)? = null
+    onDeleteBooking: ((BookingHomeResponse) -> Unit)? = null,
+    onAddReview: ((BookingHomeResponse, Int, String) -> Unit)? = null
 ) {
     when {
         paging.isLoading && paging.items.isEmpty() -> CenteredBox { CircularProgressIndicator() }
@@ -196,7 +214,8 @@ fun BookingListSection(
                 BookingCard(
                     booking = booking,
                     onClick = { onBookingClick(booking) },
-                    onDelete = if (onDeleteBooking != null) { { onDeleteBooking(booking) } } else null
+                    onDelete = if (onDeleteBooking != null) { { onDeleteBooking(booking) } } else null,
+                    onAddReview = if (onAddReview != null) { { rating, content -> onAddReview(booking, rating, content) } } else null
                 )
             }
             if (!paging.isLast) {
@@ -220,8 +239,9 @@ fun BookingListSection(
 }
 
 @Composable
-fun BookingCard(booking: BookingHomeResponse, onClick: () -> Unit = {}, onDelete: (() -> Unit)? = null) {
+fun BookingCard(booking: BookingHomeResponse, onClick: () -> Unit = {}, onDelete: (() -> Unit)? = null, onAddReview: ((Int, String) -> Unit)? = null) {
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var showReviewDialog by rememberSaveable { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onClick() },
@@ -237,6 +257,15 @@ fun BookingCard(booking: BookingHomeResponse, onClick: () -> Unit = {}, onDelete
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f)
                 )
+                if (onAddReview != null) {
+                    IconButton(onClick = { showReviewDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.RateReview,
+                            contentDescription = stringResource(R.string.booking_add_review),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
                 if (onDelete != null) {
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
@@ -290,6 +319,52 @@ fun BookingCard(booking: BookingHomeResponse, onClick: () -> Unit = {}, onDelete
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
                     Text(stringResource(R.string.booking_delete_dialog_dismiss))
+                }
+            }
+        )
+    }
+
+    if (showReviewDialog && onAddReview != null) {
+        var reviewRating by rememberSaveable { mutableStateOf(5) }
+        var reviewContent by rememberSaveable { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { showReviewDialog = false },
+            title = { Text(stringResource(R.string.booking_add_review_title)) },
+            text = {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        for (i in 1..5) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                tint = if (i <= reviewRating) Color(0xFFFFD700) else Color.LightGray,
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clickable { reviewRating = i }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = reviewContent,
+                        onValueChange = { reviewContent = it },
+                        label = { Text(stringResource(R.string.type_your_review)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onAddReview(reviewRating, reviewContent.trim())
+                        showReviewDialog = false
+                    },
+                    enabled = reviewContent.trim().isNotEmpty()
+                ) { Text(stringResource(R.string.submit)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showReviewDialog = false }) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

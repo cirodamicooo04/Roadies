@@ -101,7 +101,9 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
             travelId -> // vincenzo usa travel id per aggiungerlo ai preferiti
         }, onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
         onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
-        onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) })
+        onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
+        onEditReply = { replyId, content -> viewModel.editReply(replyId, content) },
+        onDeleteReply = { replyId -> viewModel.deleteReply(replyId) })
     }
 
     LaunchedEffect(uiState.requireLogin) {
@@ -173,7 +175,9 @@ fun TravelDetail(
     onFavoriteClick: (UUID) -> Unit,
     onDeleteReview: (UUID) -> Unit,
     onEditReview: (UUID, Int, String) -> Unit,
-    onReplyReview: (UUID, String) -> Unit
+    onReplyReview: (UUID, String) -> Unit,
+    onEditReply: (UUID, String) -> Unit,
+    onDeleteReply: (UUID) -> Unit
 ){
     //variabile is favorite , da cambiare in caso volessimo fare cuoricino rosso se favorito
     var isFavorite by remember { mutableStateOf(false) }
@@ -238,7 +242,9 @@ fun TravelDetail(
                     travelOwnerId = travel.ownerId,
                     onDeleteReview = onDeleteReview,
                     onEditReview = onEditReview,
-                    onReplyReview = onReplyReview
+                    onReplyReview = onReplyReview,
+                    onEditReply = onEditReply,
+                    onDeleteReply = onDeleteReply
                 )
             }
 
@@ -340,7 +346,7 @@ fun CollasableActivityCard(activity: ActivityResponse?){
                         modifier = Modifier.size(70.dp)
                     ) {
                         SubcomposeAsyncImage(
-                            model = activity?.images?.firstOrNull()?.url?.replace("localhost","10.0.2.2"),
+                            model = activity?.images?.firstOrNull()?.url?.replace("localhost","10.133.123.48"),
                             contentDescription = stringResource(R.string.activity_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize(),

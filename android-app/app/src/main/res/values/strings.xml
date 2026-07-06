@@ -119,6 +119,9 @@
     <string name="booking_delete_dialog_message">This will permanently cancel your booking. As stated in our Terms and Conditions, bookings that have already been paid are not eligible for a refund.</string>
     <string name="booking_delete_dialog_confirm">Cancel booking</string>
     <string name="booking_delete_dialog_dismiss">Keep booking</string>
+    <string name="booking_add_review">Leave a review</string>
+    <string name="booking_add_review_title">Leave a review</string>
+    <string name="booking_review_success">Thanks! Your review has been submitted.</string>
 
     <!-- booking detail -->
     <string name="booking_detail_title">Booking Detail</string>
@@ -242,4 +245,7 @@
     <string name="type_your_reply">Type your reply...</string>
     <string name="type_your_review">Type your review...</string>
     <string name="reply">Reply</string>
+    <string name="edit_reply_title">Edit reply</string>
+    <string name="delete_reply_title">Delete reply</string>
+    <string name="delete_reply_msg">Are you sure you want to delete this reply?</string>
 </resources>

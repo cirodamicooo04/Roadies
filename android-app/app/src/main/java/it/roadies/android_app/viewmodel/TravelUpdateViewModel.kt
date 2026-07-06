@@ -6,21 +6,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import it.roadies.android_app.R
-import it.roadies.android_app.client.models.travel.ImageResponse
 import it.roadies.android_app.client.models.travel.LocationType
 import it.roadies.android_app.client.models.travel.SearchSuggestion
 import it.roadies.android_app.client.models.travel.TagResponse
-import it.roadies.android_app.client.models.travel.TravelResponse
 import it.roadies.android_app.client.models.travel.TravelTagRequest
 import it.roadies.android_app.client.models.travel.TravelUpdateRequest
 import it.roadies.android_app.repository.LocationRepository
 import it.roadies.android_app.repository.MetadataRepository
+import it.roadies.android_app.repository.ReviewRepository
 import it.roadies.android_app.repository.TravelRepository
+import it.roadies.android_app.repository.UserRepository
+import it.roadies.android_app.client.models.review.ReplyRequest
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.ui.travel.components.UploadableImage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -99,10 +100,12 @@ class TravelUpdateViewModel @Inject constructor(
     private val travelRepository: TravelRepository,
     private val locationRepository: LocationRepository,
     private val metadataRepository: MetadataRepository,
+    private val reviewRepository: ReviewRepository,
+    private val userRepository: UserRepository,
     private val savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
-    
+
     val travelId: String? = savedStateHandle["id"]
 
     private val _uiState = MutableStateFlow(TravelUpdateUiState())
@@ -114,8 +117,98 @@ class TravelUpdateViewModel @Inject constructor(
     private val _addressSuggestions = MutableStateFlow<List<SearchSuggestion>>(emptyList())
     val addressSuggestions: StateFlow<List<SearchSuggestion>> = _addressSuggestions.asStateFlow()
 
+    private val _reviewsState = MutableStateFlow(TravelReviewsState())
+    val reviewsState = _reviewsState.asStateFlow()
+
     init {
         loadTagsAndTravel()
+
+        viewModelScope.launch {
+            val user = userRepository.getCurrentUser()
+            _reviewsState.value = _reviewsState.value.copy(currentUserId = user?.id)
+        }
+
+        val uuid = runCatching { UUID.fromString(travelId) }.getOrNull()
+        if (uuid != null) loadReviews(uuid)
+    }
+
+    private fun loadReviews(id: UUID) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val reviewsResponse = reviewRepository.getReviews(id)
+            if (reviewsResponse.success && reviewsResponse.data != null) {
+                val reviews = reviewsResponse.data
+                val userIds = reviews.map { it.userId }.toSet().toList()
+                var usersMap = emptyMap<String, MinimalInformationResponseDTO>()
+
+                if (userIds.isNotEmpty()) {
+                    val usersResponse = userRepository.getOrganizersInfo(userIds)
+                    if (usersResponse.success && usersResponse.data != null) {
+                        usersMap = usersResponse.data.associateBy { it.keycloakId ?: "" }.filterKeys { it.isNotEmpty() }
+                    }
+                }
+
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    reviews = reviews,
+                    usersInfo = usersMap,
+                    errorMessage = null
+                )
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    errorMessage = reviewsResponse.errorMessage ?: "Error while fetching reviews"
+                )
+            }
+        }
+    }
+
+    fun replyToReview(reviewId: UUID, replyContent: String) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val response = reviewRepository.createReply(reviewId, ReplyRequest(content = replyContent))
+            if (response.success) {
+                val uuid = runCatching { UUID.fromString(travelId) }.getOrNull()
+                if (uuid != null) loadReviews(uuid)
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    errorMessage = response.errorMessage ?: "Error replying to review"
+                )
+            }
+        }
+    }
+
+    fun editReply(replyId: UUID, newContent: String) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val response = reviewRepository.updateReply(replyId, ReplyRequest(content = newContent))
+            if (response.success) {
+                val uuid = runCatching { UUID.fromString(travelId) }.getOrNull()
+                if (uuid != null) loadReviews(uuid)
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    errorMessage = response.errorMessage ?: "Error updating reply"
+                )
+            }
+        }
+    }
+
+    fun deleteReply(replyId: UUID) {
+        viewModelScope.launch {
+            _reviewsState.value = _reviewsState.value.copy(isLoading = true)
+            val response = reviewRepository.deleteReply(replyId)
+            if (response.success) {
+                val uuid = runCatching { UUID.fromString(travelId) }.getOrNull()
+                if (uuid != null) loadReviews(uuid)
+            } else {
+                _reviewsState.value = _reviewsState.value.copy(
+                    isLoading = false,
+                    errorMessage = response.errorMessage ?: "Error deleting reply"
+                )
+            }
+        }
     }
 
     private fun loadTagsAndTravel() {
@@ -142,7 +235,7 @@ class TravelUpdateViewModel @Inject constructor(
 
                         val existingImages = travel.images?.mapNotNull { img -> 
                             img.id?.let { imgId ->
-                                val fixedUrl = img.url?.replace("localhost", "10.0.2.2")?.replace("127.0.0.1", "10.0.2.2") ?: ""
+                                val fixedUrl = img.url?.replace("localhost", "10.133.123.48")?.replace("127.0.0.1", "10.133.123.48") ?: ""
                                 UploadableImage(
                                     localUri = fixedUrl.toUri(),
                                     imageUUID = imgId, 
@@ -163,7 +256,7 @@ class TravelUpdateViewModel @Inject constructor(
                             }
                             val activityImages = activity.images?.mapNotNull { img ->
                                 img.id?.let { imgId ->
-                                    val fixedUrl = img.url?.replace("localhost", "10.0.2.2")?.replace("127.0.0.1", "10.0.2.2") ?: ""
+                                    val fixedUrl = img.url?.replace("localhost", "10.133.123.48")?.replace("127.0.0.1", "10.133.123.48") ?: ""
                                     UploadableImage(
                                         localUri = fixedUrl.toUri(),
                                         imageUUID = imgId,

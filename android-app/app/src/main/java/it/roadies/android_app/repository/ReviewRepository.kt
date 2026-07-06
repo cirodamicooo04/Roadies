@@ -48,7 +48,7 @@ class ReviewRepository @Inject constructor(
         safeApiCall { reviewReplyApi.getReply(reviewId) }
 
     // Update a reply
-    suspend fun updateReply(replyId: UUID, request: ReplyRequest): ApiResponse<ReviewReply> =
+    suspend fun updateReply(replyId: UUID, request: ReplyRequest): ApiResponse<Void> =
         safeApiCall { reviewReplyApi.updateReply(replyId, request) }
 
     // Delete a reply

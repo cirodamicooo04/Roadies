@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
         log.warn("Accesso negato: {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.FORBIDDEN, messageLang.getMessage("error.access.denied.title"), messageLang.getMessage("error.access.denied.message"), request.getRequestURI());
+        return buildErrorResponse(HttpStatus.FORBIDDEN, messageLang.getMessage("error.access.denied.title"), ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(ServiceUnavailableException.class)

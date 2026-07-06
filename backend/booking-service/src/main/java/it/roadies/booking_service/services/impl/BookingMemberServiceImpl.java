@@ -3,10 +3,8 @@ package it.roadies.booking_service.services.impl;
 import io.minio.errors.MinioException;
 import it.roadies.shared.i18n.MessageLang;
 import it.roadies.booking_service.data.dao.MemberDocumentRepository;
-import it.roadies.booking_service.data.dto.request.MemberDocumentUpdateRequest;
 import it.roadies.booking_service.data.entities.Booking;
 import it.roadies.booking_service.data.entities.MemberDocument;
-import it.roadies.booking_service.data.entities.enumeration.DocumentStatus;
 import it.roadies.booking_service.exceptions.UnauthorizedActionException;
 import it.roadies.booking_service.exceptions.DocumentNotFoundException;
 import it.roadies.booking_service.services.BookingMemberService;
@@ -28,29 +26,10 @@ public class BookingMemberServiceImpl implements BookingMemberService {
     private final MessageLang messageLang;
     private final BookingService bookingService;
 
-    @Transactional
-    @Override
-    public void acceptDocument(MemberDocumentUpdateRequest memberDocument) {
-        MemberDocument member = memberDocumentRepository.findById(memberDocument.getId()).orElseThrow(()-> new DocumentNotFoundException(messageLang.getMessage("error.document.not.exists")));
-        member.setStatus(DocumentStatus.VERIFIED);
-        member.setVerifiedAt(LocalDateTime.now());
-        memberDocumentRepository.save(member);
-    }
-
-    @Transactional
-    @Override
-    public void rejectDocument(MemberDocumentUpdateRequest memberDocument) {
-        MemberDocument member = memberDocumentRepository.findById(memberDocument.getId()).orElseThrow(()-> new DocumentNotFoundException(messageLang.getMessage("error.document.not.exists")));
-        member.setStatus(DocumentStatus.REJECTED);
-        member.setRejectionReason(memberDocument.getRejectionReason());
-        memberDocumentRepository.save(member);
-    }
-
     @Override
     @Transactional
     public String uploadDocumentPhoto(UUID documentId, MultipartFile file, String userId) throws MinioException {
-        MemberDocument document = memberDocumentRepository.findById(documentId)
-                .orElseThrow(() -> new DocumentNotFoundException(messageLang.getMessage("error.document.not.exists")));
+        MemberDocument document = memberDocumentRepository.findById(documentId).orElseThrow(() -> new DocumentNotFoundException(messageLang.getMessage("error.document.not.exists")));
 
         Booking booking = document.getMember().getBooking();
         if (!booking.getUserId().equals(userId)) {
@@ -60,7 +39,6 @@ public class BookingMemberServiceImpl implements BookingMemberService {
         String fileUrl = minioService.uploadFile(file);
 
         document.setFileUrl(fileUrl);
-        document.setStatus(DocumentStatus.PENDING);
         memberDocumentRepository.save(document);
 
         bookingService.updateBookingIfAllDocumentsUploaded(booking.getId());
