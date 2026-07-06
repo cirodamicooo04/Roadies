@@ -22,7 +22,9 @@ data class ChatState(
     val isSending: Boolean = false,
     val messages: List<MessageResponseDTO> = emptyList(),
     val currentUserId: String = "",
-    val error: String? = null
+    val error: String? = null,
+    val otherUserName: String? = null,
+    val otherUserAvatarUrl: String? = null
 )
 
 @HiltViewModel
@@ -45,6 +47,27 @@ class ChatViewModel @Inject constructor(
             val localUser = userRepository.getCurrentUser()
             val myId = localUser?.id ?: ""
             _state.update { it.copy(currentUserId = myId) }
+
+            val conversationsResponse = chatRepository.getMyConversations()
+            if (conversationsResponse.success && conversationsResponse.data != null) {
+                val conversation = conversationsResponse.data.find { it.id.toString() == conversationId }
+                if (conversation != null) {
+                    val otherUserId = if (conversation.travelerId == myId) conversation.organizerId else conversation.travelerId
+                    val infoResponse = userRepository.getUsersInfo(listOf(otherUserId))
+                    if (infoResponse.success && infoResponse.data?.isNotEmpty() == true) {
+                        val otherUser = infoResponse.data.first()
+                        _state.update { 
+                            it.copy(
+                                otherUserName = otherUser.username, 
+                                otherUserAvatarUrl = otherUser.avatarUrl
+                            ) 
+                        }
+                    }
+                }
+            }
+
+            // Mark messages as read
+            chatRepository.markAsRead(conversationId)
 
             loadMessages(conversationId)
 

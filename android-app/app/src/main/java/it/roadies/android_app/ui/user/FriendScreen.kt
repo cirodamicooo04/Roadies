@@ -207,6 +207,7 @@ fun FriendScreen(
                             isSearchMode = true,
                             friendsList = state.friends,
                             requestSentTo = state.requestSentTo,
+                            pendingRequests = state.pendingRequests,
                             onAddFriendClick = { username ->
                                 viewModel.sendFriendRequest(username)
                             },
@@ -233,6 +234,7 @@ fun FriendScreen(
                             isSearchMode = false,
                             friendsList = state.friends,
                             requestSentTo = state.requestSentTo,
+                            pendingRequests = state.pendingRequests,
                             onAddFriendClick = {},
                             onRemoveFriendClick = { user ->
                                 friendToRemove = user
@@ -371,6 +373,7 @@ fun UsersList(
     isSearchMode: Boolean,
     friendsList: List<UserProfileResponseDTO>,
     requestSentTo: Set<String>,
+    pendingRequests: List<FriendshipResponseDTO> = emptyList(),
     onAddFriendClick: (String) -> Unit,
     onRemoveFriendClick: (UserProfileResponseDTO) -> Unit,
     onUserClick: (String) -> Unit
@@ -392,12 +395,14 @@ fun UsersList(
         items(users) { user ->
             val isAlreadyFriend = friendsList.any { it.username == user.username }
             val requestAlreadySent = requestSentTo.contains(user.username)
+            val hasPendingRequestFromThem = pendingRequests.any { it.friendProfile?.username == user.username }
 
             FriendCard(
                 user = user,
                 isSearchMode = isSearchMode,
-                showAddButton = !isAlreadyFriend && !requestAlreadySent,
+                showAddButton = !isAlreadyFriend && !requestAlreadySent && !hasPendingRequestFromThem,
                 requestAlreadySent = requestAlreadySent,
+                hasPendingRequestFromThem = hasPendingRequestFromThem,
                 onAddFriendClick = { onAddFriendClick(user.username ?: "") },
                 onRemoveFriendClick = { onRemoveFriendClick(user) },
                 onUserClick = { onUserClick(user.username ?: "") }
@@ -412,6 +417,7 @@ fun FriendCard(
     isSearchMode: Boolean = false,
     showAddButton: Boolean = true,
     requestAlreadySent: Boolean = false,
+    hasPendingRequestFromThem: Boolean = false,
     onAddFriendClick: () -> Unit = {},
     onRemoveFriendClick: () -> Unit = {},
     onUserClick: () -> Unit = {}
@@ -455,6 +461,15 @@ fun FriendCard(
 
             if (isSearchMode) {
                 when {
+                    hasPendingRequestFromThem -> {
+                        Text(
+                            text = stringResource(R.string.request_received),
+                            color = OrangeAvatar,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    }
                     showAddButton -> {
                         IconButton(
                             onClick = onAddFriendClick,

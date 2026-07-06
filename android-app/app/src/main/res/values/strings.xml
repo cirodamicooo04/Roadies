@@ -213,6 +213,7 @@
     <string name="close"> Close</string>
     <string name="reject"> Reject</string>
     <string name="accept"> Accept</string>
+    <string name="request_received">Sent you a request</string>
     <string name="add_friend"> Add friend</string>
     <string name="request_sent"> Request sent</string>
     <string name="favourite_list"> Le mie liste preferiti</string>

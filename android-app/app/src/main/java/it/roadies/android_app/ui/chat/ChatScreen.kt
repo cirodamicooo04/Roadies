@@ -55,10 +55,16 @@ fun ChatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(organizerName, color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Indietro", tint = Color.White)
+                title = { 
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        it.roadies.android_app.ui.components.UserAvatar(
+                            username = state.otherUserName ?: organizerName,
+                            avatarUrl = state.otherUserAvatarUrl?.replace("localhost", "10.0.2.2"),
+                            modifier = Modifier.size(36.dp),
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(state.otherUserName ?: organizerName, color = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBlueBg)
