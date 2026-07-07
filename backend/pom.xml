@@ -42,6 +42,9 @@
         <okhttp.version>4.12.0</okhttp.version>
         <keycloak-admin-client.version>26.0.9</keycloak-admin-client.version>
         <mail-version>4.1.0</mail-version>
+        <actuator.version>4.1.0</actuator.version>
+        <zipkin.version>3.5.3</zipkin.version>
+        <bridge.version>1.7.0</bridge.version>
     </properties>
 
 
@@ -53,6 +56,22 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing-bridge-brave</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.reporter2</groupId>
+                <artifactId>zipkin-reporter-brave</artifactId>
+                <version>${zipkin.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version> ${actuator.version}</version>
             </dependency>
 
 
