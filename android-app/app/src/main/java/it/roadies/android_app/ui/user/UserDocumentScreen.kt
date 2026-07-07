@@ -32,6 +32,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.client.models.user.UserDocumentRequestDTO
+import it.roadies.android_app.client.models.user.UserDocumentResponseDTO
 import it.roadies.android_app.viewmodel.user.UserDocumentsViewModel
 import kotlinx.coroutines.launch
 
@@ -59,19 +60,6 @@ fun UserDocumentScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.my_documents)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Indietro"
-                        )
-                    }
-                }
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(onClick = { showUploadDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Aggiungi Documento")
@@ -108,23 +96,30 @@ fun UserDocumentScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
+                                    val docTypeName = when (doc.documentType) {
+                                        UserDocumentResponseDTO.DocumentType.ID_CARD -> stringResource(R.string.doc_type_id_card)
+                                        UserDocumentResponseDTO.DocumentType.PASSPORT -> stringResource(R.string.doc_type_passport)
+                                        UserDocumentResponseDTO.DocumentType.DRIVER_LICENSE -> stringResource(R.string.doc_type_driver_license)
+                                        else -> "Sconosciuto"
+                                    }
                                     Text(
-                                        text = "Tipo: ${doc.documentType?.value ?: "Sconosciuto"}",
+                                        text = "${stringResource(R.string.doc_type_label)}$docTypeName",
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                     Text(
-                                        text = "Numero: ${doc.documentNumber ?: "-"}",
+                                        text = "${stringResource(R.string.doc_number_label)}${doc.documentNumber ?: "-"}",
                                         style = MaterialTheme.typography.bodyMedium
                                     )
-                                    Text(
-                                        text = "Stato: ${doc.status?.value ?: "Sconosciuto"}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = when(doc.status?.value) {
-                                            "VERIFIED" -> Color(0xFF4CAF50)
-                                            "REJECTED" -> Color(0xFFF44336)
-                                            else -> Color(0xFFFF9800)
-                                        }
-                                    )
+//                                    Se si vuole implementare lo status dei documenti scommentare:
+//                                    Text(
+//                                        text = "Stato: ${doc.status?.value ?: "Sconosciuto"}",
+//                                        style = MaterialTheme.typography.bodySmall,
+//                                        color = when(doc.status?.value) {
+//                                            "VERIFIED" -> Color(0xFF4CAF50)
+//                                            "REJECTED" -> Color(0xFFF44336)
+//                                            else -> Color(0xFFFF9800)
+//                                        }
+//                                    )
                                 }
 
                                 if (!doc.fileUrl.isNullOrBlank()) {

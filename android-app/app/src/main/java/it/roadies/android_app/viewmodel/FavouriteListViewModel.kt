@@ -5,16 +5,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import it.roadies.android_app.client.models.travel.FavouriteListResponse
+import it.roadies.android_app.model.FavouriteList
 import it.roadies.android_app.repository.FavouriteRepository
 import it.roadies.android_app.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class FavouriteListsState(
     val isLoading: Boolean = false,
     val lists: List<FavouriteListResponse> = emptyList(),
+    val cachedLists: List<FavouriteList> = emptyList(),
     val isMyProfile: Boolean = false,
     val errorMessage: String? = null
 )
@@ -41,34 +44,46 @@ class FavouriteListsViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
             val currentUser = userRepository.getCurrentUser()
-
-            val isMe = currentUser?.id == targetUserId || currentUser?.username == targetUserId
-
-            val actualKeycloakId = if (isMe) currentUser?.id else {
-                val idResp = userRepository.getUserIdByUsername(targetUserId)
-                if (idResp.success) idResp.data else targetUserId
-            }
-
-            if (actualKeycloakId == null) {
-                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "Utente non trovato")
-                return@launch
-            }
+            val isMe = currentUser != null &&
+                    (currentUser.id == targetUserId || currentUser.username == targetUserId)
 
             _uiState.value = _uiState.value.copy(isMyProfile = isMe)
 
-            val response = if (isMe) {
-                favouriteRepository.getMyLists()
+            if (isMe) {
+                // Osserva la cache Room in real-time
+                launch {
+                    favouriteRepository.observeMyLists(currentUser.id).collectLatest { cached ->
+                        _uiState.value = _uiState.value.copy(cachedLists = cached)
+                    }
+                }
+                // Scarica dal network e aggiorna la cache
+                val response = favouriteRepository.refreshMyLists(currentUser.id)
+                if (response.success && response.data != null) {
+                    _uiState.value = _uiState.value.copy(isLoading = false, lists = response.data)
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = response.errorMessage ?: "Errore caricamento liste"
+                    )
+                }
             } else {
-                favouriteRepository.getUserLists(actualKeycloakId)
-            }
-
-            if (response.success && response.data != null) {
-                _uiState.value = _uiState.value.copy(isLoading = false, lists = response.data)
-            } else {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = response.errorMessage ?: "Errore caricamento liste"
-                )
+                val actualKeycloakId = if (isMe) currentUser?.id else {
+                    val idResp = userRepository.getUserIdByUsername(targetUserId)
+                    if (idResp.success) idResp.data else targetUserId
+                }
+                if (actualKeycloakId == null) {
+                    _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "Utente non trovato")
+                    return@launch
+                }
+                val response = favouriteRepository.getUserLists(actualKeycloakId)
+                if (response.success && response.data != null) {
+                    _uiState.value = _uiState.value.copy(isLoading = false, lists = response.data)
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = response.errorMessage ?: "Errore caricamento liste"
+                    )
+                }
             }
         }
     }

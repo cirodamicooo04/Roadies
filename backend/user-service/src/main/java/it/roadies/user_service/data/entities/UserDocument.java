@@ -33,9 +33,10 @@ public class UserDocument {
     @Column(name = "fileUrl", nullable = false)
     private String fileUrl;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DocumentStatus status = DocumentStatus.PENDING;
+    // Se si vuole implementare lo status dei documenti scommentare:
+    // @Enumerated(EnumType.STRING)
+    // @Column(nullable = false)
+    // private DocumentStatus status = DocumentStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
@@ -53,11 +54,12 @@ public class UserDocument {
     @Column(name = "updatedBy", nullable = false)
     private String updateBy;
 
-    @Column(name = "rejectionReason")
-    private String rejectionReason;
+    // Se si vuole implementare lo status dei documenti scommentare:
+    // @Column(name = "rejectionReason")
+    // private String rejectionReason;
 
-    @Column(name = "verifiedAt")
-    private LocalDateTime verifiedAt;
+    // @Column(name = "verifiedAt")
+    // private LocalDateTime verifiedAt;
 
     @ManyToOne
     @JoinColumn(name = "userId", referencedColumnName = "keycloakId", nullable = false)

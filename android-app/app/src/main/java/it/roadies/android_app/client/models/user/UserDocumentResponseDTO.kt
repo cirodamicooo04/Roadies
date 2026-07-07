@@ -54,11 +54,12 @@ data class UserDocumentResponseDTO (
     @SerializedName("fileUrl")
     val fileUrl: kotlin.String? = null,
 
-    @SerializedName("status")
-    val status: UserDocumentResponseDTO.Status? = null,
-
-    @SerializedName("rejectionReason")
-    val rejectionReason: kotlin.String? = null,
+// Se si vuole implementare lo status dei documenti scommentare:
+//    @SerializedName("status")
+//    val status: UserDocumentResponseDTO.Status? = null,
+//
+//    @SerializedName("rejectionReason")
+//    val rejectionReason: kotlin.String? = null,
 
     @SerializedName("createdAt")
     val createdAt: java.time.OffsetDateTime? = null,
@@ -83,11 +84,12 @@ data class UserDocumentResponseDTO (
      *
      * Values: PENDING,VERIFIED,REJECTED
      */
-    enum class Status(val value: kotlin.String) {
-        @SerializedName(value = "PENDING") PENDING("PENDING"),
-        @SerializedName(value = "VERIFIED") VERIFIED("VERIFIED"),
-        @SerializedName(value = "REJECTED") REJECTED("REJECTED");
-    }
+// Se si vuole implementare lo status dei documenti scommentare:
+//    enum class Status(val value: kotlin.String) {
+//        @SerializedName(value = "PENDING") PENDING("PENDING"),
+//        @SerializedName(value = "VERIFIED") VERIFIED("VERIFIED"),
+//        @SerializedName(value = "REJECTED") REJECTED("REJECTED");
+//    }
 
 }
 

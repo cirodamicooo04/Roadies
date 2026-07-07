@@ -348,4 +348,9 @@
     <string name="admin_user_details">Dettagli utente</string>
     <string name="admin_block">Blocca</string>
     <string name="admin_unblock">Sblocca</string>
+    <string name="doc_type_id_card">Carta d\'identità</string>
+    <string name="doc_type_passport">Passaporto</string>
+    <string name="doc_type_driver_license">Patente</string>
+    <string name="doc_type_label">Tipo: </string>
+    <string name="doc_number_label">Numero: </string>
 </resources>

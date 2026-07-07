@@ -80,7 +80,8 @@ interface DocumentManagementApi {
      * @param reason  (optional)
      * @return [Response]<[UserDocumentResponseDTO]>
      */
-    @PATCH("api/v1/user-documents/verify/{docId}")
-    suspend fun verifyDocument(@Path("docId") docId: java.util.UUID, @Query("approved") approved: kotlin.Boolean, @Query("reason") reason: kotlin.String? = null): Response<UserDocumentResponseDTO>
+    // Se si vuole implementare lo status dei documenti scommentare:
+    // @PATCH("api/v1/user-documents/verify/{docId}")
+    // suspend fun verifyDocument(@Path("docId") docId: java.util.UUID, @Query("approved") approved: kotlin.Boolean, @Query("reason") reason: kotlin.String? = null): Response<UserDocumentResponseDTO>
 
 }

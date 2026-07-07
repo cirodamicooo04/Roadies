@@ -13,8 +13,9 @@ public class UserDocumentResponseDTO {
     private DocumentType documentType;
     private String documentNumber;
     private String fileUrl;
-    private DocumentStatus status;
-    private String rejectionReason;
+    // Se si vuole implementare lo status dei documenti scommentare:
+    // private DocumentStatus status;
+    // private String rejectionReason;
     private LocalDateTime createdAt;
     private String userId;
 }

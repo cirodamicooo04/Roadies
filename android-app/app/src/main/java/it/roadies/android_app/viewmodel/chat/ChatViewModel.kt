@@ -66,7 +66,6 @@ class ChatViewModel @Inject constructor(
                 }
             }
 
-            // Mark messages as read
             chatRepository.markAsRead(conversationId)
 
             loadMessages(conversationId)

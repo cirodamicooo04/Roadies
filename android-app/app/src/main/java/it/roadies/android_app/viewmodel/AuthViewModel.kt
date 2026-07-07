@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import it.roadies.android_app.client.models.user.UserSyncRequestDTO
 import it.roadies.android_app.repository.AuthRepository
+import it.roadies.android_app.repository.FavouriteRepository
 import it.roadies.android_app.repository.UserRepository
 import kotlinx.coroutines.launch
 import net.openid.appauth.AuthState as AppAuthState
@@ -14,7 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val favouriteRepository: FavouriteRepository
 ) : ViewModel() {
 
     val authState = authRepository.authState
@@ -67,6 +69,7 @@ class AuthViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             userRepository.clearLocalUser()
+            favouriteRepository.clearLocalLists()
             authRepository.logout()
             Log.d(TAG, "Logout completato: token e cache locale rimossi")
         }

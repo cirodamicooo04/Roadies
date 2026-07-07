@@ -216,7 +216,7 @@
     <string name="request_received">Sent you a request</string>
     <string name="add_friend"> Add friend</string>
     <string name="request_sent"> Request sent</string>
-    <string name="favourite_list"> Le mie liste preferiti</string>
+    <string name="favourite_list"> My favourite List</string>
 
     <string name="error_date_past">The date must be in the future</string>
     <string name="error_time_range">End time must be after start time</string>
@@ -346,4 +346,9 @@
     <string name="admin_user_details">User Details</string>
     <string name="admin_block">Block</string>
     <string name="admin_unblock">Unblock</string>
+    <string name="doc_type_id_card">Identity card</string>
+    <string name="doc_type_passport">Passaport</string>
+    <string name="doc_type_driver_license">Driver License</string>
+    <string name="doc_type_label">Docuement type: </string>
+    <string name="doc_number_label">Document number: </string>
 </resources>

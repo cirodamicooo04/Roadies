@@ -55,10 +55,7 @@ public class UserDocumentServiceImpl implements UserDocumentService {
     public UserDocumentResponseDTO uploadDocument(String userId, UserDocumentRequestDTO dto, MultipartFile file,String id) {
         log.info("Iniziato caricamento documento per l'utente");
 
-        if(!Objects.equals(userId, id)){
-            log.error("Tentativo non autorizzato di aggiungere un documento da parte dell'utente");
-            throw new org.springframework.security.access.AccessDeniedException(messageLang.getMessage("error.unauthorized"));
-        }
+        String actualUserId = id;
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException(messageLang.getMessage("error.file.empty"));
         }
@@ -68,7 +65,7 @@ public class UserDocumentServiceImpl implements UserDocumentService {
             throw new IllegalArgumentException(messageLang.getMessage("error.type.not.supported"));
         }
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(actualUserId)
                 .orElseThrow(() -> {
                     log.error("Upload documento fallito: Utente non trovato");
                     return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
@@ -112,12 +109,11 @@ public class UserDocumentServiceImpl implements UserDocumentService {
     public List<UserDocumentResponseDTO> getMyDocuments(String userId, String userJWT){
         log.info("Recupero documenti per l'utente ID: {}", userId);
 
-        if (!userJWT.equals(userId)) {
-            log.error("Tentativo non autorizzato di aggiungere un documento da parte dell'utente");
-            throw new org.springframework.security.access.AccessDeniedException(messageLang.getMessage("error.unauthorized"));
-        }
+        // Stessa logica: se c'è un disallineamento tra cache client (username) e token (keycloakId),
+        // ci fidiamo unicamente del JWT per recuperare i documenti.
+        String actualUserId = userJWT;
 
-        List<UserDocument> docs = documentRepository.findByUserId(userId);
+        List<UserDocument> docs = documentRepository.findByUserId(actualUserId);
         List<UserDocumentResponseDTO> dtoList = userDocumentMapper.toDtoList(docs);
 
         dtoList.forEach(dto -> {
@@ -158,22 +154,23 @@ public class UserDocumentServiceImpl implements UserDocumentService {
                     return new ResourceNotFoundException(messageLang.getMessage("error.document.notfound"));
                 });
 
-        if (doc.getStatus() != DocumentStatus.PENDING) {
-            throw new ConflictException(messageLang.getMessage("error.document.already.approved"));
-        }
-
-        if(approved){
-            doc.setStatus(DocumentStatus.VERIFIED);
-            doc.setRejectionReason(null);
-            doc.setVerifiedAt(LocalDateTime.now());
-            log.info("Documento ID: {} contrassegnato come VERIFICATO", docId);
-        }
-        else{
-            doc.setStatus(DocumentStatus.REJECTED);
-            doc.setRejectionReason(reason);
-            doc.setVerifiedAt(null);
-            log.info("Documento RIFIUTATO. Motivo: {}", reason);
-        }
+        // Se si vuole implementare lo status dei documenti scommentare:
+        // if (doc.getStatus() != DocumentStatus.PENDING) {
+        //     throw new ConflictException(messageLang.getMessage("error.document.already.approved"));
+        // }
+        //
+        // if(approved){
+        //     doc.setStatus(DocumentStatus.VERIFIED);
+        //     doc.setRejectionReason(null);
+        //     doc.setVerifiedAt(LocalDateTime.now());
+        //     log.info("Documento ID: {} contrassegnato come VERIFICATO", docId);
+        // }
+        // else{
+        //     doc.setStatus(DocumentStatus.REJECTED);
+        //     doc.setRejectionReason(reason);
+        //     doc.setVerifiedAt(null);
+        //     log.info("Documento RIFIUTATO. Motivo: {}", reason);
+        // }
 
         UserDocumentResponseDTO responseDto = userDocumentMapper.toDto(documentRepository.save(doc));
         if (responseDto.getFileUrl() != null && !responseDto.getFileUrl().isBlank()) {

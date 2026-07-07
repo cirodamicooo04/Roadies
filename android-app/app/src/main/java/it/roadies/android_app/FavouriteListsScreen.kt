@@ -61,9 +61,32 @@ fun FavouriteListsScreen(
         )
 
         when {
-            state.isLoading -> {
+            state.isLoading && state.cachedLists.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
+                }
+            }
+            // Se abbiamo la cache, la mostriamo SEMPRE (anche se c'è un errore network)
+            state.lists.isNotEmpty() || state.cachedLists.isNotEmpty() -> {
+                val displayLists = if (state.lists.isNotEmpty()) state.lists else state.cachedLists.map { cached ->
+                    FavouriteListResponse(
+                        id = cached.id,
+                        ownerId = cached.ownerId,
+                        name = cached.name,
+                        visibility = FavouriteListResponse.Visibility.valueOf(cached.visibility)
+                    )
+                }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(displayLists) { list ->
+                        ListCard(
+                            list = list,
+                            isMyProfile = state.isMyProfile,
+                            onClick = { list.id?.let { onListClick(it.toString()) } }
+                        )
+                    }
                 }
             }
             state.errorMessage != null -> {
@@ -71,23 +94,9 @@ fun FavouriteListsScreen(
                     Text(text = state.errorMessage!!, color = MaterialTheme.colorScheme.error)
                 }
             }
-            state.lists.isEmpty() -> {
+            else -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = stringResource(R.string.fav_no_lists), color = Color.Gray)
-                }
-            }
-            else -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(state.lists) { list ->
-                        ListCard(
-                            list = list,
-                            isMyProfile = state.isMyProfile,
-                            onClick = { list.id?.let { onListClick(it.toString()) } }
-                        )
-                    }
                 }
             }
         }
