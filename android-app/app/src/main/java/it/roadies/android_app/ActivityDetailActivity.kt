@@ -111,10 +111,7 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
             onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
             onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
             onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
-            onEditReply = { replyId, content -> viewModel.editReply(replyId, content) },
-            onDeleteReply = { replyId -> viewModel.deleteReply(replyId) }
-            onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
-            onOrganizerClick = { username -> 
+            onOrganizerClick = { username ->
                 val isMe = uiState.currentUserId == uiState.organizerInfo?.keycloakId
                 if (isMe) {
                     navHostController.navigate("profile_graph")
@@ -219,16 +216,13 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
 
 @Composable
 fun ActivityDetail(
-    activity: ActivityResponse?, 
+    activity: ActivityResponse?,
     organizerInfo: MinimalInformationResponseDTO?,
-    onCheckAvailability: () -> Unit, 
+    onCheckAvailability: () -> Unit,
     onFavoriteClick: (UUID) -> Unit,
     reviewsState: it.roadies.android_app.viewmodel.ActivityReviewsState,
     onDeleteReview: (UUID) -> Unit,
     onEditReview: (UUID, Int, String) -> Unit,
-    onReplyReview: (UUID, String) -> Unit,
-    onEditReply: (UUID, String) -> Unit,
-    onDeleteReply: (UUID) -> Unit
     onReplyReview: (UUID, String) -> Unit,
     onOrganizerClick: (String) -> Unit
 ){
@@ -307,8 +301,6 @@ fun ActivityDetail(
                     onDeleteReview = onDeleteReview,
                     onEditReview = onEditReview,
                     onReplyReview = onReplyReview,
-                    onEditReply = onEditReply,
-                    onDeleteReply = onDeleteReply
                 )
             }
 

@@ -35,6 +35,9 @@ public class MinioServiceImpl implements MinioService {
     @Value("${minio.url}")
     private String minioUrl;
 
+    @Value("${minio.external-url:${minio.url}}")
+    private String minioExternalUrl;
+
     @Override
     public String uploadFile(MultipartFile file, String bucketName) {
 
@@ -103,7 +106,7 @@ public class MinioServiceImpl implements MinioService {
         if (fileName == null || fileName.isBlank()) {
             return null;
         }
-        return minioUrl + "/" + bucketName + "/" + fileName;
+        return minioExternalUrl + "/" + bucketName + "/" + fileName;
     }
 
     @Value("${minio.access-key}")
@@ -118,10 +121,7 @@ public class MinioServiceImpl implements MinioService {
             return null;
         }
         try {
-            // Genera il client per i presigned url sostituendo localhost con 10.0.2.2
-            // In questo modo la firma AWS viene calcolata per l'host 10.0.2.2 (utilizzato dall'emulatore Android),
-            // evitando l'errore HTTP 403 SignatureDoesNotMatch quando l'app rimpiazza localhost con 10.0.2.2.
-            String presignedEndpoint = minioUrl.replace("localhost", "10.0.2.2").replace("127.0.0.1", "10.0.2.2");
+            String presignedEndpoint = minioExternalUrl;
             MinioClient presignedClient = MinioClient.builder()
                     .endpoint(presignedEndpoint)
                     .credentials(accessKey, secretKey)

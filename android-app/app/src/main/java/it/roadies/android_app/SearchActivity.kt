@@ -435,7 +435,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, organizers: List<MinimalInfo
             // Immagine a Sinistra
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
                 SubcomposeAsyncImage(
-                    model = activity.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
+                    model = activity.images?.firstOrNull()?.url,
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = activity.name,
                     contentScale = ContentScale.Crop,
@@ -510,7 +510,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, organizers: List<MinimalInfo
                                 fontWeight = FontWeight.Medium
                             )
                         } else {
-                            val avatarUrl = organizer.avatarUrl?.replace("localhost", "10.0.2.2")
+                            val avatarUrl = organizer.avatarUrl
                             if (!avatarUrl.isNullOrEmpty()) {
                                 SubcomposeAsyncImage(
                                     model = avatarUrl,
@@ -624,7 +624,7 @@ fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformatio
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
                 SubcomposeAsyncImage(
-                    model = travel.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
+                    model = travel.images?.firstOrNull()?.url,
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = travel.title,
                     contentScale = ContentScale.Crop,
@@ -699,7 +699,7 @@ fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformatio
                                 fontWeight = FontWeight.Medium
                             )
                         } else {
-                            val avatarUrl = organizer.avatarUrl?.replace("localhost", "10.0.2.2")
+                            val avatarUrl = organizer.avatarUrl
                             if (!avatarUrl.isNullOrEmpty()) {
                                 SubcomposeAsyncImage(
                                     model = avatarUrl,

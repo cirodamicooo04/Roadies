@@ -75,7 +75,7 @@ fun RoadiesApp(
     val currentDestination = navBackStackEntry?.destination
     val currentRoute = currentDestination?.route
 
-    val bottomRoutes = listOf("home", "travel", "bookings", "chat", "handle_users", "statistics", "handle_travels")
+    val bottomRoutes = listOf("home", "travel", "bookings", "chat", "handle_users", "statistics", "handle_travels", "profile_main")
     val showBackButton = currentRoute !in bottomRoutes
 
     val authState by authViewModel.authState.collectAsState()

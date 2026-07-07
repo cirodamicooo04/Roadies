@@ -142,7 +142,7 @@ class TravelUpdateViewModel @Inject constructor(
                 var usersMap = emptyMap<String, MinimalInformationResponseDTO>()
 
                 if (userIds.isNotEmpty()) {
-                    val usersResponse = userRepository.getOrganizersInfo(userIds)
+                    val usersResponse = userRepository.getUsersInfo(userIds)
                     if (usersResponse.success && usersResponse.data != null) {
                         usersMap = usersResponse.data.associateBy { it.keycloakId ?: "" }.filterKeys { it.isNotEmpty() }
                     }

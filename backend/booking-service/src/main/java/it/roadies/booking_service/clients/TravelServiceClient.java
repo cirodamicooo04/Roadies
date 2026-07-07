@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "travelService", configuration = FeignConfiguration.class)
+@FeignClient(name = "travel-service", configuration = FeignConfiguration.class)
 public interface TravelServiceClient {
 
     @GetMapping("/api/v1/travels/{travelId}")

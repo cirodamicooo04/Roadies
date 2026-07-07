@@ -110,7 +110,7 @@ class ActivityUpdateViewModel @Inject constructor(
 
                     val existingImages = activity.images?.mapNotNull { img -> 
                         img.id?.let { imgId ->
-                            val fixedUrl = img.url?.replace("localhost", "10.0.2.2")?.replace("127.0.0.1", "10.0.2.2") ?: ""
+                            val fixedUrl = img.url ?: ""
                             UploadableImage(
                                 localUri = fixedUrl.toUri(),
                                 imageUUID = imgId, 

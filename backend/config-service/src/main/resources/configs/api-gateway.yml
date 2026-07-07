@@ -19,7 +19,7 @@ spring:
         - id: travel-service
           uri: lb://TRAVEL-SERVICE
           predicates:
-            - Path=/api/v1/travels/**, /api/v1/activities/**, /api/v1/metadata/**
+            - Path=/api/v1/travels/**, /api/v1/activities/**, /api/v1/metadata/**, /api/v1/favourite-lists/**
           filters:
             - name: CircuitBreaker
               args:
@@ -46,7 +46,7 @@ spring:
         - id: chat-service
           uri: lb://CHAT-SERVICE
           predicates:
-            - Path=/api/v1/chats/**
+            - Path=/api/v1/conversations/**, /ws/**
           filters:
             - name: CircuitBreaker
               args:

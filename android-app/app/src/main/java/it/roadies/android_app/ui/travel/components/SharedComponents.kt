@@ -163,7 +163,7 @@ fun DetailImageCarousel(images: List<ImageResponse>?) {
         pageSpacing = 16.dp,
         modifier = Modifier.padding(bottom = 18.dp)
     ) { page ->
-        val imageUrl = images[page].url?.replace("localhost","10.0.2.2")
+        val imageUrl = images[page].url
 
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -173,7 +173,7 @@ fun DetailImageCarousel(images: List<ImageResponse>?) {
         ) {
             SubcomposeAsyncImage(
                 //non funziona localhost quindi faccio replace
-                model = imageUrl?.replace("localhost","10.0.2.2"),
+                model = imageUrl,
                 contentDescription = "Foto",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),

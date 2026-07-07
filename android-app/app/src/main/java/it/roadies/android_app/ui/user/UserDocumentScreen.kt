@@ -126,7 +126,7 @@ fun UserDocumentScreen(
                                     IconButton(
                                         onClick = {
 
-                                            val finalUrl = doc.fileUrl!!.replace("localhost", "10.0.2.2")
+                                            val finalUrl = doc.fileUrl!!
                                             try {
                                                 val uri = Uri.parse(finalUrl)
                                                 val intent = Intent(Intent.ACTION_VIEW, uri).apply {

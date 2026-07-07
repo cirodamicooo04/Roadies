@@ -85,7 +85,7 @@ fun OrganizerTravelsScreen(
                                 .padding(horizontal = 24.dp, vertical = 20.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val avatarUrl = user.avatarUrl?.replace("localhost", "10.0.2.2")
+                            val avatarUrl = user.avatarUrl
                             
                             Box(
                                 modifier = Modifier

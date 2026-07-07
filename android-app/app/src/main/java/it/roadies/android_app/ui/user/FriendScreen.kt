@@ -320,7 +320,7 @@ fun PendingRequestCard(
         ) {
             it.roadies.android_app.ui.components.UserAvatar(
                 username = user?.username,
-                avatarUrl = user?.avatarUrl?.replace("localhost", "10.0.2.2"),
+                avatarUrl = user?.avatarUrl,
                 modifier = Modifier.size(52.dp),
                 fontSize = 18.sp
             )
@@ -438,7 +438,7 @@ fun FriendCard(
         ) {
             it.roadies.android_app.ui.components.UserAvatar(
                 username = user.username,
-                avatarUrl = user.avatarUrl?.replace("localhost", "10.0.2.2"),
+                avatarUrl = user.avatarUrl,
                 modifier = Modifier.size(60.dp),
                 fontSize = 22.sp
             )

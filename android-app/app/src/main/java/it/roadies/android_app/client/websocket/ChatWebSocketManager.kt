@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import io.reactivex.disposables.CompositeDisposable
 import it.roadies.android_app.client.models.chat.MessageRequestDTO
 import it.roadies.android_app.client.models.chat.MessageResponseDTO
+import okhttp3.OkHttpClient
 import ua.naiksoftware.stomp.Stomp
 import ua.naiksoftware.stomp.StompClient
 import ua.naiksoftware.stomp.dto.LifecycleEvent
@@ -14,7 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ChatWebSocketManager @Inject constructor() {
+class ChatWebSocketManager @Inject constructor(private val okHttpClient: OkHttpClient) {
 
     private var stompClient: StompClient? = null
     private val gson = Gson()
@@ -27,8 +28,8 @@ class ChatWebSocketManager @Inject constructor() {
         onMessageReceived: (MessageResponseDTO) -> Unit
     ) {
         // Usa l'IP dell'emulatore e l'endpoint STOMP corretto configurato nel backend
-        val url = "ws://10.0.2.2:8086/ws/websocket"
-        stompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, url)
+        val url = "wss://10.0.2.2:8443/ws/websocket"
+        stompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, url, null, okHttpClient)
 
         // Passiamo il JWT token per superare l'AuthChannelInterceptor del tuo backend
         val headers = listOf(StompHeader("Authorization", "Bearer $token"))

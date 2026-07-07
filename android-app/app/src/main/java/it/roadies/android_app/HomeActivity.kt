@@ -318,7 +318,7 @@ fun RecommendedTravelCard(travel: TravelSummaryResponse, onTravelClick: (TravelS
         Column() {
             SubcomposeAsyncImage(
                 //Non funziona localhost, quindi faccio replace
-                model = (travel.images?.firstOrNull()?.url)?.replace("localhost", "10.0.2.2"),
+                model = (travel.images?.firstOrNull()?.url),
                 modifier = Modifier.fillMaxWidth().height(140.dp),
                 contentDescription = travel.title,
                 contentScale = ContentScale.Crop,

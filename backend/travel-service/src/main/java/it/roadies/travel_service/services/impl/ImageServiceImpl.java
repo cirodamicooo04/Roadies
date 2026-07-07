@@ -38,6 +38,9 @@ public class ImageServiceImpl implements ImageService {
     @Value("${minio.url}")
     private String minioUrl;
 
+    @Value("${minio.external-url:${minio.url}}")
+    private String minioExternalUrl;
+
     private final List<String> allowedImageTypes = List.of("image/jpeg", "image/png", "image/webp");
 
     @Override
@@ -76,7 +79,7 @@ public class ImageServiceImpl implements ImageService {
                             .build()
             );
 
-            String fileUrl = minioUrl + "/" + travelBucket + "/" + filename;
+            String fileUrl = minioExternalUrl + "/" + travelBucket + "/" + filename;
 
             Image image = new Image();
             image.setPath(filename);

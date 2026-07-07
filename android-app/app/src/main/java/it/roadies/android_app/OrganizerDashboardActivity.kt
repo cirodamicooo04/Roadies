@@ -325,7 +325,7 @@ fun OrganizerTravelCard(
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
                 SubcomposeAsyncImage(
-                    model = travel.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
+                    model = travel.images?.firstOrNull()?.url,
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = travel.title,
                     contentScale = ContentScale.Crop,
@@ -484,7 +484,7 @@ fun OrganizerActivityCard(
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.width(140.dp).fillMaxHeight()) {
                 SubcomposeAsyncImage(
-                    model = activity.images?.firstOrNull()?.url?.replace("localhost", "10.0.2.2"),
+                    model = activity.images?.firstOrNull()?.url,
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = activity.name,
                     contentScale = ContentScale.Crop,

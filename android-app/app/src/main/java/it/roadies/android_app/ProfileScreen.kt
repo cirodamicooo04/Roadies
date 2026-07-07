@@ -124,7 +124,7 @@ fun ProfileScreen(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             it.roadies.android_app.ui.components.UserAvatar(
                                 username = user.username,
-                                avatarUrl = user.avatarUrl?.replace("localhost", "10.0.2.2"),
+                                avatarUrl = user.avatarUrl,
                                 modifier = Modifier.size(100.dp),
                                 fontSize = 36.sp
                             )
