@@ -1,7 +1,7 @@
 services:
-  postgres:
+  keycloak-db:
     image: postgres:16
-    container_name: postgres-db
+    container_name: keycloak-db
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: ${POSTGRES_USER}
@@ -9,34 +9,102 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - keycloak_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      retries: 10
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0.5
-    container_name: keycloak-server
-    command: start-dev --import-realm
-    volumes:
-      - ./keycloak/import:/opt/keycloak/data/import
+  user-db:
+    image: postgres:16
+    container_name: user-db
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      KC_DB_USERNAME: ${POSTGRES_USER}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: user_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "8081:8080"
-    depends_on:
-      - postgres
+      - "5433:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      retries: 10
+
+  travel-db:
+    image: postgres:16
+    container_name: travel-db
+    environment:
+      POSTGRES_DB: travel_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - travel_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      retries: 10
+
+  booking-db:
+    image: postgres:16
+    container_name: booking-db
+    environment:
+      POSTGRES_DB: booking_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5435:5432"
+    volumes:
+      - booking_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      retries: 10
+
+  review-db:
+    image: postgres:16
+    container_name: review-db
+    environment:
+      POSTGRES_DB: review_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5436:5432"
+    volumes:
+      - review_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      retries: 10
+
+  chat-db:
+    image: postgres:16
+    container_name: chat-db
+    environment:
+      POSTGRES_DB: chat_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5437:5432"
+    volumes:
+      - chat_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      retries: 10
 
   rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq-server
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+      image: rabbitmq:3-management
+      container_name: rabbitmq-server
+      ports:
+        - "5672:5672"
+        - "15672:15672"
+      healthcheck:
+        test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+        interval: 10s
+        retries: 10
 
   minio:
     image: minio/minio
@@ -50,14 +118,216 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ADMIN_PASSWORD}
     volumes:
       - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      retries: 10
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+    restart: always
+
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: keycloak-server
+    command: start-dev --import-realm
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8081:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+
+  eureka-service:
+    build:
+      context: ./backend/eureka-service
+    image: eureka-service:0.0.1-SNAPSHOT
+    container_name: eureka-service
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+  
+  config-service:
+    build:
+      context: ./backend/config-service
+    image: config-service:0.0.1-SNAPSHOT
+    container_name: config-service
+    env_file: .env
+    ports:
+      - "8888:8888"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+
+  travel-service:
+    build:
+      context: ./backend/travel-service
+    image: travel-service:0.0.1-SNAPSHOT
+    ports:
+      - "8080"
+    container_name: travel-service
+    env_file: .env
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      travel-db:
+        condition: service_healthy
+      minio:
+        condition: service_started
+
+  review-service:
+    build:
+      context: ./backend/review-service
+    image: review-service:0.0.1-SNAPSHOT
+    ports:
+      - "8080"
+    container_name: review-service
+    env_file: .env
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      review-db:
+        condition: service_healthy
+
+  chat-service:
+    build:
+      context: ./backend/chat-service
+    image: chat-service:0.0.1-SNAPSHOT
+    ports:
+      - "8080"
+    container_name: chat-service
+    env_file: .env
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      chat-db:
+        condition: service_healthy
+
+
+  user-service:
+    build:
+      context: ./backend/user-service
+    image: user-service:0.0.1-SNAPSHOT
+    ports:
+      - "8080"
+    container_name: user-service
+    env_file: .env
+    environment:
+      KEYCLOAK_AUTH_SERVER_URL: "http://keycloak:8080"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      user-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      minio:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
+
+  booking-service:
+    build:
+      context: ./backend/booking-service
+    image: booking-service:0.0.1-SNAPSHOT
+    ports:
+      - "8080"
+    container_name: booking-service
+    env_file: .env
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      booking-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      minio:
+        condition: service_started
+      travel-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+
+
+  notification-service:
+    build:
+      context: ./backend/notification-service
+    image: notification-service:0.0.1-SNAPSHOT
+    container_name: notification-service
+    env_file: .env
+    depends_on:
+      config-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+
+
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+    image: api-gateway:0.0.1-SNAPSHOT
+    container_name: api-gateway
+    env_file: .env
+    ports:
+      - "8443:8443"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+
 
   stripe-cli:
     image: stripe/stripe-cli:latest
     container_name: stripe-cli
-    command: listen --forward-to host.docker.internal:8083/api/v1/payments/public/webhook
+    command: listen --forward-to booking-service:8080/api/v1/payments/public/webhook
     environment:
       STRIPE_API_KEY: ${STRIPE_sk}
+    depends_on:
+      booking-service:
+        condition: service_started
 
 volumes:
-  postgres_data:
+  keycloak_db_data:
+  user_db_data:
+  travel_db_data:
+  booking_db_data:
+  review_db_data:
+  chat_db_data:
   minio_data:
