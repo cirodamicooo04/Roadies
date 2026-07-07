@@ -12,8 +12,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "conversations",
         uniqueConstraints = @UniqueConstraint(
-                name = "uk_conversation_traveler_organizer_travel",
-                columnNames = {"traveler_id", "organizer_id", "travel_id"}
+                name = "uk_conversation_traveler_organizer",
+                columnNames = {"traveler_id", "organizer_id"}
         ))
 @Getter
 @Setter
