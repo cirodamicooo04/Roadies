@@ -65,7 +65,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getProfile(jwt.getSubject()));
     }
 
-    @GetMapping("/search")
+    @GetMapping("/public/search")
     @Operation(summary = "Cerca utente", description = "Ricerca pubblica di un profilo")
     public ResponseEntity<List<UserProfileResponseDTO>> searchUsers(
             @RequestParam("username") String username
@@ -74,7 +74,7 @@ public class UserController {
         return ResponseEntity.ok(results);
     }
 
-    @GetMapping("/id/{username}")
+    @GetMapping("/public/id/{username}")
     public ResponseEntity<String> getUserIdByUsername(@PathVariable String username) {
         String userId = userService.findIdByUsername(username);
         return userId != null ? ResponseEntity.ok(userId) : ResponseEntity.notFound().build();
@@ -120,7 +120,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserMinimalInformation(username));
     }
 
-    @GetMapping("/{username}/is-organizer")
+    @GetMapping("/public/{username}/is-organizer")
     public ResponseEntity<Boolean> checkIsOrganizer(@PathVariable String username) {
         boolean isOrganizer = userService.isUserOrganizer(username);
         return ResponseEntity.ok(isOrganizer);

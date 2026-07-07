@@ -88,7 +88,7 @@ interface UserManagementApi {
      * @param username 
      * @return [Response]<[UserProfileResponseDTO]>
      */
-    @GET("api/v1/users/search")
+    @GET("api/v1/users/public/search")
     suspend fun searchUser(@Query("username") username: kotlin.String): Response<List<UserProfileResponseDTO>>
 
     /**
@@ -140,10 +140,10 @@ interface UserManagementApi {
         @Part avatarFile: MultipartBody.Part
     ): Response<UserProfileResponseDTO>
 
-    @GET("api/v1/users/{username}/is-organizer")
+    @GET("api/v1/users/public/{username}/is-organizer")
     suspend fun checkIsOrganizer(@Path("username") username: String): Response<Boolean>
 
-    @GET("api/v1/users/id/{username}")
+    @GET("api/v1/users/public/id/{username}")
     suspend fun getUserIdByUsername(@Path("username") username: String): Response<String>
 
 
