@@ -42,7 +42,13 @@ public class UserController {
         log.info("Ricevuta richiesta di sincronizzazione utente dal subject JWT: {}", jwt.getSubject());
         requestDto.setKeycloakId(jwt.getSubject());
 
-        UserSyncResult result = userService.syncUser(requestDto);
+        boolean isOrganizer = false;
+        java.util.Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
+        if (realmAccess != null && realmAccess.get("roles") != null) {
+            isOrganizer = ((java.util.Collection<String>) realmAccess.get("roles")).contains("ORGANIZER");
+        }
+
+        UserSyncResult result = userService.syncUser(requestDto, isOrganizer);
 
         //Gestiamo due stati con 200 se l'utente esisteva e con 201 se l'utente non esisteva
         if (result.isNewUser()) {
@@ -59,7 +65,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getProfile(jwt.getSubject()));
     }
 
-    @GetMapping("/search")
+    @GetMapping("/public/search")
     @Operation(summary = "Cerca utente", description = "Ricerca pubblica di un profilo")
     public ResponseEntity<List<UserProfileResponseDTO>> searchUsers(
             @RequestParam("username") String username
@@ -68,7 +74,7 @@ public class UserController {
         return ResponseEntity.ok(results);
     }
 
-    @GetMapping("/id/{username}")
+    @GetMapping("/public/id/{username}")
     public ResponseEntity<String> getUserIdByUsername(@PathVariable String username) {
         String userId = userService.findIdByUsername(username);
         return userId != null ? ResponseEntity.ok(userId) : ResponseEntity.notFound().build();
@@ -114,7 +120,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserMinimalInformation(username));
     }
 
-    @GetMapping("/{username}/is-organizer")
+    @GetMapping("/public/{username}/is-organizer")
     public ResponseEntity<Boolean> checkIsOrganizer(@PathVariable String username) {
         boolean isOrganizer = userService.isUserOrganizer(username);
         return ResponseEntity.ok(isOrganizer);

@@ -61,6 +61,7 @@ import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
 import it.roadies.android_app.client.models.travel.SearchSuggestion
 import it.roadies.android_app.client.models.travel.LocationType
+
 import it.roadies.android_app.viewmodel.HomeScreenViewModel
 
 enum class Type {
@@ -122,14 +123,19 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
                         fontWeight = FontWeight.Bold,
                         fontSize = 28.sp,
                     )
-                    if (uiState.isLoading || uiState.errorMessage != null) {
+                    if (uiState.isLoading) {
                         Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center){
                             CircularProgressIndicator()
                         }
+                    } else if (uiState.errorMessage != null) {
+                        Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center){
+                            Text(text = uiState.errorMessage ?: "Errore sconosciuto", color = MaterialTheme.colorScheme.error)
+                        }
+                    } else {
+                        RecommendedTravel(uiState.recommendedTravels, onTravelClick = { travel -> 
+                            navHostController.navigate("travel_detail/${travel.id}")
+                        })
                     }
-                    RecommendedTravel(uiState.recommendedTravels, onTravelClick = {
-                        travel -> navHostController.navigate("travel_detail/${travel.id}")
-                    })
                 }
             }
         }
@@ -275,17 +281,30 @@ fun RecommendedTravel(travels: List<TravelSummaryResponse>?, onTravelClick: (Tra
     val safeTravels = travels.orEmpty()
 
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        LazyRow(modifier = Modifier.fillMaxWidth(),
+        if (safeTravels.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.no_travels_on_platfrom),
+                    color = Color.Gray
+                )
+            }
+        }
+
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(safeTravels) {
-                travel -> RecommendedTravelCard(travel, onTravelClick = onTravelClick )
+            items(safeTravels) { travel ->
+                RecommendedTravelCard(travel, onTravelClick = onTravelClick)
             }
+        }
     }
-}
-
-
 }
 
 @Composable

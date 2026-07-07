@@ -22,7 +22,15 @@ public interface FavouriteListMapper {
     @Mapping(target = "visibility", source = "visibility")
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "items", source = "items")
+    @Mapping(target = "sharedWithIds", expression = "java(mapSharedWith(entity.getSharedWith()))")
     FavouriteListResponse toResponse(FavouriteList entity);
+
+    default List<String> mapSharedWith(List<it.roadies.travel_service.data.entity.FavouriteListShared> sharedWith) {
+        if (sharedWith == null) return null;
+        return sharedWith.stream()
+                .map(it.roadies.travel_service.data.entity.FavouriteListShared::getUserId)
+                .collect(java.util.stream.Collectors.toList());
+    }
 
     List<FavouriteListResponse> toResponseList(List<FavouriteList> entities);
 

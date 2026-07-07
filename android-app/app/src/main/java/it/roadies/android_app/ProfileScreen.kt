@@ -55,6 +55,9 @@ fun ProfileScreen(
     onNavigateTo: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
+    val isAdmin = authState.roles.contains("ADMIN")
+    val isOrganizer = authState.roles.contains("ORGANIZER")
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.warningMessage) {
@@ -111,35 +114,44 @@ fun ProfileScreen(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(60.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(DarkBlueBg)
+                            .padding(vertical = 40.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            it.roadies.android_app.ui.components.UserAvatar(
+                                username = user.username,
+                                avatarUrl = user.avatarUrl?.replace("localhost", "10.0.2.2"),
+                                modifier = Modifier.size(100.dp),
+                                fontSize = 36.sp
+                            )
 
-                    it.roadies.android_app.ui.components.UserAvatar(
-                        username = user.username,
-                        avatarUrl = user.avatarUrl?.replace("localhost", "10.0.2.2"),
-                        modifier = Modifier.size(100.dp),
-                        fontSize = 36.sp
-                    )
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "${user.firstName} ${user.lastName}",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold
+                            )
 
-                    Text(
-                        text = "${user.firstName} ${user.lastName}",
-                        color = TextDark,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                            Spacer(modifier = Modifier.height(4.dp))
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = "@${user.username}",
-                        color = Color.Gray,
-                        fontSize = 16.sp
-                    )
+                            Text(
+                                text = "@${user.username}",
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Card(
+                    if (!isAdmin) {
+                        Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp),
@@ -166,6 +178,7 @@ fun ProfileScreen(
                             BadgeStatItem(badgeName = user.badge?.toString() ?: "NONE")
                         }
                     }
+                    }
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -174,36 +187,43 @@ fun ProfileScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp)
                     ) {
-                        if (!state.organizerRequestSent) {
-                            Button(
-                                onClick = { viewModel.requestOrganizerRole() },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = OrangeAvatar,
-                                    contentColor = Color.White
-                                )
-                            ) {
-                                Text("Richiedi ruolo organizzatore")
+                        if (!isAdmin) {
+                            if (!state.organizerRequestSent && !isOrganizer) {
+                                Button(
+                                    onClick = { viewModel.requestOrganizerRole() },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = OrangeAvatar,
+                                        contentColor = Color.White
+                                    )
+                                ) {
+                                    Text(stringResource(R.string.request_organizer_role))
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
                             }
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            MenuItem(
+                                text = stringResource(R.string.edit_profile),
+                                onClick = { onNavigateTo("edit_profile") }
+                            )
+
+                            MenuItem(
+                                text = stringResource(R.string.my_documents),
+                                onClick = { onNavigateTo("user_documents") }
+                            )
+
+                            MenuItem(
+                                text = stringResource(R.string.friends),
+                                onClick = { onNavigateTo("friend") }
+                            )
+
+                            MenuItem(
+                                text = stringResource(R.string.favourite_list),
+                                onClick = { onNavigateTo("favourite_lists/${user.username}") }
+                            )
                         }
-
-                        MenuItem(
-                            text = stringResource(R.string.edit_profile),
-                            onClick = { onNavigateTo("edit_profile") }
-                        )
-
-                        MenuItem(
-                            text = "I miei documenti",
-                            onClick = { onNavigateTo("user_documents") }
-                        )
-
-                        MenuItem(
-                            text = stringResource(R.string.friends),
-                            onClick = { onNavigateTo("friend") }
-                        )
 
                         MenuItem(
                             text = stringResource(R.string.logout),

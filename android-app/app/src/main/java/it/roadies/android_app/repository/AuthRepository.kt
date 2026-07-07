@@ -15,7 +15,8 @@ import javax.inject.Singleton
 data class AuthSessionState(
     val isLoading: Boolean = true,
     val isLogged: Boolean = false,
-    val roles: List<String> = emptyList()
+    val roles: List<String> = emptyList(),
+    val userId: String? = null
 )
 
 data class KeycloakUserClaims(
@@ -155,7 +156,8 @@ class AuthRepository @Inject constructor(
         return AuthSessionState(
             isLoading = false,
             isLogged = true,
-            roles = extractRoles(currentAccessToken)
+            roles = extractRoles(currentAccessToken),
+            userId = getUserClaims(currentAccessToken)?.sub
         )
     }
 }

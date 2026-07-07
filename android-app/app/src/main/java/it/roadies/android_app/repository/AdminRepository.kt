@@ -2,6 +2,7 @@ package it.roadies.android_app.repository
 
 import it.roadies.android_app.client.apis.admin.AdminManagementApi
 import it.roadies.android_app.client.models.user.PendingOrganizerRequestResponseDTO
+import it.roadies.android_app.client.models.user.UserProfileResponseDTO
 import it.roadies.android_app.client.models.user.UserResponseDTO
 import it.roadies.android_app.repository.utils.ApiResponse
 import it.roadies.android_app.repository.utils.safeApiCall
@@ -23,5 +24,9 @@ class AdminRepository @Inject constructor(
 
     suspend fun getUsersByFilter(filter: String): ApiResponse<List<UserResponseDTO>>{
         return safeApiCall {adminApi.getUsersByFilter(filter)}
+    }
+
+    suspend fun getTop20Travelers(): ApiResponse<List<UserProfileResponseDTO>>{
+        return safeApiCall { adminApi.getTop20Travelers()}
     }
 }

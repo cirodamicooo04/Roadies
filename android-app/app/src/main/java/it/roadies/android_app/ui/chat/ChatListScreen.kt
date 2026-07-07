@@ -10,6 +10,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -80,7 +82,7 @@ fun ConversationItem(
                         text = userInfo?.username ?: "Utente ${otherUserId?.take(6)}",
                         fontWeight = if (conversation.unreadCount > 0) FontWeight.ExtraBold else FontWeight.Bold
                     )
-                    Text(text = "Chat aperta", fontSize = 12.sp, color = Color.Gray)
+                    Text(text = stringResource(R.string.chat_opened), fontSize = 12.sp, color = Color.Gray)
                 }
             }
             

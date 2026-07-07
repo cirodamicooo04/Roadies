@@ -3,6 +3,7 @@ package it.roadies.travel_service.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.roadies.travel_service.data.dto.request.FavouriteListCreateRequest;
+import it.roadies.travel_service.data.dto.request.FavouriteListUpdateRequest;
 import it.roadies.travel_service.data.dto.response.FavouriteListResponse;
 import it.roadies.travel_service.data.entity.FavouriteList;
 import it.roadies.travel_service.data.mapper.FavouriteListMapper;
@@ -78,6 +79,33 @@ public class FavouriteListController {
 
         listService.deleteList(id, jwt.getClaim("sub"));
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/users/{targetUserId}/lists")
+    @Operation(summary = "Liste di un utente", description = "Recupera le liste visibili di un utente specifico in base ai permessi dell'utente loggato.")
+    public ResponseEntity<List<FavouriteListResponse>> getUserLists(
+            @PathVariable String targetUserId,
+            @AuthenticationPrincipal Jwt jwt) {
+
+        String requesterId = jwt != null ? jwt.getClaim("sub") : null;
+        List<FavouriteList> lists = listService.getUserVisibleLists(targetUserId, requesterId);
+
+        List<FavouriteListResponse> response = lists.stream()
+                .map(listMapper::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('TRAVELER')")
+    @PutMapping("/{id}")
+    @Operation(summary = "Modifica lista", description = "Modifica il nome e la visibilità della lista.")
+    public ResponseEntity<FavouriteListResponse> updateList(
+            @PathVariable UUID id,
+            @RequestBody @Valid FavouriteListUpdateRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+
+        FavouriteList updated = listService.updateList(id, request.getName(), request.getVisibility(), jwt.getClaim("sub"));
+        return ResponseEntity.ok(listMapper.toResponse(updated));
     }
 
 

@@ -24,6 +24,10 @@ class ChatRepository @Inject constructor(
         return safeApiCall { chatApi.sendMessage(conversationId, request) }
     }
 
+    suspend fun markAsRead(conversationId: String): ApiResponse<Void> {
+        return safeApiCall { chatApi.markAsRead(conversationId) }
+    }
+
     suspend fun getMyConversations(): ApiResponse<List<ConversationResponseDTO>> {
         return safeApiCall { chatApi.getMyConversations() }
     }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Roadies</string>
     <string name="home">Home</string>
@@ -71,7 +71,7 @@
     <string name="search">Cerca</string>
     <string name="not_editable_travel">Modifiche bloccate: Questo viaggio ha già delle partenze confermate. I dettagli non possono più essere modificati, puoi solo gestire le partenze.</string>
     <string name="travel_photos_label">Foto</string>
-    <string name="add_photo">Aggiungi Foto</string>>
+    <string name="add_photo">Aggiungi Foto</string>&gt;
     <string name="photo_upload_failed">Fallito</string>
     <string name="rate_trip_type">Valuta il tipo di viaggio</string>
     <string name="error_title_invalid">Il titolo deve essere compreso tra 3 e 150 caratteri</string>
@@ -100,7 +100,7 @@
     <string name="confirm">Conferma</string>
     <string name="activity_created">Attività creata con successo</string>
 
-    <!-- booking -->
+
     <string name="booking_tab_active">Attivi</string>
     <string name="booking_tab_past">Passati</string>
     <string name="booking_empty_active">Nessuna prenotazione attiva</string>
@@ -123,7 +123,7 @@
     <string name="booking_delete_dialog_dismiss">Mantieni prenotazione</string>
 
 
-    <!-- booking detail -->
+
     <string name="booking_detail_title">Dettaglio Prenotazione</string>
     <string name="booking_detail_back">Indietro</string>
     <string name="booking_detail_info_title">Informazioni Prenotazione</string>
@@ -175,7 +175,7 @@
     <string name="departures_empty">Ancora nessuna partenza aggiunta. Inserisci la prima!</string>
 
 
-    <!-- User -->
+
     <string name="edit_profile"> Modifica Profilo</string>
     <string name="friends"> Amici</string>
     <string name="logout"> Esci</string>
@@ -187,8 +187,10 @@
     <string name="close"> Chiudi</string>
     <string name="reject"> Rifiuta</string>
     <string name="accept"> Accetta</string>
+    <string name="request_received">Ha richiesto la tua amicizia</string>
     <string name="add_friend"> Aggiungi amico</string>
     <string name="request_sent"> Richiesta inviata</string>
+    <string name="favourite_list"> Le mie liste preferiti</string>
 
 
     <string name="participant_details"> Dati dei partecipanti</string>
@@ -213,7 +215,7 @@
     <string name="choose_photo">Scegli foto</string>
     <string name="change_photo">Cambia foto</string>
 
-    <!-- booking payment -->
+
     <string name="booking_payment_step_label">Pagamento</string>
     <string name="booking_payment_title">Completa la prenotazione</string>
     <string name="booking_payment_subtitle">Paga in modo sicuro tramite Stripe per confermare il tuo viaggio</string>
@@ -249,6 +251,111 @@
     <string name="type_your_reply">Scrivi la tua risposta...</string>
     <string name="type_your_review">Scrivi la tua recensione...</string>
     <string name="reply">Rispondi</string>
+    <string name="no_travels_on_platfrom">Ancora nessun viaggio sulla piattaforma, torna più tardi!</string>
+    <string name="organized_by">Organizzato da</string>
+    <string name="loading">Caricamento...</string>
+    <string name="organizer">Organizzatore</string>
+
+
+    <string name="fav_my_lists">Le mie Liste</string>
+    <string name="fav_lists">Liste Preferiti</string>
+    <string name="fav_no_lists">Nessuna lista trovata.</string>
+    <string name="fav_no_name">Senza nome</string>
+    <string name="fav_items_count">Elementi: %1$d</string>
+    <string name="fav_visibility"> • Visibilità: %1$s</string>
+    <string name="fav_visibility_private">Privata</string>
+    <string name="fav_visibility_public">Pubblica</string>
+    <string name="fav_visibility_shared">Condivisa</string>
+    <string name="fav_error_loading">Errore caricamento lista</string>
+    <string name="fav_detail_title">Dettaglio Lista</string>
+    <string name="fav_edit_list">Modifica lista</string>
+    <string name="fav_delete_list">Elimina lista</string>
+    <string name="fav_list_empty">La lista è vuota.</string>
+    <string name="fav_travel_placeholder">Viaggio</string>
+    <string name="fav_unknown_destination">Destinazione ignota</string>
+    <string name="fav_remove_item">Rimuovi elemento</string>
+    <string name="fav_delete_confirm_title">Eliminare la lista?</string>
+    <string name="fav_delete_confirm_body">Questa azione cancellerà la lista e tutti gli elementi al suo interno in modo irreversibile.</string>
+    <string name="fav_delete_btn">Elimina</string>
+    <string name="fav_cancel_btn">Annulla</string>
+    <string name="fav_edit_title">Modifica Lista</string>
+    <string name="fav_name_label">Nome lista</string>
+    <string name="fav_visibility_label">Visibilità:</string>
+    <string name="fav_save_btn">Salva</string>
+    <string name="fav_share_with_friends">Condividi con amici</string>
+    <string name="fav_no_friends_found">Nessun amico trovato.</string>
+    <string name="fav_unknown_friend">Sconosciuto</string>
+    <string name="fav_add_to_list">Aggiungi a una lista</string>
+    <string name="fav_your_lists">Le tue Liste</string>
+    <string name="fav_new_list">Nuova Lista</string>
+    <string name="fav_list_name_placeholder">Nome della lista</string>
+    <string name="fav_create_btn">Crea</string>
+    <string name="fav_add_to_favorites">Aggiungi ai preferiti</string>
+    <string name="fav_no_lists_yet">Non hai ancora nessuna lista preferiti</string>
+    <string name="fav_elements_count">%1$d elementi</string>
+    <string name="fav_create_new_list">Crea nuova lista</string>
+    <string name="fav_visibility_label_only">Visibilità</string>
+    <string name="fav_visibility_shared_specific">Condivisa con amici specifici</string>
+    <string name="no_image_selected">Nessuna immagine selezionata</string>
+    <string name="send">Invia</string>
+    <string name="view_organized_travels">Vedi Viaggi Organizzati</string>
+    <string name="contact_organizer">Contatta Organizzatore</string>
+    <string name="my_documents">I miei documenti</string>
+    <string name="upload_new_document">Carica nuovo documento</string>
+    <string name="document_number">Numero Documento</string>
+    <string name="upload">Carica</string>
+    <string name="error_upload_image">Impossibile caricare l\'immagine</string>
+    <string name="avatar">Avatar</string>
+    <string name="select_avatar">Seleziona avatar</string>
+    <string name="date_of_birth">Data di nascita</string>
+    <string name="save_changes">Salva modifiche</string>
+    <string name="remove_friend">Rimuovi amico</string>
+    <string name="remove_friend_confirm">Vuoi davvero rimuovere @%1$s dai tuoi amici?</string>
+    <string name="remove">Rimuovi</string>
+    <string name="type_message">Scrivi un messaggio...</string>
+    <string name="all">Tutti</string>
+    <string name="chat_opened">Chat aperta</string>
+    <string name="time_expired">Tempo scaduto</string>
+    <string name="time_expired_message">Il tempo per completare la prenotazione è scaduto e i posti sono stati liberati. Riprova dall\'inizio.</string>
+    <string name="understood">Ho capito</string>
+    <string name="destination">Destinazione</string>
+    <string name="confirmed">Confermata</string>
+    <string name="sold_out_status">Al completo</string>
+    <string name="planned">Pianificata</string>
+    <string name="price_format">Prezzo: %1$s €</string>
+    <string name="max_slots_format">Posti massimi: %1$s</string>
+    <string name="price_range_format">%1$s€ - %2$s€</string>
+    <string name="duration_range_format">%1$s - %2$s %3$s</string>
+<string name="request_organizer_role">Richiedi ruolo organizzatore</string>
+    <string name="activity_address">Indirizzo dell\'attività</string>
+    <string name="yes_confirm">Sì, conferma</string>
+    <string name="metadata">Metadata</string>
+    <string name="loading_profile">Caricamento profilo...</string>
+    <string name="no_documents">Nessun documento caricato.</string>
+    <string name="time_remaining">Tempo rimanente %1$s</string>
+    <string name="admin_gamification_leaderboard">Classifica Gamification</string>
+    <string name="admin_no_stats">Nessuna statistica utente disponibile</string>
+    <string name="admin_badge">Badge: %1$s</string>
+    <string name="admin_points">%1$s pt</string>
+    <string name="admin_filter">Filtro: %1$s</string>
+    <string name="admin_organizer_requests">Richieste organizzatore</string>
+    <string name="admin_no_users">Non ci sono utenti %1$s</string>
+    <string name="admin_add_tag">Aggiungi Tag</string>
+    <string name="admin_tag_name">Nome Tag</string>
+    <string name="admin_save">Salva</string>
+    <string name="admin_tags">Tags</string>
+    <string name="admin_no_tags">Nessun tag disponibile.</string>
+    <string name="admin_no_pending_reqs">Nessuna richiesta in sospeso</string>
+    <string name="admin_reject_reason">Motivo del rifiuto</string>
+    <string name="admin_reject_hint">Scrivi il motivo qui...</string>
+    <string name="admin_user_details">Dettagli utente</string>
+    <string name="admin_block">Blocca</string>
+    <string name="admin_unblock">Sblocca</string>
+    <string name="doc_type_id_card">Carta d\'identità</string>
+    <string name="doc_type_passport">Passaporto</string>
+    <string name="doc_type_driver_license">Patente</string>
+    <string name="doc_type_label">Tipo: </string>
+    <string name="doc_number_label">Numero: </string>
     <string name="edit_reply_title">Modifica</string>
     <string name="delete_reply_title">Elimina</string>
     <string name="delete_reply_msg">Sei sicuro di voler modificare questa risposta?</string>

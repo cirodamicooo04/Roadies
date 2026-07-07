@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -30,6 +32,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.client.models.user.UserDocumentRequestDTO
+import it.roadies.android_app.client.models.user.UserDocumentResponseDTO
 import it.roadies.android_app.viewmodel.user.UserDocumentsViewModel
 import kotlinx.coroutines.launch
 
@@ -57,19 +60,6 @@ fun UserDocumentScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("I miei documenti") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Indietro"
-                        )
-                    }
-                }
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(onClick = { showUploadDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Aggiungi Documento")
@@ -106,23 +96,30 @@ fun UserDocumentScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
+                                    val docTypeName = when (doc.documentType) {
+                                        UserDocumentResponseDTO.DocumentType.ID_CARD -> stringResource(R.string.doc_type_id_card)
+                                        UserDocumentResponseDTO.DocumentType.PASSPORT -> stringResource(R.string.doc_type_passport)
+                                        UserDocumentResponseDTO.DocumentType.DRIVER_LICENSE -> stringResource(R.string.doc_type_driver_license)
+                                        else -> "Sconosciuto"
+                                    }
                                     Text(
-                                        text = "Tipo: ${doc.documentType?.value ?: "Sconosciuto"}",
+                                        text = "${stringResource(R.string.doc_type_label)}$docTypeName",
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                     Text(
-                                        text = "Numero: ${doc.documentNumber ?: "-"}",
+                                        text = "${stringResource(R.string.doc_number_label)}${doc.documentNumber ?: "-"}",
                                         style = MaterialTheme.typography.bodyMedium
                                     )
-                                    Text(
-                                        text = "Stato: ${doc.status?.value ?: "Sconosciuto"}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = when(doc.status?.value) {
-                                            "VERIFIED" -> Color(0xFF4CAF50)
-                                            "REJECTED" -> Color(0xFFF44336)
-                                            else -> Color(0xFFFF9800)
-                                        }
-                                    )
+//                                    Se si vuole implementare lo status dei documenti scommentare:
+//                                    Text(
+//                                        text = "Stato: ${doc.status?.value ?: "Sconosciuto"}",
+//                                        style = MaterialTheme.typography.bodySmall,
+//                                        color = when(doc.status?.value) {
+//                                            "VERIFIED" -> Color(0xFF4CAF50)
+//                                            "REJECTED" -> Color(0xFFF44336)
+//                                            else -> Color(0xFFFF9800)
+//                                        }
+//                                    )
                                 }
 
                                 if (!doc.fileUrl.isNullOrBlank()) {
@@ -196,17 +193,17 @@ fun UploadDocumentDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isUploading) onDismiss() },
-        title = { Text("Carica nuovo documento") },
+        title = { Text(stringResource(R.string.upload_new_document)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = documentNumber,
                     onValueChange = { documentNumber = it },
-                    label = { Text("Numero Documento") },
+                    label = { Text(stringResource(R.string.document_number)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Text("Tipo di documento:", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.type_documents), style = MaterialTheme.typography.bodyMedium)
 
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -215,17 +212,17 @@ fun UploadDocumentDialog(
                     FilterChip(
                         selected = selectedType == UserDocumentRequestDTO.DocumentType.ID_CARD,
                         onClick = { selectedType = UserDocumentRequestDTO.DocumentType.ID_CARD },
-                        label = { Text("Carta d'Identità") }
+                        label = { Text(stringResource(R.string.id_card)) }
                     )
                     FilterChip(
                         selected = selectedType == UserDocumentRequestDTO.DocumentType.PASSPORT,
                         onClick = { selectedType = UserDocumentRequestDTO.DocumentType.PASSPORT },
-                        label = { Text("Passaporto") }
+                        label = { Text(stringResource(R.string.passport)) }
                     )
                     FilterChip(
                         selected = selectedType == UserDocumentRequestDTO.DocumentType.DRIVER_LICENSE,
                         onClick = { selectedType = UserDocumentRequestDTO.DocumentType.DRIVER_LICENSE },
-                        label = { Text("Patente") }
+                        label = { Text(stringResource(R.string.dr_license)) }
                     )
                 }
 
@@ -248,13 +245,13 @@ fun UploadDocumentDialog(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Carica")
+                    Text(stringResource(R.string.upload))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isUploading) {
-                Text("Annulla")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -296,7 +293,7 @@ fun DocumentImageViewerDialog(
                                 tint = Color.Red,
                                 modifier = Modifier.size(48.dp)
                             )
-                            Text("Impossibile caricare l'immagine", color = Color.White)
+                            Text(stringResource(R.string.error_upload_image), color = Color.White)
                         }
                     }
                 )

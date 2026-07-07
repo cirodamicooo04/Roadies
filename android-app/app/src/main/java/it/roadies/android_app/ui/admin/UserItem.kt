@@ -10,6 +10,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import it.roadies.android_app.client.models.user.UserResponseDTO
@@ -26,10 +28,10 @@ fun UserItem(
                 Text(text = "${user.firstName} ${user.lastName}", style = MaterialTheme.typography.titleMedium)
             }
             if (user.enabled == true) {
-                Button(onClick = { onBlockClick(user.keycloakId) }) { Text("Block") }
+                Button(onClick = { onBlockClick(user.keycloakId) }) { Text(stringResource(R.string.admin_block)) }
             } else {
                 Button(onClick = { onUnblockClick(user.keycloakId) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
-                    Text("Unblock")
+                    Text(stringResource(R.string.admin_unblock))
                 }
             }
         }

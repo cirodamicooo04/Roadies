@@ -163,7 +163,7 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(stringResource(R.string.price_range), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                        Text("${priceRange.start.toInt()}€ - ${priceRange.endInclusive.toInt()}€", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.price_range_format, priceRange.start.toInt().toString(), priceRange.endInclusive.toInt().toString()), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     RangeSlider(
@@ -181,7 +181,7 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(stringResource(R.string.duration_days), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                            Text("${durationRange.start.toInt()} - ${durationRange.endInclusive.toInt()} ${stringResource(R.string.days)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.duration_range_format, durationRange.start.toInt().toString(), durationRange.endInclusive.toInt().toString(), stringResource(R.string.days)), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         RangeSlider(
@@ -350,13 +350,25 @@ fun SearchScreen(navHostController: NavHostController, searchScreenViewModel: Se
                     ActivitiesResult(uiState.activities ?: emptyList(), organizers, organizersUiState.isLoading, onActivityClick = { activity ->
                         navHostController.navigate("activity_detail/${activity.id}")
                     }, onOrganizerClick = { username -> 
-                        navHostController.navigate("user_profile/$username")
+                        val organizer = organizers?.find { it.username == username }
+                        val isMe = uiState.currentUserId != null && uiState.currentUserId == organizer?.keycloakId
+                        if (isMe) {
+                            navHostController.navigate("profile_graph")
+                        } else {
+                            navHostController.navigate("user_profile/$username")
+                        }
                     }, lazyListState, uiState.isLoadingMore || (uiState.isLoading && uiState.activities?.isNotEmpty() == true))
                 } else {
                     TravelsResult(uiState.travels ?: emptyList(), organizers, organizersUiState.isLoading, onTravelClick = { travel ->
                         navHostController.navigate("travel_detail/${travel.id}")
                     }, onOrganizerClick = { username -> 
-                        navHostController.navigate("user_profile/$username")
+                        val organizer = organizers?.find { it.username == username }
+                        val isMe = uiState.currentUserId != null && uiState.currentUserId == organizer?.keycloakId
+                        if (isMe) {
+                            navHostController.navigate("profile_graph")
+                        } else {
+                            navHostController.navigate("user_profile/$username")
+                        }
                     }, lazyListState, uiState.isLoadingMore || (uiState.isLoading && uiState.travels?.isNotEmpty() == true))
                 }
                 
@@ -672,7 +684,7 @@ fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformatio
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     val organizer = organizers?.find { it.keycloakId == travel.ownerId }
-                    val organizerName = if (isOrganizersLoading) "Caricamento..." else organizer?.username ?: "Sconosciuto"
+                    val organizerName = if (isOrganizersLoading) stringResource(R.string.loading) else organizer?.username ?: stringResource(R.string.organizer)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable(enabled = organizer?.username != null) {

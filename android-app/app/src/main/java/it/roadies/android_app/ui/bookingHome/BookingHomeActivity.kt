@@ -149,17 +149,17 @@ fun BookingHomeContent(
             FilterChip(
                 selected = state.filterType == BookingFilterType.ALL,
                 onClick = { onFilterChanged(BookingFilterType.ALL) },
-                label = { Text("Tutti") }
+                label = { Text(stringResource(R.string.all)) }
             )
             FilterChip(
                 selected = state.filterType == BookingFilterType.TRAVEL,
                 onClick = { onFilterChanged(BookingFilterType.TRAVEL) },
-                label = { Text("Viaggi") }
+                label = { Text(stringResource(R.string.travels)) }
             )
             FilterChip(
                 selected = state.filterType == BookingFilterType.ACTIVITY,
                 onClick = { onFilterChanged(BookingFilterType.ACTIVITY) },
-                label = { Text("Attività") }
+                label = { Text(stringResource(R.string.activities)) }
             )
         }
         

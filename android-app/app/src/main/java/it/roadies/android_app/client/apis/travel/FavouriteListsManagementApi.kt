@@ -5,6 +5,7 @@ import retrofit2.Response
 
 import it.roadies.android_app.client.models.travel.FavouriteListCreateRequest
 import it.roadies.android_app.client.models.travel.FavouriteListResponse
+import it.roadies.android_app.client.models.travel.FavouriteListUpdateRequest
 import java.util.UUID
 
 interface FavouriteListsManagementApi {
@@ -143,4 +144,15 @@ interface FavouriteListsManagementApi {
     @DELETE("api/v1/favourite-lists/{listId}/travels/{travelId}")
     suspend fun removeTravelFromList(@Path("listId") listId: UUID, @Path("travelId") travelId: UUID): Response<Unit>
 
+    @GET("api/v1/favourite-lists/users/{targetUserId}/lists")
+    suspend fun getUserLists(@Path("targetUserId") targetUserId: String): Response<List<FavouriteListResponse>>
+
+    @GET("api/v1/favourite-lists/{id}")
+    suspend fun getListDetail(@Path("id") id: UUID): Response<FavouriteListResponse>
+
+    @PUT("api/v1/favourite-lists/{id}")
+    suspend fun updateList(
+        @Path("id") id: UUID,
+        @Body request: FavouriteListUpdateRequest
+    ): retrofit2.Response<FavouriteListResponse>
 }

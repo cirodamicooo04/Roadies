@@ -1,5 +1,6 @@
 package it.roadies.android_app
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,12 +67,14 @@ import it.roadies.android_app.client.models.travel.ActivityResponse
 import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
 import it.roadies.android_app.client.models.travel.TravelTagResponse
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.ui.travel.components.BoxCentered
 import it.roadies.android_app.ui.travel.components.CheckAvailabilityButton
 import it.roadies.android_app.ui.travel.components.DetailHeader
 import it.roadies.android_app.ui.travel.components.DetailImageCarousel
 import it.roadies.android_app.ui.travel.components.ExpandableDescription
 import it.roadies.android_app.ui.travel.components.LocationMap
+import it.roadies.android_app.ui.travel.components.OrganizerCard
 import it.roadies.android_app.ui.travel.components.Reviews
 import it.roadies.android_app.viewmodel.TravelDetailViewModel
 import it.roadies.android_app.viewmodel.TravelReviewsState
@@ -94,16 +97,31 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
     } else if (uiState.errorMessage != null){
         BoxCentered(text = uiState.errorMessage)
         } else {
-        TravelDetail(uiState.travel, onCheckAvailability = {
-            viewModel.loadDepartures()
-            isDeparturesSheetOpen = true
-        }, reviewsState = reviewsState ,onFavoriteClick = {
-            travelId -> // vincenzo usa travel id per aggiungerlo ai preferiti
-        }, onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
-        onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
-        onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
-        onEditReply = { replyId, content -> viewModel.editReply(replyId, content) },
-        onDeleteReply = { replyId -> viewModel.deleteReply(replyId) })
+        TravelDetail(
+            travel = uiState.travel, 
+            organizerInfo = uiState.organizerInfo,
+            onCheckAvailability = {
+                viewModel.loadDepartures()
+                isDeparturesSheetOpen = true
+            }, 
+            reviewsState = reviewsState,
+            onFavoriteClick = { travelId -> // vincenzo usa travel id per aggiungerlo ai preferiti
+            }, 
+            onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
+            onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
+            onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
+            onOrganizerClick = { username -> 
+                val isMe = uiState.currentUserId == uiState.organizerInfo?.keycloakId
+                Log.d("check_sono_io","my_id: ${uiState.currentUserId}, keyc_id: ${uiState.organizerInfo?.keycloakId}")
+                if (isMe) {
+                    navHostController.navigate("profile_graph")
+                } else {
+                    navHostController.navigate("user_profile/$username")
+                }
+            },
+            onEditReply = { replyId, content -> viewModel.editReply(replyId, content) },
+            onDeleteReply = { replyId -> viewModel.deleteReply(replyId) }
+        )
     }
 
     LaunchedEffect(uiState.requireLogin) {
@@ -170,6 +188,7 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
 @Composable
 fun TravelDetail(
     travel: TravelResponse?, 
+    organizerInfo: MinimalInformationResponseDTO?,
     reviewsState: TravelReviewsState,
     onCheckAvailability: () -> Unit, 
     onFavoriteClick: (UUID) -> Unit,
@@ -178,6 +197,8 @@ fun TravelDetail(
     onReplyReview: (UUID, String) -> Unit,
     onEditReply: (UUID, String) -> Unit,
     onDeleteReply: (UUID) -> Unit
+    onReplyReview: (UUID, String) -> Unit,
+    onOrganizerClick: (String) -> Unit
 ){
     //variabile is favorite , da cambiare in caso volessimo fare cuoricino rosso se favorito
     var isFavorite by remember { mutableStateOf(false) }
@@ -232,6 +253,11 @@ fun TravelDetail(
 
                 //travel activity con ogni attività collasabile
                 Activities(travel.activities)
+
+                OrganizerCard(
+                    organizerInfo = organizerInfo,
+                    onOrganizerClick = onOrganizerClick
+                )
 
                 Reviews(
                     isLoading = reviewsState.isLoading,
@@ -346,7 +372,7 @@ fun CollasableActivityCard(activity: ActivityResponse?){
                         modifier = Modifier.size(70.dp)
                     ) {
                         SubcomposeAsyncImage(
-                            model = activity?.images?.firstOrNull()?.url?.replace("localhost","10.133.123.48"),
+                            model = activity?.images?.firstOrNull()?.url?.replace("localhost","10.0.2.2"),
                             contentDescription = stringResource(R.string.activity_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize(),

@@ -25,7 +25,7 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/travels/public/**", "/api/v1/activities/public/**", "/api/v1/metadata/public/**", "/api/v1/bookings/public/**", "/api/v1/payments/public/**","/api/v1/reviews/public/**" ,"/api/v1/users/public/**","/fallback/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v1/reviews/public/**").permitAll()
+                        .requestMatchers("/api/v1/travels/public/**", "/api/v1/activities/public/**", "/api/v1/metadata/public/**", "/api/v1/bookings/public/**","/api/v1/favourite-lists/public/**" , "/api/v1/payments/public/**","/api/v1/reviews/public/**" ,"/api/v1/users/public/**","/fallback/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v1/reviews/public/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

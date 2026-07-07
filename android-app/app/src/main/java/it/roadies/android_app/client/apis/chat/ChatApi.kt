@@ -31,4 +31,9 @@ interface ChatApi {
         @Path("conversationId") conversationId: String,
         @Body request: MessageRequestDTO
     ): Response<MessageResponseDTO>
+
+    @retrofit2.http.PATCH("api/v1/conversations/{conversationId}/read")
+    suspend fun markAsRead(
+        @Path("conversationId") conversationId: String
+    ): Response<Void>
 }

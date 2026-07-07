@@ -25,6 +25,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import it.roadies.android_app.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -75,12 +77,12 @@ fun EditProfileScreen(
                         showDatePicker = false
                     }
                 ) {
-                    Text("Conferma")
+                    Text(stringResource(R.string.confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Annulla")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         ) {
@@ -124,7 +126,7 @@ fun EditProfileScreen(
             value = state.firstName,
             onValueChange = viewModel::onFirstNameChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Nome") },
+            label = { Text(stringResource(R.string.first_name)) },
             singleLine = true
         )
 
@@ -132,13 +134,13 @@ fun EditProfileScreen(
             value = state.lastName,
             onValueChange = viewModel::onLastNameChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Cognome") },
+            label = { Text(stringResource(R.string.last_name)) },
             singleLine = true
         )
 
         OutlinedTextField(
             value = if (state.avatarUrl.isBlank()) {
-                "Nessuna immagine selezionata"
+                stringResource(R.string.no_image_selected)
             } else {
                 state.avatarUrl
             },
@@ -146,7 +148,7 @@ fun EditProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { photoPicker.launch("image/*") },
-            label = { Text("Avatar") },
+            label = { Text(stringResource(R.string.avatar)) },
             readOnly = true,
             singleLine = true
         )
@@ -155,7 +157,7 @@ fun EditProfileScreen(
             onClick = { photoPicker.launch("image/*") },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Seleziona avatar")
+            Text(stringResource(R.string.select_avatar))
         }
 
         OutlinedTextField(
@@ -164,7 +166,7 @@ fun EditProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { showDatePicker = true },
-            label = { Text("Data di nascita") },
+            label = { Text(stringResource(R.string.date_of_birth)) },
             readOnly = true,
             singleLine = true
         )
@@ -180,7 +182,7 @@ fun EditProfileScreen(
                     strokeWidth = 2.dp
                 )
             } else {
-                Text("Salva modifiche")
+                Text(stringResource(R.string.save_changes))
             }
         }
     }

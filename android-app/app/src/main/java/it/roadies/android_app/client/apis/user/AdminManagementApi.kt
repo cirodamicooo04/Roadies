@@ -1,6 +1,7 @@
 package it.roadies.android_app.client.apis.admin
 
 import it.roadies.android_app.client.models.user.PendingOrganizerRequestResponseDTO
+import it.roadies.android_app.client.models.user.UserProfileResponseDTO
 import it.roadies.android_app.client.models.user.UserResponseDTO
 import retrofit2.Response
 import retrofit2.http.*
@@ -30,4 +31,8 @@ interface AdminManagementApi {
     // (GET /api/v1/admin/users)
     @GET("api/v1/admin/users")
     suspend fun getUsersByFilter(@Query("filter") filter: String): Response<List<UserResponseDTO>>
+
+    // ("api/v1/admin/best-travelers")
+    @GET("api/v1/admin/best-travelers")
+    suspend fun getTop20Travelers(): Response<List<UserProfileResponseDTO>>
 }

@@ -1,5 +1,6 @@
 package it.roadies.android_app.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,23 +15,27 @@ import it.roadies.android_app.repository.AuthRepository
 import it.roadies.android_app.repository.BookingRepository
 import it.roadies.android_app.repository.ReviewRepository
 import it.roadies.android_app.repository.TravelRepository
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.repository.UserRepository
+import it.roadies.android_app.client.models.travel.FavouriteListCreateRequest
+import it.roadies.android_app.client.models.travel.FavouriteListResponse
+import it.roadies.android_app.repository.FavouriteRepository
+
 
 data class TravelDetailState(
     val isLoading: Boolean = false,
     val travel: TravelResponse? = null,
+    val organizerInfo: MinimalInformationResponseDTO? = null,
     val errorMessage: String? = null,
     val createdBookingId: UUID? = null,
     val selectedDepartureId: UUID? = null,
-    val requireLogin: Boolean = false
+    val requireLogin: Boolean = false,
+    val currentUserId: String? = null
 )
 
 data class TravelDepartureState(
@@ -44,11 +49,11 @@ data class TravelReviewsState(
     val reviews: List<ReviewResponse>? = emptyList(),
     val usersInfo: Map<String, MinimalInformationResponseDTO> = emptyMap(),
     val errorMessage: String? = null,
-    val currentUserId: String? = null
+    val currentUserId: String? = null,
 )
 
 @HiltViewModel
-class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository,private val bookingRepository: BookingRepository, private val authRepository: AuthRepository, private val reviewRepository: ReviewRepository, private val userRepository: UserRepository): ViewModel() {
+class TravelDetailViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val travelRepository: TravelRepository,private val bookingRepository: BookingRepository, private val authRepository: AuthRepository, private val reviewRepository: ReviewRepository, private val userRepository: UserRepository, private val favouriteRepository: FavouriteRepository): ViewModel() {
     val id: String? = savedStateHandle["id"]
     private val _uiState = MutableStateFlow(TravelDetailState())
     val uiState = _uiState.asStateFlow()
@@ -59,28 +64,43 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
     private val _reviewsState = MutableStateFlow(TravelReviewsState())
     val reviewsState = _reviewsState.asStateFlow()
 
+
+
     init {
         val uuid = runCatching { UUID.fromString(id) }.getOrNull()
         if (uuid != null) loadTravel(uuid)
         else _uiState.value = TravelDetailState(errorMessage = "Travel id not valid")
 
         viewModelScope.launch {
-            val user = userRepository.getCurrentUser()
-            _reviewsState.value = _reviewsState.value.copy(currentUserId = user?.id)
+            authRepository.authState.collect { authState ->
+                _uiState.value = _uiState.value.copy(currentUserId = authState.userId)
+                _reviewsState.value = _reviewsState.value.copy(currentUserId = authState.userId)
+            }
         }
     }
 
     private fun loadTravel(id: UUID){
         viewModelScope.launch {
-            _uiState.value = TravelDetailState(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
             val response = travelRepository.getTravelById(id)
             if (response.success){
-                _uiState.value = TravelDetailState(travel = response.data, isLoading = false)
+                _uiState.value = _uiState.value.copy(travel = response.data, isLoading = false)
+                response.data?.ownerId?.let { loadOrganizerInfo(it) }
                 loadReviews(id)
             }
             else {
-                _uiState.value = TravelDetailState(isLoading = false, errorMessage = response.errorMessage)
+                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = response.errorMessage)
+            }
+        }
+    }
+
+    private fun loadOrganizerInfo(ownerId: String) {
+        viewModelScope.launch {
+            val response = userRepository.getUsersInfo(listOf(ownerId))
+            if (response.success && response.data != null) {
+                val organizer = response.data.firstOrNull()
+                _uiState.value = _uiState.value.copy(organizerInfo = organizer)
             }
         }
     }
@@ -95,7 +115,7 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
                 var usersMap = emptyMap<String, MinimalInformationResponseDTO>()
                 
                 if (userIds.isNotEmpty()) {
-                    val usersResponse = userRepository.getOrganizersInfo(userIds)
+                    val usersResponse = userRepository.getUsersInfo(userIds)
                     if (usersResponse.success && usersResponse.data != null) {
                         usersMap = usersResponse.data.associateBy { it.keycloakId ?: "" }.filterKeys { it.isNotEmpty() }
                     }
@@ -217,6 +237,39 @@ class TravelDetailViewModel @Inject constructor(private val savedStateHandle: Sa
             }
         }
     }
+
+    fun loadFavouriteLists(onResult: (List<FavouriteListResponse>) -> Unit) {
+        viewModelScope.launch {
+            val response = favouriteRepository.getMyLists()
+            if (response.success && response.data != null) {
+                onResult(response.data)
+            } else {
+                onResult(emptyList())
+            }
+        }
+    }
+
+    fun addTravelToFavouriteList(listId: UUID, travelId: UUID, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            val response = favouriteRepository.addTravelToList(listId, travelId)
+            onResult(response.success, response.errorMessage)
+        }
+    }
+
+    fun createFavouriteList(
+        name: String,
+        visibility: FavouriteListCreateRequest.Visibility,
+        onCreated: (FavouriteListResponse) -> Unit
+    ) {
+        viewModelScope.launch {
+            val request = FavouriteListCreateRequest(name = name, visibility = visibility)
+            val response = favouriteRepository.createList(request)
+            if (response.success && response.data != null) {
+                onCreated(response.data)
+            }
+        }
+    }
+
 
     fun editReply(replyId: UUID, newContent: String) {
         viewModelScope.launch {

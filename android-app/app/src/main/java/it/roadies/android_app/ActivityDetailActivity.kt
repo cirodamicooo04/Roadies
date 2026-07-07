@@ -55,12 +55,18 @@ import it.roadies.android_app.ui.travel.components.DetailHeader
 import it.roadies.android_app.ui.travel.components.DetailImageCarousel
 import it.roadies.android_app.ui.travel.components.ExpandableDescription
 import it.roadies.android_app.ui.travel.components.LocationMap
+import it.roadies.android_app.ui.travel.components.OrganizerCard
 import it.roadies.android_app.ui.travel.components.Reviews
+import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
 import it.roadies.android_app.viewmodel.ActivityDetailViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.Duration
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import it.roadies.android_app.client.models.travel.FavouriteListCreateRequest
+import it.roadies.android_app.client.models.travel.FavouriteListResponse
+import it.roadies.android_app.ui.travel.components.FavouriteListBottomSheet
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +78,12 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
     val departuresSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isDeparturesSheetOpen by remember { mutableStateOf(false) }
 
+    var isFavouriteSheetOpen by remember { mutableStateOf(false) }
+    var favouriteLists by remember { mutableStateOf<List<FavouriteListResponse>>(emptyList()) }
+    var isFavouriteLoading by remember { mutableStateOf(false) }
+    var pendingItemId by remember { mutableStateOf<UUID?>(null) }
+
+
     if (uiState.isLoading){
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             CircularProgressIndicator()
@@ -81,11 +93,19 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
     } else {
         ActivityDetail(
             activity = uiState.activity, 
+            organizerInfo = uiState.organizerInfo,
             onCheckAvailability = {
                 viewModel.loadDepartures()
                 isDeparturesSheetOpen = true
-            }, 
-            onFavoriteClick = { activityId -> //vincenzo usa activity id
+            },
+            onFavoriteClick = { activityId ->
+                pendingItemId = activityId
+                isFavouriteLoading = true
+                isFavouriteSheetOpen = true
+                viewModel.loadFavouriteLists { lists ->
+                    favouriteLists = lists
+                    isFavouriteLoading = false
+                }
             },
             reviewsState = reviewsState,
             onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
@@ -93,6 +113,15 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
             onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
             onEditReply = { replyId, content -> viewModel.editReply(replyId, content) },
             onDeleteReply = { replyId -> viewModel.deleteReply(replyId) }
+            onReplyReview = { reviewId, content -> viewModel.replyToReview(reviewId, content) },
+            onOrganizerClick = { username -> 
+                val isMe = uiState.currentUserId == uiState.organizerInfo?.keycloakId
+                if (isMe) {
+                    navHostController.navigate("profile_graph")
+                } else {
+                    navHostController.navigate("user_profile/$username")
+                }
+            }
         )
     }
 
@@ -155,11 +184,43 @@ fun ActivityDetailScreen(navHostController: NavHostController, onLoginRequest: (
             }
         }
     }
+    FavouriteListBottomSheet(
+        isOpen = isFavouriteSheetOpen,
+        lists = favouriteLists,
+        isLoading = isFavouriteLoading,
+        onDismiss = {
+            isFavouriteSheetOpen = false
+            pendingItemId = null
+        },
+        onListSelected = { list ->
+            pendingItemId?.let { itemId ->
+                list.id?.let { listId ->
+                    viewModel.addActivityToFavouriteList(listId, itemId)
+                }
+            }
+            isFavouriteSheetOpen = false
+            pendingItemId = null
+        },
+        onCreateList = { name, visibility ->
+            viewModel.createFavouriteList(name, visibility) { newList ->
+                pendingItemId?.let { itemId ->
+                    newList.id?.let { listId ->
+                        viewModel.addActivityToFavouriteList(listId, itemId)
+                    }
+                }
+                isFavouriteSheetOpen = false
+                pendingItemId = null
+            }
+        }
+    )
+
+
 }
 
 @Composable
 fun ActivityDetail(
     activity: ActivityResponse?, 
+    organizerInfo: MinimalInformationResponseDTO?,
     onCheckAvailability: () -> Unit, 
     onFavoriteClick: (UUID) -> Unit,
     reviewsState: it.roadies.android_app.viewmodel.ActivityReviewsState,
@@ -168,6 +229,8 @@ fun ActivityDetail(
     onReplyReview: (UUID, String) -> Unit,
     onEditReply: (UUID, String) -> Unit,
     onDeleteReply: (UUID) -> Unit
+    onReplyReview: (UUID, String) -> Unit,
+    onOrganizerClick: (String) -> Unit
 ){
     var isFavorite by remember { mutableStateOf(false) }
 
@@ -228,6 +291,11 @@ fun ActivityDetail(
 
                 //mappa
                 LocationMap(lon = activity.longitude, lat = activity.latitude)
+
+                OrganizerCard(
+                    organizerInfo = organizerInfo,
+                    onOrganizerClick = onOrganizerClick
+                )
 
                 Reviews(
                     isLoading = reviewsState.isLoading,
@@ -357,4 +425,6 @@ fun DepartureCard(departure: ActivityDepartureResponse, onBookClick: () -> Unit)
             }
         }
     }
+
+
 }

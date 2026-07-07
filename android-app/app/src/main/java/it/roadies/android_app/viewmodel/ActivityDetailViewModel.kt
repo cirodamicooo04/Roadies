@@ -21,14 +21,20 @@ import it.roadies.android_app.client.models.review.ReviewUpdateRequest
 import it.roadies.android_app.repository.ReviewRepository
 import it.roadies.android_app.repository.UserRepository
 import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
+import it.roadies.android_app.client.models.travel.FavouriteListCreateRequest
+import it.roadies.android_app.client.models.travel.FavouriteListResponse
+import it.roadies.android_app.repository.FavouriteRepository
+
 
 data class ActivityDetailState(
     val isLoading: Boolean = false,
     val activity: ActivityResponse? = null,
+    val organizerInfo: MinimalInformationResponseDTO? = null,
     val errorMessage: String? = null,
     val createdBookingId: UUID? = null,
     val selectedDepartureId: UUID? = null,
-    val requireLogin: Boolean = false
+    val requireLogin: Boolean = false,
+    val currentUserId: String? = null
 )
 
 data class ActivityDepartureState(
@@ -52,7 +58,8 @@ class ActivityDetailViewModel @Inject constructor(
     private val bookingRepository: BookingRepository,
     private val authRepository: AuthRepository,
     private val reviewRepository: ReviewRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val favouriteRepository: FavouriteRepository
 ): ViewModel() {
     val id: String? = savedStateHandle["id"]
     
@@ -71,22 +78,35 @@ class ActivityDetailViewModel @Inject constructor(
         else _uiState.value = ActivityDetailState(errorMessage = "Activity id not valid")
 
         viewModelScope.launch {
-            val user = userRepository.getCurrentUser()
-            _reviewsState.value = _reviewsState.value.copy(currentUserId = user?.id)
+            authRepository.authState.collect { authState ->
+                _uiState.value = _uiState.value.copy(currentUserId = authState.userId)
+                _reviewsState.value = _reviewsState.value.copy(currentUserId = authState.userId)
+            }
         }
     }
 
     private fun loadActivity(id: UUID){
         viewModelScope.launch {
-            _uiState.value = ActivityDetailState(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
             val response = activityRepository.getActivityById(id)
             if (response.success){
-                _uiState.value = ActivityDetailState(activity = response.data, isLoading = false)
+                _uiState.value = _uiState.value.copy(activity = response.data, isLoading = false)
+                response.data?.ownerId?.let { loadOrganizerInfo(it) }
                 loadReviews(id)
             }
             else {
-                _uiState.value = ActivityDetailState(isLoading = false, errorMessage = response.errorMessage)
+                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = response.errorMessage)
+            }
+        }
+    }
+
+    private fun loadOrganizerInfo(ownerId: String) {
+        viewModelScope.launch {
+            val response = userRepository.getUsersInfo(listOf(ownerId))
+            if (response.success && response.data != null) {
+                val organizer = response.data.firstOrNull()
+                _uiState.value = _uiState.value.copy(organizerInfo = organizer)
             }
         }
     }
@@ -101,7 +121,7 @@ class ActivityDetailViewModel @Inject constructor(
                 var usersMap = emptyMap<String, MinimalInformationResponseDTO>()
                 
                 if (userIds.isNotEmpty()) {
-                    val usersResponse = userRepository.getOrganizersInfo(userIds)
+                    val usersResponse = userRepository.getUsersInfo(userIds)
                     if (usersResponse.success && usersResponse.data != null) {
                         usersMap = usersResponse.data.associateBy { it.keycloakId ?: "" }.filterKeys { it.isNotEmpty() }
                     }
@@ -220,6 +240,38 @@ class ActivityDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun loadFavouriteLists(onResult: (List<FavouriteListResponse>) -> Unit) {
+        viewModelScope.launch {
+            val response = favouriteRepository.getMyLists()
+            if (response.success && response.data != null) {
+                onResult(response.data)
+            } else {
+                onResult(emptyList())
+            }
+        }
+    }
+
+    fun addActivityToFavouriteList(listId: UUID, activityId: UUID) {
+        viewModelScope.launch {
+            favouriteRepository.addActivityToList(listId, activityId)
+        }
+    }
+
+    fun createFavouriteList(
+        name: String,
+        visibility: FavouriteListCreateRequest.Visibility,
+        onCreated: (FavouriteListResponse) -> Unit
+    ) {
+        viewModelScope.launch {
+            val request = FavouriteListCreateRequest(name = name, visibility = visibility)
+            val response = favouriteRepository.createList(request)
+            if (response.success && response.data != null) {
+                onCreated(response.data)
+            }
+        }
+    }
+
 
     fun editReply(replyId: UUID, newContent: String) {
         viewModelScope.launch {

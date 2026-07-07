@@ -241,7 +241,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun getOrganizersInfo(ids: List<String>): ApiResponse<List<MinimalInformationResponseDTO>> {
+    suspend fun getUsersInfo(ids: List<String>): ApiResponse<List<MinimalInformationResponseDTO>> {
         return safeApiCall { userApi.getMinimalInformation(ids) }
     }
 
@@ -258,6 +258,12 @@ class UserRepository @Inject constructor(
     suspend fun getUserIdByUsername(username: String): ApiResponse<String> {
         return safeApiCall {
             userApi.getUserIdByUsername(username)
+        }
+    }
+
+    suspend fun getMinimalInformation(userIds: List<String>): ApiResponse<List<it.roadies.android_app.client.models.user.MinimalInformationResponseDTO>> {
+        return safeApiCall {
+            userApi.getMinimalInformation(userIds)
         }
     }
 }

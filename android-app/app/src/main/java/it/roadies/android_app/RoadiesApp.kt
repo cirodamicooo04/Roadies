@@ -36,6 +36,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import it.roadies.android_app.ui.admin.AdminStatsScreen
 import it.roadies.android_app.ui.bookingFlow.BookingDocumentsScreen
 import it.roadies.android_app.ui.bookingFlow.BookingPaymentScreen
 import it.roadies.android_app.ui.bookingFlow.BookingStepMembersScreen
@@ -52,7 +53,10 @@ import it.roadies.android_app.ui.user.UserProfileScreen
 import it.roadies.android_app.ui.admin.AdminUsersScreen
 import it.roadies.android_app.ui.admin.MetadataScreen
 import it.roadies.android_app.ui.admin.PendingRequestsScreen
+import it.roadies.android_app.FavouriteListDetailScreen
+import it.roadies.android_app.FavouriteListsScreen
 import it.roadies.android_app.ui.user.UserDocumentScreen
+import it.roadies.android_app.viewmodel.AdminViewModel
 import it.roadies.android_app.viewmodel.AuthViewModel
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -80,7 +84,7 @@ fun RoadiesApp(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Roadies")
+                    Text(stringResource(R.string.app_name))
                 },
                 navigationIcon = {
                     if (showBackButton) {
@@ -183,7 +187,7 @@ fun RoadiesApp(
                                 )
                             },
                             label = {
-                                Text("Metadata")
+                                Text(stringResource(R.string.metadata))
                             }
                         )
 
@@ -507,8 +511,9 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
             )
         }
 
-        composable(route = "statistics") {
-
+        composable("statistics") {
+            val viewModel: AdminViewModel = hiltViewModel()
+            AdminStatsScreen(viewModel = viewModel)
         }
         composable(route = "metadata"){
             MetadataScreen()
@@ -589,6 +594,9 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                         if (!organizerUsername.isNullOrEmpty()) {
                             navHostController.navigate("organizer_travels/$organizerUsername")
                         }
+                    },
+                    onNavigateToFavoriteLists = {
+                        navHostController.navigate("favourite_lists/$username")
                     }
                 )
             }
@@ -604,6 +612,30 @@ fun NavigationView(navHostController: NavHostController, modifier: Modifier = Mo
                 arguments = listOf(navArgument("username") {type = NavType.StringType})
             ){
                 OrganizerTravelsScreen(navHostController = navHostController)
+            }
+
+            composable(
+                route = "favourite_lists/{userId}",
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) {
+                FavouriteListsScreen(
+                    onBack = { navHostController.popBackStack() },
+                    onListClick = { listId ->
+                        navHostController.navigate("favourite_list_detail/$listId")
+                    }
+                )
+            }
+
+            composable(
+                route = "favourite_list_detail/{listId}",
+                arguments = listOf(navArgument("listId") { type = NavType.StringType })
+            ) {
+                FavouriteListDetailScreen(
+                    onBack = { navHostController.popBackStack() },
+                    onNavigateToTravel = { travelId ->
+                        navHostController.navigate("travel_detail/$travelId")
+                    }
+                )
             }
         }
     }

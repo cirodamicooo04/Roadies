@@ -56,16 +56,17 @@ public class UserDocumentController {
         return ResponseEntity.ok(userDocumentService.getUserDocuments(userId));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/verify/{docId}")
-    @Operation(summary = "Verifica documento", description = "Approvazione o rifiuto. Solo per Organizzatori o Admin.")
-    public ResponseEntity<UserDocumentResponseDTO> verifyDocument(
-            @PathVariable UUID docId,
-            @RequestParam boolean approved,
-            @RequestParam (required = false) String reason){
-        log.info("Ricevuta richiesta di verifica per il documento ID: {}. Approvato: {}", docId, approved);
-        return ResponseEntity.ok(userDocumentService.verifyDocument(docId, approved, reason));
-    }
+    // Se si vuole implementare lo status dei documenti scommentare:
+    // @PreAuthorize("hasRole('ADMIN')")
+    // @PatchMapping("/verify/{docId}")
+    // @Operation(summary = "Verifica documento", description = "Approvazione o rifiuto. Solo per Organizzatori o Admin.")
+    // public ResponseEntity<UserDocumentResponseDTO> verifyDocument(
+    //         @PathVariable UUID docId,
+    //         @RequestParam boolean approved,
+    //         @RequestParam (required = false) String reason){
+    //     log.info("Ricevuta richiesta di verifica per il documento ID: {}. Approvato: {}", docId, approved);
+    //     return ResponseEntity.ok(userDocumentService.verifyDocument(docId, approved, reason));
+    // }
 
     @PreAuthorize("hasRole('TRAVELER')")
     @DeleteMapping("/{docId}")
