@@ -14,11 +14,13 @@ import it.roadies.user_service.exception.ResourceNotFoundException;
 import it.roadies.user_service.mappers.AdminUserMapper;
 import it.roadies.user_service.mappers.UserMapper;
 import it.roadies.user_service.services.AdminService;
+import it.roadies.shared.contracts.NotificationEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.RoleRepresentation;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,7 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final MessageLang messageLang;
     private final Keycloak keycloak;
+    private final RabbitTemplate rabbitTemplate;
 
     private boolean isUserEnabledInKeycloak(String keycloakId) {
         return keycloak.realm(realmName).users().get(keycloakId).toRepresentation().isEnabled();
@@ -97,6 +100,12 @@ public class AdminServiceImpl implements AdminService {
                 userResource.roles().realmLevel().add(Collections.singletonList(organizerRole));
 
                 log.info("Ruolo ORGANIZER assegnato con successo su Keycloak all'utente: {}", targetKeycloakId);
+                
+                rabbitTemplate.convertAndSend(
+                        "notification.exchange", 
+                        "notification.mail.send", 
+                        new NotificationEvent(user.getEmail(), "Richiesta Organizzatore Accettata", "Gentile utente,\n\nSiamo felici di comunicarti che la tua richiesta per diventare organizzatore è stata accettata!\n\nUn saluto,\nIl Team di Roadies.")
+                );
             } catch (Exception e) {
                 log.error("Impossibile assegnare il ruolo su Keycloak all'utente {}: ", targetKeycloakId, e);
                 throw new RuntimeException(messageLang.getMessage("keycloak.error"), e);
@@ -108,6 +117,12 @@ public class AdminServiceImpl implements AdminService {
             }
             user.setOrganizerRequestStatus(OrganizerRequestStatus.REJECTED);
             user.setOrganizerRejectionReason(reason);
+            
+            rabbitTemplate.convertAndSend(
+                    "notification.exchange", 
+                    "notification.mail.send", 
+                    new NotificationEvent(user.getEmail(), "Richiesta Organizzatore Rifiutata", "Gentile utente,\n\nCi dispiace comunicarti che la tua richiesta per diventare organizzatore non è stata accettata.\nMotivo: " + reason + "\n\nUn saluto,\nIl Team")
+            );
         }
 
         user.setOrganizerReviewedAt(LocalDateTime.now());
@@ -143,6 +158,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         return users.stream()
+                .filter(u -> !u.isAdmin())
                 .map(u -> {
                     UserResponseDTO dto = adminUserMapper.toDto(u);
                     dto.setEnabled(isUserEnabledInKeycloak(u.getKeycloakId()));

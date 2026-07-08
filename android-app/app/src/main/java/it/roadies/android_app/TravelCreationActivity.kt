@@ -798,7 +798,7 @@ fun DeparturesSummaryForm(
         }
     }
 
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(text = stringResource(R.string.departures), fontWeight = FontWeight.Bold, fontSize = 24.sp)
             Button(onClick = {
