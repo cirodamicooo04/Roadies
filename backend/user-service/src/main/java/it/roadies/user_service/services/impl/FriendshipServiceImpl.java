@@ -44,6 +44,11 @@ public class FriendshipServiceImpl implements FriendshipService {
     public void sendRequest(String senderId, String receiverUsername) {
         log.info("Iniziato invio richiesta di amicizia verso lo username: {}", receiverUsername);
 
+        if ("admin".equalsIgnoreCase(receiverUsername)) {
+            log.warn("Tentativo di invio richiesta di amicizia all'admin bloccato");
+            throw new ConflictException("Non è possibile inviare una richiesta di amicizia all'amministratore.");
+        }
+
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new ResourceNotFoundException(messageLang.getMessage("error.user.notfound")));
 
@@ -52,6 +57,11 @@ public class FriendshipServiceImpl implements FriendshipService {
                     log.error("Invio richiesta fallito: utente ricevente non trovato ({})", receiverUsername);
                     return new ResourceNotFoundException(messageLang.getMessage("error.user.notfound"));
                 });
+
+        if (receiver.isAdmin()) {
+            log.warn("Tentativo di invio richiesta di amicizia a un amministratore bloccato");
+            throw new ConflictException("Non è possibile inviare una richiesta di amicizia a un amministratore.");
+        }
 
         if (senderId.equals(receiver.getKeycloakId())) {
             log.warn("Tentativo di auto-aggiunta amicizia bloccato per l'utente");

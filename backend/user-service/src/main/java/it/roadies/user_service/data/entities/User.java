@@ -38,6 +38,8 @@ public class User {
 
     private LocalDate birthDate;
 
+    private boolean isAdmin = false;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

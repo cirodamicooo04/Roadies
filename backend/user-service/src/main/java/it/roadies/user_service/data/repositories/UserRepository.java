@@ -19,8 +19,9 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     //Ricerca Parziale
     @Query("SELECT u FROM User u WHERE " +
-            "LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "(LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))")
+            "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "AND u.isAdmin = false")
     List<User> searchUsersByKeyword(@Param("query") String query);
 }

@@ -43,12 +43,15 @@ public class UserController {
         requestDto.setKeycloakId(jwt.getSubject());
 
         boolean isOrganizer = false;
+        boolean isAdmin = false;
         java.util.Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
         if (realmAccess != null && realmAccess.get("roles") != null) {
-            isOrganizer = ((java.util.Collection<String>) realmAccess.get("roles")).contains("ORGANIZER");
+            java.util.Collection<String> roles = (java.util.Collection<String>) realmAccess.get("roles");
+            isOrganizer = roles.contains("ORGANIZER");
+            isAdmin = roles.contains("ADMIN");
         }
 
-        UserSyncResult result = userService.syncUser(requestDto, isOrganizer);
+        UserSyncResult result = userService.syncUser(requestDto, isOrganizer, isAdmin);
 
         //Gestiamo due stati con 200 se l'utente esisteva e con 201 se l'utente non esisteva
         if (result.isNewUser()) {
