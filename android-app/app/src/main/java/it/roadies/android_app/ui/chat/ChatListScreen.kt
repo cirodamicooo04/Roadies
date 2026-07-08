@@ -35,14 +35,39 @@ fun ChatListScreen(
     }
 
     Scaffold { paddingValues ->
-        LazyColumn(modifier = Modifier.padding(paddingValues)) {
-            items(state.conversations) { conversation ->
-                ConversationItem(
-                    conversation = conversation,
-                    myUserId = state.myUserId,
-                    state = state,
-                    onClick = { onNavigateToChat(conversation.id.toString()) }
-                )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                state.isLoading -> {
+                    CircularProgressIndicator()
+                }
+                state.conversations.isEmpty() -> {
+                    Text(
+                        text = "Non hai ancora nessuna chat attiva",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Gray
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        items(state.conversations) { conversation ->
+                            ConversationItem(
+                                conversation = conversation,
+                                myUserId = state.myUserId,
+                                state = state,
+                                onClick = { onNavigateToChat(conversation.id.toString()) }
+                            )
+                        }
+                    }
+                }
             }
         }
     }

@@ -68,7 +68,9 @@ import it.roadies.android_app.client.models.travel.TravelDepartureResponse
 import it.roadies.android_app.client.models.travel.TravelResponse
 import it.roadies.android_app.client.models.travel.TravelTagResponse
 import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
+import it.roadies.android_app.client.models.travel.FavouriteListResponse
 import it.roadies.android_app.ui.travel.components.BoxCentered
+import it.roadies.android_app.ui.travel.components.FavouriteListBottomSheet
 import it.roadies.android_app.ui.travel.components.CheckAvailabilityButton
 import it.roadies.android_app.ui.travel.components.DetailHeader
 import it.roadies.android_app.ui.travel.components.DetailImageCarousel
@@ -90,6 +92,11 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
     val departuresSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isDeparturesSheetOpen by remember { mutableStateOf(false) }
 
+    var isFavouriteSheetOpen by remember { mutableStateOf(false) }
+    var favouriteLists by remember { mutableStateOf<List<FavouriteListResponse>>(emptyList()) }
+    var isFavouriteLoading by remember { mutableStateOf(false) }
+    var pendingItemId by remember { mutableStateOf<UUID?>(null) }
+
     if (uiState.isLoading){
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             CircularProgressIndicator()
@@ -105,7 +112,14 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
                 isDeparturesSheetOpen = true
             }, 
             reviewsState = reviewsState,
-            onFavoriteClick = { travelId -> // vincenzo usa travel id per aggiungerlo ai preferiti
+            onFavoriteClick = { travelId -> 
+                pendingItemId = travelId
+                isFavouriteLoading = true
+                isFavouriteSheetOpen = true
+                viewModel.loadFavouriteLists { lists ->
+                    favouriteLists = lists
+                    isFavouriteLoading = false
+                }
             }, 
             onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) },
             onEditReview = { reviewId, rating, content -> viewModel.updateReview(reviewId, rating, content) },
@@ -118,7 +132,7 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
                 } else {
                     navHostController.navigate("user_profile/$username")
                 }
-            },
+            }
         )
     }
 
@@ -181,6 +195,36 @@ fun TravelDetailScreen(navHostController: NavHostController, onLoginRequest: () 
             }
         }
     }
+
+    FavouriteListBottomSheet(
+        isOpen = isFavouriteSheetOpen,
+        lists = favouriteLists,
+        isLoading = isFavouriteLoading,
+        onDismiss = {
+            isFavouriteSheetOpen = false
+            pendingItemId = null
+        },
+        onListSelected = { list ->
+            pendingItemId?.let { itemId ->
+                list.id?.let { listId ->
+                    viewModel.addTravelToFavouriteList(listId, itemId) { _, _ -> }
+                }
+            }
+            isFavouriteSheetOpen = false
+            pendingItemId = null
+        },
+        onCreateList = { name, visibility ->
+            viewModel.createFavouriteList(name, visibility) { newList ->
+                pendingItemId?.let { itemId ->
+                    newList.id?.let { listId ->
+                        viewModel.addTravelToFavouriteList(listId, itemId) { _, _ -> }
+                    }
+                }
+                isFavouriteSheetOpen = false
+                pendingItemId = null
+            }
+        }
+    )
 }
 
 @Composable
@@ -263,7 +307,7 @@ fun TravelDetail(
                     travelOwnerId = travel.ownerId,
                     onDeleteReview = onDeleteReview,
                     onEditReview = onEditReview,
-                    onReplyReview = onReplyReview,
+                    onReplyReview = onReplyReview
                 )
             }
 
@@ -365,7 +409,7 @@ fun CollasableActivityCard(activity: ActivityResponse?){
                         modifier = Modifier.size(70.dp)
                     ) {
                         SubcomposeAsyncImage(
-                            model = activity?.images?.firstOrNull()?.url,
+                            model = activity?.images?.firstOrNull()?.url?.replace("localhost","10.0.2.2"),
                             contentDescription = stringResource(R.string.activity_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize(),

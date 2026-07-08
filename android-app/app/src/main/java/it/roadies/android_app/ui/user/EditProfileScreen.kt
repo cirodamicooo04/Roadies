@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -138,20 +139,25 @@ fun EditProfileScreen(
             singleLine = true
         )
 
-        OutlinedTextField(
-            value = if (state.avatarUrl.isBlank()) {
-                stringResource(R.string.no_image_selected)
-            } else {
-                state.avatarUrl
-            },
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { photoPicker.launch("image/*") },
-            label = { Text(stringResource(R.string.avatar)) },
-            readOnly = true,
-            singleLine = true
-        )
+        Box(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = if (state.avatarUrl.isBlank()) {
+                    stringResource(R.string.no_image_selected)
+                } else {
+                    state.avatarUrl
+                },
+                onValueChange = {},
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.avatar)) },
+                readOnly = true,
+                singleLine = true
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { photoPicker.launch("image/*") }
+            )
+        }
 
         Button(
             onClick = { photoPicker.launch("image/*") },
@@ -160,16 +166,21 @@ fun EditProfileScreen(
             Text(stringResource(R.string.select_avatar))
         }
 
-        OutlinedTextField(
-            value = state.birthDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).orEmpty(),
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showDatePicker = true },
-            label = { Text(stringResource(R.string.date_of_birth)) },
-            readOnly = true,
-            singleLine = true
-        )
+        Box(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = state.birthDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).orEmpty(),
+                onValueChange = {},
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.date_of_birth)) },
+                readOnly = true,
+                singleLine = true
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { showDatePicker = true }
+            )
+        }
 
         Button(
             onClick = viewModel::saveProfile,

@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserSyncResult syncUser(UserSyncRequestDTO requestDto, boolean isOrganizer) {
+    public UserSyncResult syncUser(UserSyncRequestDTO requestDto, boolean isOrganizer, boolean isAdmin) {
         log.info("Iniziata sincronizzazione per l'utente con ID: {}", requestDto.getKeycloakId());
 
         Optional<User> existingUserOpt = userRepository.findById(requestDto.getKeycloakId());
@@ -67,9 +67,11 @@ public class UserServiceImpl implements UserService {
                 user.setOrganizerRequestStatus(OrganizerRequestStatus.ACCEPTED);
             }
             
+            user.setAdmin(isAdmin);
+            
             userRepository.save(user);
 
-            log.info("Utente esistente trovato. Ultimo accesso aggiornato.");
+            log.info("Utente esistente trovato. Ultimo accesso e ruoli aggiornati.");
             return new UserSyncResult(userMapper.toDto(user), false);
         }
 
@@ -87,6 +89,8 @@ public class UserServiceImpl implements UserService {
         if (isOrganizer) {
             newUser.setOrganizerRequestStatus(it.roadies.user_service.data.entities.enumeration.OrganizerRequestStatus.ACCEPTED);
         }
+        
+        newUser.setAdmin(isAdmin);
 
         User savedUser = userRepository.save(newUser);
         log.info("Nuovo utente creato con successo");

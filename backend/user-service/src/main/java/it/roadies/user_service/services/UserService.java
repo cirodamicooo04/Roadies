@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface UserService {
-    UserSyncResult syncUser(UserSyncRequestDTO requestDto, boolean isOrganizer);
+    UserSyncResult syncUser(UserSyncRequestDTO requestDto, boolean isOrganizer, boolean isAdmin);
     UserProfileResponseDTO getProfile(String keycloakId);
     List<UserProfileResponseDTO> getProfileByUsername(String username);
     UserProfileResponseDTO updateProfile(String keycloakId, UserUpdateRequestDTO updateDto);
