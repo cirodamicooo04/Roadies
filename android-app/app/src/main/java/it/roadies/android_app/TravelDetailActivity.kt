@@ -346,7 +346,7 @@ fun TravelTags(tags: List<TravelTagResponse>?) {
                             modifier = Modifier
                                 .size(12.dp)
                                 .clip(CircleShape)
-                                .background(if (i <= score) Color.Black else Color.LightGray)
+                                .background(if (i <= score) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outlineVariant)
                         )
                     }
                 }

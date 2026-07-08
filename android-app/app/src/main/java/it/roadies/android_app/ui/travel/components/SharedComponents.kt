@@ -89,6 +89,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import it.roadies.android_app.client.models.review.ReviewResponse
 import it.roadies.android_app.client.models.user.MinimalInformationResponseDTO
+import it.roadies.android_app.ui.theme.extendedColors
 
 @Composable
 fun BoxCentered(text: String? = null) {
@@ -116,7 +117,7 @@ fun DetailHeader(
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Preferiti",
-                    tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
+                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -215,7 +216,7 @@ fun ExpandableDescription(description: String?) {
         Text(
             text = description,
             fontSize = 16.sp,
-            color = Color.DarkGray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = if (isExpanded) Int.MAX_VALUE else 4,
             overflow = TextOverflow.Ellipsis,
             onTextLayout = { textLayoutResult ->
@@ -228,7 +229,7 @@ fun ExpandableDescription(description: String?) {
         if (showReadMore) {
             Text(
                 text = if (isExpanded) stringResource(R.string.show_less) else stringResource(R.string.show_more),
-                color = Color.Blue,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .padding(top = 8.dp)
@@ -446,14 +447,14 @@ fun UpdateDatePickerField(
 fun NotEditableInfoBanner(text: String) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = Icons.Default.Info, contentDescription = null, tint = Color(0xFF1976D2))
+            Icon(imageVector = Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = text,
-                color = Color(0xFF1976D2),
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -539,7 +540,7 @@ fun Reviews(
                             Icon(
                                 imageVector = Icons.Filled.Star,
                                 contentDescription = null,
-                                tint = if (i <= editRating) Color(0xFFFFD700) else Color.LightGray,
+                                tint = if (i <= editRating) MaterialTheme.extendedColors.star else MaterialTheme.colorScheme.outlineVariant,
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clickable { editRating = i }
@@ -603,7 +604,7 @@ fun Reviews(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                Text(text = stringResource(R.string.no_reviews), color = Color.Gray)
+                Text(text = stringResource(R.string.no_reviews), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             val totalReviews = reviews.size
@@ -623,7 +624,7 @@ fun Reviews(
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
-                    tint = Color(0xFFFFD700), // Gold color
+                    tint = MaterialTheme.extendedColors.star,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
@@ -761,7 +762,7 @@ fun ReviewCard(
                             Icon(
                                 imageVector = Icons.Filled.Star,
                                 contentDescription = null,
-                                tint = if (i <= review.rating) Color(0xFFFFD700) else Color.LightGray,
+                                tint = if (i <= review.rating) MaterialTheme.extendedColors.star else MaterialTheme.colorScheme.outlineVariant,
                                 modifier = Modifier.size(14.dp)
                             )
                         }
@@ -903,7 +904,7 @@ fun ReviewDetailSheet(review: ReviewResponse, user: MinimalInformationResponseDT
                             Icon(
                                 imageVector = Icons.Filled.Star,
                                 contentDescription = null,
-                                tint = if (i <= review.rating) Color(0xFFFFD700) else Color.LightGray,
+                                tint = if (i <= review.rating) MaterialTheme.extendedColors.star else MaterialTheme.colorScheme.outlineVariant,
                                 modifier = Modifier.size(16.dp)
                             )
                         }

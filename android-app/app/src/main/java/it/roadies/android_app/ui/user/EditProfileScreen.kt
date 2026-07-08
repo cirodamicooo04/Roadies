@@ -28,10 +28,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import it.roadies.android_app.R
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import it.roadies.android_app.ui.theme.extendedColors
 import it.roadies.android_app.viewmodel.user.EditProfileViewModel
 import java.time.Instant
 import java.time.ZoneId
@@ -119,7 +119,7 @@ fun EditProfileScreen(
         state.successMessage?.let {
             Text(
                 text = it,
-                color = Color(0xFF2E7D32)
+                color = MaterialTheme.extendedColors.successText
             )
         }
 

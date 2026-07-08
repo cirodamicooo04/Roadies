@@ -16,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import it.roadies.android_app.R
@@ -28,12 +27,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.BadgeStatItem
 import it.roadies.android_app.StatItem
+import it.roadies.android_app.ui.theme.extendedColors
 import it.roadies.android_app.viewmodel.user.UserProfileViewModel
-
-private val DarkBlueBg = Color(0xFF1B3B5A)
-private val OrangeAvatarColor = Color(0xFFE26D38)
-private val BackgroundGrayColor = Color(0xFFF5F5F5)
-private val BorderGrayColor = Color(0xFFE0E0E0)
 
 @Composable
 fun UserProfileScreen(
@@ -59,12 +54,12 @@ fun UserProfileScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundGrayColor)
+            .background(MaterialTheme.extendedColors.neutralBackground)
     ) {
         when {
             state.isLoading -> {
                 CircularProgressIndicator(
-                    color = OrangeAvatarColor,
+                    color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
@@ -89,7 +84,7 @@ fun UserProfileScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(DarkBlueBg)
+                            .background(MaterialTheme.extendedColors.header)
                             .padding(vertical = 40.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -105,7 +100,7 @@ fun UserProfileScreen(
 
                             Text(
                                 text = "${user.firstName} ${user.lastName}",
-                                color = Color.White,
+                                color = MaterialTheme.extendedColors.onHeader,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -114,7 +109,7 @@ fun UserProfileScreen(
 
                             Text(
                                 text = "@${user.username}",
-                                color = Color.White.copy(alpha = 0.8f),
+                                color = MaterialTheme.extendedColors.onHeader.copy(alpha = 0.8f),
                                 fontSize = 16.sp
                             )
                         }
@@ -127,7 +122,7 @@ fun UserProfileScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Row(
@@ -143,7 +138,7 @@ fun UserProfileScreen(
                                 modifier = Modifier
                                     .height(50.dp)
                                     .width(1.dp),
-                                color = BorderGrayColor
+                                color = MaterialTheme.colorScheme.outline
                             )
 
                             BadgeStatItem(badgeName = user.badge?.toString() ?: "NONE")
@@ -163,7 +158,7 @@ fun UserProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = OrangeAvatarColor),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Icon(Icons.Default.Favorite, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -182,7 +177,7 @@ fun UserProfileScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(50.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = DarkBlueBg),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.extendedColors.header),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Icon(Icons.Default.FlightTakeoff, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -196,7 +191,7 @@ fun UserProfileScreen(
                                     .fillMaxWidth()
                                     .height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = DarkBlueBg)
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.extendedColors.header)
                             ) {
                                 Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(8.dp))

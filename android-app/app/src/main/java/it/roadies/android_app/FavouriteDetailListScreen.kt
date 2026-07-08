@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import it.roadies.android_app.R
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,7 +53,7 @@ fun FavouriteListDetailScreen(
             }
             state.errorMessage != null -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = state.errorMessage!!, color = Color.Red)
+                    Text(text = state.errorMessage!!, color = MaterialTheme.colorScheme.error)
                 }
             }
             state.list != null -> {
@@ -77,14 +76,14 @@ fun FavouriteListDetailScreen(
                                     viewModel.loadFriends()
                                     showShareSheet = true
                                 }) {
-                                    Icon(Icons.Default.Share, contentDescription = stringResource(R.string.fav_share_with_friends), tint = Color(0xFFE26D38))
+                                    Icon(Icons.Default.Share, contentDescription = stringResource(R.string.fav_share_with_friends), tint = MaterialTheme.colorScheme.tertiary)
                                 }
                             }
                             IconButton(onClick = { showEditDialog = true }) {
-                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.fav_edit_list), tint = Color.Gray)
+                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.fav_edit_list), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             IconButton(onClick = { showDeleteConfirm = true }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.fav_delete_list), tint = Color.Red)
+                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.fav_delete_list), tint = MaterialTheme.colorScheme.error)
                             }
                         }
                     }
@@ -96,7 +95,7 @@ fun FavouriteListDetailScreen(
 
                 if (listItems.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.fav_list_empty), color = Color.Gray)
+                        Text(stringResource(R.string.fav_list_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 } else {
                     LazyColumn(
@@ -110,7 +109,7 @@ fun FavouriteListDetailScreen(
                                         .fillMaxWidth()
                                         .clickable { onNavigateToTravel(travel.id.toString()) },
                                     elevation = CardDefaults.cardElevation(2.dp),
-                                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                                 ) {
                                     Row(
                                         modifier = Modifier
@@ -126,7 +125,7 @@ fun FavouriteListDetailScreen(
                                             )
                                             Text(
                                                 text = travel.destination ?: stringResource(R.string.fav_unknown_destination),
-                                                color = Color.Gray
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
 
@@ -138,7 +137,7 @@ fun FavouriteListDetailScreen(
                                                 Icon(
                                                     Icons.Default.Delete,
                                                     contentDescription = stringResource(R.string.fav_remove_item),
-                                                    tint = Color.Red
+                                                    tint = MaterialTheme.colorScheme.error
                                                 )
                                             }
                                         }
@@ -156,7 +155,7 @@ fun FavouriteListDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Red) },
+            icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
             title = { Text(stringResource(R.string.fav_delete_confirm_title)) },
             text = { Text(stringResource(R.string.fav_delete_confirm_body)) },
             confirmButton = {
@@ -165,7 +164,7 @@ fun FavouriteListDetailScreen(
                         viewModel.deleteList()
                         showDeleteConfirm = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) { Text(stringResource(R.string.fav_delete_btn)) }
             },
             dismissButton = {
@@ -250,7 +249,7 @@ fun FavouriteListDetailScreen(
                         CircularProgressIndicator()
                     }
                 } else if (state.friendsList.isEmpty()) {
-                    Text(stringResource(R.string.fav_no_friends_found), color = Color.Gray)
+                    Text(stringResource(R.string.fav_no_friends_found), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
@@ -265,7 +264,7 @@ fun FavouriteListDetailScreen(
                             ) {
                                 Column {
                                     Text(text = friend.username ?: stringResource(R.string.fav_unknown_friend), fontWeight = FontWeight.Bold)
-                                    Text(text = "${friend.firstName} ${friend.lastName}", fontSize = 14.sp, color = Color.Gray)
+                                    Text(text = "${friend.firstName} ${friend.lastName}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 Switch(
                                     checked = isShared,

@@ -61,6 +61,7 @@ import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.client.models.travel.TravelSummaryResponse
 import it.roadies.android_app.client.models.travel.SearchSuggestion
 import it.roadies.android_app.client.models.travel.LocationType
+import it.roadies.android_app.ui.theme.extendedColors
 
 import it.roadies.android_app.viewmodel.HomeScreenViewModel
 
@@ -290,7 +291,7 @@ fun RecommendedTravel(travels: List<TravelSummaryResponse>?, onTravelClick: (Tra
             ) {
                 Text(
                     text = stringResource(R.string.no_travels_on_platfrom),
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -349,7 +350,7 @@ fun RecommendedTravelCard(travel: TravelSummaryResponse, onTravelClick: (TravelS
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = null,
-                    tint = Color(0xFFFFC107),
+                    tint = MaterialTheme.extendedColors.star,
                     modifier = Modifier.size(18.dp)
                 )
 

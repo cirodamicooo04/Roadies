@@ -13,7 +13,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -28,6 +27,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import it.roadies.android_app.ui.theme.extendedColors
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -342,28 +342,28 @@ fun ActivityDepartureUpdateSummaryCard(
                     ActivityDepartureResponse.Status.CONFIRMED -> {
                         Box(
                             modifier = Modifier
-                                .background(color = Color(0xFFE8F5E9), shape = RoundedCornerShape(8.dp))
+                                .background(color = MaterialTheme.extendedColors.successContainer, shape = RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text(text = stringResource(R.string.confirmed), color = Color(0xFF4CAF50), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.confirmed), color = MaterialTheme.extendedColors.success, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                     ActivityDepartureResponse.Status.FULL -> {
                         Box(
                             modifier = Modifier
-                                .background(color = Color(0xFFFFEBEE), shape = RoundedCornerShape(8.dp))
+                                .background(color = MaterialTheme.extendedColors.dangerContainer, shape = RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text(text = stringResource(R.string.sold_out_status), color = Color(0xFFF44336), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.sold_out_status), color = MaterialTheme.extendedColors.danger, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                     else -> {
                         Box(
                             modifier = Modifier
-                                .background(color = Color(0xFFFFF3E0), shape = RoundedCornerShape(8.dp))
+                                .background(color = MaterialTheme.extendedColors.warningContainer, shape = RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text(text = stringResource(R.string.planned), color = Color(0xFFFF9800), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.planned), color = MaterialTheme.extendedColors.warning, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -376,7 +376,7 @@ fun ActivityDepartureUpdateSummaryCard(
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 if (departure.status != ActivityDepartureResponse.Status.CONFIRMED) {
                     IconButton(onClick = onConfirmClick) {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = "Conferma", tint = Color(0xFF4CAF50))
+                        Icon(imageVector = Icons.Default.Check, contentDescription = "Conferma", tint = MaterialTheme.extendedColors.success)
                     }
                     IconButton(onClick = onEditClick) {
                         Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit), tint = MaterialTheme.colorScheme.primary)

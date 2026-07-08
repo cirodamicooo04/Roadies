@@ -9,7 +9,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import it.roadies.android_app.R
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -32,12 +31,12 @@ fun RejectRequestDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
                     onClick = onDismiss,
                     modifier = Modifier
                         .size(32.dp)
-                        .background(Color.Red, CircleShape)
+                        .background(MaterialTheme.colorScheme.error, CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Cancel",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onError
                     )
                 }
             }

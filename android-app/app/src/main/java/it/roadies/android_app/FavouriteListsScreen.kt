@@ -19,12 +19,12 @@ import androidx.lifecycle.Lifecycle
 import it.roadies.android_app.R
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import it.roadies.android_app.client.models.travel.FavouriteListResponse
+import it.roadies.android_app.ui.theme.extendedColors
 import it.roadies.android_app.viewmodel.FavouriteListsViewModel
 
 @Composable
@@ -96,7 +96,7 @@ fun FavouriteListsScreen(
             }
             else -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = stringResource(R.string.fav_no_lists), color = Color.Gray)
+                    Text(text = stringResource(R.string.fav_no_lists), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -111,7 +111,7 @@ fun ListCard(list: FavouriteListResponse, isMyProfile: Boolean, onClick: () -> U
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -123,7 +123,7 @@ fun ListCard(list: FavouriteListResponse, isMyProfile: Boolean, onClick: () -> U
             Icon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = null,
-                tint = Color(0xFFE26D38),
+                tint = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -144,7 +144,7 @@ fun ListCard(list: FavouriteListResponse, isMyProfile: Boolean, onClick: () -> U
                 val visibilityText = if (isMyProfile) stringResource(R.string.fav_visibility, visibilityName) else ""
                 Text(
                     text = stringResource(R.string.fav_items_count, list.items?.size ?: 0) + visibilityText,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
             }

@@ -39,14 +39,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import it.roadies.android_app.R
+import it.roadies.android_app.ui.theme.extendedColors
 import it.roadies.android_app.viewmodel.AuthViewModel
 import it.roadies.android_app.viewmodel.user.ProfileViewModel
-
-val DarkBlueBg = Color(0xFF1B3B5A)
-val OrangeAvatar = Color(0xFFE26D38)
-val BackgroundGray = Color(0xFFF5F5F5)
-val TextDark = Color(0xFF1A2B4C)
-val BorderGray = Color(0xFFE0E0E0)
 
 @Composable
 fun ProfileScreen(
@@ -81,7 +76,7 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        containerColor = BackgroundGray,
+        containerColor = MaterialTheme.extendedColors.neutralBackground,
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -90,9 +85,9 @@ fun ProfileScreen(
                 Snackbar(
                     snackbarData = snackbarData,
                     shape = RoundedCornerShape(14.dp),
-                    containerColor = Color(0xFF1F2937),
-                    contentColor = Color.White,
-                    actionColor = OrangeAvatar
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    actionColor = MaterialTheme.colorScheme.tertiary
                 )
             }
         }
@@ -100,7 +95,7 @@ fun ProfileScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(BackgroundGray)
+                .background(MaterialTheme.extendedColors.neutralBackground)
                 .padding(innerPadding)
         ) {
             if (state.isLoading) {
@@ -117,7 +112,7 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(DarkBlueBg)
+                            .background(MaterialTheme.extendedColors.header)
                             .padding(vertical = 40.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -133,7 +128,7 @@ fun ProfileScreen(
 
                             Text(
                                 text = "${user.firstName} ${user.lastName}",
-                                color = Color.White,
+                                color = MaterialTheme.extendedColors.onHeader,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -142,7 +137,7 @@ fun ProfileScreen(
 
                             Text(
                                 text = "@${user.username}",
-                                color = Color.White.copy(alpha = 0.8f),
+                                color = MaterialTheme.extendedColors.onHeader.copy(alpha = 0.8f),
                                 fontSize = 16.sp
                             )
                         }
@@ -156,7 +151,7 @@ fun ProfileScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Row(
@@ -172,7 +167,7 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .height(50.dp)
                                     .width(1.dp),
-                                color = BorderGray
+                                color = MaterialTheme.colorScheme.outline
                             )
 
                             BadgeStatItem(badgeName = user.badge?.toString() ?: "NONE")
@@ -194,8 +189,8 @@ fun ProfileScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = OrangeAvatar,
-                                        contentColor = Color.White
+                                        containerColor = MaterialTheme.colorScheme.tertiary,
+                                        contentColor = MaterialTheme.colorScheme.onTertiary
                                     )
                                 ) {
                                     Text(stringResource(R.string.request_organizer_role))
@@ -227,7 +222,7 @@ fun ProfileScreen(
 
                         MenuItem(
                             text = stringResource(R.string.logout),
-                            textColor = Color(0xFFD32F2F),
+                            textColor = MaterialTheme.colorScheme.error,
                             onClick = {
                                 authViewModel.logout()
                                 onNavigateTo("home")
@@ -257,12 +252,12 @@ fun StatItem(value: String, label: String) {
             text = value,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = TextDark
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = label,
             fontSize = 14.sp,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -289,15 +284,15 @@ fun BadgeStatItem(badgeName: String) {
 }
 
 @Composable
-fun MenuItem(text: String, textColor: Color = TextDark, onClick: () -> Unit = {}) {
+fun MenuItem(text: String, textColor: Color = MaterialTheme.colorScheme.onSurface, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, BorderGray)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Text(
             text = text,

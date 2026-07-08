@@ -35,13 +35,10 @@ import coil3.compose.SubcomposeAsyncImage
 import it.roadies.android_app.R
 import it.roadies.android_app.client.models.user.FriendshipResponseDTO
 import it.roadies.android_app.client.models.user.UserProfileResponseDTO
+import it.roadies.android_app.ui.theme.extendedColors
 import it.roadies.android_app.viewmodel.user.FriendViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
-
-private val BackgroundGray = Color(0xFFF5F5F5)
-private val OrangeAvatar = Color(0xFFE26D38)
-private val TextDark = Color(0xFF1A2B4C)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +70,7 @@ fun FriendScreen(
                         friendToRemove = null
                     }
                 ) {
-                    Text(stringResource(R.string.remove), color = Color(0xFFD32F2F))
+                    Text(stringResource(R.string.remove), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
@@ -88,7 +85,7 @@ fun FriendScreen(
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet = false },
             sheetState = sheetState,
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ) {
             PendingRequestsSheet(
                 requests = state.pendingRequests,
@@ -112,7 +109,7 @@ fun FriendScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundGray)
+            .background(MaterialTheme.extendedColors.neutralBackground)
             .padding(16.dp)
     ) {
         OutlinedTextField(
@@ -141,10 +138,10 @@ fun FriendScreen(
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedBorderColor = OrangeAvatar,
-                unfocusedBorderColor = Color.LightGray
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline
             )
         )
 
@@ -155,8 +152,8 @@ fun FriendScreen(
                 onClick = { showBottomSheet = true },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = OrangeAvatar,
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -179,7 +176,7 @@ fun FriendScreen(
             when {
                 state.isLoading || state.isSearching -> {
                     CircularProgressIndicator(
-                        color = OrangeAvatar,
+                        color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -196,7 +193,7 @@ fun FriendScreen(
                     if (state.searchResults.isEmpty() && !state.isSearching) {
                         Text(
                             text = stringResource(R.string.no_user),
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 16.sp,
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -223,7 +220,7 @@ fun FriendScreen(
                     if (state.friends.isEmpty()) {
                         Text(
                             text = stringResource(R.string.no_friends),
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 16.sp,
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -273,7 +270,7 @@ fun PendingRequestsSheet(
                 text = stringResource(R.string.pending_request),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextDark
+                color = MaterialTheme.colorScheme.onSurface
             )
             IconButton(onClick = onClose) {
                 Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
@@ -309,7 +306,7 @@ fun PendingRequestCard(
             .fillMaxWidth()
             .clickable { onUserClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -330,20 +327,20 @@ fun PendingRequestCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${user?.firstName} ${user?.lastName}",
-                    color = TextDark,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "@${user?.username ?: "utente"}",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp
                 )
             }
 
             IconButton(
                 onClick = onReject,
-                colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFFE53935))
+                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.error)
             ) {
                 Icon(
                     Icons.Default.Close,
@@ -354,7 +351,7 @@ fun PendingRequestCard(
 
             IconButton(
                 onClick = onAccept,
-                colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF43A047))
+                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.extendedColors.success)
             ) {
                 Icon(
                     Icons.Default.Check,
@@ -387,7 +384,7 @@ fun UsersList(
                 text = title,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextDark,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
@@ -427,7 +424,7 @@ fun FriendCard(
             .fillMaxWidth()
             .clickable { onUserClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -448,13 +445,13 @@ fun FriendCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${user.firstName} ${user.lastName}",
-                    color = TextDark,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "@${user.username ?: "utente"}",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
             }
@@ -464,7 +461,7 @@ fun FriendCard(
                     hasPendingRequestFromThem -> {
                         Text(
                             text = stringResource(R.string.request_received),
-                            color = OrangeAvatar,
+                            color = MaterialTheme.colorScheme.tertiary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 8.dp)
@@ -473,7 +470,7 @@ fun FriendCard(
                     showAddButton -> {
                         IconButton(
                             onClick = onAddFriendClick,
-                            colors = IconButtonDefaults.iconButtonColors(contentColor = OrangeAvatar)
+                            colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.tertiary)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PersonAdd,
@@ -487,7 +484,7 @@ fun FriendCard(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = stringResource(R.string.request_sent),
-                            tint = Color(0xFF4CAF50),
+                            tint = MaterialTheme.extendedColors.success,
                             modifier = Modifier
                                 .size(28.dp)
                                 .padding(horizontal = 12.dp)
@@ -522,7 +519,7 @@ fun FriendCard(
                     IconButton(
                         onClick = onRemoveFriendClick,
                         colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = Color(0xFFD32F2F)
+                            contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
                         Icon(

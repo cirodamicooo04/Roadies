@@ -36,7 +36,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,6 +57,7 @@ import it.roadies.android_app.viewmodel.bookingHome.BookingFilterType
 import it.roadies.android_app.viewmodel.bookingHome.BookingHomeState
 import it.roadies.android_app.viewmodel.bookingHome.BookingHomeViewModel
 import it.roadies.android_app.viewmodel.bookingHome.BookingPagingState
+import it.roadies.android_app.ui.theme.extendedColors
 import java.math.BigDecimal
 
 
@@ -337,7 +337,7 @@ fun BookingCard(booking: BookingHomeResponse, onClick: () -> Unit = {}, onDelete
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = null,
-                                tint = if (i <= reviewRating) Color(0xFFFFD700) else Color.LightGray,
+                                tint = if (i <= reviewRating) MaterialTheme.extendedColors.star else MaterialTheme.colorScheme.outlineVariant,
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clickable { reviewRating = i }

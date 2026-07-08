@@ -290,10 +290,10 @@ fun DocumentImageViewerDialog(
                             Icon(
                                 imageVector = Icons.Default.Visibility,
                                 contentDescription = null,
-                                tint = Color.Red,
+                                tint = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(48.dp)
                             )
-                            Text(stringResource(R.string.error_upload_image), color = Color.White)
+                            Text(stringResource(R.string.error_upload_image), color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 )

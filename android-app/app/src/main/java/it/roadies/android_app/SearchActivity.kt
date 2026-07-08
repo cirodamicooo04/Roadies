@@ -55,11 +55,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import it.roadies.android_app.ui.theme.extendedColors
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
@@ -477,13 +477,13 @@ fun ActivityCard(activity: ActivitySummaryResponse, organizers: List<MinimalInfo
                         Icon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = "Location",
-                            tint = Color.Gray,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${activity.destination ?: ""}, ${activity.country ?: ""}",
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 13.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -505,7 +505,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, organizers: List<MinimalInfo
                         if (isOrganizersLoading || organizer == null) {
                             Text(
                                 text = "👤 @$organizerName",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -536,7 +536,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, organizers: List<MinimalInfo
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "@${organizer.username}",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
                                 textDecoration = TextDecoration.Underline
@@ -554,7 +554,7 @@ fun ActivityCard(activity: ActivitySummaryResponse, organizers: List<MinimalInfo
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Rating",
-                            tint = Color(0xFFFFC107),
+                            tint = MaterialTheme.extendedColors.star,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -666,13 +666,13 @@ fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformatio
                         Icon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = "Location",
-                            tint = Color.Gray,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${travel.destination ?: ""}, ${travel.country ?: ""}",
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 13.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -694,7 +694,7 @@ fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformatio
                         if (isOrganizersLoading || organizer == null) {
                             Text(
                                 text = "👤 @$organizerName",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -725,7 +725,7 @@ fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformatio
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "@${organizer.username}",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
                                 textDecoration = TextDecoration.Underline
@@ -744,13 +744,13 @@ fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformatio
                             Icon(
                                 imageVector = Icons.Default.Schedule,
                                 contentDescription = "Duration",
-                                tint = Color.Gray,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(13.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "${travel.durationDays ?: 0} ${stringResource(R.string.days)}",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 13.sp
                             )
                         }
@@ -760,7 +760,7 @@ fun TravelCard(travel: TravelSummaryResponse, organizers: List<MinimalInformatio
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = "Rating",
-                                tint = Color(0xFFFFC107),
+                                tint = MaterialTheme.extendedColors.star,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
