@@ -373,7 +373,10 @@ fun TravelTagsSection(tags: List<TagResponse>, tagScores: Map<UUID, Int>, isEdit
     tags.forEach { tag ->
         val tagId = tag.id ?: return@forEach
         val currentScore = tagScores[tagId] ?: 0
-        Slider(value = currentScore.toFloat(), enabled = isEditable, onValueChange = {newValue -> onValueChange(tagId, newValue.toInt())}, valueRange = 1f .. 5f, steps = 3)
+        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+            Text(text = tag.name ?: "", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+            Slider(value = currentScore.toFloat(), enabled = isEditable, onValueChange = {newValue -> onValueChange(tagId, newValue.toInt())}, valueRange = 1f .. 5f, steps = 3)
+        }
     }
 }
 
