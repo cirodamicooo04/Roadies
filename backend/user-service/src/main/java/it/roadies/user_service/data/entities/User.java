@@ -38,6 +38,7 @@ public class User {
 
     private LocalDate birthDate;
 
+    @Column(updatable = false)
     private boolean isAdmin = false;
 
     @CreationTimestamp

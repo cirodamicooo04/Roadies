@@ -143,6 +143,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         return users.stream()
+                .filter(u -> !u.isAdmin())
                 .map(u -> {
                     UserResponseDTO dto = adminUserMapper.toDto(u);
                     dto.setEnabled(isUserEnabledInKeycloak(u.getKeycloakId()));
