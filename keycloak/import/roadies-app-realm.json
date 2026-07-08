@@ -428,31 +428,6 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
-    "id" : "69342a75-ad97-4735-ab02-93054c2bfc5a",
-    "username" : "ciao",
-    "firstName" : "cane",
-    "lastName" : "cane",
-    "email" : "ciao@gmail.iiqnwi",
-    "emailVerified" : false,
-    "attributes" : {
-      "requested_role" : [ "ORGANIZER" ]
-    },
-    "createdTimestamp" : 1779814052068,
-    "enabled" : true,
-    "totp" : false,
-    "credentials" : [ {
-      "id" : "5fdc9888-609d-4a1c-b8ac-8a2329167cba",
-      "type" : "password",
-      "createdDate" : 1779814052239,
-      "secretData" : "{\"value\":\"8KBtFuuwYcAi+c3fCTgKfQ2u9+f7EJkwF71N0JSJm2VR2lOTcZDCfEqF1LZ2Yjd+vj2sGvY4+hT68I4ycE0rUw==\",\"salt\":\"Trd4Nr15gFDhKDa6A9dABQ==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
-    } ],
-    "disableableCredentialTypes" : [ ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-roadies-app" ],
-    "notBefore" : 0,
-    "groups" : [ ]
-  }, {
     "id" : "b5b6f658-2899-4700-b131-5e4615d280a9",
     "username" : "liporace_sepolto",
     "firstName" : "Ciro",
@@ -478,31 +453,9 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
-    "id" : "c728e88f-e8dc-46a3-80a0-a26022fb8032",
-    "username" : "merda",
-    "firstName" : "cind",
-    "lastName" : "ddew",
-    "email" : "ciro@gmail.com",
-    "emailVerified" : false,
-    "createdTimestamp" : 1779812082254,
-    "enabled" : true,
-    "totp" : false,
-    "credentials" : [ {
-      "id" : "aa44427f-79e2-401f-985c-a8f9df6b08b8",
-      "type" : "password",
-      "createdDate" : 1779812082423,
-      "secretData" : "{\"value\":\"XydJ0sPrlxLhJa3ppoQyQA4Kdv6Q1DBIQApcFxnNbBhkMzhq8c3GyPPQxdqexzaKn1TPLd8UM/YGWD3XketuEA==\",\"salt\":\"YWT0CVxg3ZBmoVDDFfeLQg==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
-    } ],
-    "disableableCredentialTypes" : [ ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-roadies-app" ],
-    "notBefore" : 0,
-    "groups" : [ ]
-  }, {
     "id" : "0b27dd78-ac4c-4c87-8a43-cc50a0deb799",
     "username" : "organizer",
-    "firstName" : "o",
+    "firstName" : "lipo",
     "lastName" : "o",
     "email" : "org@org",
     "emailVerified" : false,
@@ -518,28 +471,6 @@
       "userLabel" : "My password",
       "createdDate" : 1777313765615,
       "secretData" : "{\"value\":\"rWSNLiMYBxQPgvI8fFWmohKC+5fQvFRSm6kzmTuBNcz4baxGACIcyv3ypb77KdNyZCGc2Kuaq6ZH4iB03lqPPw==\",\"salt\":\"iHimRuHZTzFhQTcZkQHpag==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
-    } ],
-    "disableableCredentialTypes" : [ ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "ORGANIZER", "default-roles-roadies-app" ],
-    "notBefore" : 0,
-    "groups" : [ ]
-  }, {
-    "id" : "ee9193b8-fc49-4110-bfdc-b26fe145b34f",
-    "username" : "prova1",
-    "firstName" : "c",
-    "lastName" : "c",
-    "email" : "ciao@gmail.com",
-    "emailVerified" : false,
-    "createdTimestamp" : 1783245758035,
-    "enabled" : true,
-    "totp" : false,
-    "credentials" : [ {
-      "id" : "7d3e6736-6f9f-4da7-8392-5352c89eb43c",
-      "type" : "password",
-      "createdDate" : 1783245758322,
-      "secretData" : "{\"value\":\"HShpJhfJ6qwTA/uPXeXnKiEvwW0z4zRBVUkmVJfOVzt77ESIlgWVpkJewl1X4j4dhz7LKH4s68Ey4UkkKQSd8A==\",\"salt\":\"dywu1WE/H4FZVObuq6UdPQ==\",\"additionalParameters\":{}}",
       "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
@@ -773,6 +704,7 @@
       "config" : {
         "user.session.note" : "client_id",
         "introspection.token.claim" : "true",
+        "userinfo.token.claim" : "true",
         "id.token.claim" : "true",
         "access.token.claim" : "true",
         "claim.name" : "client_id",
@@ -787,6 +719,7 @@
       "config" : {
         "user.session.note" : "clientAddress",
         "introspection.token.claim" : "true",
+        "userinfo.token.claim" : "true",
         "id.token.claim" : "true",
         "access.token.claim" : "true",
         "claim.name" : "clientAddress",
@@ -801,6 +734,7 @@
       "config" : {
         "user.session.note" : "clientHost",
         "introspection.token.claim" : "true",
+        "userinfo.token.claim" : "true",
         "id.token.claim" : "true",
         "access.token.claim" : "true",
         "claim.name" : "clientHost",
@@ -1449,7 +1383,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-role-list-mapper", "saml-user-attribute-mapper", "oidc-full-name-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper", "saml-user-property-mapper", "oidc-address-mapper", "oidc-sha256-pairwise-sub-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-attribute-mapper", "saml-user-attribute-mapper", "oidc-full-name-mapper", "oidc-usermodel-property-mapper", "saml-user-property-mapper", "oidc-address-mapper", "saml-role-list-mapper" ]
       }
     }, {
       "id" : "8acfcac2-01a0-48ed-9501-831c877d7adf",
@@ -1474,7 +1408,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "saml-role-list-mapper", "oidc-address-mapper", "saml-user-attribute-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-user-property-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-usermodel-attribute-mapper", "saml-user-attribute-mapper", "oidc-full-name-mapper", "saml-role-list-mapper", "oidc-address-mapper", "oidc-usermodel-property-mapper", "saml-user-property-mapper", "oidc-sha256-pairwise-sub-mapper" ]
       }
     }, {
       "id" : "867d4c55-d490-4d51-b19e-d1d30455bead",
