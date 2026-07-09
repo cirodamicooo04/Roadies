@@ -74,7 +74,7 @@ class EditProfileViewModel @Inject constructor(
                         firstName = profile.firstName ?: updatedLocal?.firstName.orEmpty(),
                         lastName = profile.lastName ?: updatedLocal?.lastName.orEmpty(),
                         avatarUrl = profile.avatarUrl ?: updatedLocal?.avatarUrl.orEmpty(),
-                        birthDate = updatedLocal?.birthDate ?: it.birthDate,
+                        birthDate = profile.birthDate ?: updatedLocal?.birthDate ?: it.birthDate,
                         isLoading = false,
                         error = null
                     )

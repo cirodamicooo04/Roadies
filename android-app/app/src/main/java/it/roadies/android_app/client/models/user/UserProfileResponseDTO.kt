@@ -56,7 +56,10 @@ data class UserProfileResponseDTO (
     val points: kotlin.Long? = null,
 
     @SerializedName("badge")
-    val badge: UserProfileResponseDTO.Badge? = null
+    val badge: UserProfileResponseDTO.Badge? = null,
+
+    @SerializedName("birthDate")
+    val birthDate: java.time.LocalDate?
 
 ) {
 
