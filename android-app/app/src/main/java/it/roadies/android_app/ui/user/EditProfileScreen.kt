@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import it.roadies.android_app.viewmodel.user.EditProfileViewModel
 import java.time.Instant
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +55,7 @@ fun EditProfileScreen(
 
     val initialSelectedDateMillis = remember(state.birthDate) {
         state.birthDate
-            ?.atStartOfDay(ZoneId.systemDefault())
+            ?.atStartOfDay(ZoneOffset.UTC)
             ?.toInstant()
             ?.toEpochMilli()
     }
@@ -71,7 +72,7 @@ fun EditProfileScreen(
                     onClick = {
                         val selectedDate = datePickerState.selectedDateMillis?.let { millis ->
                             Instant.ofEpochMilli(millis)
-                                .atZone(ZoneId.systemDefault())
+                                .atZone(ZoneOffset.UTC)
                                 .toLocalDate()
                         }
                         viewModel.onBirthDateChange(selectedDate)
