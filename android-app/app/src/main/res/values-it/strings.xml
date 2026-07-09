@@ -359,4 +359,9 @@
     <string name="edit_reply_title">Modifica</string>
     <string name="delete_reply_title">Elimina</string>
     <string name="delete_reply_msg">Sei sicuro di voler modificare questa risposta?</string>
+    <string name="hello_user">Ciao, %1$s!</string>
+    <string name="hello">Ciao!</string>
+    <string name="where_to_go_today">Dove vuoi andare oggi?</string>
+    <string name="trust_banner_title">Perché Roadies?</string>
+    <string name="trust_banner_subtitle">Itinerari autentici, nuovi amici e sicurezza garantita in ogni tuo viaggio.</string>
 </resources>

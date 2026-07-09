@@ -61,7 +61,11 @@ git clone <repository-url>
 cd Roadies
 ```
 
-### 2. Configura le variabili d'ambiente
+### 2. Certificato TLS per API Gateway
+
+Assicurati di inserire il certificato `roadies.p12` all'interno della cartella `resources` dell'API Gateway, nel percorso: `backend/api-gateway/src/main/resources/roadies.p12`.
+
+### 3. Configura le variabili d'ambiente
 
 Copia il file di esempio e valorizza le variabili con le tue credenziali (Postgres, Keycloak, Stripe, MinIO, SMTP, keystore TLS):
 
@@ -83,7 +87,7 @@ Variabili richieste (vedi `.env.example`):
 | `MAIL_USERNAME` / `MAIL_PASSWORD` | Credenziali SMTP (Gmail, richiede una App Password) |
 | `KEY_STORE_PASS` | Password del keystore TLS `roadies.p12` usato dall'api-gateway |
 
-### 3. Builda i moduli backend
+### 4. Builda i moduli backend
 
 I `Dockerfile` dei servizi si aspettano il jar già compilato in `target/` (`COPY target/*.jar app.jar`), quindi prima di buildare le immagini è necessario compilare tutto il progetto Maven multi-modulo:
 
@@ -103,7 +107,7 @@ mvnw.cmd clean package -DskipTests
 cd ..
 ```
 
-### 4. Avvia l'intero stack con Docker Compose
+### 5. Avvia l'intero stack con Docker Compose
 
 ```bash
 docker compose up --build
@@ -117,7 +121,7 @@ Questo comando builda le immagini di tutti i microservizi e avvia, in ordine di 
 4. `api-gateway`
 5. `stripe-cli`, che inoltra automaticamente gli eventi webhook di Stripe verso `booking-service`
 
-### 5. Verifica che tutto sia attivo
+### 6. Verifica che tutto sia attivo
 
 | Servizio | URL |
 |---|---|
@@ -130,7 +134,7 @@ Questo comando builda le immagini di tutti i microservizi e avvia, in ordine di 
 
 > Il certificato TLS dell'api-gateway (`roadies.p12`) è autofirmato: è normale che il browser/i client mostrino un warning in ambiente locale.
 
-### 6. Arresto
+### 7. Arresto
 
 ```bash
 docker compose down          # ferma i container

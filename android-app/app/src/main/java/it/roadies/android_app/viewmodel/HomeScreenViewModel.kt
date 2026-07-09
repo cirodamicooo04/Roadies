@@ -24,6 +24,8 @@ import it.roadies.android_app.client.models.travel.LocationType
 
 data class HomeScreenUiState(
     val isLoading: Boolean = false,
+    val isLogged: Boolean = false,
+    val username: String? = null,
     val recommendedTravels: List<TravelSummaryResponse>? = emptyList(),
     val errorMessage: String? = null,
     val typeSelected: Type = Type.TRAVEL
@@ -84,23 +86,16 @@ class HomeScreenViewModel @Inject constructor(
             //collectLatest: ogni volta che lo stato auth cambia esegue quel blocco di codice
             authRepository.authState.collectLatest { authState ->
                 if (!authState.isLoading) {
+                    _uiState.value = _uiState.value.copy(
+                        isLogged = authState.isLogged,
+                        username = authState.firstName
+                    )
                     loadRecommendedTravel(authState.isLogged)
                 }
             }
         }
     }
 
-
-    //TODO: Chiamarlo quando implementerò il pull to refresh box
-    fun refreshRecommendedTravel() {
-        viewModelScope.launch {
-            val authState = authRepository.authState.value
-
-            if (!authState.isLoading) {
-                loadRecommendedTravel(authState.isLogged)
-            }
-        }
-    }
 
     fun changeType(type: Type){
         _uiState.value = _uiState.value.copy(typeSelected = type)
@@ -113,18 +108,18 @@ class HomeScreenViewModel @Inject constructor(
             val response  = travelRepository.getPublicRecommendations()
 
             if (response.success && response.data != null){
-                _uiState.value = HomeScreenUiState(isLoading = false, recommendedTravels = response.data)
+                _uiState.value = _uiState.value.copy(isLoading = false, recommendedTravels = response.data)
             } else {
-                _uiState.value = HomeScreenUiState(isLoading = false, errorMessage = response.errorMessage)
+                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = response.errorMessage)
             }
 
         } else {
             val response = travelRepository.getRecommendations()
 
             if (response.success && response.data != null) {
-                _uiState.value = HomeScreenUiState(isLoading = false, recommendedTravels = response.data)
+                _uiState.value = _uiState.value.copy(isLoading = false, recommendedTravels = response.data)
             } else {
-                _uiState.value = HomeScreenUiState(isLoading = false, errorMessage = response.errorMessage)
+                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = response.errorMessage)
             }
         }
     }

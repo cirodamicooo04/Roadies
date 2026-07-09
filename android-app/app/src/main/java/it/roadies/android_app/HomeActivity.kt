@@ -12,10 +12,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Attractions
@@ -26,6 +34,7 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.WavingHand
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -69,6 +78,7 @@ enum class Type {
     TRAVEL, ACTIVITY
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeScreenViewModel = hiltViewModel()){
     val uiState by homeScreenViewModel.uiState.collectAsState()
@@ -76,72 +86,140 @@ fun HomeScreen(navHostController: NavHostController, homeScreenViewModel: HomeSc
     val suggestions by homeScreenViewModel.searchSuggestions.collectAsState()
     val type = uiState.typeSelected
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            SearchTypeToggle(selectedType = type, onTypeChanged = {
-                typeChanged ->  homeScreenViewModel.changeType(typeChanged)
-            })
-            SearchBar(
-                query = query,
-                suggestions = suggestions,
-                onQueryChange = { homeScreenViewModel.updateSearchQuery(it) },
-                onSuggestionClick = { suggestion ->
-                    val route = when (suggestion.type) {
-                        LocationType.CONTINENT -> "search_screen?continent=${suggestion.name}&type=$type"
-                        LocationType.COUNTRY -> "search_screen?country=${suggestion.name}&type=$type"
-                        LocationType.DESTINATION -> "search_screen?destination=${suggestion.name}&type=$type"
-                        LocationType.ADDRESS -> "search_screen?destination=${suggestion.name}&type=$type"
+    val listState = rememberLazyListState()
+
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        
+        Image(
+            painter = painterResource(id = R.drawable.home_background),
+            contentDescription = "Header Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp) 
+                .graphicsLayer {
+                    val offset = if (listState.firstVisibleItemIndex == 0) {
+                        listState.firstVisibleItemScrollOffset.toFloat()
+                    } else {
+                        300.dp.toPx()
                     }
-                    navHostController.navigate(route)
+                    translationY = -offset * 0.5f
                 }
-            )
-        }
+        )
 
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            state = listState,
+            modifier = Modifier.fillMaxSize()
         ) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(270.dp)
+                        .padding(start = 24.dp, top = 48.dp, end = 24.dp)
+                ) {
+                    val name = uiState.username
+                    val welcomeText = if (uiState.isLogged && !name.isNullOrBlank()) {
+                        stringResource(R.string.hello_user, name) + " \uD83D\uDC4B"
+                    } else {
+                        stringResource(R.string.hello) + " \uD83D\uDC4B"
+                    }
+                    
                     Text(
-                        text = stringResource(R.string.discover_world),
+                        text = welcomeText,
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 28.sp,
+                        color = Color.White
                     )
-                    ContinentDestinations(onContinentClick = {
-                        selectedContinent -> navHostController.navigate("search_screen?continent=$selectedContinent&type=$type")
+                    
+                    Text(
+                        text = stringResource(R.string.where_to_go_today),
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+
+            stickyHeader {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                        )
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 24.dp, bottom = 12.dp)
+                ) {
+                    SearchTypeToggle(selectedType = type, onTypeChanged = {
+                        typeChanged ->  homeScreenViewModel.changeType(typeChanged)
                     })
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SearchBar(
+                        query = query,
+                        suggestions = suggestions,
+                        onQueryChange = { homeScreenViewModel.updateSearchQuery(it) },
+                        onSuggestionClick = { suggestion ->
+                            val route = when (suggestion.type) {
+                                LocationType.CONTINENT -> "search_screen?continent=${suggestion.name}&type=$type"
+                                LocationType.COUNTRY -> "search_screen?country=${suggestion.name}&type=$type"
+                                LocationType.DESTINATION -> "search_screen?destination=${suggestion.name}&type=$type"
+                                LocationType.ADDRESS -> "search_screen?destination=${suggestion.name}&type=$type"
+                            }
+                            navHostController.navigate(route)
+                        }
+                    )
                 }
             }
 
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = stringResource(R.string.recommended),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 28.sp,
-                    )
-                    if (uiState.isLoading) {
-                        Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center){
-                            CircularProgressIndicator()
-                        }
-                    } else if (uiState.errorMessage != null) {
-                        Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center){
-                            Text(text = uiState.errorMessage ?: "Errore sconosciuto", color = MaterialTheme.colorScheme.error)
-                        }
-                    } else {
-                        RecommendedTravel(uiState.recommendedTravels, onTravelClick = { travel -> 
-                            navHostController.navigate("travel_detail/${travel.id}")
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = 400.dp)
+                        .background(color = MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = stringResource(R.string.discover_world),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 28.sp,
+                        )
+                        ContinentDestinations(onContinentClick = {
+                            selectedContinent -> navHostController.navigate("search_screen?continent=$selectedContinent&type=$type")
                         })
                     }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = stringResource(R.string.recommended),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 28.sp,
+                        )
+                        if (uiState.isLoading) {
+                            Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center){
+                                CircularProgressIndicator()
+                            }
+                        } else if (uiState.errorMessage != null) {
+                            Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center){
+                                Text(text = uiState.errorMessage ?: "Errore sconosciuto", color = MaterialTheme.colorScheme.error)
+                            }
+                        } else {
+                            RecommendedTravel(uiState.recommendedTravels, onTravelClick = { travel -> 
+                                navHostController.navigate("travel_detail/${travel.id}")
+                            })
+                        }
+                    }
+                    
+                    TrustBanner()
                 }
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -385,5 +463,53 @@ fun SearchTypeToggle(selectedType: Type, onTypeChanged: (Type) -> Unit ){
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.height(35.dp)
         )
+    }
+}
+
+@Composable
+fun TrustBanner() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.1f), 
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Public,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = stringResource(id = R.string.trust_banner_title),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = stringResource(id = R.string.trust_banner_subtitle),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
+                    lineHeight = 20.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
     }
 }

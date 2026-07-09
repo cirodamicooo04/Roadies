@@ -357,4 +357,9 @@
     <string name="edit_reply_title">Edit reply</string>
     <string name="delete_reply_title">Delete reply</string>
     <string name="delete_reply_msg">Are you sure you want to delete this reply?</string>
+    <string name="hello_user">Hi, %1$s!</string>
+    <string name="hello">Hi!</string>
+    <string name="where_to_go_today">Where do you want to go today?</string>
+    <string name="trust_banner_title">Why Roadies?</string>
+    <string name="trust_banner_subtitle">Authentic itineraries, new friends and guaranteed safety in every trip.</string>
 </resources>

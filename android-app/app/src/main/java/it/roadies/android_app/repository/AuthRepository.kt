@@ -16,7 +16,8 @@ data class AuthSessionState(
     val isLoading: Boolean = true,
     val isLogged: Boolean = false,
     val roles: List<String> = emptyList(),
-    val userId: String? = null
+    val userId: String? = null,
+    val firstName: String? = null
 )
 
 data class KeycloakUserClaims(
@@ -153,11 +154,13 @@ class AuthRepository @Inject constructor(
             )
         }
 
+        val claims = getUserClaims(currentAccessToken)
         return AuthSessionState(
             isLoading = false,
             isLogged = true,
             roles = extractRoles(currentAccessToken),
-            userId = getUserClaims(currentAccessToken)?.sub
+            userId = claims?.sub,
+            firstName = claims?.firstName ?: claims?.preferredUsername
         )
     }
 }
