@@ -1,7 +1,9 @@
 package it.roadies.user_service.services.impl;
 
+import it.roadies.shared.contracts.NotificationEvent;
 import it.roadies.shared.i18n.MessageLang;
 import it.roadies.user_service.data.dto.request.UserSyncRequestDTO;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import it.roadies.user_service.data.dto.request.UserUpdateRequestDTO;
 import it.roadies.user_service.data.dto.response.MinimalInformationResponseDTO;
 import it.roadies.user_service.data.dto.response.UserProfileResponseDTO;
@@ -46,6 +48,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final MessageLang messageLang;
     private final Keycloak keycloakAdminClient;
+    private final RabbitTemplate rabbitTemplate;
 
     @Value("${minio.avatarBucket}")
     private String avatarBucket;
@@ -104,6 +107,17 @@ public class UserServiceImpl implements UserService {
         log.info("Profilo gamification inizializzato per il nuovo utente");
 
         savedUser.setGamification(userGame);
+
+        try {
+            log.info("Invio email di benvenuto al nuovo utente {}", savedUser.getEmail());
+            rabbitTemplate.convertAndSend(
+                    "notification.exchange", 
+                    "notification.mail.send", 
+                    new NotificationEvent(savedUser.getEmail(), "Benvenuto in Roadies!", "Gentile utente,\n\nBenvenuto in Roadies! Siamo felici di averti con noi.\n\nUn saluto,\nIl Team di Roadies.")
+            );
+        } catch (Exception e) {
+            log.error("Errore durante l'invio dell'email di benvenuto: {}", e.getMessage(), e);
+        }
 
         return new UserSyncResult(userMapper.toDto(savedUser), true);
     }
